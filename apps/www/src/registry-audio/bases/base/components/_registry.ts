@@ -405,6 +405,45 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["knob"],
+    description: "Knob example, in the Vue adapter",
+    files: [
+      {
+        path: "components/knob/knob-vue-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-vue-demo",
+    registryDependencies: ["@audio-ui/knob-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
+    description: "Knob example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/knob/knob-svelte-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-svelte-demo",
+    registryDependencies: ["@audio-ui/knob-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
+    description: "Knob example, in the web adapter",
+    files: [
+      {
+        path: "components/knob/knob-web-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-web-demo",
+    registryDependencies: ["@audio-ui/knob-web"],
+    type: "registry:example",
+  },
+  {
+    categories: ["knob"],
     description:
       "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     files: [

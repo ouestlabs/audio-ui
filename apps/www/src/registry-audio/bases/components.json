@@ -127,6 +127,24 @@
   },
   {
     "categories": ["knob"],
+    "description": "Knob example, in the Vue adapter",
+    "name": "knob-vue-demo",
+    "title": "Knob vue demo"
+  },
+  {
+    "categories": ["knob"],
+    "description": "Knob example, in the Svelte adapter",
+    "name": "knob-svelte-demo",
+    "title": "Knob svelte demo"
+  },
+  {
+    "categories": ["knob"],
+    "description": "Knob example, in the web adapter",
+    "name": "knob-web-demo",
+    "title": "Knob web demo"
+  },
+  {
+    "categories": ["knob"],
     "description": "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     "name": "knob-filter-control-demo",
     "title": "Knob filter control demo"

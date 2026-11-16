@@ -1,8 +1,11 @@
+import { fileURLToPath } from "node:url";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react from "@vitejs/plugin-react";
+import vue from "@vitejs/plugin-vue";
 import { fumadocsMdx } from "fumadocs-mdx/vite";
 import { defineConfig } from "vite";
 import { prerenderPages } from "./scripts/site-paths.mts";
@@ -28,6 +31,8 @@ export default defineConfig({
     devtools({ consolePiping: { enabled: false } }),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     fumadocsMdx(),
+    svelte(),
+    vue(),
     tailwindcss(),
     tanstackStart({
       // Every page is built to HTML once, here, and served as a static file: no Worker runs for a page.
@@ -52,6 +57,15 @@ export default defineConfig({
   optimizeDeps: {
     entries: ["src/router.tsx", "src/routes/**/*.tsx"],
   },
-  resolve: { dedupe: ["react", "react-dom"], tsconfigPaths: true },
+  resolve: {
+    // The demos of Vue and Svelte are not read by the TypeScript paths the dependency scan uses.
+    alias: {
+      "@/registry-audio": fileURLToPath(
+        new URL("./src/registry-audio", import.meta.url)
+      ),
+    },
+    dedupe: ["react", "react-dom"],
+    tsconfigPaths: true,
+  },
   server: { port: 4000 },
 });
