@@ -59,7 +59,7 @@ bun test
 - `primitives/<name>/`: each primitive's own logic (timeline clips, waveform peaks, envelope geometry…), published as `@audio-ui/core/<name>`
 - `index.ts` is the public API; `internal.ts` (`@audio-ui/core/internal`) is for adapters only
 
-`@audio-ui/primitives` depends on it. In development it resolves to `packages/core/src` through tsconfig `paths` (Bun honours them in tests); its build reads `dist`. Core has no dependency: audio logic, and anything built on audio.js, goes in the engine.
+`@audio-ui/primitives` depends on it. In development it resolves to `packages/core/src` through tsconfig `paths` (Bun honours them in tests); its build reads `dist`. Core has no dependency: audio logic, and anything built on audio.js, goes in the engine. `core`, `engine` and `gl` stay published packages that registry items depend on, and are not copied: see [docs/decision-core-engine-gl.md](docs/decision-core-engine-gl.md).
 
 ### `@audio-ui/engine` (`packages/engine/src/`)
 
