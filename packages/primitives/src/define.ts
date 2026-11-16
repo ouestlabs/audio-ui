@@ -13,7 +13,7 @@ function nameSlots(name: string, slots: Record<string, any>) {
   const prefix = kebab(name);
   for (const [key, definition] of Object.entries(slots)) {
     const fallback = key === "root" ? prefix : `${prefix}-${kebab(key)}`;
-    const attrs = definition.attrs;
+    const { attrs } = definition;
     definition.attrs = (state: unknown, context: { props?: object }) => ({
       ...attrs?.(state, context),
       "data-slot":

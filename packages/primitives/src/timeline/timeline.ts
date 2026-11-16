@@ -14,6 +14,7 @@ import {
   type Grid,
   type RangeController,
   type TimelineController,
+  type TimelineSelectionHandlers,
   type TimelineSnapshot,
   type TrackController,
   valueAtOffset,
@@ -254,6 +255,8 @@ export interface TimelineApi extends ClipApi, NavigatorApi, RangeApi {
   position: Store<number>;
   /** Scrolls the viewport to `left` px and reports where it landed. */
   scrollerTo: { current: ((left: number) => void) | null };
+  /** What a selection reports to the app, for a gesture that makes one. */
+  selecting: () => TimelineSelectionHandlers;
   trackFor: (
     props: TrackProps,
     /** Whether `props` are the track part's own, which hold what the track is given. */
@@ -285,7 +288,7 @@ type Slot<Props, Public = TimelinePublicState> = SlotDefinition<
 export type TimelineSlots = ClipSlots &
   NavigatorSlots &
   RangeSlots & {
-    lane: Slot<PartProps & { seekable?: boolean }>;
+    lane: Slot<PartProps & { seekable?: boolean; selects?: boolean }>;
     mark: Slot<MarkProps, MarkPublicState>;
     playhead: Slot<PartProps>;
     root: Slot<PartProps>;
@@ -465,10 +468,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
     );
     context.onDestroy(controller.subscribe(publish));
 
-    // A Shift drag selects only when the app listens for it.
-    const listen = () => {
+    // A selection is made only when the app listens for it.
+    const selecting = (): TimelineSelectionHandlers => {
       const wanted = options();
-      controller.setSelection({
+      return {
         onSelectionChange: wanted.onSelectionChange
           ? (range, details) => {
               if (
@@ -489,8 +492,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
               });
             }
           : undefined,
-      });
+      };
     };
+    // A Shift drag selects.
+    const listen = () => controller.setSelection(selecting());
     listen();
     context.onOptions(listen);
 
@@ -524,6 +529,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
       ...createNavigatorApi(() => result),
       anchor,
       controller,
+      selecting,
       internal: { keyOf: (value: unknown) => String(value) },
       lanes: new Set<HTMLElement>(),
       latest: () => context.store.get().frame,
@@ -726,7 +732,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
       ...clipSlots(slot),
       ...navigatorSlots(slot),
       ...rangeSlots(slot),
-      lane: slot<{ seekable?: boolean }, TimelinePublicState>({
+      lane: slot<
+        { seekable?: boolean; selects?: boolean },
+        TimelinePublicState
+      >({
         attrs: (state: TimelineState, { api }) => ({
           ...stateAttrs(state),
           "data-timeline-lane": "",
@@ -757,19 +766,30 @@ export const timeline: TimelinePrimitive = definePrimitive({
           };
         },
         on: {
-          pointerdown: (event, { api, el, props, store }) => {
+          // Several lanes share this part, so `el` is one of them: the lane pressed is the one the press is on.
+          pointerdown: (event, { api, props, store }) => {
+            const lane = event.target;
             if (
-              !(el && props.seekable) ||
+              !(
+                lane instanceof HTMLElement &&
+                props.seekable &&
+                lane.hasAttribute("data-timeline-lane")
+              ) ||
               store.get().view.disabled ||
-              event.button !== 0 ||
-              event.target !== el
+              event.button !== 0
             ) {
               return;
             }
-            api.controller.pressSeek(event, el, el);
+            // On a lane that selects, a drag from its bare area selects time instead of scrubbing.
+            api.controller.pressSeek(
+              event,
+              lane,
+              lane,
+              props.selects ? api.selecting() : undefined
+            );
           },
         },
-        props: { seekable: "boolean" },
+        props: { seekable: "boolean", selects: "boolean" },
         state: (state: TimelineState) => publicState(state),
       }),
       mark: slot<MarkProps, MarkPublicState>({

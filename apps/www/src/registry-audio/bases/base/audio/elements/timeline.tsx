@@ -449,6 +449,7 @@ function TimelineLane({
     <TimelinePrimitive.Lane
       className={cn("cn-timeline-lane", className)}
       data-slot="timeline-lane"
+      selects={Boolean(onSelectionChange)}
       style={{ ...gridLines(gridStep), ...style }}
       {...props}
     />
