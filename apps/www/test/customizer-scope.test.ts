@@ -22,7 +22,7 @@ describe("pageScope", () => {
 
   test("an element's page, and a React primitive's with a preview, follow the elements' choices", async () => {
     expect(await scopeOf("elements/knob.mdx")).toBe("elements");
-    expect(await scopeOf("react/knob.mdx")).toBe("elements");
+    expect(await scopeOf("react-package/knob.mdx")).toBe("elements");
   });
 
   test("a page with no preview follows none", async () => {

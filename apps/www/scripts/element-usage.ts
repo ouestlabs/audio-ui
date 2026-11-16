@@ -611,7 +611,7 @@ export function usageBlock(
     "",
     '<TabsContent value="react">',
     "",
-    `In React, the same control is the [${usage.react}](/docs/react/${usage.entry}) primitive of \`@audio-ui/react\`, with the same parts as React components and its value as props.`,
+    `In React, the same control is the [${usage.react}](/docs/react-package/${usage.entry}) primitive of \`@audio-ui/react\`, with the same parts as React components and its value as props.`,
     "",
     "</TabsContent>",
     "",

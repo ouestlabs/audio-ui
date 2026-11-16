@@ -15,7 +15,7 @@ import {
 import { STYLINGS } from "../src/lib/docs/content/stylings.ts";
 import { withFallbacks } from "./element-usage.ts";
 
-const PAGES = `${import.meta.dir}/../src/content/docs/react`;
+const PAGES = `${import.meta.dir}/../src/content/docs/react-package`;
 const START =
   "{/* usage:start: written by `bun scripts/react-usage.ts --write` */}";
 const END = "{/* usage:end */}";

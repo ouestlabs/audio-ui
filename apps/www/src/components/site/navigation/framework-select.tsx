@@ -124,7 +124,7 @@ export function FrameworkSelect({
         twin ?? (forReact && next && next !== "react" ? ELEMENTS : null);
       if (next && away) {
         rememberFramework(next);
-        navigate({ href: `${away}?framework=${next}` });
+        navigate({ href: away });
         return;
       }
       setChosen(next);

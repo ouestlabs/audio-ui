@@ -50,7 +50,7 @@ const REACT_ADDRESSES = [
   "/docs/guides",
   "/docs/hooks",
   "/docs/lib",
-  "/docs/react",
+  "/docs/react-package",
   "/docs/styling",
 ];
 
@@ -75,7 +75,7 @@ export function shownTo(url: string, framework: FrameworkId | null): boolean {
 /** The elements' overview, whose tabs show a reader the setup of their framework. */
 export const ELEMENTS = "/docs/elements";
 /** React's primitives, the elements' twins. */
-const REACT_PRIMITIVES = "/docs/react";
+const REACT_PRIMITIVES = "/docs/react-package";
 /** The primitives with a page in both Elements and React, by their last segment, the overviews with them. */
 const TWINS = new Set([
   "",
