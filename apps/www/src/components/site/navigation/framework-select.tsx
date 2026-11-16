@@ -1,8 +1,4 @@
-import {
-  CaretUpDownIcon,
-  CheckIcon,
-  CodeIcon,
-} from "@phosphor-icons/react/ssr";
+import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react/ssr";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { Icons } from "@/components/site/icons";
@@ -10,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { rememberFramework, useFramework } from "@/hooks/use-framework";
@@ -36,28 +31,23 @@ const LOGOS: Record<
   web: Icons.javascript,
 };
 
-/** What the switch reads before a framework is chosen. */
-const ANY = {
-  description: "Choose yours: the docs follow it",
-  label: "Any framework",
-} as const;
+function LogoOf({ id }: { id: FrameworkId }) {
+  const Logo = LOGOS[id];
+  return <Logo aria-hidden="true" className="size-4" />;
+}
 
-/** A framework's logo, or the code glyph for any, in a small bordered square, as a section's glyph is drawn. */
-function FrameworkBadge({ id }: { id: FrameworkId | null }) {
-  const Logo = id ? LOGOS[id] : null;
+/** A framework's logo in a small bordered square, as a section's glyph is drawn. */
+function FrameworkBadge({ id }: { id: FrameworkId }) {
+  const Logo = LOGOS[id];
   return (
     <span className="flex size-8 shrink-0 items-center justify-center rounded-md border bg-background">
-      {Logo ? (
-        <Logo aria-hidden="true" className="size-4" />
-      ) : (
-        <CodeIcon aria-hidden="true" className="size-4 text-muted-foreground" />
-      )}
+      <Logo aria-hidden="true" className="size-4" />
     </span>
   );
 }
 
 /** A framework's name over what it gets of audio/ui. */
-function FrameworkText({ framework }: { framework: Framework | typeof ANY }) {
+function FrameworkText({ framework }: { framework: Framework }) {
   return (
     <span className="flex min-w-0 flex-1 flex-col">
       <span className="truncate font-medium text-foreground text-sm">
@@ -70,22 +60,22 @@ function FrameworkText({ framework }: { framework: Framework | typeof ANY }) {
   );
 }
 
-/** One framework of the menu, or any framework with `framework` null, checked when it is the one chosen. */
+/** One framework of the menu, checked when it is the one chosen. */
 function FrameworkItem({
   chosen,
   framework,
   onChoose,
 }: {
   chosen: boolean;
-  framework: Framework | null;
-  onChoose: (id: FrameworkId | null) => void;
+  framework: Framework;
+  onChoose: (id: FrameworkId) => void;
 }) {
-  const id = framework?.id ?? null;
+  const { id } = framework;
   const choose = useCallback(() => onChoose(id), [id, onChoose]);
   return (
     <DropdownMenuItem className="gap-2 p-1.5" onClick={choose}>
       <FrameworkBadge id={id} />
-      <FrameworkText framework={framework ?? ANY} />
+      <FrameworkText framework={framework} />
       {chosen ? (
         <CheckIcon aria-hidden="true" className="size-4 shrink-0" />
       ) : null}
@@ -117,12 +107,11 @@ export function FrameworkSelect({
   // Another framework picked there: what is made for it is the elements, not this section.
   const pathname = useLocation({ select: (location) => location.pathname });
   const choose = useCallback(
-    (next: FrameworkId | null) => {
+    (next: FrameworkId) => {
       // A primitive's page goes to its twin in the framework picked; a section for React alone, to the elements.
-      const twin = next ? twinPage(pathname, next) : null;
-      const away =
-        twin ?? (forReact && next && next !== "react" ? ELEMENTS : null);
-      if (next && away) {
+      const twin = twinPage(pathname, next);
+      const away = twin ?? (forReact && next !== "react" ? ELEMENTS : null);
+      if (away) {
         rememberFramework(next);
         navigate({ href: away });
         return;
@@ -131,25 +120,23 @@ export function FrameworkSelect({
     },
     [forReact, navigate, pathname, setChosen]
   );
-  const current = FRAMEWORKS.find((each) => each.id === framework) ?? null;
-  const shown = current ?? ANY;
-  const Logo = current ? LOGOS[current.id] : null;
+  const current =
+    FRAMEWORKS.find((each) => each.id === framework) ?? FRAMEWORKS[0];
   return (
     <DropdownMenu>
       {compact ? (
         <DropdownMenuTrigger
-          aria-label={`Framework: ${shown.label}`}
+          aria-label={`Framework: ${current.label}`}
           className="flex h-8 items-center gap-1.5 rounded-md border bg-muted/50 px-2 font-medium text-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-popup-open:bg-muted"
+          data-fw={framework}
+          data-fw-trigger=""
         >
-          {Logo ? (
-            <Logo aria-hidden="true" className="size-4" />
-          ) : (
-            <CodeIcon
-              aria-hidden="true"
-              className="size-4 text-muted-foreground"
-            />
-          )}
-          {current ? current.label : "Framework"}
+          {FRAMEWORKS.map((each) => (
+            <span data-fw-view={each.id} key={each.id}>
+              <LogoOf id={each.id} />
+              {each.label}
+            </span>
+          ))}
           <CaretUpDownIcon
             aria-hidden="true"
             className="size-4 shrink-0 text-muted-foreground"
@@ -157,11 +144,17 @@ export function FrameworkSelect({
         </DropdownMenuTrigger>
       ) : (
         <DropdownMenuTrigger
-          aria-label={`Framework: ${shown.label}`}
+          aria-label={`Framework: ${current.label}`}
           className="flex w-full items-center gap-2 rounded-lg border bg-muted/50 p-1.5 text-start outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-popup-open:bg-muted"
+          data-fw={framework}
+          data-fw-trigger=""
         >
-          <FrameworkBadge id={current?.id ?? null} />
-          <FrameworkText framework={shown} />
+          {FRAMEWORKS.map((each) => (
+            <span data-fw-view={each.id} key={each.id}>
+              <FrameworkBadge id={each.id} />
+              <FrameworkText framework={each} />
+            </span>
+          ))}
           <CaretUpDownIcon
             aria-hidden="true"
             className="size-4 shrink-0 text-muted-foreground"
@@ -171,14 +164,12 @@ export function FrameworkSelect({
       <DropdownMenuContent className={compact ? "w-64" : undefined}>
         {FRAMEWORKS.map((each) => (
           <FrameworkItem
-            chosen={each.id === current?.id}
+            chosen={each.id === current.id}
             framework={each}
             key={each.id}
             onChoose={choose}
           />
         ))}
-        <DropdownMenuSeparator />
-        <FrameworkItem chosen={!current} framework={null} onChoose={choose} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

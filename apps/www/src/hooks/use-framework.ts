@@ -8,6 +8,15 @@ import { type FrameworkId, isFramework } from "@/lib/docs/content/frameworks";
 const framework = createKeptChoice<FrameworkId>({
   isValid: isFramework,
   key: "audio-ui-framework",
+  // The class the document got before its first paint (root route), so the switch never shows none for a kept choice.
+  onChange: (next) => {
+    if (typeof document === "undefined") {
+      return;
+    }
+    for (const id of ["react", "svelte", "vue", "web"]) {
+      document.documentElement.classList.toggle(`framework-${id}`, id === next);
+    }
+  },
   param: "framework",
 });
 
@@ -30,10 +39,10 @@ export function useFramework() {
     select: (location) =>
       (location.search as { framework?: unknown }).framework,
   });
-  const value = isFramework(named) ? named : kept;
+  const value: FrameworkId = isFramework(named) ? named : (kept ?? "react");
   const pathname = useLocation({ select: (location) => location.pathname });
   const choose = useCallback(
-    (next: FrameworkId | null) => {
+    (next: FrameworkId) => {
       framework.remember(next);
       // Inside the router the page keeps its own address and names the framework in a parameter, which the router writes as the framework's address.
       navigate({

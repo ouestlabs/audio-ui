@@ -245,3 +245,29 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The framework switch draws every framework; the reader's is the one shown (framework-select.tsx), React when none was kept. */
+[data-fw-view] {
+  display: none;
+}
+[data-fw-trigger][data-fw="react"] [data-fw-view="react"],
+[data-fw-trigger]:not([data-fw]) [data-fw-view="react"] {
+  display: contents;
+}
+[data-fw-trigger][data-fw="vue"] [data-fw-view="vue"],
+.framework-vue [data-fw-trigger]:not([data-fw]) [data-fw-view="vue"] {
+  display: contents;
+}
+[data-fw-trigger][data-fw="svelte"] [data-fw-view="svelte"],
+.framework-svelte [data-fw-trigger]:not([data-fw]) [data-fw-view="svelte"] {
+  display: contents;
+}
+[data-fw-trigger][data-fw="web"] [data-fw-view="web"],
+.framework-web [data-fw-trigger]:not([data-fw]) [data-fw-view="web"] {
+  display: contents;
+}
+:is(.framework-vue, .framework-svelte, .framework-web)
+  [data-fw-trigger]:not([data-fw])
+  [data-fw-view="react"] {
+  display: none;
+}
