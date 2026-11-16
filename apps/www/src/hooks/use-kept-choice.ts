@@ -83,5 +83,5 @@ export function createKeptChoice<T extends string>({
     return [isValid(value) ? value : kept, choose] as const;
   }
 
-  return { remember, useChoice };
+  return { read, remember, useChoice };
 }

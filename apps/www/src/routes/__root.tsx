@@ -7,6 +7,7 @@ import {
   createRootRoute,
   HeadContent,
   Outlet,
+  redirect,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -21,10 +22,14 @@ import { QueryProvider } from "@/components/site/providers/query-provider";
 import { ThemeProvider } from "@/components/site/providers/theme-provider";
 import { TailwindIndicator } from "@/components/site/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
+import { keptFramework } from "@/hooks/use-framework";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import { watchStyleCss } from "@/lib/design-system/style-css";
-import { FRAMEWORK_REDIRECT_SCRIPT } from "@/lib/docs/content/framework-paths";
+import {
+  FRAMEWORK_REDIRECT_SCRIPT,
+  frameworkAddressOf,
+} from "@/lib/docs/content/framework-paths";
 import { watchPreloadErrors } from "@/lib/load-failure";
 import {
   buildAuthorJsonLd,
@@ -145,6 +150,18 @@ const siteHead = buildPageMetadata({
 });
 
 export const Route = createRootRoute({
+  // A link to a page that has an address for the framework kept goes to it, as a page loaded whole does (FRAMEWORK_REDIRECT_SCRIPT).
+  beforeLoad: ({ location }) => {
+    const kept = keptFramework();
+    const named = (location.search as { framework?: unknown }).framework;
+    if (kept && !named && frameworkAddressOf(location.pathname, kept)) {
+      throw redirect({
+        replace: true,
+        search: { framework: kept } as never,
+        to: location.pathname as never,
+      });
+    }
+  },
   component: RootDocument,
   head: () => ({
     links: [

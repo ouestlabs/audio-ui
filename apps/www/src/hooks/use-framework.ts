@@ -20,6 +20,10 @@ const framework = createKeptChoice<FrameworkId>({
   param: "framework",
 });
 
+/** The framework kept in the browser, null on the server or when none was. */
+export const keptFramework = () =>
+  typeof window === "undefined" ? null : framework.read();
+
 /** Keeps a framework in the browser and tells every reader of it, the address left as it is: a choice that goes to another page is kept for it. */
 export const rememberFramework = framework.remember;
 
