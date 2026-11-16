@@ -211,7 +211,12 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
-      "device-signal"
+      "arrangement-engine",
+      "device-signal",
+      "use-clip-edits",
+      "use-loudness",
+      "use-pitch",
+      "use-spectrum"
     ]
   },
   {
@@ -6820,14 +6825,9 @@
     "typesOnly": false,
     "usedBy": [
       "arrangement",
-      "arrangement-engine",
       "use-arrangement",
       "use-audio-levels",
-      "use-clip-edits",
-      "use-loudness",
       "use-piano-roll-playback",
-      "use-pitch",
-      "use-spectrum",
       "use-time-selection",
       "use-timeline-cursor"
     ]

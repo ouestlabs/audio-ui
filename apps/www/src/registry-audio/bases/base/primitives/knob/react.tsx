@@ -7,7 +7,20 @@ import {
   knob,
 } from "@audio-ui/primitives/knob";
 import { createParts } from "@ui-sdk/react/primitive";
-import { type ComponentProps, createContext, type ReactNode, use } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type FocusEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type ReactNode,
+  use,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 /** Which element each part is. */
 const parts = createParts(knob, {
@@ -99,10 +112,140 @@ function KnobThumb({
   );
 }
 
-function Value({ children, ...props }: ComponentProps<typeof parts.Value>) {
+/** The number a typed text means: "-6", "-6 dB" or "12,5". */
+const typedNumber = (text: string) => {
+  const parsed = Number.parseFloat(text.trim().replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+/** The text field of an editable readout: selected on mount, so typing replaces the value. */
+function ValueInput({
+  finish,
+  initial,
+  label,
+}: {
+  finish: (text: string | null) => void;
+  initial: string;
+  label: string | undefined;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const done = useRef<boolean>(false);
+  const settle = useCallback(
+    (text: string | null) => {
+      if (!done.current) {
+        done.current = true;
+        finish(text);
+      }
+    },
+    [finish]
+  );
+  useEffect(() => {
+    input.current?.focus({ preventScroll: true });
+    input.current?.select();
+  }, []);
+  const blur = useCallback(
+    (event: FocusEvent<HTMLInputElement>) => settle(event.currentTarget.value),
+    [settle]
+  );
+  const keyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        event.preventDefault();
+        settle(event.currentTarget.value);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        settle(null);
+      }
+    },
+    [settle]
+  );
   return (
-    <parts.Value {...props}>
-      {children ?? (({ formatted }) => formatted)}
+    <input
+      aria-label={label}
+      defaultValue={initial}
+      inputMode="decimal"
+      onBlur={blur}
+      onKeyDown={keyDown}
+      ref={input}
+      size={Math.max(initial.length, 3)}
+      style={{ font: "inherit", textAlign: "inherit" }}
+      type="text"
+    />
+  );
+}
+
+type ValueProps = ComponentProps<typeof parts.Value> & {
+  /** Lets you type the value: a double click on the readout, or Enter or F2 while it has focus. */
+  editable?: boolean;
+};
+
+function Value({ children, editable = false, ...props }: ValueProps) {
+  const [editing, setEditing] = useState(false);
+  const readout = useRef<HTMLOutputElement | null>(null);
+  const finish = useCallback((text: string | null) => {
+    setEditing(false);
+    readout.current?.focus({ preventScroll: true });
+    const typed = text === null ? null : typedNumber(text);
+    const input = readout.current
+      ?.closest('[data-slot="knob"]')
+      ?.querySelector<HTMLInputElement>('input[type="range"]');
+    if (typed !== null && input) {
+      // The native range input is where the control takes a typed value from.
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )?.set?.call(input, String(typed));
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }, []);
+  const open = () => {
+    if (!readout.current?.closest("[data-disabled]")) {
+      setEditing(true);
+    }
+  };
+  const handlers = editable
+    ? {
+        "aria-keyshortcuts": "Enter",
+        "data-editing": editing ? "" : undefined,
+        // A readout inside a thumb or a control must not also reset or drag it.
+        onDoubleClick: (event: MouseEvent<HTMLElement>) => {
+          event.stopPropagation();
+          open();
+        },
+        onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+          if (
+            event.target === event.currentTarget &&
+            (event.key === "Enter" || event.key === "F2")
+          ) {
+            event.preventDefault();
+            open();
+          }
+        },
+        onPointerDown: (event: PointerEvent<HTMLElement>) =>
+          event.stopPropagation(),
+        tabIndex: 0,
+      }
+    : {};
+  const label = props["aria-label"];
+  const content = useCallback(
+    (state: KnobPublicState) => {
+      if (editing) {
+        return (
+          <ValueInput finish={finish} initial={state.formatted} label={label} />
+        );
+      }
+      if (typeof children === "function") {
+        return children(state);
+      }
+      return children ?? state.formatted;
+    },
+    [children, editing, finish, label]
+  );
+  return (
+    <parts.Value {...props} {...handlers} ref={readout}>
+      {content}
     </parts.Value>
   );
 }

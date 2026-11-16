@@ -1760,7 +1760,7 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    dependencies: ["@audio-ui/icons"],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
     categories: ["sequencer"],
     description:
       "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
@@ -1776,6 +1776,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["scrubber"],
+    dependencies: ["@audio-ui/core"],
     description:
       "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
     files: [
@@ -1799,7 +1800,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "transport-demo",
-    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/engine"],
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },

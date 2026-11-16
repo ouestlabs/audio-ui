@@ -25,7 +25,7 @@ const ENVELOPE_SHAKE = {
 
 export const audio: RegistryItem[] = [
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An editor for a breakpoint ramp, such as an ADSR shape or an automation curve.",
     files: [
@@ -36,10 +36,11 @@ export const audio: RegistryItem[] = [
     ],
     css: ENVELOPE_SHAKE,
     name: "envelope",
+    registryDependencies: ["@audio-ui/envelope-react"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A track's automation over its lane in a timeline: an envelope along the whole arrangement, under the same zoom and scroll as the clips, whose line and points alone take the pointer.",
     files: [
@@ -50,6 +51,7 @@ export const audio: RegistryItem[] = [
     ],
     css: ENVELOPE_SHAKE,
     name: "automation-envelope",
+    registryDependencies: ["@audio-ui/envelope-react"],
     type: "registry:ui",
   },
   {
@@ -94,7 +96,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
-    dependencies: ["@audio-ui/gl", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/gl", "@audio-ui/react"],
     description:
       "A lane's clips drawn on the GPU in the view you pick: the waveform, the waveform by band, or the spectrogram on octaves, mel, ERB or hertz with its frequency axis and the reading under the pointer. With the views labelled for a menu",
     files: [
@@ -182,7 +184,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A rotary control for continuous parameters, with pointer, wheel and keyboard input.",
     files: [
@@ -192,10 +194,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "knob",
+    registryDependencies: ["@audio-ui/knob-react"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description: "A linear slider for gain and other continuous parameters.",
     files: [
       {
@@ -204,10 +207,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "fader",
+    registryDependencies: ["@audio-ui/fader-react"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A two-dimensional control for two parameters at once, with pointer, wheel and keyboard input.",
     files: [
@@ -217,10 +221,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "xypad",
+    registryDependencies: ["@audio-ui/xypad-react"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A grid of drum pads struck by pointer, touch or keyboard, with velocity and choke groups.",
     files: [
@@ -230,10 +235,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "pad",
+    registryDependencies: ["@audio-ui/pad-react"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A piano keyboard for a MIDI pitch range, played with the pointer, touch or the keyboard.",
     files: [
@@ -243,6 +249,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "piano",
+    registryDependencies: ["@audio-ui/piano-react"],
     type: "registry:ui",
   },
   {
@@ -409,7 +416,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "A chromatic tuner on its own: the nearest note with a needle on a scale of cents, a start button and a field for the pitch of A4. Also the display alone, for a tuner of another shape.",
     files: [
@@ -684,7 +691,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1 (StereoField), or as a layer behind another plot with the correlation in its corner (StereoFieldLayer). Painted on a canvas from a source, without a React render.",
     files: [
@@ -697,7 +704,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "Curves and draggable points, for equalizers, filters and compressors.",
     files: [
@@ -707,6 +714,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "plot",
+    registryDependencies: ["@audio-ui/plot-react"],
     type: "registry:ui",
   },
   {
@@ -724,7 +732,7 @@ export const audio: RegistryItem[] = [
         "color-warning": "var(--warning)",
       },
     },
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A level meter in decibels for one or more channels, with peak hold.",
     files: [
@@ -734,6 +742,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "meter",
+    registryDependencies: ["@audio-ui/meter-react"],
     type: "registry:ui",
   },
   {
@@ -764,7 +773,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer.",
     files: [
@@ -774,6 +783,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "waveform",
+    registryDependencies: ["@audio-ui/waveform-react"],
     type: "registry:ui",
   },
   {
@@ -807,7 +817,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, position fields in bars.beats.16ths (parameter fields), and useClipPlayhead, where playback reads the clip's source from the arrangement's position.",
     files: [
@@ -989,7 +999,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/icons"],
     description:
       "A step grid: press a step, or drag across several, to draw a pattern.",
     files: [
@@ -1005,6 +1015,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "sequencer",
     registryDependencies: [
+      "@audio-ui/sequencer-react",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-transport-clock",
       "@audio-ui/web-audio",
@@ -1014,7 +1025,12 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio-ui/engine"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio-ui/react",
+      "@audio-ui/icons",
+      "@audio-ui/engine",
+    ],
     description:
       "A compact player: play and pause, the position, a seek bar and the length.",
     files: [
@@ -1047,7 +1063,12 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio-ui/engine"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio-ui/react",
+      "@audio-ui/icons",
+      "@audio-ui/engine",
+    ],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",

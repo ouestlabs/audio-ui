@@ -1,3 +1,4 @@
+import type { Source } from "@audio-ui/core";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,
@@ -11,7 +12,6 @@ import {
 } from "@audio-ui/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type { WaveformBands } from "@audio-ui/gl/waveform";
-import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,

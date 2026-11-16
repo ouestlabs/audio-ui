@@ -1,3 +1,4 @@
+import { createSource, type Source } from "@audio-ui/core";
 import {
   type AudioPeaks,
   computePeaks,
@@ -25,7 +26,6 @@ import {
 } from "@audio-ui/engine/format";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
-import { createSource, type Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,

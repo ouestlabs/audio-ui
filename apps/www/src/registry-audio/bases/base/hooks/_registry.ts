@@ -289,7 +289,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-pitch", {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/engine"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
   }),
@@ -301,7 +301,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-loudness", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/engine"],
     description:
       "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
     registryDependencies: [],
@@ -313,7 +313,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-spectrum", {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/engine"],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
   }),

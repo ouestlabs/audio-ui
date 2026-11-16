@@ -1,8 +1,11 @@
-import { Pad as PadPrimitive } from "@audio-ui/react";
-import type { CSSProperties } from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Pad as PadPrimitive } from "@/registry-audio/bases/base/primitives/pad/react";
 
-type PadProps = Omit<PadPrimitive.Root.Props, "className" | "style"> & {
+type PadProps = Omit<
+  ComponentProps<typeof PadPrimitive.Root>,
+  "className" | "style"
+> & {
   className?: string;
   style?: CSSProperties;
 };
@@ -27,7 +30,10 @@ function Pad({ className, columns = 4, style, ...props }: PadProps) {
   );
 }
 
-type PadItemProps = Omit<PadPrimitive.Item.Props, "className"> & {
+type PadItemProps = Omit<
+  ComponentProps<typeof PadPrimitive.Item>,
+  "className"
+> & {
   className?: string;
 };
 

@@ -1,5 +1,5 @@
+import type { Source } from "@audio-ui/core";
 import type { Note } from "@audio-ui/core/piano-roll";
-import type { Source } from "@audio-ui/react";
 import {
   type MouseEvent,
   useCallback,

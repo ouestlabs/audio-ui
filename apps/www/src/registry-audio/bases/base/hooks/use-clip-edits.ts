@@ -1,4 +1,4 @@
-import type { createSource } from "@audio-ui/react";
+import type { createSource } from "@audio-ui/core";
 import { type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import {
   FLAT,

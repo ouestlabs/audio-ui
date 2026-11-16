@@ -1,6 +1,6 @@
+import { createSource } from "@audio-ui/core";
 import type { SpectrogramScale } from "@audio-ui/gl/spectrogram";
 import type { WaveformClip, WaveformLayout } from "@audio-ui/gl/waveform";
-import { createSource } from "@audio-ui/react";
 import { type ComponentProps, useState } from "react";
 import {
   SpectrogramAxis,

@@ -1,4 +1,4 @@
-import type { Pad as PadPrimitive } from "@audio-ui/react";
+import type { PadOffDetails, PadOnDetails } from "@audio-ui/primitives/pad";
 import { useCallback, useRef } from "react";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -51,7 +51,7 @@ export default function PadDemo() {
   const ringing = useRef(new Map<string, GainNode[]>());
 
   const strike = useCallback(
-    (value: string, details: PadPrimitive.Root.OnEventDetails) => {
+    (value: string, details: PadOnDetails) => {
       const ctx = webAudio.resume();
       const pad = PADS.find((item) => item.value === value);
       if (!(ctx && master && pad)) {
@@ -73,19 +73,16 @@ export default function PadDemo() {
   );
 
   // Drum hits ring on after the pad is released: only a choke stops them.
-  const choke = useCallback(
-    (value: string, details: PadPrimitive.Root.OffEventDetails) => {
-      const ctx = webAudio.resume();
-      if (!ctx || details.reason !== "choke") {
-        return;
-      }
-      for (const hit of ringing.current.get(value) ?? []) {
-        hit.gain.setTargetAtTime(0, ctx.currentTime, CHOKE_FADE);
-      }
-      ringing.current.delete(value);
-    },
-    []
-  );
+  const choke = useCallback((value: string, details: PadOffDetails) => {
+    const ctx = webAudio.resume();
+    if (!ctx || details.reason !== "choke") {
+      return;
+    }
+    for (const hit of ringing.current.get(value) ?? []) {
+      hit.gain.setTargetAtTime(0, ctx.currentTime, CHOKE_FADE);
+    }
+    ringing.current.delete(value);
+  }, []);
 
   return (
     <Pad

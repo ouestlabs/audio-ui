@@ -300,6 +300,9 @@ export const knob: KnobPrimitive = definePrimitive({
           ),
           style: css({
             "--knob-mark-angle": `${angle}deg`,
+            inset: "0",
+            "pointer-events": "none",
+            position: "absolute",
             rotate: `${angle}deg`,
           }),
         };

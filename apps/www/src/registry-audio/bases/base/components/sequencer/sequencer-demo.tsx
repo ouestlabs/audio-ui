@@ -1,5 +1,5 @@
+import { createSource } from "@audio-ui/core";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
-import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";

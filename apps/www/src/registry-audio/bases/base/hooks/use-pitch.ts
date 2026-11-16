@@ -1,6 +1,6 @@
+import { createSource, type Source } from "@audio-ui/core";
 import { detectPitch, type PitchEstimate } from "@audio-ui/engine/analysis";
 import { cents } from "@audio-ui/engine/pitch";
-import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
 /** What a tuner shows: the note nearest the sound, and how far from it the sound is. */

@@ -14,19 +14,29 @@ const parts = createParts(envelope, {
 
 const DEFAULT_STROKE_WIDTH = 2;
 
-/** The curve through the points: an `<svg>` over the graph, drawn in its `color`. */
+/**
+ * The curve through the points: an `<svg>` over the graph, drawn in its
+ * `color`. The stroke is set on the `<svg>`, where a class or a style reaches
+ * it, and the line inside takes it from there.
+ */
 function Line({ strokeWidth, ...props }: ComponentProps<typeof parts.Line>) {
-  const width = strokeWidth ?? DEFAULT_STROKE_WIDTH;
   return (
-    <parts.Line {...props} strokeWidth={strokeWidth}>
+    <parts.Line
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={strokeWidth ?? DEFAULT_STROKE_WIDTH}
+      {...props}
+    >
       {({ points }: ShapeState) => (
         <polyline
-          fill="none"
+          fill="inherit"
           points={points}
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={width}
+          stroke="inherit"
+          strokeLinecap="inherit"
+          strokeLinejoin="inherit"
+          strokeWidth="inherit"
           style={{ vectorEffect: "non-scaling-stroke" }}
         />
       )}
@@ -34,12 +44,12 @@ function Line({ strokeWidth, ...props }: ComponentProps<typeof parts.Line>) {
   );
 }
 
-/** The area under the curve: an `<svg>` over the graph, filled with its `color`. */
+/** The area under the curve: an `<svg>` over the graph, filled with its `color`, or with the fill its class or style gives it. */
 function Fill(props: ComponentProps<typeof parts.Fill>) {
   return (
-    <parts.Fill {...props}>
+    <parts.Fill fill="currentColor" stroke="none" {...props}>
       {({ points }: ShapeState) => (
-        <polyline fill="currentColor" points={points} stroke="none" />
+        <polyline fill="inherit" points={points} stroke="inherit" />
       )}
     </parts.Fill>
   );

@@ -1,4 +1,4 @@
-import type { Pad as PadPrimitive } from "@audio-ui/react/pad";
+import type { PadOnDetails } from "@audio-ui/primitives/pad";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
@@ -51,7 +51,7 @@ function DrumSynthPanel({
 }: DrumSynthPanelProps) {
   // Each hit as it rang: its attack and its decay, the newest at the end.
   const strike = useCallback(
-    (_pad: string, details: PadPrimitive.Root.OnEventDetails) =>
+    (_pad: string, details: PadOnDetails) =>
       onNoteOn?.({ velocity: details.velocity }),
     [onNoteOn]
   );

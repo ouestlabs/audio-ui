@@ -1,4 +1,4 @@
-import type { Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
 import {
   type ChangeEvent,
   type ComponentProps,

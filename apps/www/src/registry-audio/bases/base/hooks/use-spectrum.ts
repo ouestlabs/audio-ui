@@ -1,3 +1,4 @@
+import { createSource, type Source } from "@audio-ui/core";
 import {
   holdPeaks,
   type LogSpectrumOptions,
@@ -5,7 +6,6 @@ import {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "@audio-ui/engine/analysis";
-import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
 export interface UseSpectrumOptions extends LogSpectrumOptions {
