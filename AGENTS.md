@@ -70,7 +70,7 @@ bun test
 ### `@audio-ui/primitives` (`packages/primitives/src/`)
 
 - `<name>/`: Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad, each a `definePrimitive` description over `@audio-ui/core` (its attributes, events and state, once for every framework)
-- The adapters (React, Vue, Svelte, custom elements) are not in the package: they are files of the registry, `apps/www/src/registry-audio/bases/base/primitives/<name>/`, that the CLI copies into a project
+- The adapters (React, Vue, Svelte, custom elements) are not in the package: they are files of the registry, `apps/www/src/registry-audio/bases/base/primitives/<name>/<framework>/`, that the CLI copies into a project
 
 ### `apps/www/src/`: two registry trees
 
@@ -144,7 +144,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 
 ## Rules
 
-### Registry items (`registry-audio/bases/base/components/{category}/`)
+### Registry items (`registry-audio/bases/base/components/{category}/<framework>/`)
 
 - Filename `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos); default export `Block{Component}{Variant}` / `{Component}{Feature}Demo`, PascalCase of the filename, no params
 - No `"use client"` directive: the site is TanStack Start, where it means nothing

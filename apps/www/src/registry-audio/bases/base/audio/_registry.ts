@@ -1013,7 +1013,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "components/sequencer/sequencer-demo.tsx",
+        path: "components/sequencer/react/sequencer-demo.tsx",
         target: "components/audio-ui/sequencer-default.tsx",
         type: "registry:component",
       },
@@ -1039,7 +1039,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "components/scrubber/scrubber-demo.tsx",
+        path: "components/scrubber/react/scrubber-demo.tsx",
         target: "components/audio-ui/scrubber-default.tsx",
         type: "registry:component",
       },
@@ -1057,7 +1057,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "components/transport/transport-demo.tsx",
+        path: "components/transport/react/transport-demo.tsx",
         target: "components/audio-ui/transport-default.tsx",
         type: "registry:component",
       },
