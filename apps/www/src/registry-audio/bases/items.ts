@@ -1,4 +1,11 @@
 import type { RegistryItem } from "shadcn/schema";
+import {
+  LOGIC_PRIMITIVES,
+  logicFiles,
+  SVELTE_FOLDER,
+  sourceOf,
+  targetOf,
+} from "./logic.ts";
 
 /**
  * The factories of registry items: every `_registry.ts` declares its items
@@ -202,7 +209,9 @@ export function primitiveItems(
   frameworks: PrimitiveFramework[],
   description: string
 ): RegistryItem[] {
-  return frameworks.map((framework) => {
+  // A primitive whose logic ships with it needs no package of ours: the item `<name>-logic` carries it.
+  const ships = LOGIC_PRIMITIVES.has(name);
+  const items: RegistryItem[] = frameworks.map((framework) => {
     // shadcn-svelte puts a `registry:ui` file under its own `ui` folder, and
     // a `registry:component` one in `components`, which is where it belongs.
     const svelte = framework.name === "svelte";
@@ -212,13 +221,17 @@ export function primitiveItems(
     return {
       categories: ["primitive", framework.name],
       dependencies: [
-        "@audio-ui/primitives",
+        ...(ships ? [] : ["@audio-ui/primitives"]),
         `@ui-sdk/core@${UI_SDK}`,
-        ...framework.dependencies.map((dependency) =>
-          dependency.startsWith("@ui-sdk/")
-            ? `${dependency}@${UI_SDK}`
-            : dependency
-        ),
+        ...framework.dependencies
+          .filter(
+            (dependency) => !(ships && dependency.startsWith("@audio-ui/"))
+          )
+          .map((dependency) =>
+            dependency.startsWith("@ui-sdk/")
+              ? `${dependency}@${UI_SDK}`
+              : dependency
+          ),
       ],
       description: `${description} Its ${framework.name} adapter.`,
       files: framework.files.map((file) =>
@@ -230,8 +243,25 @@ export function primitiveItems(
         )
       ),
       name: `${name}-${framework.name}`,
-      registryDependencies: [],
+      registryDependencies: ships
+        ? [`@audio-ui/${name}-logic${svelte ? "-svelte" : ""}`]
+        : [],
       type,
     };
   });
+  if (!ships) {
+    return items;
+  }
+  const logic = (suffix: string, folder?: string): RegistryItem => ({
+    categories: ["primitive", "logic"],
+    dependencies: [`@ui-sdk/core@${UI_SDK}`],
+    description: `The logic of the ${name}, in files you own: its controller and the helpers it reads, with no package of ours. The adapters of ${suffix ? "Svelte" : "every other framework"} import it.`,
+    files: logicFiles(name).map((file) =>
+      fileOf(sourceOf(file), "registry:lib", targetOf(file, folder))
+    ),
+    name: `${name}-logic${suffix}`,
+    registryDependencies: [],
+    type: "registry:lib",
+  });
+  return [...items, logic(""), logic("-svelte", SVELTE_FOLDER)];
 }

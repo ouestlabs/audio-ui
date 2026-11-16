@@ -16,11 +16,18 @@
  * Run: bun run registry:build
  */
 
+import { resolve } from "node:path";
 import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
+import {
+  LOGIC_PRIMITIVES,
+  rewriteAdapter,
+  rewriteLogic,
+  SVELTE_FOLDER,
+} from "../src/registry-audio/bases/logic.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
@@ -32,6 +39,16 @@ const BASES_DIR = `${REGISTRY_AUDIO}/bases`;
 const OUTPUT_ROOT = `${PROJECT_ROOT}/public/r/styles`;
 
 const NAMESPACE = "@audio-ui";
+const LOGIC_DEPENDENCY = /^@audio-ui\/([a-z-]+-logic(?:-svelte)?)$/;
+// Where the registry is served from: the logic an adapter needs is named by its address, which every CLI reads, and not by the namespace, which shadcn-svelte does not know.
+const ORIGIN =
+  process.env.AUDIO_UI_REGISTRY_ORIGIN ?? "https://www.audio-ui.dev";
+
+/** The address of a logic item in the style being built, for a dependency by name. */
+function logicUrl(dependency: string, style: string) {
+  const name = LOGIC_DEPENDENCY.exec(dependency)?.[1];
+  return name ? `${ORIGIN}/r/styles/${style}/${name}.json` : dependency;
+}
 const HOMEPAGE = "https://www.audio-ui.dev";
 const DEFAULT_STYLE = "base-nova";
 
@@ -352,8 +369,26 @@ async function buildFile(
   if (file.type !== "registry:page") {
     content = content.replace(EXPORT_DEFAULT, "export");
   }
+  // 5. The logic that ships with a primitive, and the adapters over it, import it by relative paths
+  const absolute = resolve(
+    `${PROJECT_ROOT}/src/registry-audio/bases/${build.base}`,
+    file.path
+  );
+  const adapter = ADAPTER_ITEM.exec(item.name);
+  if (/-logic(?:-svelte)?$/.test(item.name)) {
+    content = rewriteLogic(
+      absolute,
+      content,
+      item.name.endsWith("-svelte") ? SVELTE_FOLDER : undefined
+    );
+  } else if (adapter?.[1] && LOGIC_PRIMITIVES.has(adapter[1])) {
+    content = rewriteAdapter(adapter[1], adapter[2] ?? "", content);
+  }
 
-  const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
+  // A file of the packages keeps its path from there: two of them may share a name.
+  const fileName = file.path.includes("packages/")
+    ? file.path.slice(file.path.indexOf("packages/") + "packages/".length)
+    : file.path.slice(file.path.lastIndexOf("/") + 1);
   return {
     content: content.trim(),
     path: fileName,
@@ -395,7 +430,9 @@ async function buildItem(
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
     registryDependencies: item.registryDependencies?.map((dependency) =>
-      itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
+      itemNames.has(dependency)
+        ? `${NAMESPACE}/${dependency}`
+        : logicUrl(dependency, build.name)
     ),
     title: item.title,
     type: item.type,
@@ -569,6 +606,7 @@ const itemsByBase = new Map(
 const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
 const SOURCE_EXTENSION = /\.tsx?$/;
 const INDEX_FILE = /\/index$/;
+const ADAPTER_ITEM = /^([a-z-]+)-(react|vue|svelte|web)$/;
 const SVELTE_ROOT = /^~\/src\/lib\//;
 const explicitRewrites = [...itemsByBase.values()]
   .flatMap((items) => [...items.values()])
