@@ -82,7 +82,9 @@ export function prerenderPages() {
     { path: "/privacy" },
     ...categoryPaths().map((path) => ({ path })),
     ...docsPages().map(({ path }) => ({ path })),
-    ...frameworkAddresses().map((path) => ({ path })),
+    ...frameworkAddresses(docsPages().map(({ path }) => path)).map((path) => ({
+      path,
+    })),
     ...STATIC_TEXT_PATHS.map((path) => ({
       path,
       prerender: { outputPath: path },

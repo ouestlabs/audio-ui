@@ -1,3 +1,4 @@
+import { REACT_ADDRESSES, under } from "@/lib/docs/content/framework-paths";
 import { DOCS_SECTIONS, type DocsSection } from "@/lib/docs/content/sections";
 
 /**
@@ -40,22 +41,6 @@ const REACT_ONLY: readonly string[] = ["react"];
 
 /** Whether a section is for React alone: read there, the framework is React, whatever the reader chose. */
 export const needsReact = (section: string) => REACT_ONLY.includes(section);
-
-/** The addresses only a React app uses: React's primitives, the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
-const REACT_ADDRESSES = [
-  "/components",
-  "/docs/api",
-  "/docs/components",
-  "/docs/devices",
-  "/docs/guides",
-  "/docs/hooks",
-  "/docs/lib",
-  "/docs/react-package",
-  "/docs/styling",
-];
-
-const under = (url: string, prefix: string) =>
-  url === prefix || url.startsWith(`${prefix}/`);
 
 /**
  * Whether a page is one a reader of `framework` is shown, in the search as in
