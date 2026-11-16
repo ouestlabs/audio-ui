@@ -45,10 +45,10 @@ export function sourceOf(event?: Event): ChangeSource | undefined {
       ? event.pointerType
       : "mouse";
   }
+  if (event instanceof MouseEvent) {
+    return "mouse";
+  }
   if (event instanceof KeyboardEvent) {
     return "keyboard";
-  }
-  if (event instanceof WheelEvent) {
-    return "mouse";
   }
 }

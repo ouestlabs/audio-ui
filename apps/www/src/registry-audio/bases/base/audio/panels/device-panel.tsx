@@ -1,4 +1,3 @@
-import type { NumberScale } from "@ui-sdk/core/number";
 import type {
   ChoiceParameter,
   Device,
@@ -8,6 +7,7 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@audio-ui/engine/device";
+import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

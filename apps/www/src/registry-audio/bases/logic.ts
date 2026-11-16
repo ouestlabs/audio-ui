@@ -15,6 +15,7 @@ const OUR_PACKAGES = /["']@audio-ui\/(?:core|primitives)\/[^"']*["']/g;
 
 /** The files of each primitive's logic, from `base/logic/`. A primitive listed here needs no package of ours. */
 const LOGIC: Record<string, string[]> = {
+  fader: ["define.ts", "shared.ts", "fader/fader.ts"],
   knob: ["define.ts", "shared.ts", "knob/knob.ts"],
 };
 
@@ -70,8 +71,5 @@ export function rewriteAdapter(
     adapterFolder(primitive, framework),
     `${logicFolder}/${entryOf(primitive)}`
   );
-  return content.replace(
-    OUR_PACKAGES,
-    `"${path}"`
-  );
+  return content.replace(OUR_PACKAGES, `"${path}"`);
 }
