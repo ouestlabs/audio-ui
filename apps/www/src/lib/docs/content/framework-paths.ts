@@ -2,7 +2,7 @@
  * The framework addresses of the docs: `/docs/vue/knob` is the page of the
  * knob on the UI SDK, read for Vue. They are the same pages under another
  * address, so the router rewrites them to the page's own address with the
- * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`), but the sections that are one framework's own, React's primitives (`/docs/primitives`) and the elements: their pages stay where they are.
+ * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`) (`/docs/react/primitives/knob` for React's primitives, `/docs/vue/elements/knob` for the elements).
  */
 
 /** The addresses only a React app uses: React's primitives, the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
@@ -18,8 +18,8 @@ export const REACT_ADDRESSES = [
   "/docs/styling",
 ];
 
-/** The sections of one framework, which have no address per framework: React's primitives and the elements. */
-const OWN_SECTIONS = ["/docs/elements", "/docs/primitives"];
+/** The elements, which React is not shown: its own are the primitives. */
+const ELEMENTS = "/docs/elements";
 
 export const under = (url: string, prefix: string) =>
   url === prefix || url.startsWith(`${prefix}/`);
@@ -62,7 +62,7 @@ const SEGMENT_OF = new Map<string, Segment>(
   ])
 );
 
-/** Whether a page has an address for a framework: the docs' own pages the framework is shown, not the sections that are one framework's. */
+/** Whether a page has an address for a framework: the docs' pages it is shown. */
 function addressable(pathname: string, framework: string): boolean {
   if (
     !(pathname === "/docs" || pathname.startsWith("/docs/")) ||
@@ -70,11 +70,8 @@ function addressable(pathname: string, framework: string): boolean {
   ) {
     return false;
   }
-  if (OWN_SECTIONS.some((section) => under(pathname, section))) {
-    return false;
-  }
   return framework === "react"
-    ? true
+    ? !under(pathname, ELEMENTS)
     : !REACT_ADDRESSES.some((prefix) => under(pathname, prefix));
 }
 
@@ -142,13 +139,13 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
     )};
     var primitives = ${JSON.stringify(UI_SDK_PRIMITIVES)};
     var reactOnly = ${JSON.stringify(REACT_ADDRESSES)};
-    var own = ${JSON.stringify(OWN_SECTIONS)};
+    var elements = ${JSON.stringify(ELEMENTS)};
     var kept = localStorage['audio-ui-framework'];
     var segment = segments[kept];
     var path = location.pathname.replace(/\\/$/, '');
     var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
     var to = null;
-    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && !own.some(under) && (kept === 'react' || !reactOnly.some(under))) {
+    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' ? !under(elements) : !reactOnly.some(under))) {
       var name = /^\\/docs\\/([a-z-]+)-ui-sdk$/.exec(path);
       to = name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1]
         : '/docs/' + segment + path.slice(5);
