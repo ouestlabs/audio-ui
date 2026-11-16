@@ -1,0 +1,2 @@
+var P=[0.25,0.5,0.75];function L(p,a,v,N=1){let l=[],M=a.map(p),S=4096-a.length,r=(e,n,u,t,m)=>{if(m>=8||S<=0)return;let b=0,s=Number.NaN;for(let c of P){let h=p(e+(u-e)*c);if(b=Math.max(b,Math.abs(h-(n+(t-n)*c))),c===0.5)s=h}let f=(t-n)/((u-e)*N);if(b/Math.sqrt(1+f*f)<=v)return;let o=(e+u)/2;S-=1,r(e,n,o,s,m+1),l.push([o,s]),r(o,s,u,t,m+1)};return a.forEach((e,n)=>{let u=M[n]??0;l.push([e,u]);let t=a[n+1];if(t!==void 0)r(e,u,t,M[n+1]??0,0)}),l}
+export{L};

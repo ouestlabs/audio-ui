@@ -1,0 +1,2 @@
+function A(o){let e=0,r=null,t=!1,n=()=>{if(!t&&e===0)e=requestAnimationFrame(a)};function a(s){e=0;let i=r===null?0:Math.min(Math.max(0,s-r),100);if(r=s,o(i))n();else r=null}return{flush:()=>{if(t)return;cancelAnimationFrame(e),a(performance.now())},stop:()=>{t=!0,cancelAnimationFrame(e),e=0},wake:n}}function x(o){let e=o,r=new Set;return{get:()=>e,set:(t)=>{if(Object.is(t,e))return;e=t;for(let n of r)n()},subscribe:(t)=>(r.add(t),()=>{r.delete(t)})}}
+export{x,A};

@@ -14,7 +14,7 @@
     "postinstall": "fumadocs-mdx",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "registry:build": "bun ./scripts/build-registry.ts && bun ./scripts/build-entries.ts",
+    "registry:build": "bun ./scripts/build-registry.ts && bun ./scripts/build-entries.ts && bun ./scripts/build-web.ts",
     "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
     "skill:build": "bun ./scripts/build-skill.ts",
     "start": "vite preview",
