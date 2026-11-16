@@ -16,18 +16,18 @@ import { Panel } from "./audio-ui/panel";
 This is the verified part tree of every skin (a test renders it in CI). It is one code block: copy the pieces you need into your own files. Its class names are the contract with the CSS: keep them, and add your own parts the same way.
 
 ```tsx
-import { Envelope } from "@audio-ui/react/envelope";
-import { Fader } from "@audio-ui/react/fader";
-import { Knob } from "@audio-ui/react/knob";
-import { Meter } from "@audio-ui/react/meter";
-import { Pad } from "@audio-ui/react/pad";
-import { Piano } from "@audio-ui/react/piano";
-import { Plot } from "@audio-ui/react/plot";
-import { Sequencer } from "@audio-ui/react/sequencer";
-import { Waveform } from "@audio-ui/react/waveform";
-import { XYPad } from "@audio-ui/react/xypad";
-import { createSource, type Source } from "@audio-ui/react";
+import { createSource, type Source } from "@audio-ui/core";
 import { useEffect, useRef, useState } from "react";
+import { Envelope } from "@/components/audio-ui/envelope/react";
+import { Fader } from "@/components/audio-ui/fader/react";
+import { Knob } from "@/components/audio-ui/knob/react";
+import { Meter } from "@/components/audio-ui/meter/react";
+import { Pad } from "@/components/audio-ui/pad/react";
+import { Piano } from "@/components/audio-ui/piano/react";
+import { Plot } from "@/components/audio-ui/plot/react";
+import { Sequencer } from "@/components/audio-ui/sequencer/react";
+import { Waveform } from "@/components/audio-ui/waveform/react";
+import { XYPad } from "@/components/audio-ui/xypad/react";
 
 // The class names are the contract with styles/base.css and every skin.
 // Keep them, change the skin: a part without its class has no size and draws nothing.
@@ -98,7 +98,7 @@ function FaderControl({ label, defaultValue }: { label: string; defaultValue: nu
   );
 }
 
-// An envelope editor: points are normalized to 0..1 on both axes. Points takes a render function.
+// An envelope editor: points are normalized to 0..1 on both axes. The Root's child is a function of its value.
 function EnvelopeControl({ label }: { label: string }) {
   return (
     <Envelope.Root
@@ -108,20 +108,22 @@ function EnvelopeControl({ label }: { label: string }) {
       maxPoints={5}
       minPoints={5}
     >
-      <Envelope.Graph className="envelope-graph">
-        <Envelope.Fill className="envelope-fill" />
-        <Envelope.Line className="envelope-line" />
-      </Envelope.Graph>
-      <Envelope.Points>
-        {(_point, index) => (
-          <Envelope.Point
-            aria-label={`${label} point ${index + 1}`}
-            className="envelope-point"
-            index={index}
-            key={index}
-          />
-        )}
-      </Envelope.Points>
+      {({ value }) => (
+        <>
+          <Envelope.Graph className="envelope-graph">
+            <Envelope.Fill className="envelope-fill" />
+            <Envelope.Line className="envelope-line" />
+          </Envelope.Graph>
+          {value.map((_point, index) => (
+            <Envelope.Point
+              aria-label={`${label} point ${index + 1}`}
+              className="envelope-point"
+              index={index}
+              key={index}
+            />
+          ))}
+        </>
+      )}
     </Envelope.Root>
   );
 }
@@ -140,20 +142,17 @@ function WaveformControl({ label }: { label: string }) {
   );
 }
 
-// A spectrum: Plot.Root must be given a height (it is a positioned div), Plot.Graph is the svg.
+// A spectrum: Plot.Root must be given a height (it is a positioned div) and draws its parts itself.
 // Trace takes a source of one value per point (here dB, log frequency on x).
 function SpectrumControl() {
   return (
     <Plot.Root className="plot" maxX={20_000} maxY={0} minX={20} minY={-96} scaleX="log">
-      <Plot.Graph className="plot-graph">
-        {DB_LINES.map((db) => (
-          <Plot.Line axis="y" className="plot-grid" key={db} value={db} />
-        ))}
-        {HZ_LINES.map((hz) => (
-          <Plot.Line axis="x" className="plot-grid" key={hz} value={hz} />
-        ))}
-        <Plot.Trace className="plot-area" fillTo={-96} source={spectrum} />
-      </Plot.Graph>
+      <Plot.Grid
+        className="plot-grid"
+        x={{ labels: false, ticks: HZ_LINES }}
+        y={{ labels: false, ticks: DB_LINES }}
+      />
+      <Plot.Trace className="plot-area" fillTo={-96} source={spectrum} />
     </Plot.Root>
   );
 }
@@ -178,25 +177,25 @@ function ChoiceControl({ label }: { label: string }) {
   );
 }
 
-// A step sequencer: Rows and Cells take render functions; `source` carries the playing step (-1 hides it).
+// A step sequencer: the Root's child is a function of its rows and steps; `source` carries the playing step (-1 hides it).
 function SequencerControl({ step }: { step: Source<number> }) {
   return (
     <Sequencer.Root className="sequencer" defaultValue={PATTERN} source={step}>
-      <Sequencer.Rows>
-        {(row: number) => (
-          <Sequencer.Row aria-label={`Row ${row + 1}`} className="sequencer-row" index={row}>
-            <Sequencer.Cells>
-              {(cell: number) => (
-                <Sequencer.Cell
-                  aria-label={`Row ${row + 1}, step ${cell + 1}`}
-                  className="step"
-                  step={cell}
-                />
-              )}
-            </Sequencer.Cells>
+      {({ rows, steps }) =>
+        Array.from({ length: rows }, (_row, row) => (
+          <Sequencer.Row aria-label={`Row ${row + 1}`} className="sequencer-row" index={row} key={row}>
+            {Array.from({ length: steps }, (_cell, cell) => (
+              <Sequencer.Cell
+                aria-label={`Row ${row + 1}, step ${cell + 1}`}
+                className="step"
+                key={cell}
+                row={row}
+                step={cell}
+              />
+            ))}
           </Sequencer.Row>
-        )}
-      </Sequencer.Rows>
+        ))
+      }
     </Sequencer.Root>
   );
 }
@@ -254,7 +253,7 @@ export function Panel({
         <FaderControl defaultValue={40} label="Pan" />
         <ToggleControl label="M" />
         <Vu label="GR" source={reduction} />
-        {/* Meter.Channels takes a render function and renders no element itself */}
+        {/* The Root's only child is a function of the channel count */}
         <Meter.Root
           aria-label="Output"
           className="meter"
@@ -263,18 +262,14 @@ export function Panel({
           peak={[-6, -2]}
           value={[-14, -4]}
         >
-          <Meter.Channels>
-            {(index: number) => (
-              <Meter.Channel
-                className="meter-channel"
-                index={index}
-                key={index}
-              >
+          {({ channelCount }) =>
+            Array.from({ length: channelCount }, (_channel, index) => (
+              <Meter.Channel className="meter-channel" index={index} key={index}>
                 <Meter.Indicator className="meter-indicator" />
                 <Meter.Peak className="meter-peak" />
               </Meter.Channel>
-            )}
-          </Meter.Channels>
+            ))
+          }
         </Meter.Root>
         <XYPad.Root
           aria-label="Filter"
@@ -299,11 +294,11 @@ export function Panel({
           maxPitch={71}
           minPitch={60}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key className="piano-key" key={pitch} pitch={pitch} />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
         <EnvelopeControl label="Amp" />
         <ChoiceControl label="Wave" />
@@ -359,7 +354,7 @@ Read [hardware.md](./hardware.md) before composing a retro panel: it explains wh
 
 Most are built from `styles/materials.css` and the shared tokens (tape, phosphor, console and hifi lean on them most; y2k and synth70 set only the light and dark tokens and draw the rest by hand, since candy gloss and wood are not in the materials), so each is about sixty lines: read the closest one before writing your own. `.lamp` and `.screw` (with `screw-tl`, `screw-tr`, `screw-bl`, `screw-br`) come from `materials.css`; the rocker and the lamp rim are retro's.
 
-With shadcn and a distinct look, take the headless parts from `@audio-ui/react` for the kit's skins, and the registry only for the engine items (`web-audio`, `drum-synthesis`): the registry components take `size` and `marks`, not these class names.
+With shadcn and a distinct look, install the headless primitives (`npx shadcn@latest add @audio-ui/knob-react`, one item per primitive) for the kit's skins, and the registry only for the engine items (`web-audio`, `drum-synthesis`): the registry components take `size` and `marks`, not these class names.
 
 Minimal, modern and brutalist hide the knob ticks (`.knob-tick { display: none }`). Delete that rule to print a scale: an EQ's bipolar knob wants its marks. Each skin styles the panel, not the page: set the page background and `color-scheme` yourself. The kit covers knob, fader, meter, XY pad, pad, piano and a toggle; read the component page of Envelope, Plot, Waveform, Timeline and the rest (an ADSR can also be four faders), and style them with the same tokens and the part's own `className`.
 
@@ -418,14 +413,14 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 - **Plot.Trace:** `source` holds one value per point, spread evenly across `minX` to `maxX`; without `fillTo` it is a line, with it an area. A linear axis works for any curve (a decay, an envelope), the log axis for a spectrum.
 - **computePeaks(channels, bucketCount)** from `@audio-ui/engine/analysis` takes the decoded channels (`audioBuffer.getChannelData(i)` for each) and returns `{ min, max }` Float32Arrays; `normalizePeaks` scales them to full height. Give the Waveform `peaks={normalizePeaks(computePeaks(channels, 2048))}`.
 - **Waveform.Root:** `peaks` (amplitudes 0 to 1, or the `AudioPeaks` of `computePeaks`, optional: a waveform draws nothing until it has them; keep the state `undefined` until a file loads, since an empty array does not type-check), `value` (a fraction, or seconds with `duration`), `onValueChange(position, details)` to seek your audio, `onValueCommitted`, `range`, `source` is the position of a playhead that follows playback, in the unit of `duration` (a seekable waveform moves its progress with it, and `onValueCommitted` seeks). For a start marker that stays put while a playhead moves, keep `value` as the marker and overlay your own playhead element driven by a source. The canvas reads `--waveform-color` and `--waveform-progress-color` as plain colors (a `color-mix()` or a gradient does not work there). Parts: `Control > Canvas`, `Playhead`, `Thumb`, `Region`, `Marker`, `Hover`. The `Bars` part is the DOM alternative to `Canvas`, with `count` (default 24) and `mirrored`.
-- **Plot.Handle** (a draggable point: an EQ band, a crossover): a direct child of `Plot.Root`, not of `Plot.Graph`. Props: `axis` (`"x"`, `"y"` or `"both"`), a controlled `value={{ x, y }}` in data units (an `x`-only handle still needs a `y`, which sets where the grabber sits), `onValueChange(value, details)`, `onValueCommitted`, `getAriaLabel(axis)` and `getAriaValueText(value, axis)` with a plain number. It renders a positioned `div` holding a native range input, so widen its hit area with a `::before` and draw its focus ring with `:has(:focus-visible)`. **Plot.Band:** `axis`, `from` and `to` in data units, inside `Plot.Graph`.
-- **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts: `Graph` (the svg: children go inside it), `Line axis value`, `Trace source fillTo`, `Curve`, `Band`, `Handle`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
+- **Plot.Handle** (a draggable point: an EQ band, a crossover): a direct child of `Plot.Root`. Props: `handle` (its name), `axis` (`"x"`, `"y"` or `"both"`), a controlled `value={{ x, y }}` in data units (an `x`-only handle still needs a `y`, which sets where the grabber sits), `onValueChange(value, details)`, `onValueCommitted`, `getAriaLabel(axis)` and `getAriaValueText(value, axis)` with a plain number. It renders a positioned `div` holding a native range input, so widen its hit area with a `::before` and draw its focus ring with `:has(:focus-visible)`. **Plot.Band:** `axis`, `from` and `to` in data units, a direct child of `Plot.Root`.
+- **Plot.Root:** `minX`, `maxX`, `minY`, `maxY`, `scaleX="log"`. Parts, all direct children of the Root: `Grid` (`x` and `y`, each with `ticks` and `labels`), `Line axis value`, `Trace source fillTo`, `Curve fn`, `Band`, `Handle`, `Mark`, `Dot`. `Plot.Root` has an inline `position: relative`, so size it with `height`.
 - **Computer keys on pads:** `activePads` on `Pad.Root` lights the pads (a list of their values) that something else is striking, so map `keydown` and `keyup` to your own strike and pass the held values there.
 - **Envelope.Root keyboard:** the points share one tab stop. The arrow keys move the focused point's value, and Page Up and Page Down (or Home and End) move focus between points.
 - **Pad.Root:** `onPadOn` and `onPadOff` go on the Root; `activePads` lights pads from elsewhere (a computer key, a sequencer step). Only the first pad is in the tab order (arrow keys move between pads), so a test must Tab to it, then press Space or Enter.
 - **Piano.Root:** `minPitch`, `maxPitch`, `onNoteOn(pitch, details)`, `onNoteOff(pitch, details)`, `activeNotes` (pitches held by something else, such as a computer keyboard). The black keys come before the white keys in the DOM.
-- **Envelope.Root:** `defaultValue` or `value` as `{ x, y, curve? }[]` (both axes 0 to 1), `onValueChange(points, details)`, `minPoints`, `maxPoints`, `snap`, `locale` for the announced text. `Envelope.Points` takes a render function `(point, index) => <Envelope.Point index={index} aria-label />`.
-- **Sequencer.Root:** `defaultValue` or `value` as `boolean[][]` (a row per sound, a list of steps), `onValueChange(pattern, details)`, `source` (a source of the playing step, `-1` for none), `velocities`. `Rows` and `Cells` take render functions, `Row` needs `index`, `Cell` needs `step`; a cell is a button with `aria-pressed`, `data-on` and `data-current`. `Row` is a grid `div` that forwards `data-*` and `aria-*`: label a row with `data-label` and `.sequencer-row::before { content: attr(data-label) }`. Drive the playing step with a writable source: `const step = createSource(-1)` (it has `set`), `step.set(n)` from the look-ahead loop at the time the note sounds (queue the step with its audio time and set it from `requestAnimationFrame` once `ctx.currentTime` passes), and `step.set(-1)` on stop.
+- **Envelope.Root:** `defaultValue` or `value` as `{ x, y, curve? }[]` (both axes 0 to 1), `onValueChange(points, details)`, `minPoints`, `maxPoints`, `snap`, `locale` for the announced text. The Root's child is a function of its value, `({ value }) => ...`: an `Envelope.Graph` with a `Fill` and a `Line`, and an `<Envelope.Point index aria-label />` for each point.
+- **Sequencer.Root:** `defaultValue` or `value` as `boolean[][]` (a row per sound, a list of steps), `onValueChange(pattern, details)`, `source` (a source of the playing step, `-1` for none), `velocities`. The Root's child is a function `({ rows, steps })`; `Row` needs `index`, `Cell` needs `row` and `step`; a cell is a button with `aria-pressed`, `data-on` and `data-current`. `Row` is a grid `div` that forwards `data-*` and `aria-*`: label a row with `data-label` and `.sequencer-row::before { content: attr(data-label) }`. Drive the playing step with a writable source: `const step = createSource(-1)` (it has `set`), `step.set(n)` from the look-ahead loop at the time the note sounds (queue the step with its audio time and set it from `requestAnimationFrame` once `ctx.currentTime` passes), and `step.set(-1)` on stop.
 - **XYPad:** name the axes with `aria-label` on `XYPad.Thumb` ("Filter X" and "Filter Y"), not on the Root.
 - **A buss compressor, as a skeleton:** `gunmetal` was drawn for it. Put the threshold, make-up, ratio, attack and release knobs in a `.panel-row`: ivory caps (`data-cap="ivory"`) for threshold, make-up and ratio, black caps (`data-cap="black"`) for attack, release and rate; a `Vu` in the middle of the row; three `ToggleControl`s (IN, ANALOG, FADE) in a footer. Numerals come from `span.knob-numeral` in each `Knob.Mark`, and each section's top padding is 2.5rem so they clear the legend. Give the meter a range of 0 to 18 dB of reduction with `clipThreshold` above it.
 - **Eight large pads:** `.pads` is four 4rem columns and `.pad` is square, so for eight large pads override the grid columns and `aspect-ratio`. A vertical knob drag sweeps a log range in about 100px: give a log knob a smaller feel with `step` or accept it. Reordering with a CSS grid does not reorder Tab: keep the JSX in reading order. a pad is a 4rem square with a 0.65rem label, so a long name needs a wider column and a smaller font on `.pad`; size one knob with `style={{ "--knob-size": "6rem" }}` on its Root.
@@ -436,7 +431,7 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 - **Meter zones:** the zone gradient puts amber at 60% and red at 85% of the strip (the zone gradient and its two companions in materials.css). Compute the stops from the range (0 dB sits at `(0 - min) / (max - min)`: 88.9% for -48 to +6) and override the zone gradient and its dimming layer on your skin (the three zone variables are set on the panel in materials.css: set them again with `style` on `Meter.Root`, which they inherit down to).
 - **Tab stops:** a knob with an `editable` readout has two (the slider and the readout), so five knobs give ten. That is expected.
 - **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: place it outside the tick (`position: absolute; top: -1.6rem; left: 50%; translate: -50% 0`) and give it `rotate: calc(var(--knob-mark-angle) * -1)`. On a log knob, `Knob.Mark` takes real values, so evenly spaced angles need a geometric series (20, 200, 2000). Keep 2.4rem or more between knobs so numerals do not touch the next one.
-- **A writable source** is `WritableSource<T>` from `@audio-ui/react` (`Source` has no `set`); `subscribe(listener)` returns the remover.
+- **A writable source** is `WritableSource<T>` from `@audio-ui/core` (`Source` has no `set`); `subscribe(listener)` returns the remover.
 - Importing CSS in TypeScript needs `declare module "*.css";` in a `.d.ts` file under `moduleResolution: "Bundler"`.
 
 ### Envelope points to ADSR times

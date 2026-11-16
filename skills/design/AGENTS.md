@@ -1,6 +1,6 @@
 # audio/ui design
 
-**Version 1.2.0**  
+**Version 1.3.0**  
 audio/ui  
 October 2026
 
@@ -68,7 +68,7 @@ Making the headless primitives look like something: one visual direction (retro 
 
 **Impact: HIGH (parts that render at the right size and position)**
 
-A headless part has no size. A `Knob.Control` without a width collapses to nothing, a `Fader.Track` without a height is invisible, and a `Meter.Channels` renders no element at all. Start from `styles/base.css` (the structure of every part), then add a skin on top. The parts also set inline styles you cannot override from a class: never set `position`, `bottom`, `left`, `translate` or `rotate` on `Fader.Thumb`, `Knob.Thumb`, `XYPad.Thumb` or a `Meter.Indicator`.
+A headless part has no size. A `Knob.Control` without a width collapses to nothing, a `Fader.Track` without a height is invisible, and a `Meter.Root` with no height collapses its channels. Start from `styles/base.css` (the structure of every part), then add a skin on top. The parts also set inline styles you cannot override from a class: never set `position`, `bottom`, `left`, `translate` or `rotate` on `Fader.Thumb`, `Knob.Thumb`, `XYPad.Thumb` or a `Meter.Indicator`.
 
 **Incorrect (a track with no height, a thumb placed by hand):**
 
@@ -86,7 +86,7 @@ A headless part has no size. A `Knob.Control` without a width collapses to nothi
 .fader-thumb { position: absolute; width: 2rem; height: 1rem; }
 ```
 
-Meter channels need a flex `Meter.Root` with a height, and `Meter.Channels` takes a render function: `{(index) => <Meter.Channel index={index}>...</Meter.Channel>}`.
+Meter channels need a flex `Meter.Root` with a height, and the Root's child is a function of its channel count: `{({ channelCount }) => Array.from({ length: channelCount }, (_, index) => <Meter.Channel index={index} key={index}>...</Meter.Channel>)}`.
 
 ### 1.3 One light source, a few materials
 
@@ -119,7 +119,7 @@ A skeuomorphic panel is believable when every highlight and shadow agrees on one
 
 **Impact: HIGH (one coherent look instead of a mix of styles)**
 
-The primitives of `@audio-ui/react` draw nothing, so the look is yours to decide, and an agent that starts writing CSS without deciding produces a little of everything: a gradient here, a glass card there, a neon accent. Choose one direction, say it in a sentence, then style every part from it.
+The headless primitives draw nothing, so the look is yours to decide, and an agent that starts writing CSS without deciding produces a little of everything: a gradient here, a glass card there, a neon accent. Choose one direction, say it in a sentence, then style every part from it.
 
 More than a dozen are ready to use (copy `styles/base.css` and one skin; the table of `design.md` maps a request to each): retro, tape, synth70, tube, blackface, gunmetal, opto, blacky, bluey, solidstate and console for hardware, plugin for a glossy software window, minimal, modern and phosphor for flat tools, brutalist, y2k and hifi for a strong character. Take the one the user names. When they name none, pick from the product: a synth, drum machine or compressor is hardware, a tool or a player is minimal, a dense workstation is modern.
 

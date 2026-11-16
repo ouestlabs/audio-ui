@@ -1,6 +1,6 @@
 # Designing the interface
 
-`@audio-ui/react` is headless: it draws nothing. Whatever the project uses (Tailwind, CSS modules, plain CSS, no shadcn at all), the look is written by you. This is the process that keeps it from drifting into a generic one.
+The headless primitives draw nothing. Whatever the project uses (Tailwind, CSS modules, plain CSS, no shadcn at all), the look is written by you. This is the process that keeps it from drifting into a generic one.
 
 ## 1. Choose a direction and say it
 
@@ -49,7 +49,7 @@ A display-only app (a tuner, a readout, a scope) uses none of the knob, fader or
 - `Knob.Mark` goes inside `Knob.Control`: `.knob-mark` fills its nearest positioned ancestor, and the Root also holds the label and the value, so marks placed there land off the dial.
 - `Knob.Thumb` rotates itself: a pointer drawn as its `::after` rotates with the value.
 - `Meter.Indicator` is a full-height bar scaled to the level: anything painted on it squeezes with it. Put the zones on `Meter.Channel` (rule `design-meter-zones`).
-- `Meter.Channels` takes a render function and renders no element; the sized flex container is `Meter.Root`.
+- The Root's child of a `Meter` is a function of its channel count that returns the channels; the sized flex container is `Meter.Root`.
 - A decorative element (screw, lamp, legend line) gets `aria-hidden="true"` and `pointer-events: none`.
 - Registry components (`@audio-ui/knob`...) take `size`, `marks` and `orientation` before classes; the kit is for the headless parts.
 

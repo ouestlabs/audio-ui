@@ -1,21 +1,21 @@
 ---
 name: design
-description: "Designs how an audio interface looks with audio/ui: picks a visual direction (retro hardware, skeuomorphic, minimalist, modern, and skins such as tape, phosphor, hifi, brutalist, y2k, console, synth70), ships ready CSS skins and the verified Panel markup for the headless @audio-ui/react primitives, and composes a look from a brief or a reference with materials, palettes, lighting and typography. Use when the user wants a synth, mixer, plugin, drum machine or DAW panel to look like hardware or like a named style, asks for retro, analog, skeuomorphic, minimal or modern audio UI, has no shadcn or Tailwind and needs the primitives styled, or when a panel looks flat, generic or AI-made and needs to read as an instrument."
+description: "Designs how an audio interface looks with audio/ui: picks a visual direction (retro hardware, skeuomorphic, minimalist, modern, and skins such as tape, phosphor, hifi, brutalist, y2k, console, synth70), ships ready CSS skins and the verified Panel markup for the headless primitives of the audio/ui registry, and composes a look from a brief or a reference with materials, palettes, lighting and typography. Use when the user wants a synth, mixer, plugin, drum machine or DAW panel to look like hardware or like a named style, asks for retro, analog, skeuomorphic, minimal or modern audio UI, has no shadcn or Tailwind and needs the primitives styled, or when a panel looks flat, generic or AI-made and needs to read as an instrument."
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Designing audio interfaces with audio/ui
 
-`@audio-ui/react` primitives are headless: they bring behavior, input and ARIA, and no look. This skill gives them one. Choose a direction first and say it in a sentence, then style every part from it; mixing three looks is what makes a panel read as a template.
+The headless primitives are headless: they bring behavior, input and ARIA, and no look. This skill gives them one. Choose a direction first and say it in a sentence, then style every part from it; mixing three looks is what makes a panel read as a template.
 
 ## When to Apply
 
 - A synth, mixer, plugin, sampler or drum machine panel that should look like hardware, or like a named style
 - Retro, skeuomorphic, minimalist or modern directions, with or without shadcn/ui or Tailwind
-- Styling `@audio-ui/react` primitives from scratch with a ready skin
+- Styling the headless primitives from scratch with a ready skin
 - A look the skins do not cover, or a reference the user names
 - Reviewing a panel that looks flat, generic or uneven
 

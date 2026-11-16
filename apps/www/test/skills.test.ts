@@ -40,6 +40,8 @@ const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
 // Not the `audio-ui` skill's own name.
 const RULE_ID =
   /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
+// A primitive's adapter, as a project imports it once the CLI has copied it.
+const INSTALLED_PRIMITIVE = /"@\/components\/audio-ui\/([a-z-]+)\/react"/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
@@ -380,7 +382,15 @@ describe("skills/design styles", () => {
     // Rendered from inside the app, where react and the primitives resolve.
     const copy = `${import.meta.dir}/skill-panel.tmp.tsx`;
     const source = await readPanel();
-    await Bun.write(copy, source);
+    // The adapters the kit imports from `components/audio-ui/<name>/react`, where the CLI installs them, are the registry's files.
+    await Bun.write(
+      copy,
+      source.replace(
+        INSTALLED_PRIMITIVE,
+        (_, name) =>
+          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react.tsx"`
+      )
+    );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());
     const html = renderToString(
       createElement(panel.Panel, { skin: "retro", title: "Kit" })
