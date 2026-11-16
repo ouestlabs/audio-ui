@@ -89,6 +89,9 @@ async function render(
   };
 }
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 const styleOf = (element: HTMLElement) => element.getAttribute("style") ?? "";
 
 export function xypadSuite(framework: string, mount: MountXYPad) {
@@ -243,6 +246,8 @@ export function xypadSuite(framework: string, mount: MountXYPad) {
           pointerId: 1,
         });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.changes.at(-1)).toEqual([{ x: 80, y: 80 }, "drag"]);
       for (const part of [p.root, p.control, p.thumb]) {
         expect(part.hasAttribute("data-dragging")).toBe(true);

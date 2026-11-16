@@ -360,7 +360,7 @@ export const primitives: RegistryItem[] = [
   {
     categories: ["primitive", "css"],
     description:
-      "The anatomy of the knob and the fader, drawn: flat, square, one thin stroke. Optional, and the same for every framework. It reads the tokens of the UI SDK stylesheet when the page has it.",
+      "The anatomy of the knob, the fader and the XY pad, drawn: flat, square, one thin stroke. Optional, and the same for every framework. It reads the tokens of the UI SDK stylesheet when the page has it.",
     files: [
       {
         path: "primitives/audio-ui.css",

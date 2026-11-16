@@ -24,6 +24,9 @@
       "@audio-ui/primitives/knob": [
         "./src/registry-audio/bases/base/primitives/knob/knob.ts"
       ],
+      "@audio-ui/primitives/xypad": [
+        "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
+      ],
       "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
       "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
       "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],

@@ -1,5 +1,5 @@
 /*
- * The anatomy of the knob and the fader, drawn: flat and square, one thin
+ * The anatomy of the knob, the fader and the XY pad, drawn: flat and square, one thin
  * stroke, the foreground as the accent. It reads the tokens of the UI SDK
  * stylesheet (`--ui-*`) when the page has it, and falls back to its own.
  * Every rule targets a `data-slot` or a state attribute, in the `ui-sdk`
@@ -36,25 +36,37 @@
     color-scheme: light dark;
   }
 
-  :is([data-slot="knob"], [data-slot="fader"]) {
+  :is([data-slot="knob"], [data-slot="fader"], [data-slot="xypad"]) {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     align-items: center;
   }
 
-  :is([data-slot="knob-label"], [data-slot="fader-label"]) {
+  :is(
+    [data-slot="knob-label"],
+    [data-slot="fader-label"],
+    [data-slot="xypad-label"]
+  ) {
     font-size: 0.75rem;
     font-weight: 500;
   }
 
-  :is([data-slot="knob-value"], [data-slot="fader-value"]) {
+  :is(
+    [data-slot="knob-value"],
+    [data-slot="fader-value"],
+    [data-slot="xypad-value"]
+  ) {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
     color: var(--audio-ui-muted-foreground);
   }
 
-  :is([data-slot="knob-control"], [data-slot="fader-control"])[data-disabled] {
+  :is(
+    [data-slot="knob-control"],
+    [data-slot="fader-control"],
+    [data-slot="xypad-control"]
+  )[data-disabled] {
     opacity: 0.5;
   }
 
@@ -190,6 +202,58 @@
       top: 100%;
       width: 1px;
       height: 0.5rem;
+    }
+  }
+
+  /* XY pad */
+
+  [data-slot="xypad-control"] {
+    display: block;
+    width: 10rem;
+    height: 10rem;
+    cursor: crosshair;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    /* The crosshair through the point, from the place the root carries. */
+    &::before,
+    &::after {
+      position: absolute;
+      pointer-events: none;
+      content: "";
+      background: var(--audio-ui-input);
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: var(--xy-pad-x);
+      width: 1px;
+    }
+
+    &::after {
+      top: var(--xy-pad-y);
+      right: 0;
+      left: 0;
+      height: 1px;
+    }
+
+    &[data-dragging]::before,
+    &[data-dragging]::after {
+      background: var(--audio-ui-foreground);
+    }
+  }
+
+  [data-slot="xypad-thumb"] {
+    position: absolute;
+    z-index: 1;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
     }
   }
 }
