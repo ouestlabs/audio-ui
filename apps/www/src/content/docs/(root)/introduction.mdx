@@ -13,9 +13,48 @@ Both come from the `@audio-ui` registry, which puts the code in your project: yo
 
 **The primitives** are headless: behavior and accessibility, no styles, one adapter per framework (React, Vue, Svelte and plain web components) over the same logic. Pick them when you have your own design system.
 
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
 ```bash
 npx shadcn@latest add @audio-ui/knob-react
 ```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
 
 <ForFrameworks only="react">
 
