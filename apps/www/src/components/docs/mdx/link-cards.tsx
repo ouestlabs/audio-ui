@@ -19,7 +19,7 @@ export function LinkCard({
   title: string;
 }) {
   const className =
-    "flex flex-col gap-1 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted/50";
+    "flex flex-col gap-1 rounded-lg border bg-card p-4 text-card-foreground no-underline transition-colors hover:bg-muted/50";
   const content = (
     <>
       <span className="font-medium">{title}</span>
@@ -28,11 +28,11 @@ export function LinkCard({
   );
   // A file of the site, such as llms.txt, is not a page of the router.
   return href.includes(".") ? (
-    <a className={className} href={href}>
+    <a className={className} data-not-typeset="" href={href}>
       {content}
     </a>
   ) : (
-    <Link className={className} to={href as never}>
+    <Link className={className} data-not-typeset="" to={href as never}>
       {content}
     </Link>
   );
