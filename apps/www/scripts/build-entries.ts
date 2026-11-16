@@ -144,14 +144,10 @@ const MODULE_PACKAGES = [
   { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
   { folder: "gl", name: "@audio-ui/gl" },
-  { folder: "elements", name: "@audio-ui/elements" },
-  { folder: "react", name: "@audio-ui/react" },
 ] as const;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
-  /** The adapters that draw it: `@audio-ui/react/knob`, `@audio-ui/elements/knob`. */
-  adapters: string[];
   /** The audio.js packages it builds on, such as `@audio/note`: those its files import, and those whose code its kernels carry. */
   audiojs: string[];
   exports: EntryExport[];
@@ -357,37 +353,6 @@ async function moduleExports(entry: string): Promise<Resolved[]> {
   return [...own, ...statements.flat()];
 }
 
-/** The files under `folder` that import `from`, as their paths. */
-async function importers(folder: string, from: string) {
-  const files = [...new Bun.Glob("**/*.{ts,tsx}").scanSync(folder)];
-  const found = await Promise.all(
-    files.map(async (file) =>
-      (await read(`${folder}/${file}`)).includes(`from "${from}"`) ? file : ""
-    )
-  );
-  return found.filter(Boolean);
-}
-
-/** The adapters of `@audio-ui/react` and `@audio-ui/elements` with a file that imports `from`. */
-async function adaptersOf(from: string) {
-  const roots = [
-    { name: "@audio-ui/react", src: `${PACKAGES}/react/src/primitives` },
-    { name: "@audio-ui/elements", src: `${PACKAGES}/elements/src` },
-  ];
-  const found = await Promise.all(
-    roots.map(async (root) => {
-      const files = await importers(root.src, from);
-      const primitives = new Set(
-        files
-          .filter((file) => file.includes("/") && !file.startsWith("internal/"))
-          .map((file) => file.split("/")[0])
-      );
-      return [...primitives].sort().map((each) => `${root.name}/${each}`);
-    })
-  );
-  return found.flat();
-}
-
 export async function buildPackageModules(): Promise<PackageModule[]> {
   const items = await loadItems(["hooks", "lib"]);
   const itemFiles = await Promise.all(
@@ -415,7 +380,6 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
           const entry = `${PACKAGES}/${folder}/src/${target.types.replace("./dist/", "").replace(".d.ts", ".ts")}`;
           const resolved = await moduleExports(entry);
           return {
-            adapters: await adaptersOf(from),
             exports: resolved.map((each) => each.declared),
             from,
             package: name,

@@ -15,7 +15,6 @@ import { Glob } from "bun";
 
 const WEB = `${import.meta.dir}/..`;
 const PAGES = `${WEB}/src/content/docs/components/base`;
-const REACT_PAGES = `${WEB}/src/content/docs/primitives`;
 const PRIMITIVES = `${WEB}/../../packages/react/src/primitives`;
 
 const SECTION = /^### (.+)$/gm;
@@ -170,22 +169,15 @@ const PRIMITIVE_OF_PAGE: Record<string, string> = { arrangement: "timeline" };
 export async function sync(write: boolean) {
   const mismatches: Mismatch[] = [];
   const skipped: string[] = [];
-  const pages = [
-    ...(await Array.fromAsync(new Glob("**/*.mdx").scan(PAGES))).map(
-      (page) => ({ dir: PAGES, page })
-    ),
-    ...(await Array.fromAsync(new Glob("*.mdx").scan(REACT_PAGES))).map(
-      (page) => ({ dir: REACT_PAGES, page: `react/${page}` })
-    ),
-  ];
+  const pages = await Array.fromAsync(new Glob("**/*.mdx").scan(PAGES));
   await Promise.all(
-    pages.map(async ({ dir, page }) => {
+    pages.map(async (page) => {
       const name = page.split("/").pop()?.replace(".mdx", "") ?? "";
       const files = await filesOf(PRIMITIVE_OF_PAGE[name] ?? name);
       if (files.size === 0) {
         return;
       }
-      const path = `${dir}/${page.replace("react/", "")}`;
+      const path = `${PAGES}/${page}`;
       let text = await Bun.file(path).text();
       for (const row of rowsOf(page, text, files, name in PRIMITIVE_OF_PAGE)) {
         const label = `${page} / ${row.section} / ${row.names.join(", ")}`;

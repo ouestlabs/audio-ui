@@ -48,10 +48,10 @@ export function getDocsSpaces() {
 
 const COMPONENTS = "/docs/components/";
 const GUIDES = "/docs/guides";
-const ELEMENTS = "/docs/elements/";
+const UI_SDK_PAGE = /^\/docs\/[a-z-]+-ui-sdk$/;
 
-/** The custom elements' pages, as their sidebar orders them: what the home lists for a reader of Vue, Svelte or the web. */
-function elementPages(): SpacePage[] {
+/** The primitives' pages, as their sidebar orders them: what the home lists for a reader of Vue, Svelte or the web. */
+function primitivePages(): SpacePage[] {
   const byUrl = new Map(source.getPages().map((page) => [page.url, page]));
   return source
     .getPageTree()
@@ -60,7 +60,7 @@ function elementPages(): SpacePage[] {
     )
     .flatMap((node): SpacePage[] => {
       const page = byUrl.get(node.url);
-      return page?.url.startsWith(ELEMENTS)
+      return page && UI_SDK_PAGE.test(page.url)
         ? [
             {
               description: page.data.description ?? "",
@@ -72,11 +72,11 @@ function elementPages(): SpacePage[] {
     });
 }
 
-/** What the home lists: the spaces of components (Elements, Workstation, Devices), the custom elements' pages, and the guides' pages. */
+/** What the home lists: the spaces of components (Elements, Workstation, Devices), the primitives' pages, and the guides' pages. */
 export function getHomeIndex() {
   const spaces = getDocsSpaces();
   return {
-    elements: elementPages(),
+    primitives: primitivePages(),
     guides: spaces
       .flatMap((space) => space.sections.flatMap((section) => section.pages))
       .filter((page) => page.url.startsWith(GUIDES)),

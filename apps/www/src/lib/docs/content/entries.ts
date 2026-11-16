@@ -105,7 +105,7 @@ function exportsMarkdown(exports: Entry["exports"]) {
   ];
 }
 
-/** A module's head as markdown, for an agent: the install, the import, its adapters, what uses it, the audio.js it builds on and its exports. */
+/** A module's head as markdown, for an agent: the install, the import, what uses it, the audio.js it builds on and its exports. */
 export function moduleMarkdown(packageModule: PackageModule): string {
   const list = (names: readonly string[]) =>
     names.map((name) => `\`${name}\``).join(", ") || "nothing";
@@ -118,9 +118,6 @@ export function moduleMarkdown(packageModule: PackageModule): string {
     importLine(packageModule),
     "```",
     "",
-    ...(packageModule.adapters.length > 0
-      ? [`- Adapters: ${list(packageModule.adapters)}`]
-      : []),
     ...(packageModule.usedBy.length > 0
       ? [`- Used by: ${list(packageModule.usedBy)}`]
       : []),

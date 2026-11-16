@@ -242,7 +242,7 @@ export function MobileNav({
       >
         <div className="flex shrink-0 flex-col gap-2">
           <SectionSelect tree={tree} />
-          <FrameworkSelect tree={tree} />
+          <FrameworkSelect />
         </div>
         <nav
           aria-label={section}

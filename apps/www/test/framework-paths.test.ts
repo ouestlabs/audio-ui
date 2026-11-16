@@ -24,8 +24,6 @@ test("a framework address is the page of the primitive on the UI SDK, read for t
 });
 
 test("an address with no framework prefix is left alone", () => {
-  expect(pageOfFrameworkAddress("/docs/vue/primitives/knob")).toBeNull();
-  expect(pageOfFrameworkAddress("/docs/react/elements/knob")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/knob-ui-sdk")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/vuex")).toBeNull();
 });
@@ -53,15 +51,6 @@ test("every page of the docs has the address of each framework it is shown to", 
   expect(frameworkAddressOf("/docs/engine/analysis", "vue")).toBe(
     "/docs/vue/engine/analysis"
   );
-  // Each framework has the section that is made for it.
-  expect(frameworkAddressOf("/docs/primitives/knob", "react")).toBe(
-    "/docs/react/primitives/knob"
-  );
-  expect(frameworkAddressOf("/docs/elements/knob", "vue")).toBe(
-    "/docs/vue/elements/knob"
-  );
-  expect(frameworkAddressOf("/docs/primitives/knob", "vue")).toBeNull();
-  expect(frameworkAddressOf("/docs/elements/knob", "react")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/vue/engine/analysis")).toEqual({
     framework: "vue",
     pathname: "/docs/engine/analysis",

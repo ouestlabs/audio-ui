@@ -3,7 +3,7 @@ title: Roadmap
 description: What audio/ui ships today, and what comes next.
 ---
 
-**audio/ui** is a toolkit for building audio interfaces on the web: headless primitives on npm, for React (`@audio-ui/react`) and as custom elements for any framework (`@audio-ui/elements`), and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
+**audio/ui** is a toolkit for building audio interfaces on the web: headless primitives for React, Vue, Svelte and the web, and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
 
 ## Current Status
 
@@ -13,8 +13,7 @@ Available today:
 
 - **[`@audio-ui/core`](/docs/core)**: the logic of every control, with no dependency
 - **[`@audio-ui/engine`](/docs/engine)**: the audio logic (devices, time, analysis, MIDI, scales, playback, files), on audio.js
-- **[`@audio-ui/react`](/docs/primitives)**: the headless React primitives
-- **[`@audio-ui/elements`](/docs/elements)**: every primitive as custom elements, for plain HTML and any framework, with template types for Vue and Svelte
+- **[Primitives](/docs/registry)**: the headless primitives for React, Vue, Svelte and the web, copied from the registry
 - **[`@audio-ui/icons`](/docs/icons)**: audio glyphs, one thin stroke on a 24 grid
 
 ### Elements
@@ -54,7 +53,6 @@ Pre-assembled patterns: a mixing console, a drum rack, a piano roll, a timeline,
 
 ## What's Next
 
-- **Native Vue and Svelte packages**: the [custom elements](/docs/elements) work in any framework, with template types and binding for Vue and Svelte. A package per framework stays thin only once each part's attributes and handlers come from `@audio-ui/core`, as its logic already does, so that comes first.
 - **Agents**: the Agent Skill and the MCP server have a link on the home page and a page each. They should be easier to find, from the documentation overview and from the component pages, with what an agent gets from each in a few lines.
 - **Devices**: a device is a definition, an engine and a panel, and the panel is generated from the parameters alone, with no code of its own per device. That is shown on the Devices page as one device in two skins; it should be shown as the idea it is, with the contract (the parameters, the readings, the tools for an agent) in plain view.
 - **More audio components**: further audio-specific patterns and controls.

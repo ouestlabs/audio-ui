@@ -2,10 +2,10 @@
  * The framework addresses of the docs: `/docs/vue/knob` is the page of the
  * knob on the UI SDK, read for Vue. They are the same pages under another
  * address, so the router rewrites them to the page's own address with the
- * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`) (`/docs/react/primitives/knob` for React's primitives, `/docs/vue/elements/knob` for the elements).
+ * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`).
  */
 
-/** The addresses only a React app uses: React's primitives, the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
+/** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
 export const REACT_ADDRESSES = [
   "/components",
   "/docs/api",
@@ -14,12 +14,8 @@ export const REACT_ADDRESSES = [
   "/docs/guides",
   "/docs/hooks",
   "/docs/lib",
-  "/docs/primitives",
   "/docs/styling",
 ];
-
-/** The elements, which React is not shown: its own are the primitives. */
-const ELEMENTS = "/docs/elements";
 
 export const under = (url: string, prefix: string) =>
   url === prefix || url.startsWith(`${prefix}/`);
@@ -70,9 +66,10 @@ function addressable(pathname: string, framework: string): boolean {
   ) {
     return false;
   }
-  return framework === "react"
-    ? !under(pathname, ELEMENTS)
-    : !REACT_ADDRESSES.some((prefix) => under(pathname, prefix));
+  return (
+    framework === "react" ||
+    !REACT_ADDRESSES.some((prefix) => under(pathname, prefix))
+  );
 }
 
 /** The page a framework address is, and its framework: `/docs/vue/knob` is `/docs/knob-ui-sdk` for Vue, `/docs/vue/guides/output` is `/docs/guides/output`; `/docs/vue` is the docs' own first page. Null for any other address, and for a page the framework is not shown. */
@@ -139,13 +136,12 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
     )};
     var primitives = ${JSON.stringify(UI_SDK_PRIMITIVES)};
     var reactOnly = ${JSON.stringify(REACT_ADDRESSES)};
-    var elements = ${JSON.stringify(ELEMENTS)};
     var kept = localStorage['audio-ui-framework'];
     var segment = segments[kept];
     var path = location.pathname.replace(/\\/$/, '');
     var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
     var to = null;
-    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' ? !under(elements) : !reactOnly.some(under))) {
+    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' || !reactOnly.some(under))) {
       var name = /^\\/docs\\/([a-z-]+)-ui-sdk$/.exec(path);
       to = name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1]
         : '/docs/' + segment + path.slice(5);

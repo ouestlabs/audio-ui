@@ -8,8 +8,6 @@ const SECTIONS = [
   { folder: "core", guides: ["controllers"], package: "@audio-ui/core" },
   { folder: "engine", guides: [], package: "@audio-ui/engine" },
   { folder: "gl", guides: [], package: "@audio-ui/gl" },
-  { folder: "elements", guides: [], package: "@audio-ui/elements" },
-  { folder: "primitives", guides: [], package: "@audio-ui/react" },
 ] as const;
 
 /** The modules with a page of their own: a framework's template types (`@audio-ui/elements/vue`) are set up in their framework's tab of the package's overview. */

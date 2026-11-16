@@ -10,7 +10,7 @@ import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
-import packageModules from "@/lib/docs/content/package-modules.generated.json";
+import { UI_SDK_PRIMITIVES } from "@/lib/docs/content/framework-paths";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/block-audio-editor";
@@ -38,7 +38,7 @@ async function monthlyDownloads(): Promise<number | null> {
 
 /** The component spaces, the guides and the figures, read once on the server. */
 const loadHome = createServerFn({ method: "GET" }).handler(async () => {
-  const { elements, guides, spaces } = getHomeIndex();
+  const { guides, primitives, spaces } = getHomeIndex();
   // A space's component pages, not the overview it may link to.
   const pagesOf = (name: string) =>
     spaces
@@ -60,16 +60,9 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
       value: String(pagesOf("Devices")),
     },
     {
-      elementsHref: "/docs/elements",
-      href: "/docs/primitives",
+      href: "/docs/registry",
       label: "Primitives",
-      // The primitives are the entries the elements and React share: the elements' own, less the types of its frameworks.
-      value: String(
-        packageModules.filter(
-          (each) =>
-            each.from.startsWith("@audio-ui/elements/") && !each.typesOnly
-        ).length
-      ),
+      value: String(UI_SDK_PRIMITIVES.length),
     },
     ...(downloads === null
       ? []
@@ -81,7 +74,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
           },
         ]),
   ];
-  return { elements, figures, guides, spaces };
+  return { figures, guides, primitives, spaces };
 });
 
 const title = "audio/ui: the Audio UI Component Library for React";
@@ -123,7 +116,7 @@ export const Route = createFileRoute("/_site/")({
 });
 
 function IndexPage() {
-  const { elements, figures, guides, spaces } = Route.useLoaderData();
+  const { figures, guides, primitives, spaces } = Route.useLoaderData();
   // The bar's button gives the editor the whole inset; leaving the home gives it back.
   const expanded = useEditorExpanded();
   useEffect(() => () => setEditorExpanded(false), []);
@@ -150,9 +143,9 @@ function IndexPage() {
       {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
       {expanded ? null : (
         <HomeGuide
-          elements={elements}
           figures={figures}
           guides={guides}
+          primitives={primitives}
           spaces={spaces}
         />
       )}

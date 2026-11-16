@@ -1,5 +1,4 @@
 import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react/ssr";
-import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { Icons } from "@/components/site/icons";
 import {
@@ -8,17 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { rememberFramework, useFramework } from "@/hooks/use-framework";
-import { useSiteSections } from "@/hooks/use-sidebar-groups";
+import { useFramework } from "@/hooks/use-framework";
 import {
-  ELEMENTS,
   FRAMEWORKS,
   type Framework,
   type FrameworkId,
-  needsReact,
-  twinPage,
 } from "@/lib/docs/content/frameworks";
-import type { source } from "@/lib/docs/content/source";
 
 /** Each framework's logo; the web's is JavaScript's, as in the hero. */
 const LOGOS: Record<
@@ -91,35 +85,8 @@ function FrameworkItem({
  * another framework picked there opens the elements, its own. `compact` draws the button on one line, for the bar of the inset
  * while the sidebar is shut.
  */
-export function FrameworkSelect({
-  compact = false,
-  tree,
-}: {
-  compact?: boolean;
-  tree: ReturnType<typeof source.getPageTree>;
-}) {
-  const [chosen, setChosen] = useFramework();
-  const navigate = useNavigate();
-  // A section for React alone reads as React; the reader's own choice stays for the others.
-  const reading = useSiteSections(tree).find((section) => section.current);
-  const forReact = reading ? needsReact(reading.id) : false;
-  const framework = forReact ? "react" : chosen;
-  // Another framework picked there: what is made for it is the elements, not this section.
-  const pathname = useLocation({ select: (location) => location.pathname });
-  const choose = useCallback(
-    (next: FrameworkId) => {
-      // A primitive's page goes to its twin in the framework picked; a section for React alone, to the elements.
-      const twin = twinPage(pathname, next);
-      const away = twin ?? (forReact && next !== "react" ? ELEMENTS : null);
-      if (away) {
-        rememberFramework(next);
-        navigate({ href: away });
-        return;
-      }
-      setChosen(next);
-    },
-    [forReact, navigate, pathname, setChosen]
-  );
+export function FrameworkSelect({ compact = false }: { compact?: boolean }) {
+  const [framework, choose] = useFramework();
   const current =
     FRAMEWORKS.find((each) => each.id === framework) ?? FRAMEWORKS[0];
   return (

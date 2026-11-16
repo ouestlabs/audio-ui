@@ -20,14 +20,8 @@ describe("pageScope", () => {
     expect(pageScope('<ComponentSource name="x" />')).toBe("all");
   });
 
-  test("an element's page, and a React primitive's with a preview, follow the elements' choices", async () => {
-    expect(await scopeOf("elements/knob.mdx")).toBe("elements");
-    expect(await scopeOf("primitives/knob.mdx")).toBe("elements");
-  });
-
   test("a page with no preview follows none", async () => {
     expect(await scopeOf("core/knob.mdx")).toBe("none");
-    expect(await scopeOf("elements/index.mdx")).toBe("none");
   });
 });
 

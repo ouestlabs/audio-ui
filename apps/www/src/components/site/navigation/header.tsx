@@ -113,8 +113,8 @@ export function SiteSidebarHeader() {
         <SiteHeaderModeSwitcher />
       </div>
       <SectionSelect tree={pageTree} />
-      <FrameworkSelect tree={pageTree} />
-      <div className="[&>*]:w-full">
+      <FrameworkSelect />
+      <div className="*:w-full">
         <SiteHeaderCommandMenu
           commandGroups={commandGroups}
           componentCategories={componentCategories}
@@ -144,7 +144,7 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
     return (
       <div className="flex items-center gap-2">
         <SectionSelect compact tree={source.getPageTree()} />
-        <FrameworkSelect compact tree={source.getPageTree()} />
+        <FrameworkSelect compact />
       </div>
     );
   }
