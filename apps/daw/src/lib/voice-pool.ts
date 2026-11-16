@@ -1,6 +1,9 @@
 import type { DeviceContext } from "@audio-ui/engine/device";
 import { midiToHz } from "@audio-ui/engine/pitch";
-import type { AnyDeviceState, LibraryDevice } from "@/lib/device-library";
+import type {
+  AnyDeviceState,
+  LibraryDevice,
+} from "@/lib/device-library";
 import { createPolyphony } from "@/lib/polyphony";
 
 /** A note to play: its pitch and velocity, 0 to 1, and the instrument's own note parameters it sets over them, such as a pad's frequency and cutoff. */

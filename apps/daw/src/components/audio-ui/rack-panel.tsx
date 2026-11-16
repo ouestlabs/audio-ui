@@ -1,7 +1,7 @@
 import { pitchName } from "@audio-ui/core";
-import { PlusIcon, XIcon } from "@phosphor-icons/react";
+
 import { type ReactNode, useCallback, useState } from "react";
-import { Knob } from "@/components/audio-ui/knob";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
+import { Knob } from "@/components/audio-ui/knob";
 import {
   type ChainZone,
   FULL_ZONE,
@@ -24,7 +25,7 @@ import {
   type RackChain,
   type RackMapping,
 } from "@/lib/arrangement";
-import { cn } from "@/lib/utils";
+import { XIcon, PlusIcon } from "@phosphor-icons/react";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {

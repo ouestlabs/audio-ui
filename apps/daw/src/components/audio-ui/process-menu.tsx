@@ -14,7 +14,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { REPAIR_NAMES, type SoundOperation } from "@/lib/sound-operations";
+import {
+  REPAIR_NAMES,
+  type SoundOperation,
+} from "@/lib/sound-operations";
 
 /** One operation as the menu offers it: what it says, with a note at its end. */
 interface OperationEntry {

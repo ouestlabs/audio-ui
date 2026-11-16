@@ -14,7 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { TimelineMark } from "@/components/audio-ui/timeline";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -22,6 +21,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { TimelineMark } from "@/components/audio-ui/timeline";
 
 /** A named point of the arrangement, in its time. */
 export interface Locator {

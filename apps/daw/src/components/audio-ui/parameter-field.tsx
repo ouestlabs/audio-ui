@@ -1,9 +1,4 @@
 import { NumberField } from "@base-ui/react/number-field";
-import {
-  ArrowsHorizontalIcon,
-  MinusIcon,
-  PlusIcon,
-} from "@phosphor-icons/react";
 import { cva } from "class-variance-authority";
 import {
   type ChangeEvent,
@@ -15,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,
@@ -22,7 +18,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
-import { cn } from "@/lib/utils";
+import { ArrowsHorizontalIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 
 const parameterFieldVariants = cva("w-auto min-w-0", {
   defaultVariants: { size: "default" },
@@ -330,7 +326,10 @@ function NumberParameterField({
               />
             }
           >
-            {stepperIcons?.decrement ?? <MinusIcon />}
+            {stepperIcons?.decrement ?? (
+              <MinusIcon
+              />
+            )}
           </NumberField.Decrement>
         </InputGroupAddon>
       ) : null}
@@ -361,7 +360,10 @@ function NumberParameterField({
                 />
               }
             >
-              {stepperIcons?.increment ?? <PlusIcon />}
+              {stepperIcons?.increment ?? (
+                <PlusIcon
+                />
+              )}
             </NumberField.Increment>
           ) : null}
         </InputGroupAddon>

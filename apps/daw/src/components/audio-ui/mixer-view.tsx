@@ -1,5 +1,7 @@
+import type { Source } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
-import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
+import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -10,12 +12,19 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
+import { cn } from "@/lib/utils";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
-import { SWITCH_TONES, trackSwatch } from "@/components/audio-ui/timeline";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  SWITCH_TONES,
+  trackSwatch,
+} from "@/components/audio-ui/timeline";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
@@ -30,9 +39,11 @@ import {
   hasOutput,
   type Mix,
 } from "@/lib/arrangement";
-import { trackBlock, trackOf } from "@/lib/arrangement-state";
+import {
+  trackBlock,
+  trackOf,
+} from "@/lib/arrangement-state";
 import { startSortableDrag } from "@/lib/sortable-drag";
-import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -41,7 +52,7 @@ type Engine = ReturnType<typeof useArrangementEngine>;
 const MIN_DB = -60;
 const MAX_DB = 6;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
-const SILENT: MeterPrimitive.Root.Frame = {
+const SILENT: MeterFrame = {
   levels: [-100, -100],
   peaks: [-100, -100],
 };
@@ -53,19 +64,17 @@ const SILENT_SOURCE = {
 const decibels = (gain: number) => Math.max(MIN_DB, gainToDb(gain));
 const gainOf = (db: number) => (db <= MIN_DB ? 0 : dbToGain(db));
 const formatDb = (db: number) =>
-  db <= MIN_DB ? "-∞" : `${db > 0 ? "+" : ""}${db.toFixed(1)}`;
-const formatPan = (pan: number) => {
-  const amount = Math.round(Math.abs(pan) * 50);
-  if (amount === 0) {
-    return "C";
-  }
-  return `${amount}${pan < 0 ? "L" : "R"}`;
-};
+  formatLevel(db <= MIN_DB ? Number.NEGATIVE_INFINITY : db, "dB", {
+    unit: false,
+  });
+const formatPan = (pan: number) => formatPanOf(pan);
 const formatSend = (level: number) =>
-  level <= 0 ? "-∞ dB" : `${gainToDb(level).toFixed(1)} dB`;
+  formatLevel(level <= 0 ? Number.NEGATIVE_INFINITY : gainToDb(level), "dB", {
+    sign: false,
+  });
 
 const formatLufs = (lufs: number, digits: number) =>
-  Number.isFinite(lufs) ? lufs.toFixed(digits) : "-∞";
+  formatLevel(lufs, "LUFS", { decimals: digits, unit: false });
 
 /** The main track's meter is read to the dB: a scale beside it. */
 const MAIN_MARKS = [0, -6, -12, -24, -48];
@@ -76,7 +85,7 @@ function StripMeter({
   marks,
 }: {
   label: string;
-  levels: Source<MeterPrimitive.Root.Frame>;
+  levels: Source<MeterFrame>;
   marks?: readonly number[];
 }) {
   return (

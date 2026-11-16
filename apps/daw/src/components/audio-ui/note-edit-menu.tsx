@@ -1,4 +1,3 @@
-import { CaretDownIcon } from "@phosphor-icons/react";
 import {
   type ComponentProps,
   createContext,
@@ -7,6 +6,7 @@ import {
   useCallback,
   useMemo,
 } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { NoteEdit } from "@/lib/note-edits";
-import { cn } from "@/lib/utils";
+import { CaretDownIcon } from "@phosphor-icons/react";
 
 interface NoteEditMenuContextValue {
   isDisabled: (edit: NoteEdit) => boolean;
@@ -90,7 +90,8 @@ function NoteEditMenuTrigger({
       }
     >
       {children}
-      <CaretDownIcon />
+      <CaretDownIcon
+      />
     </DropdownMenuTrigger>
   );
 }

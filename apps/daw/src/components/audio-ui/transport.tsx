@@ -1,3 +1,4 @@
+import type { Source } from "@audio-ui/core";
 import {
   barsBeatsWith,
   gridLabel,
@@ -17,13 +18,14 @@ import {
   RecordIcon,
   StopIcon,
 } from "@audio-ui/icons/react";
-import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
-import { CaretDownIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { BpmControl } from "@/components/audio-ui/bpm-control";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
+import {
+  ButtonGroup,
+  ButtonGroupText,
+} from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -46,7 +48,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { BpmControl } from "@/components/audio-ui/bpm-control";
+import { CaretDownIcon } from "@phosphor-icons/react";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 
@@ -248,7 +251,8 @@ function RecordMenu({
           />
         }
       >
-        <CaretDownIcon />
+        <CaretDownIcon
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-auto min-w-40">
         {onCountInChange ? (
@@ -389,7 +393,8 @@ function MetronomeMenu({
           />
         }
       >
-        <CaretDownIcon />
+        <CaretDownIcon
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-48">
         {sounds && onSoundChange ? (
@@ -593,6 +598,8 @@ function TransportTempo({
 const NO_SIGNATURES: readonly SignatureChange[] = [];
 
 interface TransportProps {
+  /** More of the bar after its own clusters, such as a file menu or an output's level and volume: button groups of your own, in the same bar. */
+  children?: ReactNode;
   className?: string;
   /** How many bars the metronome counts in before a take: 0, 1, 2 or 4. @default 0 */
   countIn?: number;
@@ -649,6 +656,7 @@ interface TransportProps {
  * by color alone.
  */
 function Transport({
+  children,
   className,
   countIn = 0,
   looping,
@@ -787,6 +795,7 @@ function Transport({
           tempo={tempo}
         />
       ) : null}
+      {children}
     </Toolbar.Root>
   );
 }

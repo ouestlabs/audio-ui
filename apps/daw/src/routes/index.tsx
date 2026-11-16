@@ -1,4 +1,4 @@
-import { Knob } from "@audio-ui/react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";

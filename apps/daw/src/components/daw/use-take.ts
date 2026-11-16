@@ -3,7 +3,7 @@ import {
   secondsPerBeat,
   secondsPerQuarter,
 } from "@audio-ui/engine/time";
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ArrangementTake } from "@/components/audio-ui/arrangement-view";

@@ -4,7 +4,7 @@ import type {
   Tempo,
 } from "@audio-ui/engine/time";
 import { AutomationIcon } from "@audio-ui/icons/react";
-import type { Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
 import {
   ArrowArcLeftIcon,
   ArrowArcRightIcon,

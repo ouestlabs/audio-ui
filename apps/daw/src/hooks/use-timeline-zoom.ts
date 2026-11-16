@@ -1,5 +1,6 @@
 import {
   type RefObject,
+  startTransition,
   useCallback,
   useLayoutEffect,
   useMemo,
@@ -13,7 +14,7 @@ const LEAD_PX = 160;
 /** The width of the track headers, which the lanes start after. */
 function leadWidth(viewport: HTMLElement) {
   return (
-    viewport.querySelector<HTMLElement>('[data-slot="timeline-track-header"]')
+    viewport.querySelector<HTMLElement>('[data-slot="timeline-trackHeader"]')
       ?.offsetWidth ?? LEAD_PX
   );
 }
@@ -145,7 +146,8 @@ export function useTimelineZoom({
     () => ({
       maxZoom,
       minZoom: fit || undefined,
-      onZoomChange: setZoomed,
+      onZoomChange: (next: number | null) =>
+        startTransition(() => setZoomed(next)),
       zoom: zoomed === null ? undefined : zoom,
     }),
     [fit, maxZoom, zoom, zoomed]

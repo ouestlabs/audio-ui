@@ -1,4 +1,4 @@
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AutomatedParameter } from "@/lib/arrangement";
 import {

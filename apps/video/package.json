@@ -19,7 +19,6 @@
   "dependencies": {
     "@audio-ui/core": "workspace:*",
     "@audio-ui/engine": "workspace:*",
-    "@audio-ui/react": "workspace:*",
     "@remotion/bundler": "4.0.535",
     "@remotion/cli": "4.0.535",
     "@remotion/google-fonts": "4.0.535",

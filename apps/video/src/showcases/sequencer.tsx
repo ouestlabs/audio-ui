@@ -1,4 +1,4 @@
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { useLayoutEffect, useState } from "react";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";
 
