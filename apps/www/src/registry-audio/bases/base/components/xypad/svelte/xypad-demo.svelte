@@ -23,53 +23,53 @@ let value = $state({ x: 50, y: 50 });
         <div
           class="cn-xypad-grid-line absolute top-0 bottom-0 w-px"
           style="left: 20%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute top-0 bottom-0 w-px"
           style="left: 40%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute top-0 bottom-0 w-px"
           style="left: 60%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute top-0 bottom-0 w-px"
           style="left: 80%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute right-0 left-0 h-px"
           style="top: 20%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute right-0 left-0 h-px"
           style="top: 40%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute right-0 left-0 h-px"
           style="top: 60%"
-        />
+        ></div>
         <div
           class="cn-xypad-grid-line absolute right-0 left-0 h-px"
           style="top: 80%"
-        />
+        ></div>
       </div>
       <div
         aria-hidden="true"
         class="cn-xypad-crosshair pointer-events-none absolute top-0 bottom-0 left-(--xy-pad-x) w-px"
-      />
+      ></div>
       <div
         aria-hidden="true"
         class="cn-xypad-crosshair pointer-events-none absolute top-(--xy-pad-y) right-0 left-0 h-px"
-      />
+      ></div>
       <XYPad.Thumb
         aria-label="Position"
         class="pointer-events-none absolute size-5"
       >
         <div
           class="cn-xypad-cursor-glow absolute inset-0 transition-opacity duration-200 motion-reduce:transition-none"
-        />
-        <div class="cn-xypad-cursor-dot absolute inset-1" />
-        <div class="cn-xypad-cursor-highlight absolute inset-2" />
+        ></div>
+        <div class="cn-xypad-cursor-dot absolute inset-1"></div>
+        <div class="cn-xypad-cursor-highlight absolute inset-2"></div>
       </XYPad.Thumb>
       <XYPad.Value class="cn-xypad-value absolute top-2.5 right-2.5 z-10" />
     </XYPad.Control>

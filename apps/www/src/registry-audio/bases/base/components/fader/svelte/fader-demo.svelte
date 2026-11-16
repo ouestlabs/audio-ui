@@ -29,32 +29,32 @@ import { Fader } from "@/registry-audio/bases/base/primitives/fader/svelte/index
         value={0}
       >
         <span class="cn-fader-mark-label">0</span>
-        <span class="cn-fader-mark-tick h-px w-1.5" />
+        <span class="cn-fader-mark-tick h-px w-1.5"></span>
       </Fader.Mark>
       <Fader.Mark
         class="flex items-center gap-1 end-0 translate-y-1/2 flex-row"
         value={25}
       >
-        <span class="cn-fader-mark-tick h-px w-1.5" />
+        <span class="cn-fader-mark-tick h-px w-1.5"></span>
       </Fader.Mark>
       <Fader.Mark
         class="flex items-center gap-1 end-0 translate-y-1/2 flex-row"
         value={50}
       >
-        <span class="cn-fader-mark-tick h-px w-1.5" />
+        <span class="cn-fader-mark-tick h-px w-1.5"></span>
       </Fader.Mark>
       <Fader.Mark
         class="flex items-center gap-1 end-0 translate-y-1/2 flex-row"
         value={75}
       >
-        <span class="cn-fader-mark-tick h-px w-1.5" />
+        <span class="cn-fader-mark-tick h-px w-1.5"></span>
       </Fader.Mark>
       <Fader.Mark
         class="flex items-center gap-1 end-0 translate-y-1/2 flex-row"
         value={100}
       >
         <span class="cn-fader-mark-label">100</span>
-        <span class="cn-fader-mark-tick h-px w-1.5" />
+        <span class="cn-fader-mark-tick h-px w-1.5"></span>
       </Fader.Mark>
     </div>
     <Fader.Thumb
@@ -68,15 +68,15 @@ import { Fader } from "@/registry-audio/bases/base/primitives/fader/svelte/index
         <div
           class="cn-fader-thumb-mark cn-fader-thumb-mark-size-default"
           data-orientation="vertical"
-        />
+        ></div>
         <div
           class="cn-fader-thumb-mark cn-fader-thumb-mark-size-default"
           data-orientation="vertical"
-        />
+        ></div>
         <div
           class="cn-fader-thumb-mark cn-fader-thumb-mark-size-default"
           data-orientation="vertical"
-        />
+        ></div>
       </div>
       <Fader.Value
         class="cn-fader-value absolute z-20 whitespace-nowrap cursor-text start-full top-1/2 ms-2 -translate-y-1/2 opacity-0 transition-opacity duration-150 ease-out group-hover/fader:opacity-100 group-has-focus-visible/fader:opacity-100 group-has-data-dragging/fader:opacity-100 data-editing:opacity-100 motion-reduce:transition-none"

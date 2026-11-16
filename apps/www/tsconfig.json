@@ -30,6 +30,13 @@
     },
     "types": ["bun", "mdx", "node", "react", "react-dom", "vite/client"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "vite.config.mts"],
+  // The Vue and Svelte demos and adapters are listed so the paths above reach their imports in the build, as in the .ts files: TypeScript itself does not read them.
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.vue",
+    "**/*.svelte",
+    "vite.config.mts"
+  ],
   "exclude": ["node_modules"]
 }
