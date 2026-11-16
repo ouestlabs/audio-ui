@@ -93,6 +93,9 @@ function tap(control: Element, pointerId: number) {
 
 const rotation = (thumb: HTMLElement) => Number.parseFloat(thumb.style.rotate);
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function knobSuite(
   framework: string,
   mount: MountKnob,
@@ -120,6 +123,7 @@ export function knobSuite(
             pointerId: 1,
           });
         });
+        await frame();
         expect(k.changes.at(-1)?.[0]).toBe(60);
         k.unmount();
       });
@@ -268,6 +272,7 @@ export function knobSuite(
         });
       });
       // 90° / 288° × 100 = 31.25, from 50: 81 once on the step.
+      await frame();
       expect(k.changes.at(-1)).toEqual([81, "drag"]);
       expect(k.commits).toEqual([]);
       await k.act(() =>
@@ -295,6 +300,7 @@ export function knobSuite(
           pointerId: 1,
         });
       });
+      await frame();
       expect(k.changes.at(-1)?.[0]).toBe(60);
       k.unmount();
     });

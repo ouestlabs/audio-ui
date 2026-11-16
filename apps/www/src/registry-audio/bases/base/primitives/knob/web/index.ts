@@ -1,9 +1,10 @@
-import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/core/knob";
 import {
   arcOf,
+  DEFAULT_ARC_STROKE_WIDTH,
   indicatorSpan,
   type KnobState,
   knob,
+  viewOf,
 } from "@audio-ui/primitives/knob";
 import { createParts, wrappedChild } from "@ui-sdk/web";
 
@@ -93,7 +94,7 @@ function drawParts(
   }
 ) {
   const draw = () => {
-    const { view } = instance.get() as KnobState;
+    const view = viewOf(instance.get() as KnobState);
     for (const track of el.querySelectorAll("audio-ui-knob-track")) {
       drawArc(track, 0, 1);
     }
@@ -135,7 +136,7 @@ export const parts = createParts(knob, {
     render: drawParts,
     state: {
       value: {
-        get: (api) => api.controller.getSnapshot().value,
+        get: (api) => api.value(),
         set: (api, value: number) => api.set(value),
       },
     },

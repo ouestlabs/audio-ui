@@ -16,7 +16,6 @@
  * Run: bun run registry:build
  */
 
-import { resolve } from "node:path";
 import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
@@ -25,8 +24,6 @@ import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
   LOGIC_PRIMITIVES,
   rewriteAdapter,
-  rewriteLogic,
-  SVELTE_FOLDER,
 } from "../src/registry-audio/bases/logic.ts";
 
 // ---------------------------------------------------------------------------
@@ -370,24 +367,14 @@ async function buildFile(
     content = content.replace(EXPORT_DEFAULT, "export");
   }
   // 5. The logic that ships with a primitive, and the adapters over it, import it by relative paths
-  const absolute = resolve(
-    `${PROJECT_ROOT}/src/registry-audio/bases/${build.base}`,
-    file.path
-  );
   const adapter = ADAPTER_ITEM.exec(item.name);
-  if (/-logic(?:-svelte)?$/.test(item.name)) {
-    content = rewriteLogic(
-      absolute,
-      content,
-      item.name.endsWith("-svelte") ? SVELTE_FOLDER : undefined
-    );
-  } else if (adapter?.[1] && LOGIC_PRIMITIVES.has(adapter[1])) {
+  if (adapter?.[1] && LOGIC_PRIMITIVES.has(adapter[1])) {
     content = rewriteAdapter(adapter[1], adapter[2] ?? "", content);
   }
 
-  // A file of the packages keeps its path from there: two of them may share a name.
-  const fileName = file.path.includes("packages/")
-    ? file.path.slice(file.path.indexOf("packages/") + "packages/".length)
+  // A file of the logic keeps its path from there: two of them may share a name.
+  const fileName = file.path.startsWith("logic/")
+    ? file.path
     : file.path.slice(file.path.lastIndexOf("/") + 1);
   return {
     content: content.trim(),

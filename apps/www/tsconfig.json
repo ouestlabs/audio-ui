@@ -18,6 +18,9 @@
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
+      "@audio-ui/primitives/knob": [
+        "./src/registry-audio/bases/base/logic/knob/knob.ts"
+      ],
       "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
       "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
       "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],
