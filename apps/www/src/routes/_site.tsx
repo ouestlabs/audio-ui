@@ -10,25 +10,12 @@ import {
 } from "@/components/site/navigation/header";
 import { CREATE_PREVIEW_FONTS_ATTR } from "@/lib/design-system/fonts";
 import { source } from "@/lib/docs/content/source";
-import {
-  getCategories,
-  getTotalComponentCount,
-  searchCatalog,
-} from "@/lib/registry/core/registry";
 
 /** The docs' page tree, read once on the server: the sidebars list its pages. */
 const loadPageTree = createServerFn({ method: "GET" }).handler(async () => ({
   pageTree: await source.serializePageTree(source.getPageTree()),
 }));
 
-const categoryCounts = Object.fromEntries(
-  getCategories().map((category) => [category.name, category.count])
-);
-const catalog = {
-  catalogItems: searchCatalog(""),
-  categoryCounts,
-  totalCount: getTotalComponentCount(),
-};
 const previewFontAttrs = { [CREATE_PREVIEW_FONTS_ATTR]: "" };
 
 export const Route = createFileRoute("/_site")({
@@ -40,7 +27,7 @@ export const Route = createFileRoute("/_site")({
 });
 
 /**
- * One layout for the home, the docs and the components: the header, the
+ * One layout for the home, the docs and the icons: the header, the
  * sidebars and the frame are rendered here once, and what changes from a
  * section to the next is the page in the panel and the links in the sidebar.
  */
@@ -55,7 +42,6 @@ function SiteLayout() {
       <SiteHeader framed />
       <main className="flex min-h-0 flex-1 flex-col">
         <SiteShell
-          catalog={catalog}
           closedEnd={<SiteBarContent part="end" />}
           closedStart={<SiteBarContent part="start" />}
           footer={<SiteFooter docs />}

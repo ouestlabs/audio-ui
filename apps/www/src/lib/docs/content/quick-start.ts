@@ -17,8 +17,7 @@ export const QUICK_START_PROMPTS: Record<FrameworkId, string> = {
   react: `Set up audio/ui in this React project. It needs React 19 or newer and Tailwind CSS v4, with shadcn/ui set up (components.json).
 
 ${steps([
-  'Add the audio/ui registry to components.json: "registries": { "@audio-ui": "https://www.audio-ui.dev/r/{style}/{name}.json" }.',
-  `Components install with the shadcn CLI, for example: npx shadcn@latest add @audio-ui/knob. The headless primitive alone is @audio-ui/knob-react. ${RELEASE_AGE}`,
+  `Components install with the shadcn CLI, and @audio-ui is in shadcn's registry directory, so there is nothing to configure. For example: npx shadcn@latest add @audio-ui/knob. The headless primitive alone is @audio-ui/knob-react. ${RELEASE_AGE}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,

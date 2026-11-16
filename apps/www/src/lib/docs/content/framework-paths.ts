@@ -7,7 +7,6 @@
 
 /** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
 export const REACT_ADDRESSES = [
-  "/components",
   "/docs/api",
   "/docs/components",
   "/docs/devices",

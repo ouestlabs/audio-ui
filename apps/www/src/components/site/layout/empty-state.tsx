@@ -10,7 +10,7 @@ import {
 } from "@/registry/bases/base/ui/empty";
 
 interface ComponentEmptyStateProps {
-  /** What to do next, such as a link back to the whole catalog. */
+  /** What to do next, such as a link back to the whole list. */
   children?: ReactNode;
   className?: string;
   description?: string;

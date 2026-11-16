@@ -10,7 +10,7 @@ import {
 import { useCustomizerScope } from "@/hooks/use-customizer-scope";
 import { lazyComponent } from "@/lib/lazy";
 import { cn } from "@/lib/utils";
-import { useCustomizer } from "../../catalog/components-context";
+import { useCustomizer } from "../customizer-context";
 import { CustomizerSidebarHeader } from "./sidebar-header";
 import { useIsDesktopCustomizer } from "./use-is-desktop-customizer";
 

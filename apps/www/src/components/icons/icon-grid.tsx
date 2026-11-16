@@ -1,9 +1,9 @@
 import { categories, type IconEntry, type IconWeight } from "@audio-ui/icons";
 import { icons } from "@audio-ui/icons/react";
 import * as React from "react";
-import { ComponentEmptyState } from "@/components/catalog/card/component-empty-state";
-import { useCustomizer } from "@/components/catalog/components-context";
+import { useCustomizer } from "@/components/customizer/customizer-context";
 import { useIcons } from "@/components/icons/icons-context";
+import { ComponentEmptyState } from "@/components/site/layout/empty-state";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

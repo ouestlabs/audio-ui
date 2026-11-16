@@ -30,8 +30,6 @@ import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
 import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as LlmIndexRouteImport } from './routes/llm/index'
 import { Route as LlmSplatRouteImport } from './routes/llm/$'
-import { Route as SiteComponentsIndexRouteImport } from './routes/_site/components/index'
-import { Route as SiteComponentsCategoryRouteImport } from './routes/_site/components/$category'
 import { Route as SiteDocsIndexRouteImport } from './routes/_site/docs/index'
 import { Route as SiteDocsSplatRouteImport } from './routes/_site/docs/$'
 import { Route as ApiV1IndexRouteImport } from './routes/api/v1/index'
@@ -144,16 +142,6 @@ const LlmSplatRoute = LlmSplatRouteImport.update({
   path: '/llm/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SiteComponentsIndexRoute = SiteComponentsIndexRouteImport.update({
-  id: '/components/',
-  path: '/components/',
-  getParentRoute: () => SiteRoute,
-} as any)
-const SiteComponentsCategoryRoute = SiteComponentsCategoryRouteImport.update({
-  id: '/components/$category',
-  path: '/components/$category',
-  getParentRoute: () => SiteRoute,
-} as any)
 const SiteDocsIndexRoute = SiteDocsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -211,11 +199,9 @@ export interface FileRoutesByFullPath {
   '/llm/$': typeof LlmSplatRoute
   '/api/': typeof ApiIndexRoute
   '/llm/': typeof LlmIndexRoute
-  '/components/$category': typeof SiteComponentsCategoryRoute
   '/docs/$': typeof SiteDocsSplatRoute
   '/api/v1/catalog': typeof ApiV1CatalogRoute
   '/api/v1/search': typeof ApiV1SearchRoute
-  '/components/': typeof SiteComponentsIndexRoute
   '/docs/': typeof SiteDocsIndexRoute
   '/api/v1/': typeof ApiV1IndexRoute
   '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
@@ -241,11 +227,9 @@ export interface FileRoutesByTo {
   '/': typeof SiteIndexRoute
   '/api': typeof ApiIndexRoute
   '/llm': typeof LlmIndexRoute
-  '/components/$category': typeof SiteComponentsCategoryRoute
   '/docs/$': typeof SiteDocsSplatRoute
   '/api/v1/catalog': typeof ApiV1CatalogRoute
   '/api/v1/search': typeof ApiV1SearchRoute
-  '/components': typeof SiteComponentsIndexRoute
   '/docs': typeof SiteDocsIndexRoute
   '/api/v1': typeof ApiV1IndexRoute
   '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
@@ -274,11 +258,9 @@ export interface FileRoutesById {
   '/_site/': typeof SiteIndexRoute
   '/api/': typeof ApiIndexRoute
   '/llm/': typeof LlmIndexRoute
-  '/_site/components/$category': typeof SiteComponentsCategoryRoute
   '/_site/docs/$': typeof SiteDocsSplatRoute
   '/api/v1/catalog': typeof ApiV1CatalogRoute
   '/api/v1/search': typeof ApiV1SearchRoute
-  '/_site/components/': typeof SiteComponentsIndexRoute
   '/_site/docs/': typeof SiteDocsIndexRoute
   '/api/v1/': typeof ApiV1IndexRoute
   '/api/v1/components/$name': typeof ApiV1ComponentsNameRoute
@@ -307,11 +289,9 @@ export interface FileRouteTypes {
     | '/llm/$'
     | '/api/'
     | '/llm/'
-    | '/components/$category'
     | '/docs/$'
     | '/api/v1/catalog'
     | '/api/v1/search'
-    | '/components/'
     | '/docs/'
     | '/api/v1/'
     | '/api/v1/components/$name'
@@ -337,11 +317,9 @@ export interface FileRouteTypes {
     | '/'
     | '/api'
     | '/llm'
-    | '/components/$category'
     | '/docs/$'
     | '/api/v1/catalog'
     | '/api/v1/search'
-    | '/components'
     | '/docs'
     | '/api/v1'
     | '/api/v1/components/$name'
@@ -369,11 +347,9 @@ export interface FileRouteTypes {
     | '/_site/'
     | '/api/'
     | '/llm/'
-    | '/_site/components/$category'
     | '/_site/docs/$'
     | '/api/v1/catalog'
     | '/api/v1/search'
-    | '/_site/components/'
     | '/_site/docs/'
     | '/api/v1/'
     | '/api/v1/components/$name'
@@ -551,20 +527,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_site/components/': {
-      id: '/_site/components/'
-      path: '/components'
-      fullPath: '/components/'
-      preLoaderRoute: typeof SiteComponentsIndexRouteImport
-      parentRoute: typeof SiteRoute
-    }
-    '/_site/components/$category': {
-      id: '/_site/components/$category'
-      path: '/components/$category'
-      fullPath: '/components/$category'
-      preLoaderRoute: typeof SiteComponentsCategoryRouteImport
-      parentRoute: typeof SiteRoute
-    }
     '/_site/docs/': {
       id: '/_site/docs/'
       path: '/'
@@ -639,8 +601,6 @@ interface SiteRouteChildren {
   SiteIconsRoute: typeof SiteIconsRoute
   SitePrivacyRoute: typeof SitePrivacyRoute
   SiteIndexRoute: typeof SiteIndexRoute
-  SiteComponentsCategoryRoute: typeof SiteComponentsCategoryRoute
-  SiteComponentsIndexRoute: typeof SiteComponentsIndexRoute
 }
 
 const SiteRouteChildren: SiteRouteChildren = {
@@ -651,8 +611,6 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteIconsRoute: SiteIconsRoute,
   SitePrivacyRoute: SitePrivacyRoute,
   SiteIndexRoute: SiteIndexRoute,
-  SiteComponentsCategoryRoute: SiteComponentsCategoryRoute,
-  SiteComponentsIndexRoute: SiteComponentsIndexRoute,
 }
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)

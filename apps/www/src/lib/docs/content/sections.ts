@@ -37,9 +37,6 @@ export const DOCS_SECTIONS = [
   },
 ] as const;
 
-/** The components catalog: its own page, read as part of the Registry. */
-const CATALOG = "/components";
-
 export type DocsSection = (typeof DOCS_SECTIONS)[number];
 export type DocsSectionId = DocsSection["id"];
 
@@ -57,9 +54,6 @@ export function sectionOfFolder(folder: string): DocsSectionId {
 
 /** The section an address is in when no page of the tree says so: the one whose landing page it is under, the Docs otherwise. */
 export function sectionOfPath(pathname: string): DocsSectionId {
-  if (pathname === CATALOG || pathname.startsWith(`${CATALOG}/`)) {
-    return "registry";
-  }
   const under = DOCS_SECTIONS.filter(
     (section) =>
       section.href !== "/docs" &&

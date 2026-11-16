@@ -48,7 +48,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
   const downloads = await monthlyDownloads();
   const figures: HomeFigure[] = [
     {
-      href: "/components",
+      href: "/docs/registry",
       label: "Components",
       reactOnly: true,
       value: String(pagesOf("Elements") + pagesOf("Workstation")),

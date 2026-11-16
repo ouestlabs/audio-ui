@@ -1,7 +1,6 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
-import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
 import {
   ICON_CATEGORIES,
   ICON_CATEGORIES_TITLE,
@@ -23,9 +22,7 @@ import {
 } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
-import type { CategoryInfo } from "@/lib/registry/core/registry";
-import { cn, isActive, isFileUrl, normalizeSlug } from "@/lib/utils";
-import { categoryGroups } from "@/registry-audio/bases/categories";
+import { cn, isFileUrl } from "@/lib/utils";
 
 const rowClassName =
   "flex h-9 shrink-0 items-center justify-between gap-3 rounded-(--menu-inner-radius) px-2 font-medium text-[0.8rem] text-site-foreground no-underline transition-colors hover:bg-site-muted";
@@ -155,23 +152,16 @@ function IconLinks({ onNavigate }: { onNavigate: () => void }) {
 export function MobileNav({
   items: _items,
   tree,
-  componentCategories,
   className,
 }: {
   tree: ReturnType<typeof source.getPageTree>;
   items: { href: string; label: string; soon?: boolean }[];
-  componentCategories?: CategoryInfo[];
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
   const { groups, pathname, setOpen: setGroupOpen } = useSidebarGroups(tree);
   const reading = useReadingSection(tree);
-  let section = "docs";
-  if (isActive(pathname, "/components")) {
-    section = "components";
-  } else if (reading === "icons") {
-    section = "icons";
-  }
+  const section = reading === "icons" ? "icons" : "docs";
   const close = React.useCallback(() => setOpen(false), []);
 
   // The menu is for below `lg`: from there up the sidebar is the navigation.
@@ -185,23 +175,6 @@ export function MobileNav({
     query.addEventListener("change", onChange);
     return () => query.removeEventListener("change", onChange);
   }, []);
-
-  const categoryLinks = React.useMemo(
-    () =>
-      (componentCategories ?? [])
-        .toSorted((a, b) => a.label.localeCompare(b.label))
-        .map((category) => ({
-          ...category,
-          href: `/components/${normalizeSlug(category.name)}`,
-        })),
-    [componentCategories]
-  );
-  const totalCount = categoryLinks.reduce((sum, c) => sum + c.count, 0);
-  const categoryByName = React.useMemo(
-    () => new Map(categoryLinks.map((category) => [category.name, category])),
-    [categoryLinks]
-  );
-  const { collapsed } = useGroupFolding();
 
   return (
     <Popover modal onOpenChange={setOpen} open={open}>
@@ -251,55 +224,6 @@ export function MobileNav({
           <NavRow active={pathname === "/"} href="/" onNavigate={close}>
             Home
           </NavRow>
-          {section === "components" ? (
-            <>
-              <NavRow
-                active={pathname === "/components"}
-                href="/components"
-                onNavigate={close}
-              >
-                All components
-                <Count>{totalCount}</Count>
-              </NavRow>
-              {categoryGroups.map((group) => {
-                const unfolded = !collapsed.has(group.label);
-                return (
-                  <div
-                    className="flex shrink-0 flex-col gap-0.5"
-                    key={group.label}
-                  >
-                    <GroupLabel
-                      collapsible
-                      onOpenChange={setGroupOpen}
-                      open={unfolded}
-                      title={group.label}
-                    />
-                    {unfolded
-                      ? group.names.map((name) => {
-                          const category = categoryByName.get(name);
-                          return category ? (
-                            <NavRow
-                              active={pathname === category.href}
-                              href={category.href}
-                              key={category.name}
-                              onNavigate={close}
-                            >
-                              {category.label}
-                              <span className="flex items-center gap-2">
-                                <ComponentUpdateIndicator
-                                  category={category.name}
-                                />
-                                <Count>{category.count}</Count>
-                              </span>
-                            </NavRow>
-                          ) : null;
-                        })
-                      : null}
-                  </div>
-                );
-              })}
-            </>
-          ) : null}
           {section === "icons" ? <IconLinks onNavigate={close} /> : null}
           {section === "docs"
             ? groups.map((group) => (

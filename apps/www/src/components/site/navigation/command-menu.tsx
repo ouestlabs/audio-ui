@@ -4,13 +4,12 @@ import {
   BookOpenIcon,
   DiamondsFourIcon,
   MagnifyingGlassIcon,
-  SquaresFourIcon,
   XIcon,
 } from "@phosphor-icons/react/ssr";
 import { useRouter } from "@tanstack/react-router";
 import * as React from "react";
-import { ComponentEmptyState } from "@/components/catalog/card/component-empty-state";
 import { copyToClipboardWithMeta } from "@/components/code/copy/copy-button";
+import { ComponentEmptyState } from "@/components/site/layout/empty-state";
 import {
   FrameContent,
   FrameFooter,
@@ -41,8 +40,7 @@ import { useFramework } from "@/hooks/use-framework";
 import { useIsMac } from "@/hooks/use-is-mac";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
 import { shownTo } from "@/lib/docs/content/frameworks";
-import type { CategoryInfo } from "@/lib/registry/core/registry";
-import { cn, normalizeSlug } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 type CommandPage = {
   url: string;
@@ -75,20 +73,16 @@ export type CommandMenuGroup = {
   pages: CommandPage[];
 };
 
-const NO_COMPONENT_CATEGORIES: CategoryInfo[] = [];
-
 export function CommandMenu({
   groups,
   navItems,
-  componentCategories = NO_COMPONENT_CATEGORIES,
 }: {
   groups: CommandMenuGroup[];
   navItems?: { href: string; label: string; soon?: boolean }[];
-  componentCategories?: CategoryInfo[];
 }) {
   const router = useRouter();
   const isMac = useIsMac();
-  // The pages of the reader's framework alone, and the catalog's categories for React or no framework.
+  // The pages of the reader's framework alone.
   const [framework] = useFramework();
   const shownGroups = React.useMemo(
     () =>
@@ -100,9 +94,6 @@ export function CommandMenu({
         .filter((group) => group.pages.length > 0),
     [framework, groups]
   );
-  const categories = shownTo("/components", framework)
-    ? componentCategories
-    : NO_COMPONENT_CATEGORIES;
   const [config] = useConfig();
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState<HighlightType | null>(
@@ -315,34 +306,6 @@ export function CommandMenu({
                   ))}
                 </CommandGroup>
               ))}
-              {categories.length > 0 && (
-                <CommandGroup
-                  className="p-0! **:[[cmdk-group-heading]]:p-3!"
-                  heading="Components"
-                >
-                  {categories.map((category) => (
-                    <CommandMenuItem
-                      highlightType="category"
-                      href={`/components/${normalizeSlug(category.name)}`}
-                      key={`component-cat-${category.name}`}
-                      keywords={[
-                        "component",
-                        "category",
-                        category.name,
-                        category.label,
-                      ]}
-                      onHighlight={highlight}
-                      onNavigate={navigate}
-                      value={`Component category ${category.label}`}
-                    >
-                      <SquaresFourIcon weight="fill" />
-                      <span className="min-w-0 flex-1 truncate">
-                        {category.label}
-                      </span>
-                    </CommandMenuItem>
-                  ))}
-                </CommandGroup>
-              )}
             </CommandList>
           </FrameContent>
         </Command>

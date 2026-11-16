@@ -2,7 +2,6 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
 import { Button } from "@/components/ui/button";
 import { lazyComponent } from "@/lib/lazy";
-import type { CategoryInfo } from "@/lib/registry/core/registry";
 
 const CommandMenu = lazyComponent(
   () =>
@@ -49,16 +48,13 @@ type HeaderTree = unknown;
 export function SiteHeaderMobileNav({
   tree,
   navItems,
-  componentCategories,
 }: {
   tree: HeaderTree;
   navItems: { href: string; label: string; soon?: boolean }[];
-  componentCategories: CategoryInfo[];
 }) {
   return (
     <MobileNav
       className="flex lg:hidden"
-      componentCategories={componentCategories}
       items={navItems}
       tree={tree as never}
     />
@@ -67,20 +63,12 @@ export function SiteHeaderMobileNav({
 
 export function SiteHeaderCommandMenu({
   navItems,
-  componentCategories,
   commandGroups,
 }: {
   navItems: { href: string; label: string; soon?: boolean }[];
-  componentCategories: CategoryInfo[];
   commandGroups: CommandMenuGroup[];
 }) {
-  return (
-    <CommandMenu
-      componentCategories={componentCategories}
-      groups={commandGroups}
-      navItems={navItems}
-    />
-  );
+  return <CommandMenu groups={commandGroups} navItems={navItems} />;
 }
 
 export function SiteHeaderModeSwitcher() {
