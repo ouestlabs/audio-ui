@@ -1,21 +1,20 @@
 ---
 name: audio-ui
-description: "Picks, installs and wires audio/ui components in React, with or without shadcn: chooses between the @audio-ui shadcn registry and the headless @audio-ui/react primitives, installs the right knob, fader, XY pad, envelope, level meter, waveform, EQ or filter plot, timeline, step sequencer, drum pad, piano, piano roll or transport bar, and sets how its value and events flow (controlled or uncontrolled, change versus commit, scales, anchors), keeps it accessible, styles it with the registry's props and tokens, and lets an AI model drive it through tools. Use for any request to add an audio control or display to a React app, to build a synth, mixer, DAW, sampler or player from those parts, or when a project imports @audio-ui/react or has an @audio-ui registry in components.json, even if the user does not name audio/ui. Sound and live signals are the web-audio skill, the look is the design skill, and non-React frameworks are the core skill."
+description: "Picks, installs and wires audio/ui components in React, with or without shadcn: chooses between the styled components of the @audio-ui shadcn registry and its headless primitives, installs the right knob, fader, XY pad, envelope, level meter, waveform, EQ or filter plot, timeline, step sequencer, drum pad, piano, piano roll or transport bar, and sets how its value and events flow (controlled or uncontrolled, change versus commit, scales, anchors), keeps it accessible, styles it with the registry's props and tokens, and lets an AI model drive it through tools. Use for any request to add an audio control or display to a React app, to build a synth, mixer, DAW, sampler or player from those parts, or when a project has an @audio-ui registry in components.json or components copied from it, even if the user does not name audio/ui. Sound and live signals are the web-audio skill, the look is the design skill, and the primitives for Vue, Svelte and the web, and the framework-free controllers, are the core skill."
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # audio/ui
 
-Accessible, composable audio controls, in three layers:
+Accessible, composable audio controls, in two layers:
 
 | Layer | What it is | Pick it when |
 | --- | --- | --- |
 | `@audio-ui` registry (shadcn) | Styled components and blocks copied into the project | The project has a `components.json` (shadcn/ui, Tailwind v4) |
-| `@audio-ui/react` (npm) | Headless React primitives: behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system. Ready skins: the `design` skill |
-| `@audio-ui/elements` (npm) | The same primitives as custom elements: behavior, input handling and ARIA, no styles, typed for Vue and Svelte templates | Vue, Svelte, Solid, Angular, Lit or plain HTML → the `core` skill, which also has the framework-free controllers of `@audio-ui/core` for a control of your own |
+| `@audio-ui` primitives (registry) | Headless primitives, one adapter per framework (`knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system. Ready skins: the `design` skill. Vue, Svelte and the web: the `core` skill |
 
 Run commands with the project's package manager, read from its lockfile: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, `bunx --bun shadcn@latest` or `yarn dlx shadcn@latest`. Examples use `npx`.
 
@@ -28,15 +27,15 @@ audio/ui ships as one plugin of four skills. Each one loads when its job comes u
 | `audio-ui` | Pick, install and wire the components: layers, component selection, values and events, accessibility, styling, AI control |
 | `web-audio` | Sound and live data: the AudioContext, click-free ramps, scheduling, meters, spectra, playheads, microphone and MIDI input |
 | `design` | How it looks: retro, minimal and modern skins, materials, and composing a look from a brief |
-| `core` | Outside React: the custom elements for Vue, Svelte and plain HTML (template types, `v-model`), and the framework-free controllers for a control of your own |
+| `core` | Outside React: the primitives for Vue, Svelte and plain HTML, and the framework-free controllers for a control of your own |
 
 ## When to Apply
 
 - Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, drum pad, piano or piano roll
 - Building a synth, mixer, DAW, sampler, recorder or player interface
-- Choosing between the registry, the headless React package and the custom elements
+- Choosing between the styled components and the headless primitives of the registry
 - Making a control controlled, deciding what happens on change and on commit, or keeping it usable with a keyboard and a screen reader
-- Styling `@audio-ui/react` primitives with your own design system
+- Styling the headless primitives with your own design system
 - Letting a chat, voice or agent compose, edit or mix through the interface
 
 ## Rule Categories by Priority
@@ -72,10 +71,10 @@ The CRITICAL rules (sound without clicks, live data without re-renders) are in t
 
 ### 3. Styling (MEDIUM)
 
-- `style-headless-state` - Style primitives by state: `className` functions, `data-*`, CSS variables
+- `style-headless-state` - Style primitives by state: `data-*` attributes and CSS variables
 - `style-props-before-classname` - Registry components: `size`, `marks`, `orientation` before classes
 - `style-semantic-tokens` - Theme tokens, never raw palette colors
-- `style-never-edit-package` - Style the parts or copy the registry component, never patch the package
+- `style-never-edit-package` - Edit your copy of the adapter or the component, never the package
 
 ### 4. AI Control (MEDIUM)
 
@@ -119,10 +118,10 @@ Installed components import from `@/components/audio-ui/<name>`. Every import, i
 ## Workflow
 
 1. **Read the project.** `package.json` (framework, and React 19 for the React layers), `components.json` if any, the lockfile for the package manager.
-2. **Pick the layer and the component** from the two tables above. No `components.json`, or the user wants a distinct look (retro, minimalist, modern): use `@audio-ui/react` with the kit of the `design` skill, never a hand-written slider.
+2. **Pick the layer and the component** from the two tables above. No `components.json`, or the user wants a distinct look (retro, minimalist, modern): install the headless primitive (`npx shadcn@latest add @audio-ui/<name>-react`) and style it with the kit of the `design` skill, never a hand-written slider.
 2b. **Choose a visual direction** and say it in one sentence (retro hardware, minimal or modern), then follow the `design` skill: it has the skins, the `Panel` markup, and how to compose a look from a brief. Outside React, the `core` skill has the plain DOM kit.
-3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves. Offline, the verified `Panel` markup and the props table of the `design` skill's `directions.md` cover knob, fader, meter, XY pad, pad and piano; the entries are `@audio-ui/react/knob`, `fader`, `meter`, `xypad`, `pad`, `piano`.
-4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. React package: install `@audio-ui/react`, import from `@audio-ui/react/<name>`. Other frameworks: install `@audio-ui/core` and use the `core` skill.
+3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves. Offline, the verified `Panel` markup and the props table of the `design` skill's `directions.md` cover knob, fader, meter, XY pad, pad and piano; the items are `@audio-ui/knob-react`, `fader-react`, `meter-react`, `xypad-react`, `pad-react`, `piano-react`.
+4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. Headless primitive: `npx shadcn@latest add @audio-ui/<name>-react` copies it to `components/audio-ui/<name>/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"`. Other frameworks: use the `core` skill.
 5. **Write the code against the CRITICAL and HIGH rules** first, starting with the `web-audio` skill for anything that makes or measures sound.
 6. **Verify.** Type check, render the page and look at a screenshot. A headless browser has no microphone: feed an `OscillatorNode` through the same analyser to test an input path. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
 

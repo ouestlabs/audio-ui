@@ -4,12 +4,12 @@
     {
       "id": 4,
       "prompt": "My app has its own CSS design system and no Tailwind or shadcn. I need a rotary knob for pan that matches our styles.",
-      "expected_output": "Knob primitive from @audio-ui/react/knob assembled from its parts, styled via className functions / data attributes, anchor={0}, focus-visible styles.",
+      "expected_output": "Knob headless primitive (the knob-react item of the registry, imported from components/audio-ui/knob/react) assembled from its parts, styled with classes and data attributes, anchor={0}, focus-visible styles.",
       "files": [],
       "expectations": [
-        "Installs @audio-ui/react and imports Knob (ideally from the @audio-ui/react/knob entry), not the shadcn registry",
+        "Installs the headless primitive with npx shadcn@latest add @audio-ui/knob-react and imports Knob from where it landed (components/audio-ui/knob/react), not the styled component",
         "Assembles the documented parts (Root, Control, Track, Indicator, Thumb...)",
-        "Styles state through className/style functions or data-* attributes (e.g. data-dragging), not by tracking pointer state manually",
+        "Styles state through classes and data-* attributes (e.g. data-dragging), not by tracking pointer state manually",
         "Uses anchor={0} with min -1 and max 1 for pan",
         "Keeps Knob.Thumb (the focusable part) and styles :focus-visible",
         "Gives the knob an accessible name",

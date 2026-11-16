@@ -43,7 +43,7 @@
       "expected_output": "Sequencer from the registry, sounds scheduled at AudioContext time through use-transport-clock, playhead from getPosition via a source.",
       "files": [],
       "expectations": [
-        "Uses the audio/ui Sequencer (registry or @audio-ui/react), not a grid of buttons",
+        "Uses the audio/ui Sequencer (the styled component or the headless primitive of the registry), not a grid of buttons",
         "Steps are scheduled on the audio clock (use-transport-clock onStep time, or an equivalent look-ahead), not with setInterval/setTimeout triggering sounds immediately",
         "Each sound starts at the scheduled `time` (e.g. osc.start(time))",
         "Stop or seek silences sound already scheduled ahead (onReset or equivalent)",

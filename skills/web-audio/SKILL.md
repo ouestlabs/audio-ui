@@ -4,7 +4,7 @@ description: "Load this before writing any code that makes or measures sound in 
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Web Audio with audio/ui

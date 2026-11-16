@@ -28,13 +28,14 @@ function ChannelStrip({ levels }: { levels: Levels }) {
 **Correct (a leaf owns the subscription):**
 
 ```tsx
-import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
 import { useSyncExternalStore } from "react";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Meter } from "@/components/audio-ui/meter";
 
-type Levels = Source<MeterPrimitive.Root.Frame>;
+type Levels = Source<MeterFrame>;
 
 function PeakReadout({ levels }: { levels: Levels }) {
   const frame = useSyncExternalStore(levels.subscribe, levels.getSnapshot);

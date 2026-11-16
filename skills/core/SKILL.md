@@ -1,10 +1,10 @@
 ---
 name: core
-description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers behind every audio/ui primitive (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), every primitive as custom elements in @audio-ui/elements, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
+description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers behind every audio/ui primitive (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), the primitives for Vue, Svelte and the web from the audio/ui registry, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.4.0"
+  version: "1.5.0"
 ---
 
 # Audio controls without React
@@ -14,8 +14,8 @@ metadata:
 ## When to Apply
 
 - Audio controls for Vue, Svelte, Solid, Angular, web components or the plain DOM
-- A project that has no React, or no `@audio-ui/react`
-- A knob or a fader as custom elements (`@audio-ui/elements`)
+- A project that has no React
+- A knob or a fader for Vue, Svelte or the web, from the registry's primitives
 - Writing a binding of the controllers for another framework
 - Reviewing code that creates controllers, subscribes or redraws
 
@@ -39,7 +39,7 @@ metadata:
 
 ## Workflow
 
-1. **Install.** `@audio-ui/elements`: every primitive as custom elements, ready to style, typed for Vue templates (`import type {} from "@audio-ui/elements/vue"`, then `v-model`) and Svelte's (`import type {} from "@audio-ui/elements/svelte"`, then `value` and `oninput`); see [core.md](./core.md). Write a binding over `@audio-ui/core` (no dependencies) only for a control the elements do not cover: [core.md](./core.md) has the entries, a plain DOM knob, and Vue and Svelte bindings.
+1. **Install.** The registry's primitive for the framework (`npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, `shadcn-svelte` with `knob-svelte.json`, `npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json` for the web): every primitive, unstyled and ready to style, with the same parts as in React; see [core.md](./core.md). Write a binding over `@audio-ui/core` (no dependencies) only for a control the primitives do not cover: [core.md](./core.md) has the entries, a plain DOM knob, and Vue and Svelte bindings.
 2. **Create one controller per control**, once (`core-one-controller`), wire a hidden `<input type="range">` to it (`core-native-range-input`), and draw from `getSnapshot()` (`core-draw-from-snapshot`).
 3. **Handle the pointer the way the rules say** (`core-pointer-handler`) and call the removers on teardown (`core-cleanup`).
 4. **Look.** The `design` skill has the skins and `styles/dom.css` for the plain DOM; sound and live data come from the `web-audio` skill.

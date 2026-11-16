@@ -4,6 +4,7 @@ import { components } from "@/registry-audio/bases/base/components/_registry";
 import { devices } from "@/registry-audio/bases/base/devices/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
+import { primitives } from "@/registry-audio/bases/base/primitives/_registry";
 import {
   compileSkill,
   readRules,
@@ -56,7 +57,14 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["react", "core", "elements", "engine", "gl"]);
+const PACKAGES = new Set([
+  "react",
+  "core",
+  "elements",
+  "engine",
+  "gl",
+  "primitives",
+]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -79,7 +87,7 @@ const skills = (
 ).map((path) => path.split("/")[0] ?? "");
 const markdown = await read("**/*.md", SKILLS_DIR);
 const registryNames = new Set(
-  [...audio, ...devices, ...components, ...hooks, ...lib].map(
+  [...audio, ...devices, ...components, ...hooks, ...lib, ...primitives].map(
     (item) => item.name
   )
 );

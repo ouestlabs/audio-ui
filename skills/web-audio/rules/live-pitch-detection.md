@@ -51,7 +51,7 @@ Without the registry, `detectPitch(samples, sampleRate, { minHz, maxHz, minLevel
 ```ts
 import { detectPitch } from "@audio-ui/engine/analysis";
 import { cents } from "@audio-ui/engine/pitch";
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 
 const reading = createSource<{ name: string; cents: number } | null>(null);
 const samples = new Float32Array(analyser.fftSize);

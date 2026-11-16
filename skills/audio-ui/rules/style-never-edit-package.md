@@ -1,19 +1,19 @@
 ---
-title: Never edit the package
+title: Edit your copy, never the package
 impact: LOW
 impactDescription: upgrades keep working
 tags: headless, upgrade, registry
 ---
 
-## Never edit the package
+## Edit your copy, never the package
 
-Changes made inside `node_modules/@audio-ui/react` (or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: either the headless parts styled by state, or the registry component copied into the project.
+Changes made inside `node_modules/@audio-ui/primitives` (or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: the adapter and the registry component are copied into the project, and they are yours to edit.
 
 **Incorrect (patching the installed package):**
 
 ```bash
 # lost on the next install, conflicts with every upgrade
-sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/react/dist/index.js
+sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/primitives/dist/knob/index.js
 ```
 
 **Correct (style the parts, or own a copy):**
@@ -23,5 +23,5 @@ sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/react/dist/in
 ```
 
 ```bash
-npx shadcn@latest add @audio-ui/knob   # then edit components/audio-ui/knob.tsx: it belongs to the project
+npx shadcn@latest add @audio-ui/knob-react   # then edit components/audio-ui/knob/react.tsx: it belongs to the project
 ```
