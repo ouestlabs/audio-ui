@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-A rotary control for continuous parameters such as level, cutoff or pan. The registry component wraps the `Knob` primitive from `@audio-ui/react` and adds size variants and theme styles.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the `Knob` primitive of `@audio-ui/primitives`, which installs with it and adds size variants and theme styles.
 
 ## Overview
 
@@ -21,7 +21,7 @@ A rotary control for continuous parameters such as level, cutoff or pan. The reg
 
 ## Anatomy
 
-It is built on the headless [Knob](/docs/react/knob) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Knob](/docs/knob-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -124,7 +124,7 @@ The props of the headless parts are on [Knob](/docs/react/knob#api-reference).
 <TypeRow name={"className"} type={"string"}>On the root wrapper.</TypeRow>
 </TypeTable>
 
-`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+The `Knob` primitive that installs with it exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 
@@ -145,7 +145,7 @@ Use `anchor` to show a reference point on the rail (for example the center of a 
 To turn every knob of an app that way, wrap it once in `Knob.Provider`: each `Knob.Root` below it takes that mode, unless it sets its own `dragMode`.
 
 ```tsx
-import { Knob } from "@audio-ui/react"
+import { Knob } from "@/components/audio-ui/knob/react"
 
 <Knob.Provider dragMode="vertical">
   <Mixer />

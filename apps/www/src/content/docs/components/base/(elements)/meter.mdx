@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
 
-Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component wraps the `Meter` primitive from `@audio-ui/react`: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
+Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component is written on the `Meter` primitive of `@audio-ui/primitives`, which installs with it: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
 
 ## Overview
 
@@ -22,7 +22,7 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 
 ## Anatomy
 
-It is built on the headless [Meter](/docs/react/meter) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Meter](/docs/meter-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -55,7 +55,7 @@ interface MeterSource {
 }
 ```
 
-`createSource` from `@audio-ui/react` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
+`createSource` from `@audio-ui/core` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
 
 ```bash
 npx shadcn@latest add @audio-ui/use-audio-levels
@@ -115,7 +115,7 @@ The props of the headless parts are on [Meter](/docs/react/meter#api-reference).
 
 
 
-`@audio-ui/react/meter` exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
+The `Meter` primitive that installs with it exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
 
 ## Examples
 

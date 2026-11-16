@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="envelope-size-default-demo" />
 
-Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. The registry component wraps the `Envelope` primitive from `@audio-ui/react` and draws the points, the segments between them and a grid.
+Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. The registry component is written on the `Envelope` primitive of `@audio-ui/primitives`, which installs with it and draws the points, the segments between them and a grid.
 
 ## Overview
 
@@ -25,7 +25,7 @@ Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. 
 
 ## Anatomy
 
-It is built on the headless [Envelope](/docs/react/envelope) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Envelope](/docs/envelope-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -134,7 +134,7 @@ The props of the headless parts are on [Envelope](/docs/react/envelope#api-refer
 
 
 
-`@audio-ui/react/envelope` exposes `Envelope.Root`, `Envelope.Graph` (the SVG surface; double-click to add), `Envelope.Line` and `Envelope.Fill` (the curve and the area under it), `Envelope.Points` (renders one child per point), `Envelope.Point` (the draggable handle), `Envelope.Segments` (renders one child per segment) and `Envelope.Segment` (the handle on a segment's midpoint, which bends it). Every part accepts a `render` prop and `className` / `style` as functions of state; points expose `data-dragging`, `data-removable`, `data-blocked`, `data-disabled` and `data-index`, and segment handles `data-dragging`, `data-flat` and `data-disabled`.
+The `Envelope` primitive that installs with it exposes `Envelope.Root`, `Envelope.Graph` (the SVG surface; double-click to add), `Envelope.Line` and `Envelope.Fill` (the curve and the area under it), `Envelope.Points` (renders one child per point), `Envelope.Point` (the draggable handle), `Envelope.Segments` (renders one child per segment) and `Envelope.Segment` (the handle on a segment's midpoint, which bends it). Every part accepts a `render` prop and `className` / `style` as functions of state; points expose `data-dragging`, `data-removable`, `data-blocked`, `data-disabled` and `data-index`, and segment handles `data-dragging`, `data-flat` and `data-disabled`.
 
 ## Examples
 

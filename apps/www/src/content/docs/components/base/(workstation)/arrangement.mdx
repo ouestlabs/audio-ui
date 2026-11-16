@@ -37,7 +37,7 @@ npx shadcn@latest add @audio-ui/timeline
 <Step>Install the following dependencies:</Step>
 
 ```bash
-npm install @audio-ui/react
+npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
 
 <Step>Copy and paste the following code into your project.</Step>
@@ -64,7 +64,7 @@ npm install @audio-ui/react
 
 ## The timeline
 
-The registry component wraps the `Timeline` primitive from `@audio-ui/react`. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
+The registry component is written on the `Timeline` primitive of `@audio-ui/primitives`, which installs with it. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
 
 ### Overview
 
@@ -78,7 +78,7 @@ The registry component wraps the `Timeline` primitive from `@audio-ui/react`. Th
 
 ### Anatomy
 
-It is built on the headless [Timeline](/docs/react/timeline) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Timeline](/docs/timeline-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ### Usage
 
@@ -650,7 +650,7 @@ The props of the headless parts are on [Timeline](/docs/react/timeline#api-refer
 <TypeRow name={"TimelineNavigator"}>The whole timeline as one bar, scrolling and zooming the viewport.</TypeRow>
 </TypeTable>
 
-`@audio-ui/react/timeline` exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
+The `Timeline` primitive that installs with it exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
 
 ### ArrangedClip
 
