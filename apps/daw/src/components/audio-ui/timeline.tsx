@@ -537,6 +537,7 @@ type TimelineMarkProps = Omit<
 function TimelineMark({
   className,
   mark,
+  movable,
   onValueChange,
   onValueCommitted,
   ...props
@@ -556,6 +557,8 @@ function TimelineMark({
       )}
       data-slot="timeline-mark"
       mark={name}
+      // A mark that is told of its moves can be dragged.
+      movable={movable ?? Boolean(onValueChange || onValueCommitted)}
       {...props}
     />
   );

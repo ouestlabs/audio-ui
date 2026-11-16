@@ -235,8 +235,10 @@ export function createRangeController(initial: RangeOptions): RangeController {
     const details = Object.assign(createChangeEventDetails(reason, event), {
       edge: "both" as const,
     }) as RangeChangeEventDetails;
-    if (change([from, from + span], details)) {
-      commit(current(), {
+    const next: RangeValue = [from, from + span];
+    if (change(next, details)) {
+      // The range just proposed: telling a view of it can redraw it from its own props before this reads `current()`.
+      commit(next, {
         edge: "both",
         event,
         reason,
@@ -307,7 +309,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
       edge,
     }) as RangeChangeEventDetails;
     if (change(next, details)) {
-      commit(current(), { edge, event, reason } as RangeCommitEventDetails);
+      commit(next, { edge, event, reason } as RangeCommitEventDetails);
     }
   };
 

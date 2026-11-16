@@ -454,6 +454,15 @@ export const timeline: TimelinePrimitive = definePrimitive({
     };
     configure();
     context.onOptions(configure);
+    // A zoom that was given and is not any more goes back to where the timeline began: to the fit, or its default.
+    let zoomGiven = options().zoom !== undefined;
+    context.onOptions(() => {
+      const given = options().zoom !== undefined;
+      if (zoomGiven && !given) {
+        context.store.set({ zoom: options().defaultZoom ?? null } as never);
+      }
+      zoomGiven = given;
+    });
     let lastPosition = context.store.get().position;
     let lastZoom = context.store.get().zoom;
     context.onDestroy(
@@ -526,7 +535,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
     const result = {
       ...createClipApi(context, () => adjustOptions(options()), bump),
       ...createRangeApi(context, () => adjustOptions(options()), bump),
-      ...createNavigatorApi(() => result),
+      ...createNavigatorApi(
+        () => result,
+        () => adjustOptions(options()).maxZoom
+      ),
       anchor,
       controller,
       selecting,
@@ -766,30 +778,25 @@ export const timeline: TimelinePrimitive = definePrimitive({
           };
         },
         on: {
-          // Several lanes share this part, so `el` is one of them: the lane pressed is the one the press is on.
-          pointerdown: (event, { api, props, store }) => {
-            const lane = event.target;
+          pointerdown: (event, { api, el, props, store }) => {
             if (
-              !(
-                lane instanceof HTMLElement &&
-                props.seekable &&
-                lane.hasAttribute("data-timeline-lane")
-              ) ||
+              !(el && props.seekable) ||
               store.get().view.disabled ||
-              event.button !== 0
+              event.button !== 0 ||
+              event.target !== el
             ) {
               return;
             }
-            // On a lane that selects, a drag from its bare area selects time instead of scrubbing.
             api.controller.pressSeek(
               event,
-              lane,
-              lane,
+              el,
+              el,
               props.selects ? api.selecting() : undefined
             );
           },
         },
-        props: { seekable: "boolean", selects: "boolean" },
+        // An id of its own for each lane: parts that share their props share one element.
+        props: { id: "id", seekable: "boolean", selects: "boolean" },
         state: (state: TimelineState) => publicState(state),
       }),
       mark: slot<MarkProps, MarkPublicState>({
@@ -887,6 +894,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
             offStore();
           };
         },
+        // An id of its own for each: parts that share their props share one element.
+        props: { id: "id" },
         state: (state: TimelineState) => publicState(state),
       }),
       root: slot<object, TimelinePublicState>({
@@ -1026,7 +1035,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
             api.trackFor(props, true).getSnapshot().resizing
           ),
           "data-selected": flag(Boolean(props.selected)),
-          "data-track": String(props.track),
+          "data-track-name": String(props.track),
           style: css({
             display: "flex",
             "min-width": "100%",
@@ -1214,7 +1223,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
           observer?.observe(el);
 
           // The one place that reacts to the zoom changing, once the lanes are laid out again.
-          let applying = 0;
+          let applying = false;
           const settle = () => {
             const current = drawnZoom();
             if (previous && previous.zoom > 0 && previous.zoom !== current) {
@@ -1241,8 +1250,14 @@ export const timeline: TimelinePrimitive = definePrimitive({
             const { zoom } = store.get().frame;
             if (zoom !== lastZoom) {
               lastZoom = zoom;
-              cancelAnimationFrame(applying);
-              applying = requestAnimationFrame(settle);
+              // Before the next frame, so a scroll the app puts there in its own frame has the last word, and once for the steps of one task.
+              if (!applying) {
+                applying = true;
+                queueMicrotask(() => {
+                  applying = false;
+                  settle();
+                });
+              }
             }
           });
 
@@ -1261,7 +1276,6 @@ export const timeline: TimelinePrimitive = definePrimitive({
           return () => {
             offStore();
             cancelAnimationFrame(frame);
-            cancelAnimationFrame(applying);
             observer?.disconnect();
             el.removeEventListener("wheel", handleWheel);
             el.removeEventListener("scroll", handleScroll);

@@ -74,7 +74,11 @@ export interface NavigatorApi {
 
 const describeNumber = (value: number) => String(Math.round(value * 100) / 100);
 
-export function createNavigatorApi(api: () => TimelineApi): NavigatorApi {
+export function createNavigatorApi(
+  api: () => TimelineApi,
+  /** How close the timeline zooms, in px per unit: where the window stops narrowing. */
+  maxZoom: () => number
+): NavigatorApi {
   const navigator = {
     el: null as HTMLElement | null,
     minWindowWidth: 0,
@@ -86,7 +90,7 @@ export function createNavigatorApi(api: () => TimelineApi): NavigatorApi {
       createNavigatorController({
         disabled: state.view.disabled,
         duration: state.duration,
-        maxZoom: Number.POSITIVE_INFINITY,
+        maxZoom: maxZoom(),
         metrics: () => api().viewport.get(),
         minWindowWidth: navigator.minWindowWidth,
         scrollTo: (left) => api().scrollerTo.current?.(left),

@@ -326,7 +326,7 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
         track: { height: 80, label: "Resize", track: "drums" },
       });
       expect(styleOf(p.track)).toContain("height: 80px");
-      expect(p.track.getAttribute("data-track")).toBe("drums");
+      expect(p.track.getAttribute("data-track-name")).toBe("drums");
       expect(p.resizeInput.getAttribute("aria-label")).toBe("Resize");
       await p.act(() => key(p.resizeInput, "ArrowDown"));
       expect(p.heights.at(-1)).toEqual([88, "drums", "keyboard"]);
