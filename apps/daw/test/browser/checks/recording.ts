@@ -300,10 +300,11 @@ export const checks: Checks = {
         .getByRole("button", { name: "Solo 1 MIDI" })
         .getAttribute("aria-pressed");
       assert(soloed !== "true", "S played a note, it did not solo the track");
+      // The notes of a clip are one path, a box for each.
       const notes = await clips
         .last()
-        .locator('[data-slot="timeline-clip-notes"] > *')
-        .count();
+        .locator('[data-slot="timeline-clip-notes"] path')
+        .evaluate((path) => (path.getAttribute("d")?.match(/M/g) ?? []).length);
       assert(notes === 3, `the take keeps the 3 notes played (${notes})`);
     },
   "REC-003: with Monitor input on, an armed audio track plays its input through its strip, stopped; off, it is silent":

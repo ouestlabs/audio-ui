@@ -75,7 +75,10 @@ function Provider({
 
 function KnobRoot(props: ComponentProps<typeof parts.Root>) {
   const defaults = use(KnobDefaults);
-  return <parts.Root {...defaults} {...props} />;
+  // A prop left undefined by a wrapper does not hide what the provider gives.
+  return (
+    <parts.Root {...props} dragMode={props.dragMode ?? defaults.dragMode} />
+  );
 }
 
 /** An arc in the part's own state, written as its child so the server renders it. */

@@ -533,13 +533,12 @@ export function clipSlots(slot: any) {
           focusable: "false",
           preserveAspectRatio: "none",
           style: css({
-            // A positioned svg does not stretch between top and bottom without a height.
-            bottom: "0",
+            // A positioned svg does not stretch between top and bottom without a height. `--clip-fade-top` leaves room above it, from a class: a style given to the part replaces this one.
             display: length > 0 ? undefined : "none",
-            height: "100%",
+            height: "calc(100% - var(--clip-fade-top, 0px))",
             "pointer-events": "none",
             position: "absolute",
-            top: "0",
+            top: "var(--clip-fade-top, 0px)",
             width: `calc(var(--clip-unit) * var(${property}))`,
             ...(edge === "in"
               ? { "inset-inline-start": "0" }

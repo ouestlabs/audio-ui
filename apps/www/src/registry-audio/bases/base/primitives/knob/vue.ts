@@ -36,7 +36,16 @@ const Provider = defineComponent(
 const Root = defineComponent(
   (_props, { attrs, slots }) => {
     const defaults = inject(DEFAULTS, {});
-    return () => h(parts.Root, { ...defaults, ...attrs }, slots);
+    return () =>
+      h(
+        parts.Root,
+        {
+          ...attrs,
+          dragMode: (attrs.dragMode ??
+            defaults.dragMode) as Defaults["dragMode"],
+        },
+        slots
+      );
   },
   { inheritAttrs: false, name: "KnobRoot" }
 );

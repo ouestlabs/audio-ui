@@ -6,4 +6,4 @@ let props = $props();
 const defaults = getContext<Defaults | undefined>(DEFAULTS) ?? {};
 </script>
 
-<parts.Root {...defaults} {...props} />
+<parts.Root {...props} dragMode={props.dragMode ?? defaults.dragMode} />
