@@ -1,5 +1,3 @@
-import type { FaderPublicState } from "@audio-ui/primitives/fader";
-import { fader } from "@audio-ui/primitives/fader";
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
@@ -14,6 +12,8 @@ import {
   useRef,
   useState,
 } from "react";
+import type { FaderPublicState } from "@/primitives/fader";
+import { fader } from "@/primitives/fader";
 
 const noop = () => undefined;
 

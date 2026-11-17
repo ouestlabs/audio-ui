@@ -1,7 +1,7 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-import type { GridTick } from "@audio-ui/primitives/plot";
+import type { GridTick } from "@/primitives/plot";
 
 let { columns, rows }: { columns: GridTick[]; rows: GridTick[] } = $props();
 </script>

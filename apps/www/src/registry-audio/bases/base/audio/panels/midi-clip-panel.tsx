@@ -1,8 +1,4 @@
 import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
-import type {
-  RollNoteOffDetails,
-  RollNoteOnDetails,
-} from "@audio-ui/primitives/piano-roll";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -14,6 +10,10 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import type {
+  RollNoteOffDetails,
+  RollNoteOnDetails,
+} from "@/primitives/piano-roll";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   ContextMenu,

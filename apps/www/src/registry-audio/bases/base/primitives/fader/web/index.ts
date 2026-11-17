@@ -1,5 +1,5 @@
-import { type FaderState, fader, viewOf } from "@audio-ui/primitives/fader";
 import { createParts, wrappedChild } from "@ui-sdk/web";
+import { type FaderState, fader, viewOf } from "@/primitives/fader";
 
 /** A thumb's attributes that name its input instead, so they are read once. */
 const INPUT_NAMES = ["aria-describedby", "aria-label", "aria-labelledby"];

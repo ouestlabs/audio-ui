@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { VelocityState } from "@audio-ui/primitives/sequencer";
+import type { VelocityState } from "@/primitives/sequencer";
 import type { ComponentProps, Snippet } from "svelte";
 import { type Known, parts } from "./parts";
 

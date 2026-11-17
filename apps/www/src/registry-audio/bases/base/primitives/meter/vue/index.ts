@@ -1,6 +1,6 @@
-import { type ChannelPublicState, meter } from "@audio-ui/primitives/meter";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { type ChannelPublicState, meter } from "@/primitives/meter";
 
 /** Which element each part is. */
 const parts = createParts(meter, {

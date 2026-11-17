@@ -1,3 +1,5 @@
+import { createParts } from "@ui-sdk/vue/primitive";
+import { defineComponent, h } from "vue";
 import {
   type BandState,
   type GridState,
@@ -5,9 +7,7 @@ import {
   type LineState,
   type PathState,
   plot,
-} from "@audio-ui/primitives/plot";
-import { createParts } from "@ui-sdk/vue/primitive";
-import { defineComponent, h } from "vue";
+} from "@/primitives/plot";
 
 /** Which element each part is. */
 const parts = createParts(plot, {

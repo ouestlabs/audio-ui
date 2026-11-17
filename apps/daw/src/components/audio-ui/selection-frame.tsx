@@ -5,7 +5,6 @@ import {
 } from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { formatTime } from "@audio-ui/engine/format";
-import type { ClipChangeDetails } from "@audio-ui/primitives/timeline";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -13,12 +12,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
 import {
   TimelineClip,
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/components/audio-ui/timeline";
+import type { ClipChangeDetails } from "@/components/audio-ui/timeline/timeline";
+import { cn } from "@/lib/utils";
 
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
 export interface SelectionShape {

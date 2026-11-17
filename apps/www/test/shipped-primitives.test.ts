@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { SHIPPED_PRIMITIVES } from "@/registry-audio/bases/primitives";
 
 const PRIMITIVES = `${import.meta.dir}/../src/registry-audio/bases/base/primitives`;
-const ALIAS = /"@audio-ui\/primitives\/([a-z-]+)": \[\s*"([^"]+)"/g;
+const ALIAS = /"@\/primitives\/([a-z-]+)": \[\s*"([^"]+)"/g;
 
 test("a primitive written in the registry is shipped and aliased, and only those", async () => {
   const written = [

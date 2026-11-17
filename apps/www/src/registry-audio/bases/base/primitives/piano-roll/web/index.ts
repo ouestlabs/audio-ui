@@ -1,8 +1,5 @@
-import {
-  type PianoRollState,
-  pianoRoll,
-} from "@audio-ui/primitives/piano-roll";
 import { createParts } from "@ui-sdk/web";
+import { type PianoRollState, pianoRoll } from "@/primitives/piano-roll";
 
 /** Makes, or takes away, the children of `parent` named `tag` so there is one for each key, in the order they came. */
 function syncChildren(

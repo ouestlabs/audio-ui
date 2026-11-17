@@ -1,6 +1,6 @@
-import { waveform } from "@audio-ui/primitives/waveform";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { waveform } from "@/primitives/waveform";
 
 /** Which element each part is. */
 const parts = createParts(waveform, {

@@ -1,5 +1,5 @@
-import { type XYPadState, viewOf, xypad } from "@audio-ui/primitives/xypad";
 import { createParts, wrappedChild } from "@ui-sdk/web";
+import { viewOf, type XYPadState, xypad } from "@/primitives/xypad";
 
 /** A thumb's attributes that name its inputs instead, so they are read once. */
 const INPUT_NAMES = ["aria-describedby", "aria-labelledby"];

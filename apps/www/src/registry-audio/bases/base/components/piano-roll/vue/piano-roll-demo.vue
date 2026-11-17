@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/primitives/piano-roll";
 import { ref } from "vue";
 import { PianoRoll } from "@/registry-audio/bases/base/primitives/piano-roll/vue";
 

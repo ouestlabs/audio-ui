@@ -1,5 +1,3 @@
-import type { Note as NoteValue } from "@audio-ui/primitives/piano-roll";
-import { pianoRoll } from "@audio-ui/primitives/piano-roll";
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
@@ -7,6 +5,8 @@ import {
   Fragment,
   type ReactNode,
 } from "react";
+import type { Note as NoteValue } from "./piano-roll";
+import { pianoRoll } from "./piano-roll";
 
 const noop = () => undefined;
 

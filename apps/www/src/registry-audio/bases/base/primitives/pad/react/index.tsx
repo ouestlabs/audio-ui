@@ -1,5 +1,5 @@
-import { pad } from "@audio-ui/primitives/pad";
 import { createParts } from "@ui-sdk/react/primitive";
+import { pad } from "@/primitives/pad";
 
 /** Which element each part is. */
 const parts = createParts(pad, { item: "button", root: "div" });

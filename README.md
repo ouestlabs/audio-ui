@@ -4,7 +4,7 @@
 
 Accessible, composable Audio UI components for the web, in React, Vue, Svelte or plain HTML: knobs, faders, meters, pads, waveforms, timelines, piano rolls and the synths, mixers and players made from them.
 
-- **Primitives.** Headless, accessible parts with the behavior built in and the styling left to you, written once ([`@audio-ui/primitives`](packages/primitives), on the framework-agnostic [`@audio-ui/core`](packages/core)) and copied into your project for React, Vue, Svelte or the web.
+- **Primitives.** Headless, accessible parts with the behavior built in and the styling left to you, written once on the UI SDK kernel and copied into your project for React, Vue, Svelte or the web.
 - **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
 - **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
 
@@ -43,7 +43,6 @@ bun run dev    # the docs site on http://localhost:4000
 | `apps/www` | The docs site and the registry (TanStack Start, Fumadocs) |
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |
-| `packages/primitives` | `@audio-ui/primitives`, the behavior of each primitive, written once on the UI SDK kernel |
 | `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design`, `core` |
 
 Before opening a pull request:

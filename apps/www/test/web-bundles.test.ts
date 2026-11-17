@@ -7,7 +7,7 @@ const PRIMITIVES = join(
   "../src/registry-audio/bases/base/primitives"
 );
 const { version } = (await Bun.file(
-  join(import.meta.dir, "../../../packages/primitives/package.json")
+  join(import.meta.dir, "../src/registry-audio/web-version.json")
 ).json()) as { version: string };
 const WEB = join(import.meta.dir, "../public/web", version);
 

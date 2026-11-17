@@ -1,11 +1,3 @@
-import {
-  type BandState,
-  type GridState,
-  type HandleState,
-  type LineState,
-  type PathState,
-  plot,
-} from "@audio-ui/primitives/plot";
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
@@ -13,6 +5,14 @@ import {
   type ReactNode,
   useCallback,
 } from "react";
+import {
+  type BandState,
+  type GridState,
+  type HandleState,
+  type LineState,
+  type PathState,
+  plot,
+} from "./plot";
 
 const noop = () => undefined;
 

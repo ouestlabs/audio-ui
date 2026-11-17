@@ -5,7 +5,7 @@ description: "Change, fix or add a headless primitive or its logic: the behavior
 
 # Change a primitive
 
-`@audio-ui/core` and `@audio-ui/engine` are published to npm: every change there is a change to someone's app. `@audio-ui/primitives` is not published yet, and its adapters are registry files that people copy: a change there reaches a project only when it installs the item again.
+`@audio-ui/core` and `@audio-ui/engine` are published to npm: every change there is a change to someone's app. The primitives are not a package: they and their adapters are registry files that people copy, and a change there reaches a project only when it installs the item again.
 
 ## Where the code goes
 

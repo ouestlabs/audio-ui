@@ -1,6 +1,5 @@
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { formatTime } from "@audio-ui/engine/format";
-import type { ClipChangeDetails } from "@audio-ui/primitives/timeline";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -8,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { ClipChangeDetails } from "@/primitives/timeline";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   TimelineClip,

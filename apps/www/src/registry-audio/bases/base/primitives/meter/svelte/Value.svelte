@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { ChannelPublicState } from "@audio-ui/primitives/meter";
+import type { ChannelPublicState } from "@/primitives/meter";
 import type { ComponentProps, Snippet } from "svelte";
 import { parts } from "./parts";
 

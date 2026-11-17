@@ -1,9 +1,5 @@
-import {
-  type EnvelopeState,
-  envelope,
-  viewOf,
-} from "@audio-ui/primitives/envelope";
 import { createParts } from "@ui-sdk/web";
+import { type EnvelopeState, envelope, viewOf } from "@/primitives/envelope";
 
 const SVG = "http://www.w3.org/2000/svg";
 const DEFAULT_STROKE_WIDTH = 2;

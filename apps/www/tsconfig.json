@@ -18,40 +18,40 @@
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
-      "@audio-ui/primitives/envelope": [
+      "@/primitives/envelope": [
         "./src/registry-audio/bases/base/primitives/envelope/envelope.ts"
       ],
-      "@audio-ui/primitives/fader": [
+      "@/primitives/fader": [
         "./src/registry-audio/bases/base/primitives/fader/fader.ts"
       ],
-      "@audio-ui/primitives/knob": [
+      "@/primitives/knob": [
         "./src/registry-audio/bases/base/primitives/knob/knob.ts"
       ],
-      "@audio-ui/primitives/meter": [
+      "@/primitives/meter": [
         "./src/registry-audio/bases/base/primitives/meter/meter.ts"
       ],
-      "@audio-ui/primitives/pad": [
+      "@/primitives/pad": [
         "./src/registry-audio/bases/base/primitives/pad/pad.ts"
       ],
-      "@audio-ui/primitives/piano": [
+      "@/primitives/piano": [
         "./src/registry-audio/bases/base/primitives/piano/piano.ts"
       ],
-      "@audio-ui/primitives/piano-roll": [
+      "@/primitives/piano-roll": [
         "./src/registry-audio/bases/base/primitives/piano-roll/piano-roll.ts"
       ],
-      "@audio-ui/primitives/plot": [
+      "@/primitives/plot": [
         "./src/registry-audio/bases/base/primitives/plot/plot.ts"
       ],
-      "@audio-ui/primitives/sequencer": [
+      "@/primitives/sequencer": [
         "./src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
       ],
-      "@audio-ui/primitives/timeline": [
+      "@/primitives/timeline": [
         "./src/registry-audio/bases/base/primitives/timeline/timeline.ts"
       ],
-      "@audio-ui/primitives/waveform": [
+      "@/primitives/waveform": [
         "./src/registry-audio/bases/base/primitives/waveform/waveform.ts"
       ],
-      "@audio-ui/primitives/xypad": [
+      "@/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],
       "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
@@ -61,7 +61,6 @@
       "@audio-ui/icons/react": [
         "../../packages/icons/src/providers/react/index.tsx"
       ],
-      "@audio-ui/primitives/*": ["../../packages/primitives/src/*/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },
     "types": ["bun", "mdx", "node", "react", "react-dom", "vite/client"]

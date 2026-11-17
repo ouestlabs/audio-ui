@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/primitives/piano-roll";
 import { PianoRoll } from "@/registry-audio/bases/base/primitives/piano-roll/svelte/index";
 
 const NOTES: Note[] = [

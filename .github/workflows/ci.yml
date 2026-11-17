@@ -67,10 +67,6 @@ jobs:
         working-directory: packages/icons
         run: bun test
 
-      - name: Test primitives
-        working-directory: packages/primitives
-        run: bun test
-
       - name: Primitives in React, Vue, Svelte and custom elements
         working-directory: apps/www
         run: bun run test:primitives

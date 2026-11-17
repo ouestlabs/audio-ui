@@ -1,6 +1,6 @@
-import { piano } from "@audio-ui/primitives/piano";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { piano } from "@/primitives/piano";
 
 /** Which element each part is. */
 const parts = createParts(piano, { key: "button", label: "span", root: "div" });

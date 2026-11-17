@@ -20,7 +20,6 @@
         "@audio-ui/engine": "*",
         "@audio-ui/gl": "*",
         "@audio-ui/icons": "*",
-        "@audio-ui/primitives": "workspace:*",
         "@base-ui/react": "catalog:",
         "@fontsource/bricolage-grotesque": "^5.3.0",
         "@fontsource/instrument-serif": "^5.3.0",
@@ -63,7 +62,6 @@
       "dependencies": {
         "@audio-ui/core": "*",
         "@audio-ui/engine": "*",
-        "@audio-ui/primitives": "workspace:*",
         "@base-ui/react": "catalog:",
         "@fontsource/bricolage-grotesque": "^5.3.0",
         "@fontsource/instrument-serif": "^5.3.0",
@@ -141,7 +139,6 @@
         "@audio-ui/engine": "*",
         "@audio-ui/gl": "*",
         "@audio-ui/icons": "*",
-        "@audio-ui/primitives": "*",
         "@audio/dynamics-compand": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-deesser": "catalog:",
@@ -379,23 +376,6 @@
         "react",
       ],
     },
-    "packages/primitives": {
-      "name": "@audio-ui/primitives",
-      "version": "0.1.0",
-      "dependencies": {
-        "@audio-ui/core": "^0.29.2",
-      },
-      "devDependencies": {
-        "@happy-dom/global-registrator": "^21.0.4",
-        "@types/bun": "1.4.2",
-        "@ui-sdk/core": "0.1.0-beta.5",
-        "tsup": "^8.5.0",
-        "typescript": "^7.0.2",
-      },
-      "peerDependencies": {
-        "@ui-sdk/core": "0.1.0-beta.5",
-      },
-    },
   },
   "catalog": {
     "@audio/beat-detect": "1.1.0",
@@ -506,8 +486,6 @@
     "@audio-ui/gl": ["@audio-ui/gl@workspace:packages/gl"],
 
     "@audio-ui/icons": ["@audio-ui/icons@workspace:packages/icons"],
-
-    "@audio-ui/primitives": ["@audio-ui/primitives@workspace:packages/primitives"],
 
     "@audio/beat-detect": ["@audio/beat-detect@1.1.0", "", { "dependencies": { "@audio/beat-tempo": "^2.0.0", "@audio/onset": "^1.0.3" } }, "sha512-yO7DuuVunglnbZ+BdRF+9iQmK/Ssnc4Dg0dagyPdSsUnbPvP+EXPriF5AFG8zhQ30KFU6tOkZZ0IjXpGxYHgbA=="],
 

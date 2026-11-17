@@ -1,5 +1,5 @@
-import { envelope } from "@audio-ui/primitives/envelope";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { envelope } from "@/primitives/envelope";
 
 /** Which element each part is. */
 export const parts = createParts(envelope, {

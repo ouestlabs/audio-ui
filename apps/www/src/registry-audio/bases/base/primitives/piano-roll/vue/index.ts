@@ -1,9 +1,6 @@
-import {
-  type Note as NoteValue,
-  pianoRoll,
-} from "@audio-ui/primitives/piano-roll";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, Fragment, h } from "vue";
+import { type Note as NoteValue, pianoRoll } from "@/primitives/piano-roll";
 
 /** Which element each part is. */
 const parts = createParts(pianoRoll, {

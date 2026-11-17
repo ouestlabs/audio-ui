@@ -134,7 +134,7 @@ The page of each component has its parts, its options and an example in your fra
 A plain HTML page can run a primitive with no CLI, no bundler and no `node_modules`: the site serves each web adapter as a script, with its packages inside. Load the one you need, and write its tags:
 
 ```html title="index.html"
-<script type="module" src="https://www.audio-ui.dev/web/0.1.1/knob.js"></script>
+<script type="module" src="https://www.audio-ui.dev/web/0.1.2/knob.js"></script>
 
 <audio-ui-knob value="40">
   <audio-ui-knob-control>
@@ -146,7 +146,7 @@ A plain HTML page can run a primitive with no CLI, no bundler and no `node_modul
 </audio-ui-knob>
 ```
 
-The folder of the address is a version, the one of `@audio-ui/primitives`, and the files of a version never change: your page keeps what you wrote it against, and moving to a newer version is a change of the address. There is no address that follows the latest release. Every primitive has a script, named as it is: `fader.js`, `meter.js`, `waveform.js`, `piano-roll.js`… A page that loads several downloads the code they share once. Browsers only run module scripts from a server, so open the page through one, not from the file system.
+The folder of the address is a version of the scripts, and the files of a version never change: your page keeps what you wrote it against, and moving to a newer version is a change of the address. There is no address that follows the latest release. Every primitive has a script, named as it is: `fader.js`, `meter.js`, `waveform.js`, `piano-roll.js`… A page that loads several downloads the code they share once. Browsers only run module scripts from a server, so open the page through one, not from the file system.
 
 </ForFrameworks>
 

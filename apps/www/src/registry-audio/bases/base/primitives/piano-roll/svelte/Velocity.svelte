@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/primitives/piano-roll";
 import type { ComponentProps, Snippet } from "svelte";
 import { type Known, parts } from "./parts";
 

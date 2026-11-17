@@ -1,6 +1,6 @@
-import { waveform } from "@audio-ui/primitives/waveform";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps, ComponentType, ReactNode } from "react";
+import { waveform } from "@/primitives/waveform";
 
 const noop = () => undefined;
 

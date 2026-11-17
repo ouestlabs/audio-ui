@@ -1,9 +1,5 @@
-import {
-  type SequencerState,
-  sequencer,
-  viewOf,
-} from "@audio-ui/primitives/sequencer";
 import { createParts, wrappedButton, wrappedChild } from "@ui-sdk/web";
+import { type SequencerState, sequencer, viewOf } from "@/primitives/sequencer";
 
 const ROW = "audio-ui-sequencer-row";
 const CELL = "audio-ui-sequencer-cell";

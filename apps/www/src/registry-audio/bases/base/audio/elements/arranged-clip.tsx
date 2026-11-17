@@ -1,9 +1,5 @@
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
-import type {
-  ClipChangeDetails,
-  ClipCommitDetails,
-} from "@audio-ui/primitives/timeline";
 import {
   type FocusEvent,
   Fragment,
@@ -17,6 +13,10 @@ import {
   useRef,
   useState,
 } from "react";
+import type {
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "@/primitives/timeline";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ContextMenu,

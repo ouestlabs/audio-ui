@@ -1,6 +1,6 @@
-import { type XYPadPublicState, xypad } from "@audio-ui/primitives/xypad";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { type XYPadPublicState, xypad } from "@/primitives/xypad";
 
 /** Which element each part is. */
 const parts = createParts(xypad, {

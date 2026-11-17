@@ -8,8 +8,10 @@ import { expect, test } from "bun:test";
  * registry ships, by an item of its own.
  */
 
+const REPEATED_IMPORT = /["']@\/components\/audio-ui\/([a-z-]+)\/\1["']/;
 const OUR_PACKAGE = /^@audio-ui\/(?:core|primitives)(?:\/|$)/;
-const OUR_IMPORT = /from\s+"@audio-ui\/(?:core|primitives)(?:\/[^"]*)?"/;
+const OUR_IMPORT =
+  /from\s+"(?:@audio-ui\/(?:core|primitives)(?:\/[^"]*)?|@\/primitives\/[^"]*)"/;
 
 interface BuiltItem {
   dependencies?: string[];
@@ -44,4 +46,13 @@ test("no file of an item imports @audio-ui/core or @audio-ui/primitives", () => 
       .map((file) => `${item.name}: ${file.path}`)
   );
   expect(importing).toEqual([]);
+});
+
+test("no file imports a primitive as @/components/audio-ui/<name>/<name>: the CLI shortens it to the file itself", () => {
+  const repeated = items.flatMap((item) =>
+    (item.files ?? [])
+      .filter((file) => REPEATED_IMPORT.test(file.content ?? ""))
+      .map((file) => `${item.name}: ${file.path}`)
+  );
+  expect(repeated).toEqual([]);
 });

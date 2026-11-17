@@ -1,5 +1,5 @@
-import { timeline } from "@audio-ui/primitives/timeline";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { timeline } from "@/primitives/timeline";
 
 /** Which element each part is. */
 export const parts = createParts(timeline, {

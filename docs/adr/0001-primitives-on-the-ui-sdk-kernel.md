@@ -1,6 +1,6 @@
 # Primitives are written once, on the UI SDK kernel
 
-Status: accepted, 2026-11-15.
+Status: accepted, 2026-11-15. Amended 2026-11-17: the primitives were written in the registry rather than in a package, and `@audio-ui/primitives` was removed from the repository.
 
 ## Context
 
