@@ -7,7 +7,7 @@ import { Route as SiteRoute } from "@/routes/_site";
 export const Route = createFileRoute("/_site/docs/")({
   component: DocsIndexPage,
   loader: async () => {
-    const data = await loadDocPage({ data: [] });
+    const data = await loadDocPage({ data: { framework: null, slugs: [] } });
     await docsLoader.preload(data.path);
     return data;
   },

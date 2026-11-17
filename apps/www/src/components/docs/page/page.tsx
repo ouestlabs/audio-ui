@@ -21,6 +21,7 @@ import {
   pageScope,
 } from "@/lib/design-system/customizer-scope";
 import { readRawDoc } from "@/lib/docs/content/docs-text";
+import { FRAMEWORKS } from "@/lib/docs/content/frameworks";
 import { getPageImage, source } from "@/lib/docs/content/source";
 import {
   buildBreadcrumbJsonLd,
@@ -57,26 +58,33 @@ export interface DocPageData {
 /** The SEO a component's docs page may have of its own, or lend to another page: only a canonical component page has any. */
 function componentDocSeo(
   slugs: string[],
-  doc: { base?: string; description?: string; title: string }
+  doc: { base?: string; description?: string; title: string },
+  framework: string | null
 ) {
   const slug = slugs[2] ?? "";
   const onBase = slugs[0] === "components" && slugs[1] === "base";
   if (!(onBase && slugs.length === 3 && isCanonicalComponentDoc(slug))) {
     return null;
   }
-  return getComponentDocSeo(slug, doc.title, "base", doc.description);
+  return getComponentDocSeo(
+    slug,
+    doc.title,
+    "base",
+    doc.description,
+    FRAMEWORKS.find((each) => each.id === framework)
+  );
 }
 
-/** Reads a docs page's frontmatter and works out its SEO: a component's page may be another's canonical. */
+/** Reads a docs page's frontmatter and works out its SEO: a component's page may be another's canonical, and one read for another framework than React is named for it. */
 export const loadDocPage = createServerFn({ method: "GET" })
-  .validator((slugs: string[]) => slugs)
-  .handler(async ({ data: slugs }): Promise<DocPageData> => {
+  .validator((data: { framework: string | null; slugs: string[] }) => data)
+  .handler(async ({ data: { framework, slugs } }): Promise<DocPageData> => {
     const page = source.getPage(slugs);
     if (!page) {
       throw notFound();
     }
     const doc = page.data;
-    const seo = componentDocSeo(slugs, doc);
+    const seo = componentDocSeo(slugs, doc, framework);
     const isComponentDoc = doc.component === true && doc.base !== undefined;
 
     return {
