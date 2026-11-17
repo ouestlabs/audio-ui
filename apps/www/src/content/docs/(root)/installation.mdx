@@ -77,9 +77,13 @@ The shadcn CLI is for React, so copy the headless primitive by hand, from the ad
 
 `primitive.ts`, `grid.ts`, `frame.ts` and `pitch.ts` are shared: every primitive that reads one installs it at the same path. The CLI skips a file your project already holds, so you keep the copy you installed first. These files only gain exports, never lose one, so a primitive installed later still finds what it reads. To pick up an addition, ask the CLI to overwrite (`npx shadcn@latest add <item> --overwrite`), or copy the file from its item by hand.
 
+<ForFrameworks only="react">
+
 ## Without the CLI
 
 Each item is a JSON file at its address, and the CLI only reads it: you can do the same by hand. Open the address of the item (for the knob in Vue, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`), write each entry of `files` to its path under `components/audio-ui/` with its `content`, and install the packages its `dependencies` lists. An agent can do this for you: the prompt of [Get Started](/docs) says how.
+
+</ForFrameworks>
 
 ## Use it
 
