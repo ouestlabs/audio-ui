@@ -1,9 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
-import {
-  primitiveFiles,
-  SHARED_ITEMS,
-  SHIPPED_PRIMITIVES,
-} from "./primitives.ts";
+import { primitiveFiles, SHARED_ITEMS } from "./primitives.ts";
 
 /**
  * The factories of registry items: every `_registry.ts` declares its items
@@ -196,7 +192,7 @@ export interface PrimitiveFramework {
  * `<name>-<framework>`, from the adapter files in `primitives/<name>/`. Each
  * installs to `components/audio-ui/<name>/`. A primitive written in the
  * registry ships in each of its items, beside the adapter, so the user owns
- * both; the others still render `@audio-ui/primitives`.
+ * both.
  */
 const ADAPTER_INDEX = /^(react|vue|web)\/index(\.\w+)$/;
 
@@ -205,8 +201,7 @@ export function primitiveItems(
   frameworks: PrimitiveFramework[],
   description: string
 ): RegistryItem[] {
-  // A primitive written in the registry ships in each item: no package of ours.
-  const ships = SHIPPED_PRIMITIVES.has(name);
+  // A primitive ships in each item, with no package of ours.
   return frameworks.map((framework) => {
     // shadcn-svelte puts a `registry:ui` file under its own `ui` folder, and
     // a `registry:component` one in `components`, which is where it belongs.
@@ -217,21 +212,18 @@ export function primitiveItems(
     return {
       categories: ["primitive", framework.name],
       dependencies: [
-        ...(ships ? [] : ["@audio-ui/primitives"]),
         `@ui-sdk/core@${UI_SDK}`,
         ...framework.dependencies
-          .filter(
-            (dependency) => !(ships && dependency.startsWith("@audio-ui/"))
-          )
+          .filter((dependency) => !dependency.startsWith("@audio-ui/"))
           .map((dependency) =>
             dependency.startsWith("@ui-sdk/")
               ? `${dependency}@${UI_SDK}`
               : dependency
           ),
       ],
-      description: `${description} Its ${framework.name} adapter${ships ? ", with the primitive it renders" : ""}.`,
+      description: `${description} Its ${framework.name} adapter, with the primitive it renders.`,
       files: [
-        ...(ships ? primitiveFiles(name) : []).map((file) =>
+        ...primitiveFiles(name).map((file) =>
           fileOf(`primitives/${file}`, type, `${root}audio-ui/${file}`)
         ),
         ...framework.files.map((file) =>

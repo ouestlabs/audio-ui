@@ -1,5 +1,3 @@
-import { resolveScale } from "@audio-ui/core";
-import { valueOn } from "@audio-ui/core/plot";
 import {
   type ComponentProps,
   createContext,
@@ -13,6 +11,7 @@ import {
 } from "react";
 import { Plot as PlotPrimitive } from "@/components/audio-ui/plot/react";
 import { cn } from "@/lib/utils";
+import { type PlotAxis, valueOn } from "./plot/plot";
 
 type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
 type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
@@ -20,8 +19,8 @@ type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
 /** What `useValueAtPointer` reads: the plot's element, and its axes. */
 const PlotAxes = createContext<{
   axes: {
-    x: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
-    y: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
+    x: PlotAxis;
+    y: PlotAxis;
   };
   el: RefObject<HTMLDivElement | null>;
   /** What each handle asked to hear of its own changes. */
@@ -56,8 +55,8 @@ function Plot({
   const context = useMemo(
     () => ({
       axes: {
-        x: { max: maxX, min: minX, scale: resolveScale(scaleX ?? "linear") },
-        y: { max: maxY, min: minY, scale: resolveScale(scaleY ?? "linear") },
+        x: { max: maxX, min: minX, scale: scaleX ?? "linear" },
+        y: { max: maxY, min: minY, scale: scaleY ?? "linear" },
       },
       el,
       handlers,

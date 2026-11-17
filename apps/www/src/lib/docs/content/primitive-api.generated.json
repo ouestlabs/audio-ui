@@ -131,7 +131,7 @@
     "name": "fader",
     "options": [
       {
-        "description": "Value the fill starts from, such as `0` on a -1…1 pan. Defaults to `min`.",
+        "description": "Value the fill starts from, such as `0` on a -1 to 1 pan. Defaults to `min`.",
         "name": "anchor",
         "optional": true,
         "type": "number"
@@ -150,7 +150,7 @@
       },
       {
         "default": "10",
-        "description": "Step for Page Up/Page Down and Shift + arrow keys.",
+        "description": "Step for Page Up, Page Down and Shift with the arrow keys.",
         "name": "largeStep",
         "optional": true,
         "type": "number"
@@ -284,7 +284,7 @@
     "name": "knob",
     "options": [
       {
-        "description": "Value the indicator arc grows from, such as `0` on a -1…1 pan. Defaults to `min`.",
+        "description": "Value the indicator arc grows from, such as `0` on a -1 to 1 pan. Defaults to `min`.",
         "name": "anchor",
         "optional": true,
         "type": "number"
@@ -310,7 +310,7 @@
       },
       {
         "default": "10",
-        "description": "Step for Page Up/Page Down and Shift + arrow keys.",
+        "description": "Step for Page Up, Page Down and Shift with the arrow keys.",
         "name": "largeStep",
         "optional": true,
         "type": "number"
@@ -355,10 +355,10 @@
       },
       {
         "default": "\"linear\"",
-        "description": "",
+        "description": "`\"linear\"`, `\"log\"`, or a `{ to, from }` pair that maps values into an even space and back.",
         "name": "scale",
         "optional": true,
-        "type": "ParameterScaleProp"
+        "type": "NumberScale"
       },
       {
         "default": "1",
@@ -495,7 +495,7 @@
         "description": "A live frame an engine pushes to, painted without a render.",
         "name": "source",
         "optional": true,
-        "type": "Source<MeterFrame>"
+        "type": "MeterSource"
       },
       {
         "description": "Level at or above which a channel is in its warning zone. Unset, there is none.",
@@ -521,6 +521,10 @@
             "from": "channel",
             "kind": "number",
             "required": true
+          },
+          "value": {
+            "from": "channel.index",
+            "kind": "number"
           }
         }
       },
@@ -532,6 +536,10 @@
             "from": "channel",
             "kind": "number",
             "required": true
+          },
+          "value": {
+            "from": "channel.index",
+            "kind": "number"
           }
         }
       },
@@ -550,6 +558,10 @@
             "from": "channel",
             "kind": "number",
             "required": true
+          },
+          "value": {
+            "from": "channel.index",
+            "kind": "number"
           }
         }
       },
@@ -571,6 +583,10 @@
             "from": "channel",
             "kind": "number",
             "required": true
+          },
+          "value": {
+            "from": "channel.index",
+            "kind": "number"
           }
         }
       }
@@ -723,7 +739,7 @@
         "description": "",
         "name": "orientation",
         "optional": true,
-        "type": "\"horizontal\" | \"vertical\""
+        "type": "PianoOrientation"
       },
       {
         "description": "Only these pitches get keys, instead of `minPitch` to `maxPitch`.",
@@ -748,6 +764,10 @@
             "from": "key",
             "kind": "number",
             "required": true
+          },
+          "value": {
+            "from": "key.pitch",
+            "kind": "number"
           }
         }
       },
@@ -946,7 +966,7 @@
         "description": "A live playback position, read when a gesture needs it.",
         "name": "source",
         "optional": true,
-        "type": "Source<number>"
+        "type": "PositionSource"
       },
       {
         "description": "",
@@ -1121,17 +1141,17 @@
       },
       {
         "default": "\"linear\"",
-        "description": "How x values spread across: `\"log\"` for frequency, or your own `{ toPosition, toValue }`.",
+        "description": "How x values spread across: `\"log\"` for frequency, or a `{ to, from }` pair that maps values into an even space and back.",
         "name": "scaleX",
         "optional": true,
-        "type": "ParameterScaleProp"
+        "type": "NumberScale"
       },
       {
         "default": "\"linear\"",
         "description": "How y values spread up.",
         "name": "scaleY",
         "optional": true,
-        "type": "ParameterScaleProp"
+        "type": "NumberScale"
       }
     ],
     "parts": [
@@ -1313,7 +1333,7 @@
         "description": "The step being played, a live value followed without a render.",
         "name": "source",
         "optional": true,
-        "type": "Source<number>"
+        "type": "StepSource"
       },
       {
         "description": "The pattern: a row per sound, each a list of steps.",
@@ -1322,7 +1342,7 @@
         "type": "Pattern"
       },
       {
-        "description": "How loud each step plays, 0…1, a row per sound like the pattern.",
+        "description": "How loud each step plays, 0 to 1, a row per sound like the pattern.",
         "name": "velocities",
         "optional": true,
         "type": "Velocities"

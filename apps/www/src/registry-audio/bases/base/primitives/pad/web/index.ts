@@ -1,5 +1,5 @@
-import { pad } from "@audio-ui/primitives/pad";
 import { createParts, wrappedButton } from "@ui-sdk/web";
+import { pad } from "@/primitives/pad";
 
 /**
  * The whole web adapter of the pad grid: a tag for each part. A pad's own

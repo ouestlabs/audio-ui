@@ -1,5 +1,5 @@
-import { plot } from "@audio-ui/primitives/plot";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { plot } from "@/primitives/plot";
 
 /** Which element each part is. */
 export const parts = createParts(plot, {

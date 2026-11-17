@@ -1,6 +1,6 @@
-import { timeline } from "@audio-ui/primitives/timeline";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps, ComponentType, ReactNode } from "react";
+import { timeline } from "./timeline";
 
 const noop = () => undefined;
 

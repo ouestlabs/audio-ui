@@ -1,5 +1,5 @@
-import { piano } from "@audio-ui/primitives/piano";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { piano } from "@/primitives/piano";
 
 /** Which element each part is. */
 export const parts = createParts(piano, {

@@ -10,7 +10,9 @@
  * installs two primitives holds it once.
  */
 
-const OUR_PACKAGES = /["']@audio-ui\/(?:core|primitives)\/[^"']*["']/g;
+import { dirname, relative } from "node:path/posix";
+
+const OUR_PACKAGES = /["'](?:@audio-ui\/core\/|@\/primitives\/)[^"']*["']/g;
 
 /** The primitives written in the registry. A primitive listed here needs no package of ours. */
 export const SHIPPED_PRIMITIVES = new Set([
@@ -93,11 +95,11 @@ export function rewriteAdapter(
   return content.replace(OUR_PACKAGES, `"${path}"`);
 }
 
-const PRIMITIVE_IMPORT = /(["'])@audio-ui\/primitives\/([a-z-]+)\1/g;
+const PRIMITIVE_IMPORT = /(["'])@\/primitives\/([a-z-]+)\1/g;
 
 /**
  * Any other file of the registry (a demo, a block) that imports a primitive
- * written in the registry, as `@audio-ui/primitives/<name>`, imports it where
+ * written in the registry, as `@/primitives/<name>`, imports it where
  * the primitive's adapter installs it: `$lib/components/audio-ui/<name>/<name>`
  * in Svelte, `@/components/audio-ui/<name>/<name>` elsewhere.
  */
@@ -193,4 +195,24 @@ export function sharedDependencies(content: string) {
     }
   }
   return needed;
+}
+
+const REPEATED_IMPORT = /(["'])@\/components\/audio-ui\/([a-z-]+)\/\2\1/g;
+
+/**
+ * The shadcn CLI turns an import of `@/components/audio-ui/<name>/<name>` into
+ * `@/components/audio-ui/<name>`, which for an element named as its primitive
+ * (`plot.tsx` over `plot/plot.ts`) is the file itself. A file that imports a
+ * primitive by that path imports it by a relative path instead, from where the
+ * file installs, which the CLI leaves as it is.
+ */
+export function relativizeRepeatedImports(content: string, target: string) {
+  const directory = dirname(target);
+  return content.replace(
+    REPEATED_IMPORT,
+    (_match, quote: string, name: string) => {
+      const path = relative(directory, `components/audio-ui/${name}/${name}`);
+      return `${quote}${path.startsWith(".") ? path : `./${path}`}${quote}`;
+    }
+  );
 }

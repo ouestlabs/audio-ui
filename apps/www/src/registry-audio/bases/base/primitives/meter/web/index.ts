@@ -1,9 +1,5 @@
-import {
-  channelView,
-  type MeterState,
-  meter,
-} from "@audio-ui/primitives/meter";
 import { createParts } from "@ui-sdk/web";
+import { channelView, type MeterState, meter } from "@/primitives/meter";
 
 /** Writes the level's text as one text node's data, so a change restyles nothing else. */
 function writeText(part: Element, text: string) {

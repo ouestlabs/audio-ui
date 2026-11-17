@@ -2,10 +2,6 @@ import type { Source } from "@audio-ui/core";
 import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
-import type {
-  ClipChangeDetails,
-  ClipCommitDetails,
-} from "@audio-ui/primitives/timeline";
 import {
   type FocusEvent,
   Fragment,
@@ -19,15 +15,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -40,7 +27,19 @@ import {
   TimelineClipHeader,
   trackSwatch,
 } from "@/components/audio-ui/timeline";
+import type {
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "@/components/audio-ui/timeline/timeline";
 import { WaveformLane } from "@/components/audio-ui/waveform-lane";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   type Arranged,
   type ClipAction,
@@ -51,6 +50,7 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";

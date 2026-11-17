@@ -1,5 +1,5 @@
-import { xypad } from "@audio-ui/primitives/xypad";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { xypad } from "@/primitives/xypad";
 
 /** Which element each part is. */
 export const parts = createParts(xypad, {

@@ -14,7 +14,7 @@ import { join } from "node:path";
 
 const WEB = join(import.meta.dir, "..");
 const PACKAGES = join(WEB, "../../packages");
-const PRIMITIVES = join(PACKAGES, "primitives/src");
+const PRIMITIVES = join(WEB, "src/registry-audio/bases/base/primitives");
 const ADAPTERS = join(WEB, "src/registry-audio/bases/base/primitives");
 export const MANIFEST = join(
   WEB,
@@ -223,7 +223,7 @@ function exportsOf(adapter: string) {
 }
 
 function slotsOf(name: string): Promise<Record<string, any>> {
-  return import(join(PRIMITIVES, name, "index.ts")).then((module) => {
+  return import(join(PRIMITIVES, name, `${name}.ts`)).then((module) => {
     const description = Object.values(module).find(
       (value: any) => value?.options && value?.slots
     ) as { slots: Record<string, any> } | undefined;

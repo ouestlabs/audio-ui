@@ -1,3 +1,4 @@
+import { createParts } from "@ui-sdk/web";
 import {
   bandOf,
   curveOf,
@@ -6,8 +7,7 @@ import {
   plot,
   ticksOf,
   traceOf,
-} from "@audio-ui/primitives/plot";
-import { createParts } from "@ui-sdk/web";
+} from "@/primitives/plot";
 
 const SVG = "http://www.w3.org/2000/svg";
 

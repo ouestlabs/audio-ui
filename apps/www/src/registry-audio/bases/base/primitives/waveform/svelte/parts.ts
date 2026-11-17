@@ -1,5 +1,5 @@
-import { waveform } from "@audio-ui/primitives/waveform";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { waveform } from "@/primitives/waveform";
 
 /** Which element each part is. */
 export const parts = createParts(waveform, {

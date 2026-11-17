@@ -1,10 +1,5 @@
-import {
-  type PianoState,
-  piano,
-  pitchName,
-  viewOf,
-} from "@audio-ui/primitives/piano";
 import { createParts, wrappedButton } from "@ui-sdk/web";
+import { type PianoState, piano, pitchName, viewOf } from "@/primitives/piano";
 
 const KEY = "audio-ui-piano-key";
 

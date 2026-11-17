@@ -1,12 +1,12 @@
+import { createParts } from "@ui-sdk/vue/primitive";
+import { defineComponent, h, type InjectionKey, inject, provide } from "vue";
 import {
   type ArcState,
   DEFAULT_ARC_STROKE_WIDTH,
   type KnobPrimitiveOptions,
   type KnobPublicState,
   knob,
-} from "@audio-ui/primitives/knob";
-import { createParts } from "@ui-sdk/vue/primitive";
-import { defineComponent, h, type InjectionKey, inject, provide } from "vue";
+} from "@/primitives/knob";
 
 /** Which element each part is. */
 const parts = createParts(knob, {

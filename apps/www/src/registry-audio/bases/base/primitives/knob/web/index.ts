@@ -1,3 +1,4 @@
+import { createParts, wrappedChild } from "@ui-sdk/web";
 import {
   arcOf,
   DEFAULT_ARC_STROKE_WIDTH,
@@ -5,8 +6,7 @@ import {
   type KnobState,
   knob,
   viewOf,
-} from "@audio-ui/primitives/knob";
-import { createParts, wrappedChild } from "@ui-sdk/web";
+} from "@/primitives/knob";
 
 /** A thumb's attributes that name its input instead, so they are read once. */
 const INPUT_NAMES = ["aria-describedby", "aria-label", "aria-labelledby"];

@@ -1,8 +1,8 @@
+import { type RefObject, useCallback, useState } from "react";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,
-} from "@audio-ui/primitives/timeline";
-import { type RefObject, useCallback, useState } from "react";
+} from "@/primitives/timeline";
 import type {
   Arranged,
   ArrangementTrack,

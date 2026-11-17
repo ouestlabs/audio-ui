@@ -1,6 +1,6 @@
-import { sequencer, type VelocityState } from "@audio-ui/primitives/sequencer";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps, ComponentType, ReactNode } from "react";
+import { sequencer, type VelocityState } from "./sequencer";
 
 const noop = () => undefined;
 

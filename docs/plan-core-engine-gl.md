@@ -5,7 +5,7 @@ Context (2026-11-17). The docs have no "Core" section any more: the pages of `co
 ## What holds today
 
 - A registry item declares npm dependencies, so `npx shadcn@latest add @audio-ui/knob` already installs `@audio-ui/core` for the user: one command, no setup.
-- `@audio-ui/primitives` depends on core. The DAW, the lab and the video depend on engine. Copying the logic into each would duplicate it with no shared updates.
+- The DAW, the lab and the video depend on engine. Copying the logic into each would duplicate it with no shared updates.
 - engine wraps the audio.js atoms and holds generated files (worklet source, kernels) that a test keeps in sync. The rule "a registry file never imports an `@audio/*` atom" exists so a user is not tied to them. Copying engine into a project breaks it.
 
 ## Proposal

@@ -1,11 +1,4 @@
 import {
-  createFrameTask,
-  createSource,
-  type FrameTask,
-  type Source,
-} from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
-import {
   type LogSpectrumOptions,
   logSpectrum,
   peakDb,
@@ -19,6 +12,9 @@ import type {
   DeviceTaps,
   ParameterDescriptor,
 } from "@audio-ui/engine/device";
+import { createFrameTask, type FrameTask } from "@/components/audio-ui/frame";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
+import { createSource, type Source } from "@/components/audio-ui/primitive";
 
 /** The level a meter of silence reads, in dB. */
 const SILENCE_DB = -100;

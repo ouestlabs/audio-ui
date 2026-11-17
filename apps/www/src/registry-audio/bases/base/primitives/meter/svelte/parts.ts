@@ -1,5 +1,5 @@
-import { meter } from "@audio-ui/primitives/meter";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { meter } from "@/primitives/meter";
 
 /** Which element each part is. */
 export const parts = createParts(meter, {

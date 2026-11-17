@@ -1,6 +1,6 @@
-import { envelope, type ShapeState } from "@audio-ui/primitives/envelope";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps } from "react";
+import { envelope, type ShapeState } from "@/primitives/envelope";
 
 /** Which element each part is. */
 const parts = createParts(envelope, {

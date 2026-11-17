@@ -3,13 +3,13 @@
  * with no bundler and no import map: `public/web/<version>/<name>.js`, one for
  * each primitive. They share their code in chunks beside them, so a page that
  * loads several downloads the common part once, and the packages they build on
- * (`@audio-ui/core`, `@audio-ui/primitives`, `@ui-sdk/web`) are inside.
+ * (`@ui-sdk/web`) are inside.
  *
- * The folder is named by the version of `@audio-ui/primitives`, and the files
- * of a version are served as immutable: a build writes the folder of the
- * current version and never touches another, so a page pinned to a version
- * keeps what it was written against. An adapter that changes ships under a new
- * version of the package.
+ * The folder is named by the version in `src/registry-audio/web-version.json`,
+ * and the files of a version are served as immutable: a build writes the
+ * folder of the current version and never touches another, so a page pinned
+ * to a version keeps what it was written against. An adapter that changes
+ * ships under a new version: raise it there, and commit the folder this writes.
  */
 import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -17,7 +17,7 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dir, "..");
 const PRIMITIVES = join(ROOT, "src/registry-audio/bases/base/primitives");
 const { version } = (await Bun.file(
-  join(ROOT, "../../packages/primitives/package.json")
+  join(ROOT, "src/registry-audio/web-version.json")
 ).json()) as { version: string };
 const OUT = join(ROOT, "public/web", version);
 const ENTRIES = join(ROOT, "node_modules/.cache/web-entries");

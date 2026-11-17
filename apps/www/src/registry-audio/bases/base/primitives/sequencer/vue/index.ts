@@ -1,6 +1,6 @@
-import { sequencer, type VelocityState } from "@audio-ui/primitives/sequencer";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { sequencer, type VelocityState } from "@/primitives/sequencer";
 
 /** Which element each part is. */
 const parts = createParts(sequencer, {

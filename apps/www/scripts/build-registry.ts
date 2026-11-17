@@ -22,6 +22,7 @@ import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
+  relativizeRepeatedImports,
   rewriteAdapter,
   rewritePrimitiveImports,
   SHARED_ITEMS,
@@ -372,10 +373,15 @@ async function buildFile(
   }
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
+  const target = file.target || defaultTarget(item, file, fileName);
+  // 7. A path the CLI would shorten to the file itself is relative to where the file lands
+  if (!target.startsWith("~/")) {
+    content = relativizeRepeatedImports(content, target);
+  }
   return {
     content: content.trim(),
     path: fileName,
-    target: file.target || defaultTarget(item, file, fileName),
+    target,
     type: file.type,
   };
 }

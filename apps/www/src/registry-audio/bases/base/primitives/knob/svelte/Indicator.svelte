@@ -1,5 +1,5 @@
 <script lang="ts">
-import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/primitives/knob";
+import { DEFAULT_ARC_STROKE_WIDTH } from "@/primitives/knob";
 import type { ComponentProps } from "svelte";
 import Arc from "./Arc.svelte";
 import { parts } from "./parts";

@@ -1,6 +1,6 @@
-import { type XYPadPublicState, xypad } from "@audio-ui/primitives/xypad";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps, ComponentType, ReactNode } from "react";
+import { type XYPadPublicState, xypad } from "@/primitives/xypad";
 
 const noop = () => undefined;
 

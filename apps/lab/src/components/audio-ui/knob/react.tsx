@@ -1,11 +1,3 @@
-import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/core/knob";
-import {
-  type ArcState,
-  type ChangeDetails,
-  type KnobPrimitiveOptions,
-  type KnobPublicState,
-  knob,
-} from "@audio-ui/primitives/knob";
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
@@ -22,6 +14,14 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  type ArcState,
+  type ChangeDetails,
+  DEFAULT_ARC_STROKE_WIDTH,
+  type KnobPrimitiveOptions,
+  type KnobPublicState,
+  knob,
+} from "./knob";
 
 const noop = () => undefined;
 
@@ -75,7 +75,10 @@ function Provider({
 
 function KnobRoot(props: ComponentProps<typeof parts.Root>) {
   const defaults = use(KnobDefaults);
-  return <parts.Root {...defaults} {...props} />;
+  // A prop left undefined by a wrapper does not hide what the provider gives.
+  return (
+    <parts.Root {...props} dragMode={props.dragMode ?? defaults.dragMode} />
+  );
 }
 
 /** An arc in the part's own state, written as its child so the server renders it. */

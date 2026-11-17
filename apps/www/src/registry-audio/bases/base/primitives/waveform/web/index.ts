@@ -1,5 +1,5 @@
-import { waveform } from "@audio-ui/primitives/waveform";
 import { createParts } from "@ui-sdk/web";
+import { waveform } from "@/primitives/waveform";
 
 const NAMING = ["aria-describedby", "aria-label", "aria-labelledby"] as const;
 

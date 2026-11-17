@@ -1,6 +1,6 @@
-import { timeline } from "@audio-ui/primitives/timeline";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { timeline } from "@/primitives/timeline";
 
 /** Which element each part is. */
 const parts = createParts(timeline, {

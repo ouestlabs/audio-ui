@@ -1,6 +1,6 @@
-import type { KnobPrimitiveOptions } from "@audio-ui/primitives/knob";
-import { knob } from "@audio-ui/primitives/knob";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import type { KnobPrimitiveOptions } from "@/primitives/knob";
+import { knob } from "@/primitives/knob";
 
 /** Which element each part is. */
 export const parts = createParts(knob, {

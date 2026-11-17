@@ -13,7 +13,6 @@
   "dependencies": {
     "@audio-ui/core": "*",
     "@audio-ui/engine": "*",
-    "@audio-ui/primitives": "workspace:*",
     "@base-ui/react": "catalog:",
     "@fontsource/bricolage-grotesque": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",

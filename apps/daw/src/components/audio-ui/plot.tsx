@@ -1,5 +1,3 @@
-import { resolveScale } from "@audio-ui/core";
-import { valueOn } from "@audio-ui/core/plot";
 import {
   type ComponentProps,
   createContext,
@@ -11,8 +9,9 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { cn } from "@/lib/utils";
 import { Plot as PlotPrimitive } from "@/components/audio-ui/plot/react";
+import { cn } from "@/lib/utils";
+import { type PlotAxis, valueOn } from "./plot/plot";
 
 type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
 type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
@@ -20,8 +19,8 @@ type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
 /** What `useValueAtPointer` reads: the plot's element, and its axes. */
 const PlotAxes = createContext<{
   axes: {
-    x: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
-    y: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
+    x: PlotAxis;
+    y: PlotAxis;
   };
   el: RefObject<HTMLDivElement | null>;
   /** What each handle asked to hear of its own changes. */
@@ -56,8 +55,8 @@ function Plot({
   const context = useMemo(
     () => ({
       axes: {
-        x: { max: maxX, min: minX, scale: resolveScale(scaleX ?? "linear") },
-        y: { max: maxY, min: minY, scale: resolveScale(scaleY ?? "linear") },
+        x: { max: maxX, min: minX, scale: scaleX ?? "linear" },
+        y: { max: maxY, min: minY, scale: scaleY ?? "linear" },
       },
       el,
       handlers,
@@ -164,7 +163,10 @@ function PlotDot({
 }: ComponentProps<typeof PlotPrimitive.Dot>) {
   return (
     <PlotPrimitive.Dot
-      className={cn("rounded-full bg-primary ring-4 ring-primary/25 size-2.5 rounded-full", className)}
+      className={cn(
+        "rounded-full bg-primary ring-4 ring-primary/25 size-2.5",
+        className
+      )}
       data-slot="plot-dot"
       {...props}
     />
@@ -226,7 +228,7 @@ function PlotGrid({
   return (
     <PlotPrimitive.Grid
       className={cn(
-        "text-muted-foreground rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none",
+        "text-muted-foreground rounded-[inherit] text-[10px] tabular-nums leading-none",
         // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame.
         "[&>svg]:overflow-hidden! [&>svg]:rounded-[inherit]",
         "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",

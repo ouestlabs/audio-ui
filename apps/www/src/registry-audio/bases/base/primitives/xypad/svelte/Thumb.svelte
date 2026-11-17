@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { XYPadPublicState } from "@audio-ui/primitives/xypad";
+import type { XYPadPublicState } from "@/primitives/xypad";
 import type { ComponentProps, Snippet } from "svelte";
 import { parts } from "./parts";
 

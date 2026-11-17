@@ -1,6 +1,6 @@
-import { piano } from "@audio-ui/primitives/piano";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps } from "react";
+import { piano } from "./piano";
 
 /** Which element each part is. */
 const parts = createParts(piano, { key: "button", label: "span", root: "div" });

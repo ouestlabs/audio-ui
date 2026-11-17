@@ -1,6 +1,6 @@
-import { type FaderPublicState, fader } from "@audio-ui/primitives/fader";
 import { createParts } from "@ui-sdk/vue/primitive";
 import { defineComponent, h } from "vue";
+import { type FaderPublicState, fader } from "@/primitives/fader";
 
 /** Which element each part is. */
 const parts = createParts(fader, {

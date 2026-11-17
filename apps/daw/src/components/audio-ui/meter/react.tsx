@@ -1,6 +1,6 @@
-import { meter } from "@audio-ui/primitives/meter";
 import { createParts } from "@ui-sdk/react/primitive";
 import type { ComponentProps } from "react";
+import { meter } from "./meter";
 
 /** Which element each part is. */
 const parts = createParts(meter, {

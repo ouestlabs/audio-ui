@@ -7,17 +7,8 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@audio-ui/engine/device";
+import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Toggle } from "@/components/ui/toggle";
 import {
   FilterTypeSelect,
   isFilterType,
@@ -27,7 +18,17 @@ import {
   isWaveform,
   WaveformSelect,
 } from "@/components/audio-ui/waveform-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { cn } from "@/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;
@@ -66,6 +67,15 @@ function NumberControl({
     (next: number) => device.format(parameter.id, next),
     [device, parameter.id]
   );
+  const { scale } = parameter;
+  const numberScale: NumberScale | undefined =
+    scale === undefined || typeof scale === "string"
+      ? scale
+      : {
+          from: (position) =>
+            scale.toValue(position, parameter.min, parameter.max),
+          to: (next) => scale.toPosition(next, parameter.min, parameter.max),
+        };
   const change = useCallback(
     (next: number) =>
       onValueChange(device.set(value as never, parameter.id, next) as AnyState),
@@ -90,7 +100,7 @@ function NumberControl({
         max={parameter.max}
         min={parameter.min}
         onValueChange={change}
-        scale={parameter.scale}
+        scale={numberScale}
         size="sm"
         step={parameter.step}
         value={typeof current === "number" ? current : parameter.default}

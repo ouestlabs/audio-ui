@@ -1,5 +1,5 @@
 <script lang="ts">
-import type { KnobPublicState } from "@audio-ui/primitives/knob";
+import type { KnobPublicState } from "@/primitives/knob";
 import type { ComponentProps, Snippet } from "svelte";
 import { parts } from "./parts";
 

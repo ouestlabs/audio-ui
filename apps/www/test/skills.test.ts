@@ -59,7 +59,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["core", "engine", "gl", "primitives"]);
+const PACKAGES = new Set(["core", "engine", "gl"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -94,9 +94,10 @@ const engineExports = Object.keys(
 );
 const uiSource = (
   await Promise.all(
-    ["primitives", "core"].map((name) =>
-      read("**/*.{ts,tsx}", `${ROOT}/packages/${name}/src`)
-    )
+    [
+      `${ROOT}/apps/www/src/registry-audio/bases/base/primitives`,
+      `${ROOT}/packages/core/src`,
+    ].map((folder) => read("**/*.{ts,tsx}", folder))
   )
 )
   .flat()

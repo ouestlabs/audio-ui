@@ -1,5 +1,5 @@
-import { sequencer } from "@audio-ui/primitives/sequencer";
 import { createParts } from "@ui-sdk/svelte/primitive";
+import { sequencer } from "@/primitives/sequencer";
 
 /** Which element each part is. */
 export const parts = createParts(sequencer, {
