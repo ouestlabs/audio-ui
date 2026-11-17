@@ -21,6 +21,8 @@ import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
+const EXTENSION = /\.([a-z]+)$/;
+
 export function ComponentPreviewTabs({
   className,
   previewClassName,
@@ -49,10 +51,17 @@ export function ComponentPreviewTabs({
   /** The registry name of what is shown. */
   name: string;
   /** The code, given where to report it once loaded: the panel's copy button copies it, open or closed. */
-  source: (onCode: (code: string) => void) => React.ReactNode;
+  source: (onCode: (code: string, path?: string) => void) => React.ReactNode;
 }) {
   const previewRef = React.useRef<HTMLDivElement>(null);
-  const [code, setCode] = React.useState<string>();
+  const [file, setFile] = React.useState<{ code?: string; path?: string }>({});
+  const onCode = React.useCallback(
+    (content: string, path?: string) => setFile({ code: content, path }),
+    []
+  );
+  const { code } = file;
+  // The file as the registry names it (`knob-demo.ts`), the item's name until it is read.
+  const fileName = file.path?.split("/").at(-1) ?? `${name}.tsx`;
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
   // elements, pointer listeners, etc.). Defer mounting each one until it's
@@ -95,17 +104,18 @@ export function ComponentPreviewTabs({
           <Collapsible
             render={
               <FrameContent
-                className="mt-0.5 bg-site-code [&_pre]:max-h-96"
+                className="mt-0.5 bg-site-code [&_pre]:max-h-96 [&_pre]:scroll-fade-y"
                 data-slot="code"
               />
             }
           >
             <div className="flex items-center pr-1.5">
               <CollapsibleTrigger className="flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&[data-panel-open]>svg:last-child]:rotate-180">
-                {getIconForLanguageExtension("tsx", {
-                  className: "size-3.5 shrink-0",
-                })}
-                <span className="truncate font-mono text-xs">{name}.tsx</span>
+                {getIconForLanguageExtension(
+                  EXTENSION.exec(fileName)?.[1] ?? "",
+                  { className: "size-3.5 shrink-0" }
+                )}
+                <span className="truncate font-mono text-xs">{fileName}</span>
                 <CaretDownIcon
                   aria-hidden="true"
                   className="ml-auto size-4 shrink-0 transition-transform motion-reduce:transition-none"
@@ -125,7 +135,7 @@ export function ComponentPreviewTabs({
               className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
               keepMounted
             >
-              {hasBeenVisible ? source(setCode) : null}
+              {hasBeenVisible ? source(onCode) : null}
             </CollapsibleContent>
           </Collapsible>
         )}

@@ -99,7 +99,7 @@ export function FileTabs({
         ) : null}
       </div>
       <div
-        className="overflow-hidden rounded-[max(calc(var(--frame-radius)-3px),0px)] border border-site-border bg-site-code [&_pre]:max-h-96 [&_pre]:overflow-auto"
+        className="overflow-hidden rounded-[max(calc(var(--frame-radius)-3px),0px)] border border-site-border bg-site-code [&_pre]:max-h-96 [&_pre]:overflow-auto [&_pre]:scroll-fade-y"
         data-slot="code"
         role="tabpanel"
       >
