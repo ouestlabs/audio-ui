@@ -52,22 +52,27 @@ The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. No
 
 The styled component, with a grid, a crosshair, a cursor and a value display, is one command:
 
-<Install name="xypad" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
 </ForFrameworks>
-
-The primitive and its adapter, without the styling:
 
 <CodeTabs>
 
 <TabsList>
   <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
 <TabsContent value="cli">
 
 <ForFrameworks only="react">
+
+The styled component, with size variants and theme styles:
+
+```bash component
+npx shadcn@latest add @audio-ui/xypad
+```
+
+Or the primitive alone, to style yourself:
 
 ```bash component
 npx shadcn@latest add @audio-ui/xypad-react
@@ -266,6 +271,30 @@ Optional, and the same for every framework: the anatomy of the primitives, drawn
 />
 
 Import it once.
+
+<ForFrameworks only="react">
+
+### 5. The styled component
+
+Optional: size variants and theme styles over the primitive.
+
+```bash
+npm install class-variance-authority
+```
+
+<ComponentSource
+  styleName="base-nova"
+  name="xypad"
+  title="components/audio-ui/xypad.tsx"
+/>
+
+</ForFrameworks>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="xypad" />
 
 </TabsContent>
 

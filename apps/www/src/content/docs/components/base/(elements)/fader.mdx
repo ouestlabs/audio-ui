@@ -48,26 +48,25 @@ The fader's behavior is one file, the primitive, written on the UI SDK kernel an
 
 The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
-<ForFrameworks only="react">
-
-The styled component, with size variants and theme styles, is one command:
-
-<Install name="fader" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-</ForFrameworks>
-
-The primitive and its adapter, without the styling:
-
 <CodeTabs>
 
 <TabsList>
   <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
 <TabsContent value="cli">
 
 <ForFrameworks only="react">
+
+The styled component, with size variants and theme styles:
+
+```bash component
+npx shadcn@latest add @audio-ui/fader
+```
+
+Or the primitive alone, to style yourself:
 
 ```bash component
 npx shadcn@latest add @audio-ui/fader-react
@@ -266,6 +265,30 @@ Optional, and the same for every framework: the anatomy of the primitives, drawn
 />
 
 Import it once.
+
+<ForFrameworks only="react">
+
+### 5. The styled component
+
+Optional: size variants and theme styles over the primitive.
+
+```bash
+npm install class-variance-authority
+```
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader"
+  title="components/audio-ui/fader.tsx"
+/>
+
+</ForFrameworks>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="fader" />
 
 </TabsContent>
 
