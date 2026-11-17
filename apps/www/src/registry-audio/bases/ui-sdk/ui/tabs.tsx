@@ -9,9 +9,14 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
-function Tabs({ className, ...props }: ComponentProps<typeof TabsPrimitive>) {
+function Tabs({
+  activation = "manual",
+  className,
+  ...props
+}: ComponentProps<typeof TabsPrimitive>) {
   return (
     <TabsPrimitive
+      activation={activation}
       className={cn(
         "cn-tabs group/tabs flex data-[orientation=horizontal]:flex-col",
         className
