@@ -23,6 +23,7 @@ import { Route as DotwellKnownApiCatalogRouteImport } from './routes/[.]well-kno
 import { Route as SiteIndexRouteImport } from './routes/_site/index'
 import { Route as SiteSplatRouteImport } from './routes/_site/$'
 import { Route as SiteAboutRouteImport } from './routes/_site/about'
+import { Route as SiteComponentsRouteImport } from './routes/_site/components'
 import { Route as SiteContactRouteImport } from './routes/_site/contact'
 import { Route as SiteDocsRouteImport } from './routes/_site/docs'
 import { Route as SiteIconsRouteImport } from './routes/_site/icons'
@@ -105,6 +106,11 @@ const SiteSplatRoute = SiteSplatRouteImport.update({
 const SiteAboutRoute = SiteAboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => SiteRoute,
+} as any)
+const SiteComponentsRoute = SiteComponentsRouteImport.update({
+  id: '/components',
+  path: '/components',
   getParentRoute: () => SiteRoute,
 } as any)
 const SiteContactRoute = SiteContactRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/$': typeof SiteSplatRoute
   '/about': typeof SiteAboutRoute
+  '/components': typeof SiteComponentsRoute
   '/contact': typeof SiteContactRoute
   '/docs': typeof SiteDocsRouteWithChildren
   '/icons': typeof SiteIconsRoute
@@ -220,6 +227,7 @@ export interface FileRoutesByTo {
   '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/$': typeof SiteSplatRoute
   '/about': typeof SiteAboutRoute
+  '/components': typeof SiteComponentsRoute
   '/contact': typeof SiteContactRoute
   '/icons': typeof SiteIconsRoute
   '/privacy': typeof SitePrivacyRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/.well-known/api-catalog': typeof DotwellKnownApiCatalogRoute
   '/_site/$': typeof SiteSplatRoute
   '/_site/about': typeof SiteAboutRoute
+  '/_site/components': typeof SiteComponentsRoute
   '/_site/contact': typeof SiteContactRoute
   '/_site/docs': typeof SiteDocsRouteWithChildren
   '/_site/icons': typeof SiteIconsRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/.well-known/api-catalog'
     | '/$'
     | '/about'
+    | '/components'
     | '/contact'
     | '/docs'
     | '/icons'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/.well-known/api-catalog'
     | '/$'
     | '/about'
+    | '/components'
     | '/contact'
     | '/icons'
     | '/privacy'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/.well-known/api-catalog'
     | '/_site/$'
     | '/_site/about'
+    | '/_site/components'
     | '/_site/contact'
     | '/_site/docs'
     | '/_site/icons'
@@ -478,6 +490,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteAboutRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/components': {
+      id: '/_site/components'
+      path: '/components'
+      fullPath: '/components'
+      preLoaderRoute: typeof SiteComponentsRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/contact': {
       id: '/_site/contact'
       path: '/contact'
@@ -596,6 +615,7 @@ const SiteDocsRouteWithChildren = SiteDocsRoute._addFileChildren(
 interface SiteRouteChildren {
   SiteSplatRoute: typeof SiteSplatRoute
   SiteAboutRoute: typeof SiteAboutRoute
+  SiteComponentsRoute: typeof SiteComponentsRoute
   SiteContactRoute: typeof SiteContactRoute
   SiteDocsRoute: typeof SiteDocsRouteWithChildren
   SiteIconsRoute: typeof SiteIconsRoute
@@ -606,6 +626,7 @@ interface SiteRouteChildren {
 const SiteRouteChildren: SiteRouteChildren = {
   SiteSplatRoute: SiteSplatRoute,
   SiteAboutRoute: SiteAboutRoute,
+  SiteComponentsRoute: SiteComponentsRoute,
   SiteContactRoute: SiteContactRoute,
   SiteDocsRoute: SiteDocsRouteWithChildren,
   SiteIconsRoute: SiteIconsRoute,
