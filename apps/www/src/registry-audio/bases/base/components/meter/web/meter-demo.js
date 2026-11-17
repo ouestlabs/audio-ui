@@ -2,7 +2,7 @@ import "@/registry-audio/bases/base/primitives/meter/web";
 import { createSimulatedLevels } from "@/registry-audio/bases/base/lib/simulated-levels";
 
 /** Draws the meter into `element`, and returns what takes it away. */
-export default function meterWebDemo(element: HTMLElement) {
+export default function meterWebDemo(element) {
   element.innerHTML = `
     <audio-ui-meter aria-label="Stereo output" class="cn-meter cn-meter-size-default flex select-none gap-1 data-[orientation=horizontal]:mb-6 data-[orientation=horizontal]:w-full data-[orientation=horizontal]:flex-col data-[orientation=vertical]:me-8 data-[orientation=vertical]:w-fit" warn-threshold="-12">
       <audio-ui-meter-channel aria-label="Stereo output 1" class="cn-meter-channel relative flex-1 overflow-hidden data-[orientation=horizontal]:h-(--meter-thickness,auto) data-[orientation=horizontal]:flex-none data-[orientation=vertical]:w-(--meter-thickness,auto) data-[orientation=vertical]:flex-none" index="0">
@@ -47,9 +47,7 @@ export default function meterWebDemo(element: HTMLElement) {
       </audio-ui-meter-mark>
     </audio-ui-meter>`;
   const simulated = createSimulatedLevels(2);
-  const meter = element.querySelector("audio-ui-meter") as
-    | (HTMLElement & { source?: unknown })
-    | null;
+  const meter = element.querySelector("audio-ui-meter");
   if (meter) {
     meter.source = simulated.source;
   }

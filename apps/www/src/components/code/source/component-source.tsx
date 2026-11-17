@@ -21,7 +21,7 @@ const DEFAULT_STYLE_NAME = "base-nova";
 const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
   "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";
 
-/** Each file read, with the path the registry gives it (`knob-demo.ts`). */
+/** Each file read, with the path the registry gives it (`knob-demo.js`). */
 const clientCodeCache = new Map<string, { content: string; path?: string }>();
 
 export interface ComponentSourceProps {

@@ -1,7 +1,7 @@
 import "@/registry-audio/bases/base/primitives/fader/web";
 
 /** Draws the demo into `element`, and returns what takes it away. */
-export default function faderWebDemo(element: HTMLElement) {
+export default function faderWebDemo(element) {
   element.innerHTML = `
     <audio-ui-fader class="group/fader relative data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-disabled:cursor-not-allowed data-[orientation=horizontal]:pb-6 data-[orientation=vertical]:ps-10" default-value="50" max="100" min="0" orientation="vertical" step="1">
       <audio-ui-fader-control class="relative flex w-full touch-none select-none items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-[var(--fader-min-height,10rem)] data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32 transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:pointer-events-none data-disabled:opacity-50">

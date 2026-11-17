@@ -60,7 +60,7 @@ export function ComponentPreviewTabs({
     []
   );
   const { code } = file;
-  // The file as the registry names it (`knob-demo.ts`), the item's name until it is read.
+  // The file as the registry names it (`knob-demo.js`), the item's name until it is read.
   const fileName = file.path?.split("/").at(-1) ?? `${name}.tsx`;
 
   // Docs pages can mount a dozen+ live previews on one page (real audio

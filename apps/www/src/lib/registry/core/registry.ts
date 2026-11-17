@@ -298,7 +298,7 @@ const componentModules = import.meta.glob<{ default: React.ComponentType }>([
 /** The demos of the other frameworks, by their files: a Vue or Svelte component, or a web function that draws into an element. */
 const frameworkModules = import.meta.glob<{ default: unknown }>([
   "../../../registry-audio/bases/*/components/**/*-demo.{vue,svelte}",
-  "../../../registry-audio/bases/*/components/**/*-demo.ts",
+  "../../../registry-audio/bases/*/components/**/*-demo.js",
 ]);
 
 function FrameworkDemo({
