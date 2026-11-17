@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
-import { FileTabs } from "@/components/code/source/file-tabs";
+import { FileStack } from "@/components/code/source/file-stack";
 import { Command } from "@/components/docs/mdx/install";
 import { useFramework } from "@/hooks/use-framework";
 import {
@@ -173,7 +173,7 @@ function ItemInstall({ dependencies, files, name, needs }: ItemInstallProps) {
       {dependencies.length > 0 ? (
         <Command code={`npm install ${dependencies.join(" ")}`} />
       ) : null}
-      <FileTabs name={name} paths={files} />
+      <FileStack name={name} paths={files} />
       {own.length > 0 ? (
         <p>
           It needs{" "}

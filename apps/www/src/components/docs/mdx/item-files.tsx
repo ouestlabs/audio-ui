@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FileTabs } from "@/components/code/source/file-tabs";
+import { FileStack } from "@/components/code/source/file-stack";
 import { getRegistryJsonUrl } from "@/lib/registry/core/registry";
 
 /** A Svelte target names the project's root: `~/src/lib/...` lands in `src/lib/...`. */
@@ -48,5 +48,5 @@ export function ItemFiles({
   if (files.length === 0) {
     return <div aria-hidden="true" className="min-h-24" />;
   }
-  return <FileTabs name={name} paths={files.map(where)} />;
+  return <FileStack name={name} paths={files.map(where)} />;
 }

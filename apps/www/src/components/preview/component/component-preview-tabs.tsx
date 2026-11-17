@@ -1,6 +1,5 @@
-import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
-import { CopyButton } from "@/components/code/copy/copy-button";
+import { FilePanel } from "@/components/code/source/file-panel";
 import {
   PreviewBar,
   PreviewLoading,
@@ -10,19 +9,11 @@ import {
   HostedPreview,
   usePreviewHost,
 } from "@/components/preview/frame/preview-host";
-import { getIconForLanguageExtension } from "@/components/site/icons";
-import { Frame, FrameContent } from "@/components/site/layout/frame";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Frame } from "@/components/site/layout/frame";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { getRegistryItemMetadata } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
-
-const EXTENSION = /\.([a-z]+)$/;
 
 export function ComponentPreviewTabs({
   className,
@@ -55,7 +46,6 @@ export function ComponentPreviewTabs({
   source: (onCode: (code: string) => void) => React.ReactNode;
 }) {
   const previewRef = React.useRef<HTMLDivElement>(null);
-  const [code, setCode] = React.useState<string>();
   // The file as the registry names it (`knob-demo.js`), known before anything loads: the bar never changes once drawn.
   const fileName =
     getRegistryItemMetadata(name)?.files?.[0]?.path?.split("/").at(-1) ?? name;
@@ -98,43 +88,12 @@ export function ComponentPreviewTabs({
         </PreviewPanel>
         {/* The code is the frame's second panel, folded as an accordion's item: closed, its bar still names the file and copies it. */}
         {hideCode ? null : (
-          <Collapsible
-            render={
-              <FrameContent
-                className="mt-0.5 bg-site-code [&_pre]:max-h-96 [&_pre]:scroll-fade-y"
-                data-slot="code"
-              />
-            }
-          >
-            <div className="flex items-center pr-1.5">
-              <CollapsibleTrigger className="flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&[data-panel-open]>svg:last-child]:rotate-180">
-                {getIconForLanguageExtension(
-                  EXTENSION.exec(fileName)?.[1] ?? "",
-                  { className: "size-3.5 shrink-0" }
-                )}
-                <span className="truncate font-mono text-xs">{fileName}</span>
-                <CaretDownIcon
-                  aria-hidden="true"
-                  className="ml-auto size-4 shrink-0 transition-transform motion-reduce:transition-none"
-                />
-              </CollapsibleTrigger>
-              {code ? (
-                <CopyButton
-                  className="static shrink-0 bg-transparent"
-                  event="copy_component_code"
-                  properties={{ name }}
-                  value={code}
-                />
-              ) : null}
-            </div>
-            {/* Kept mounted once the preview is near, so the code is there to copy before it opens. */}
-            <CollapsibleContent
-              className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
-              keepMounted
-            >
-              {hasBeenVisible ? source(setCode) : null}
-            </CollapsibleContent>
-          </Collapsible>
+          <FilePanel
+            className="mt-0.5"
+            name={name}
+            path={fileName}
+            source={source}
+          />
         )}
       </Frame>
     </AudioSessionProvider>
