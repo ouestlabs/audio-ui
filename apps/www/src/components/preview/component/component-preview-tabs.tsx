@@ -1,5 +1,6 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
+import { CopyButton } from "@/components/code/copy/copy-button";
 import {
   PreviewBar,
   PreviewLoading,
@@ -47,9 +48,11 @@ export function ComponentPreviewTabs({
   hint?: string;
   /** The registry name of what is shown. */
   name: string;
-  source: React.ReactNode;
+  /** The code, given where to report it once loaded: the panel's copy button copies it, open or closed. */
+  source: (onCode: (code: string) => void) => React.ReactNode;
 }) {
   const previewRef = React.useRef<HTMLDivElement>(null);
+  const [code, setCode] = React.useState<string>();
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
   // elements, pointer listeners, etc.). Defer mounting each one until it's
@@ -87,29 +90,42 @@ export function ComponentPreviewTabs({
         >
           {hasBeenVisible ? shown : <PreviewLoading />}
         </PreviewPanel>
-        {/* The code folds under the preview, as an accordion's item: closed until the reader opens it. */}
+        {/* The code is the frame's second panel, folded as an accordion's item: closed, its bar still names the file and copies it. */}
         {hideCode ? null : (
-          <Collapsible>
-            <CollapsibleTrigger className="flex h-9 w-full items-center justify-between rounded-(--frame-radius-inner) px-3 font-medium text-site-muted-foreground text-sm outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 [&[data-panel-open]>svg]:rotate-180">
-              {/* Named as a file, as each item of a stack of files would be. */}
-              <span className="flex items-center gap-2 font-mono text-xs">
+          <Collapsible
+            render={
+              <FrameContent
+                className="mt-0.5 bg-site-code [&_pre]:max-h-96"
+                data-slot="code"
+              />
+            }
+          >
+            <div className="flex items-center pr-1.5">
+              <CollapsibleTrigger className="flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&[data-panel-open]>svg:last-child]:rotate-180">
                 {getIconForLanguageExtension("tsx", {
                   className: "size-3.5 shrink-0",
                 })}
-                {name}.tsx
-              </span>
-              <CaretDownIcon
-                aria-hidden="true"
-                className="size-4 transition-transform motion-reduce:transition-none"
-              />
-            </CollapsibleTrigger>
-            <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none">
-              <FrameContent
-                className="bg-site-code [&_pre]:max-h-96"
-                data-slot="code"
-              >
-                {source}
-              </FrameContent>
+                <span className="truncate font-mono text-xs">{name}.tsx</span>
+                <CaretDownIcon
+                  aria-hidden="true"
+                  className="ml-auto size-4 shrink-0 transition-transform motion-reduce:transition-none"
+                />
+              </CollapsibleTrigger>
+              {code ? (
+                <CopyButton
+                  className="static shrink-0 bg-transparent"
+                  event="copy_component_code"
+                  properties={{ name }}
+                  value={code}
+                />
+              ) : null}
+            </div>
+            {/* Kept mounted once the preview is near, so the code is there to copy before it opens. */}
+            <CollapsibleContent
+              className="h-(--collapsible-panel-height) overflow-hidden border-site-border border-t transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
+              keepMounted
+            >
+              {hasBeenVisible ? source(setCode) : null}
             </CollapsibleContent>
           </Collapsible>
         )}
