@@ -15,29 +15,8 @@ import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/react/block-audio-editor";
 
-const PACKAGES = ["core", "engine", "gl", "icons"];
-
-/** Last month's npm downloads of every package, or null when npm does not answer. */
-async function monthlyDownloads(): Promise<number | null> {
-  try {
-    const counts = await Promise.all(
-      PACKAGES.map(async (name) => {
-        const response = await fetch(
-          `https://api.npmjs.org/downloads/point/last-month/@audio-ui/${name}`,
-          { signal: AbortSignal.timeout(4000) }
-        );
-        const body = (await response.json()) as { downloads?: number };
-        return body.downloads ?? 0;
-      })
-    );
-    return counts.reduce((sum, count) => sum + count, 0);
-  } catch {
-    return null;
-  }
-}
-
 /** The component spaces, the guides and the figures, read once on the server. */
-const loadHome = createServerFn({ method: "GET" }).handler(async () => {
+const loadHome = createServerFn({ method: "GET" }).handler(() => {
   const { guides, primitives, spaces } = getHomeIndex();
   // A space's component pages, not the overview it may link to.
   const pagesOf = (name: string) =>
@@ -45,7 +24,6 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
       .find((space) => space.title === name)
       ?.sections.flatMap((section) => section.pages)
       .filter((page) => page.url.startsWith("/docs/components/")).length ?? 0;
-  const downloads = await monthlyDownloads();
   const figures: HomeFigure[] = [
     {
       href: "/docs/components",
@@ -64,15 +42,6 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
       label: "Primitives",
       value: String(Object.keys(PRIMITIVE_PAGES).length),
     },
-    ...(downloads === null
-      ? []
-      : [
-          {
-            href: "https://www.npmjs.com/org/audio-ui",
-            label: "npm downloads a month",
-            value: `${Math.floor(downloads / 1000)}K+`,
-          },
-        ]),
   ];
   return { figures, guides, primitives, spaces };
 });
