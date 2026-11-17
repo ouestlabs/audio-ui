@@ -82,8 +82,8 @@ export function useGroupFolding() {
 }
 
 const EXCLUDED_FOLDERS = ["test"];
-/** The folders of a section open to any framework that only a React app uses: the guides, on the registry's hooks and libraries. */
-const REACT_FOLDERS: readonly string[] = ["guides"];
+/** The folders of a section open to any framework that only a React app uses: the hooks, the libraries the registry's React components build on, and the guides on them. */
+const REACT_FOLDERS: readonly string[] = ["guides", "hooks", "lib"];
 /** The pages of a section open to any framework that only a React app uses: the REST API serves the registry's components. */
 const REACT_PAGES = new Set(["/docs/api"]);
 const NO_FOLDERS: readonly string[] = [];
@@ -197,34 +197,36 @@ export function useSidebarGroups(tree: PageTree) {
   }, [currentTitle, setOpen]);
 
   return {
-    groups: groups.map((group) => {
-      // Only a group that folds has a heading, and only when it is not named as its section: the switcher names the section, and a heading that does nothing reads as a button.
-      const titled = group.collapsible && group.title !== sectionLabel;
-      return {
-        ...group,
-        collapsible: group.collapsible && titled,
-        current: group.title === currentTitle,
-        open: !(
-          titled &&
-          group.collapsible &&
-          group.title &&
-          collapsed.has(group.title)
-        ),
-        // What the reader's framework is shown: a group or a part with no page left goes.
-        sections: group.sections
-          .map((part) => ({
-            ...part,
-            pages: part.pages
-              .filter(
+    groups: groups
+      .map((group) => {
+        // Only a group that folds has a heading, and only when it is not named as its section: the switcher names the section, and a heading that does nothing reads as a button.
+        const titled = group.collapsible && group.title !== sectionLabel;
+        return {
+          ...group,
+          collapsible: group.collapsible && titled,
+          current: group.title === currentTitle,
+          open: !(
+            titled &&
+            group.collapsible &&
+            group.title &&
+            collapsed.has(group.title)
+          ),
+          // What the reader's framework is shown: a group or a part with no page left goes.
+          sections: group.sections
+            .map((part) => ({
+              ...part,
+              pages: part.pages.filter(
                 (page) =>
                   !(otherThanReact && REACT_PAGES.has(page.url)) &&
                   shownTo(page.url, framework ?? "react")
               ),
-          }))
-          .filter((part) => part.pages.length > 0),
-        titled,
-      };
-    }),
+            }))
+            .filter((part) => part.pages.length > 0),
+          titled,
+        };
+      })
+      // A group with no page left for the reader's framework goes too.
+      .filter((group) => group.sections.length > 0),
     pathname,
     setOpen,
   };
