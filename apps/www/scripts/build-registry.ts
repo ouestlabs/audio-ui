@@ -26,7 +26,6 @@ import {
   rewriteModuleImports,
 } from "../src/registry-audio/bases/modules.ts";
 import {
-  relativizeRepeatedImports,
   rewriteAdapter,
   rewritePrimitiveImports,
   SHARED_ITEMS,
@@ -393,6 +392,41 @@ async function buildFile(
     target,
     type: file.type,
   };
+}
+
+const REPEATED_IMPORT = /(["'])@\/components\/audio-ui\/([a-z-]+)\/\2\1/g;
+
+/** `to` from the folder `from`, both relative to the project: `../plot/plot`. */
+function relativePath(from: string, to: string) {
+  const source = from.split("/").filter(Boolean);
+  const target = to.split("/").filter(Boolean);
+  let shared = 0;
+  while (
+    shared < source.length &&
+    shared < target.length - 1 &&
+    source[shared] === target[shared]
+  ) {
+    shared += 1;
+  }
+  const up = source.slice(shared).map(() => "..");
+  const path = [...up, ...target.slice(shared)].join("/");
+  return path.startsWith(".") ? path : `./${path}`;
+}
+
+/**
+ * The shadcn CLI turns an import of `@/components/audio-ui/<name>/<name>` into
+ * `@/components/audio-ui/<name>`, which for an element named as its primitive
+ * (`plot.tsx` over `plot/plot.ts`) is the file itself. A file that imports a
+ * primitive by that path imports it by a relative path instead, from where the
+ * file installs, which the CLI leaves as it is.
+ */
+function relativizeRepeatedImports(content: string, target: string) {
+  const directory = target.slice(0, target.lastIndexOf("/"));
+  return content.replace(
+    REPEATED_IMPORT,
+    (_match, quote: string, name: string) =>
+      `${quote}${relativePath(directory, `components/audio-ui/${name}/${name}`)}${quote}`
+  );
 }
 
 /**
