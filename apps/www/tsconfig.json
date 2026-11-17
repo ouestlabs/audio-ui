@@ -27,6 +27,9 @@
       "@audio-ui/primitives/meter": [
         "./src/registry-audio/bases/base/primitives/meter/meter.ts"
       ],
+      "@audio-ui/primitives/pad": [
+        "./src/registry-audio/bases/base/primitives/pad/pad.ts"
+      ],
       "@audio-ui/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],

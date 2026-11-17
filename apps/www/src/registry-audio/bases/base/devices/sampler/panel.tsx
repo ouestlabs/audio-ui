@@ -1,5 +1,4 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import type { PadOnDetails } from "@audio-ui/primitives/pad";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -24,6 +23,7 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry-audio/bases/base/devices/sampler/device";
+import type { PadOnDetails } from "@/registry-audio/bases/base/primitives/pad/pad";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;

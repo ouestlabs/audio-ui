@@ -13,7 +13,13 @@
 const OUR_PACKAGES = /["']@audio-ui\/(?:core|primitives)\/[^"']*["']/g;
 
 /** The primitives written in the registry. A primitive listed here needs no package of ours. */
-export const SHIPPED_PRIMITIVES = new Set(["fader", "knob", "meter", "xypad"]);
+export const SHIPPED_PRIMITIVES = new Set([
+  "fader",
+  "knob",
+  "meter",
+  "pad",
+  "xypad",
+]);
 
 /** The files of a primitive, by path from `base/primitives/`. */
 export const primitiveFiles = (name: string) => [

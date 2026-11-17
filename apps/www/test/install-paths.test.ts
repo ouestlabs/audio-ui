@@ -265,15 +265,15 @@ test("a component's docs page only imports what installing it brings", async () 
 });
 
 test("an item's own imports come with it when it is installed", () => {
-  // Which item installs a path: `components/audio-ui/knob` -> "knob".
-  const owner = new Map(
-    items.flatMap((item) =>
-      (item.files ?? []).map(
-        (file) =>
-          [(file.target ?? "").replace(EXTENSION, ""), item.name] as const
-      )
-    )
-  );
+  // The items that install a path: `components/audio-ui/knob` -> ["knob"].
+  // A primitive's own files come with each of its adapters.
+  const owners = new Map<string, string[]>();
+  for (const item of items) {
+    for (const file of item.files ?? []) {
+      const target = (file.target ?? "").replace(EXTENSION, "");
+      owners.set(target, [...(owners.get(target) ?? []), item.name ?? ""]);
+    }
+  }
   const problems: string[] = [];
   for (const item of items) {
     const brought = withDependencies(item.name ?? "");
@@ -300,11 +300,13 @@ test("an item's own imports come with it when it is installed", () => {
         const target = folder
           ? INSTALL_FOLDERS[folder] + specifier.slice(folder.length)
           : "";
-        const needed = owner.get(target);
+        const needed = owners.get(target);
         if (!needed) {
           problems.push(`${item.name}: ${specifier} is installed by no item`);
-        } else if (!brought.has(needed ?? "")) {
-          problems.push(`${item.name}: ${specifier} (add @audio-ui/${needed})`);
+        } else if (!needed.some((owner) => brought.has(owner))) {
+          problems.push(
+            `${item.name}: ${specifier} (add @audio-ui/${needed[0]})`
+          );
         }
       }
     }
