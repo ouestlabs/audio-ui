@@ -177,15 +177,24 @@ interface Problem {
 
 async function readCnClasses(style: string): Promise<Map<string, string>> {
   const classes = new Map<string, string>();
-  const css = Bun.file(`${REGISTRY_AUDIO}/styles/style-${style}.css`);
-  if (!(await css.exists())) {
-    return classes;
-  }
-
-  const source = (await css.text()).replace(CSS_COMMENT, "");
-  const rules = source.match(STYLE_WRAPPER)?.[1] ?? source;
-  for (const [, className, utilities] of rules.matchAll(APPLY_RULE)) {
-    classes.set(className, utilities.trim());
+  // The hooks of the audio components, then those of the ui components: `registry/styles` is the shadcn-derived set the `ui-sdk` base's own components use.
+  const files = await Promise.all(
+    [
+      `${REGISTRY_AUDIO}/styles/style-${style}.css`,
+      `${PROJECT_ROOT}/src/registry/styles/style-${style}.css`,
+    ].map(async (path) => {
+      const css = Bun.file(path);
+      return (await css.exists()) ? await css.text() : "";
+    })
+  );
+  for (const css of files) {
+    const source = css.replace(CSS_COMMENT, "");
+    const rules = source.match(STYLE_WRAPPER)?.[1] ?? source;
+    for (const [, className, utilities] of rules.matchAll(APPLY_RULE)) {
+      if (!classes.has(className)) {
+        classes.set(className, utilities.trim());
+      }
+    }
   }
   return classes;
 }
@@ -715,6 +724,17 @@ const cnClassesByStyle = new Map(
     STYLES.map(async (style) => [style, await readCnClasses(style)] as const)
   )
 );
+// A hook one style leaves out (lyra has no `cn-dialog-footer`) is empty there, not left in the file.
+const everyHook = new Set(
+  [...cnClassesByStyle.values()].flatMap((classes) => [...classes.keys()])
+);
+for (const classes of cnClassesByStyle.values()) {
+  for (const hook of everyHook) {
+    if (!classes.has(hook)) {
+      classes.set(hook, "");
+    }
+  }
+}
 const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
   STYLES.map((style) => ({
     base,
