@@ -125,6 +125,9 @@ async function render(mount: MountPianoRoll, options: PianoRollOptions = {}) {
 const styleOf = (element: HTMLElement | undefined) =>
   element?.getAttribute("style") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
   describe(`the piano roll in ${framework}`, () => {
     test("the roll counts its rows, and a row for each pitch says what it is", async () => {
@@ -197,6 +200,8 @@ export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
           pointerId: 1,
         });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.changes.at(-1)?.[0][0]?.start).toBe(30);
       expect(p.changes.at(-1)?.[1]).toBe("drag");
       expect(styleOf(p.notes()[0])).toContain("--timeline-offset: 30");
@@ -261,6 +266,31 @@ export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
       p.unmount();
     });
 
+    test("a paint stroke quicker than a frame paints a note in every cell it crosses", async () => {
+      const p = await render(mount, { drawStyle: "paint", mode: "draw" });
+      await p.act(() => {
+        pointer(p.grid, "pointerdown", {
+          clientX: 70,
+          clientY: 5,
+          pointerId: 1,
+        });
+        // One move across ten cells of one unit, one pixel each.
+        pointer(p.grid, "pointermove", {
+          clientX: 80,
+          clientY: 5,
+          pointerId: 1,
+        });
+      });
+      await frame();
+      await p.act(() => undefined);
+      const starts = (p.changes.at(-1)?.[0] ?? [])
+        .filter((note) => note.pitch === 63 && note.start >= 70)
+        .map((note) => note.start)
+        .sort((a, b) => a - b);
+      expect(starts).toEqual([70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80]);
+      p.unmount();
+    });
+
     test("Delete on a note removes it", async () => {
       const p = await render(mount);
       const [first] = p.notes();
@@ -286,6 +316,8 @@ export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
           pointerId: 1,
         });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(marquee.hasAttribute("hidden")).toBe(false);
       expect(styleOf(marquee)).toContain("width: 30px");
       await p.act(() => {

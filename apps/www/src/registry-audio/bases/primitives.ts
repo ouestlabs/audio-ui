@@ -20,15 +20,27 @@ export const SHIPPED_PRIMITIVES = new Set([
   "meter",
   "pad",
   "piano",
+  "piano-roll",
   "plot",
   "sequencer",
   "xypad",
 ]);
 
+/** The files a large primitive keeps beside its own, by subject, and the shared grid it reads. */
+const MORE_FILES: Record<string, string[]> = {
+  "piano-roll": [
+    "grid.ts",
+    "piano-roll/controller.ts",
+    "piano-roll/edits.ts",
+    "piano-roll/rows.ts",
+  ],
+};
+
 /** The files of a primitive, by path from `base/primitives/`. */
 export const primitiveFiles = (name: string) => [
   "primitive.ts",
   `${name}/${name}.ts`,
+  ...(MORE_FILES[name] ?? []),
 ];
 
 /**
@@ -43,4 +55,22 @@ export function rewriteAdapter(
 ) {
   const path = `${framework === "svelte" ? ".." : "."}/${primitive}`;
   return content.replace(OUR_PACKAGES, `"${path}"`);
+}
+
+const PRIMITIVE_IMPORT = /(["'])@audio-ui\/primitives\/([a-z-]+)\1/g;
+
+/**
+ * Any other file of the registry (a demo, a block) that imports a primitive
+ * written in the registry, as `@audio-ui/primitives/<name>`, imports it where
+ * the primitive's adapter installs it: `$lib/components/audio-ui/<name>/<name>`
+ * in Svelte, `@/components/audio-ui/<name>/<name>` elsewhere.
+ */
+export function rewritePrimitiveImports(content: string, svelte: boolean) {
+  return content.replace(
+    PRIMITIVE_IMPORT,
+    (match, quote: string, name: string) =>
+      SHIPPED_PRIMITIVES.has(name)
+        ? `${quote}${svelte ? "$lib" : "@"}/components/audio-ui/${name}/${name}${quote}`
+        : match
+  );
 }

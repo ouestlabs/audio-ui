@@ -37,7 +37,7 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 
 <ForFrameworks only="vue svelte web">
 
-The piano roll's behavior is one description, `pianoRoll` in `@audio-ui/primitives`, over the controller of `@audio-ui/core/piano-roll`. It is a grid of MIDI notes you draw, move, resize and select, with rows by pitch (folded to the notes or to a scale), a marquee, bars for the velocity or the chance to play, and the commands of an editor on the keys. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The piano roll's behavior is a few files, the primitive, written on the UI SDK kernel and copied into your project. It is a grid of MIDI notes you draw, move, resize and select, with rows by pitch (folded to the notes or to a scale), a marquee, bars for the velocity or the chance to play, and the commands of an editor on the keys. Each framework renders it with a thin adapter that you also own, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -51,19 +51,19 @@ The piano roll's behavior is one description, `pianoRoll` in `@audio-ui/primitiv
 
 ## Installation
 
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
+
 <ForFrameworks only="react">
+
+The styled component, on a timeline, with its keyboard and lanes, is one command:
 
 <Install name="piano-roll" />
 
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [timeline](/docs/components/base/arrangement#installation) it sits on, the [piano](/docs/components/base/piano#installation) it draws its keys with and the other controls are built the same way.
-
-<ForFrameworks only="react">
-
-The primitive alone, without the styling:
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -77,46 +77,235 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/piano-roll-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/piano-roll/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/piano-roll/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Ten files in `components/audio-ui/piano-roll/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/piano-roll/web.ts`. Import it once, and it registers the `audio-ui-piano-roll` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same files for every framework: `piano-roll.ts`, the roll itself, beside its controller, the edits it makes and its rows; `grid.ts`, the grid it snaps to, which the timeline shares; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="piano-roll-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="piano-roll-react"
+  title="components/audio-ui/grid.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="piano-roll-react"
+  title="components/audio-ui/piano-roll/piano-roll.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="piano-roll-react"
+  title="components/audio-ui/piano-roll/controller.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="piano-roll-react"
+  title="components/audio-ui/piano-roll/edits.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={5}
+  name="piano-roll-react"
+  title="components/audio-ui/piano-roll/rows.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="piano-roll-react"
+  title="components/audio-ui/piano-roll/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/piano-roll-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="piano-roll-vue"
+  title="components/audio-ui/piano-roll/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/Note.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={7}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/NoteHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={8}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/Notes.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={9}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/Rows.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={10}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/StretchHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={11}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/Velocity.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={13}
+  name="piano-roll-svelte"
+  title="src/lib/components/audio-ui/piano-roll/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-piano-roll` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="piano-roll-web"
+  title="components/audio-ui/piano-roll/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
@@ -125,7 +314,7 @@ Each item also installs what it imports: `@audio-ui/primitives`, the adapter of 
 A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
 
 ```tsx
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
 
 const [notes, setNotes] = useState<Note[]>([]);
 ```
@@ -167,7 +356,7 @@ A note is `{ id, pitch, start, length, velocity?, deviation?, muted?, chance? }`
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch.
 
-`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row` in it, `data-out-of-scale` on the others, and `data-scale-root` on its root's): the styles leave the scale's rows clear, shade the others in place of the black keys, and edge the root's in the primary color, and `folded="scale"` keeps only those rows and the ones carrying notes. The roll takes a scale as its pitch classes and its root; `@audio-ui/engine/pitch` holds the scales by name (`SCALES`, `inScale`, `nearestInScale`) and `rollScale`, which gives one in that shape, and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row` in it, `data-out-of-scale` on the others, and `data-scale-root` on its root's): the styles leave the scale's rows clear, shade the others in place of the black keys, and edge the root's in the primary color, and `folded="scale"` keeps only those rows and the ones carrying notes. The roll takes a scale as its pitch classes and its root; `@audio-ui/engine/pitch` holds the scales by name (`SCALES`, `inScale`, `nearestInScale`) and `rollScale`, which gives one in that shape, and `edits.ts`, which installs with the roll, the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
 
 The toolbar of the preview above is three menus that install on their own: the [Scale menu](/docs/components/base/scale-menu) picks the scale the roll marks, [Note find](/docs/components/base/note-find) selects notes by what they are, and the [Note edit menu](/docs/components/base/note-edit-menu) runs the commands above on the selection.
 
@@ -269,7 +458,7 @@ A Root holds the notes and their selection. The roll is a column of parts you pl
 <TabsContent value="react">
 
 ```tsx
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
 import { Piano } from "@/components/audio-ui/piano/react";
 import { PianoRoll } from "@/components/audio-ui/piano-roll/react";
 
@@ -321,7 +510,7 @@ export function Roll({ notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[
 
 ```vue
 <script setup lang="ts">
-import type { Note } from "@audio-ui/primitives/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
 import { PianoRoll } from "@/components/audio-ui/piano-roll/vue";
 
 defineProps<{ notes: Note[] }>();
@@ -360,7 +549,7 @@ const emit = defineEmits<{ notes: [notes: Note[]] }>();
 
 ```svelte
 <script lang="ts">
-  import type { Note } from "@audio-ui/primitives/piano-roll";
+  import type { Note } from "$lib/components/audio-ui/piano-roll/piano-roll";
   import { PianoRoll } from "$lib/components/audio-ui/piano-roll/svelte";
 
   let { notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[]) => void } = $props();

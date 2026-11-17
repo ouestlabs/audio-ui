@@ -23,6 +23,7 @@ import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
   rewriteAdapter,
+  rewritePrimitiveImports,
   SHIPPED_PRIMITIVES,
 } from "../src/registry-audio/bases/primitives.ts";
 
@@ -360,6 +361,12 @@ async function buildFile(
   const adapter = ADAPTER_ITEM.exec(item.name);
   if (adapter?.[1] && SHIPPED_PRIMITIVES.has(adapter[1])) {
     content = rewriteAdapter(adapter[1], adapter[2] ?? "", content);
+  } else {
+    // 6. Any other file imports such a primitive where its adapter installs it
+    content = rewritePrimitiveImports(
+      content,
+      file.path.includes("/svelte/") || file.path.endsWith(".svelte")
+    );
   }
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);

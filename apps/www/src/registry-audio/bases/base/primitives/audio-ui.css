@@ -770,4 +770,133 @@
     pointer-events: none;
     translate: 0.5rem -100%;
   }
+
+  /* Piano roll */
+
+  [data-slot="piano-roll"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 32rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="piano-roll-grid"] {
+    height: 10rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-input);
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The rows of the black keys, and those out of the scale, are shaded. */
+  [data-slot="piano-roll-row"] {
+    box-shadow: inset 0 -1px var(--audio-ui-muted);
+
+    &:is([data-color="black"], [data-out-of-scale]) {
+      background: var(--audio-ui-muted);
+    }
+
+    &[data-in-scale] {
+      background: none;
+    }
+
+    &[data-scale-root] {
+      box-shadow:
+        inset 2px 0 var(--audio-ui-foreground),
+        inset 0 -1px var(--audio-ui-muted);
+    }
+
+    &[data-active] {
+      background: color-mix(
+        in oklch,
+        var(--audio-ui-foreground) 12%,
+        transparent
+      );
+    }
+  }
+
+  [data-slot="piano-roll-note"] {
+    cursor: move;
+    background: var(--audio-ui-muted-foreground);
+    border: 1px solid var(--audio-ui-background);
+
+    &[data-selected] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-muted] {
+      opacity: 0.4;
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      outline: 2px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The edges of a note resize it. */
+  :is([data-slot="piano-roll-note-start"], [data-slot="piano-roll-note-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.25rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="piano-roll-note-start"] {
+    left: 0;
+  }
+
+  [data-slot="piano-roll-note-end"] {
+    right: 0;
+  }
+
+  [data-slot="piano-roll-marquee"] {
+    background: color-mix(in oklch, var(--audio-ui-foreground) 8%, transparent);
+    border: 1px dashed var(--audio-ui-foreground);
+  }
+
+  [data-slot="piano-roll-selection-span"] {
+    background: color-mix(in oklch, var(--audio-ui-foreground) 5%, transparent);
+    border-inline: 1px solid var(--audio-ui-muted-foreground);
+  }
+
+  /* The edges of the selection's span stretch the notes selected. */
+  :is(
+    [data-slot="piano-roll-stretch-start"],
+    [data-slot="piano-roll-stretch-end"]
+  ) {
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="piano-roll-velocity-lane"] {
+    height: 3rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="piano-roll-velocity"] {
+    width: 3px;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-selected] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-muted] {
+      opacity: 0.4;
+    }
+
+    &:has(:focus-visible) {
+      outline: 2px solid var(--audio-ui-ring);
+    }
+  }
 }
