@@ -62,14 +62,16 @@ The styled component, with the seekable waveform, the live waveform and the bar 
 <CodeTabs>
 
 <TabsList>
-  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  <ForFrameworks only="react">
+    <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  </ForFrameworks>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
   <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
 
-<TabsContent value="cli">
-
 <ForFrameworks only="react">
+
+<TabsContent value="cli">
 
 The styled component, with size variants and theme styles:
 
@@ -83,39 +85,15 @@ Or the primitive alone, to style yourself:
 npx shadcn@latest add @audio-ui/waveform-react
 ```
 
-</ForFrameworks>
-
-<ForFrameworks only="vue">
-
-```bash component
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
-```
-
-</ForFrameworks>
-
-<ForFrameworks only="svelte">
-
-```bash component
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
-```
-
-</ForFrameworks>
-
-<ForFrameworks only="web">
-
-```bash component
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
-```
-
-</ForFrameworks>
-
-It writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte) and installs the kernel's packages and what each file imports. The optional styles are one more command:
+It writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` and installs the kernel's packages and what each file imports. The optional styles are one more command:
 
 ```bash component
 npx shadcn@latest add @audio-ui/primitives-css
 ```
 
 </TabsContent>
+
+</ForFrameworks>
 
 <TabsContent value="manual">
 
