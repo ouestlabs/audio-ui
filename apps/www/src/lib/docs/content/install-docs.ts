@@ -35,13 +35,11 @@ export interface InstallPlan {
 export function installAgent(name: string): InstallPart[] {
   return [
     {
-      text: "Give your agent the skill, and it picks the component, installs it and wires it to your audio:",
+      text: "Paste this prompt to your agent. It does the rest: it installs the skill, adds the component and wires it to your audio.",
       type: "text",
     },
-    { code: "npx skills add ouestlabs/audio-ui", type: "command" },
-    { text: "Then ask it:", type: "text" },
     {
-      text: `Add the ${name.replaceAll("-", " ")} from audio/ui to my project and wire it to my audio code.`,
+      text: `Install the audio/ui skill with \`npx skills add ouestlabs/audio-ui\`, then follow it to add the ${name.replaceAll("-", " ")} from audio/ui to my project and wire it to my audio code. Read the docs at https://www.audio-ui.dev/llms.txt first.`,
       type: "prompt",
     },
     {
@@ -51,8 +49,7 @@ export function installAgent(name: string): InstallPart[] {
   ];
 }
 
-const REACT =
-  "@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5";
+const REACT = "@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5";
 const REACT_AND_CORE = REACT;
 
 /** What the two tabs hold, as data: the site draws it, and the markdown pages print it. */
