@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { DocsComponentSource } from "@/components/code/source/docs-component-source";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileTabs } from "@/components/code/source/file-tabs";
 import { getRegistryJsonUrl } from "@/lib/registry/core/registry";
 
 /** A Svelte target names the project's root: `~/src/lib/...` lands in `src/lib/...`. */
@@ -49,25 +48,5 @@ export function ItemFiles({
   if (files.length === 0) {
     return <div aria-hidden="true" className="min-h-24" />;
   }
-  return (
-    <Tabs className="not-typeset" defaultValue={where(files[0] as BuiltFile)}>
-      <TabsList className="max-w-full overflow-x-auto">
-        {files.map((file) => (
-          <TabsTrigger key={where(file)} value={where(file)}>
-            {where(file).slice(where(file).lastIndexOf("/") + 1)}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-      {files.map((file, index) => (
-        <TabsContent key={where(file)} value={where(file)}>
-          <DocsComponentSource
-            file={index}
-            name={name}
-            styleName="base-nova"
-            title={where(file)}
-          />
-        </TabsContent>
-      ))}
-    </Tabs>
-  );
+  return <FileTabs name={name} paths={files.map(where)} />;
 }
