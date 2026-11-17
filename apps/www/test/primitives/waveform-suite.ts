@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

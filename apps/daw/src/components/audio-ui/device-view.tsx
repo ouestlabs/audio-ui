@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type {
   Device,
   ParameterDescriptor,
@@ -21,6 +20,7 @@ import {
 } from "@/components/audio-ui/device-chain";
 import { devicePanel } from "@/components/audio-ui/device-panels";
 import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
+import type { Source } from "@/components/audio-ui/primitive";
 import {
   type RackChainMix,
   RackPanel,

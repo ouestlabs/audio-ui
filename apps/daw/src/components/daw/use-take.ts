@@ -1,4 +1,3 @@
-import { createSource } from "@audio-ui/core";
 import {
   secondsPerBar,
   secondsPerBeat,
@@ -7,6 +6,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ArrangementTake } from "@/components/audio-ui/arrangement-view";
+import { createSource } from "@/components/audio-ui/primitive";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import type { Arranged } from "@/lib/arrangement";
 import type {

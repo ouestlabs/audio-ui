@@ -24,7 +24,7 @@ rollScale(aMinor); // { pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 9 }
 
 ## On a piano roll
 
-A piano roll knows a scale only as the pitch classes it keeps and its root, a [`RollScale`](/docs/core/piano-roll): it shades the rows out of the scale, folds onto it and fits notes into it without knowing any scale by name. `rollScale(scale)` gives a named scale in that shape:
+A piano roll knows a scale only as the pitch classes it keeps and its root, a `RollScale`: it shades the rows out of the scale, folds onto it and fits notes into it without knowing any scale by name. `rollScale(scale)` gives a named scale in that shape:
 
 ```tsx
 const scale = useMemo(() => rollScale({ name: "dorian", root: 2 }), []);
@@ -47,4 +47,4 @@ detectKeys(notes.map(({ pitch, length, muted }) => ({ pitch, length, muted })));
 
 `midiToHz(pitch)` is a pitch's frequency, A4 at 440 Hz unless told, and `cents(frequency)` the nearest note to a frequency and how far off it is: `{ midi, name, hz, cents }`, `name` with its octave, as `"A#4"`, and `cents` positive when sharp. Both are `@audio/note`'s.
 
-A pitch's name and whether it is a black key are the keyboard's own: `pitchName`, `pitchClassName` and `isBlackKey` are in [`@audio-ui/core`](/docs/core).
+A pitch's name and whether it is a black key are the keyboard's own: `pitchName`, `pitchClassName` and `isBlackKey` ship with the piano and the piano roll, in `pitch.ts`.

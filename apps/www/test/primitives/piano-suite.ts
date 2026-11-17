@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { pitchName } from "@audio-ui/core";
+import { pitchName } from "@/registry-audio/bases/base/primitives/pitch";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

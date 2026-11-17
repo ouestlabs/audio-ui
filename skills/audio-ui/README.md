@@ -17,7 +17,6 @@ In Claude Code they install as one plugin (the repository's `.claude-plugin/mark
 | `audio-ui` | Pick, install and wire the components | `components.md`, `setup.md`, rules `values-`, `a11y-`, `style-`, `ai-` |
 | `web-audio` | Sound and live data | rules `audio-`, `live-` |
 | `design` | How it looks | `design.md`, `directions.md`, `taste.md`, `hardware.md`, `styles/`, rules `design-` |
-| `core` | Outside React | `core.md`, rules `core-` |
 
 Skills refer to each other by name (the `design` skill), never by relative link, so each one still reads on its own when installed alone.
 
@@ -47,6 +46,6 @@ Skills refer to each other by name (the `design` skill), never by relative link,
 - a rule's frontmatter, prefix, heading or examples are missing or wrong
 - a rule is missing from the Quick Reference, or the Quick Reference names a rule that doesn't exist
 - `AGENTS.md` is not the output of `bun run skill:build`
-- the skill names a registry item, an `@audio-ui/core` or `@audio-ui/engine` entry, a data attribute or a CSS variable that doesn't exist in the code
+- the skill names a registry item, an `@audio-ui/engine` entry, a data attribute or a CSS variable that doesn't exist in the code
 - a relative link, an icon, the evals or the version in `SKILL.md` and `metadata.json` disagree
 - a skill folder is missing from the plugin in `.claude-plugin/marketplace.json`, or the plugin lists one that doesn't exist

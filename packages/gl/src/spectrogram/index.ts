@@ -29,7 +29,7 @@ export type SpectrogramScale = Scale;
  * The frequencies a spectrogram shows, as shares of its axis from 0 (the
  * floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: the
  * clips draw this band, the axis labels it. `[0, 1]` is all of it. Anything
- * with this shape does: `createSource([0, 1])` of `@audio-ui/core` is one.
+ * with this shape does: a source of `[0, 1]` is one.
  */
 export interface SpectrogramBand {
   getSnapshot: () => readonly [number, number];

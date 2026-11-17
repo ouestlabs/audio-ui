@@ -1,4 +1,3 @@
-import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/engine/time";
 import {
   type ReactNode,
@@ -19,6 +18,7 @@ import {
   type MidiClipRegion,
   type MidiClipView,
 } from "@/components/audio-ui/midi-clip-panel";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import {

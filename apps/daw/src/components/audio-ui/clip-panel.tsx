@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,
@@ -13,6 +12,11 @@ import {
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type { WaveformBands } from "@audio-ui/gl/waveform";
 import {
+  MagicWandIcon,
+  ScissorsIcon,
+  WaveformIcon,
+} from "@phosphor-icons/react";
+import {
   type KeyboardEvent,
   type MouseEvent,
   memo,
@@ -25,26 +29,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   ClipBox,
   type ClipMeter,
@@ -59,6 +43,7 @@ import {
   ClipWaveform,
 } from "@/components/audio-ui/clip-waveform";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
+import type { Source } from "@/components/audio-ui/primitive";
 import { ProcessMenuItems } from "@/components/audio-ui/process-menu";
 import {
   FLAT,
@@ -84,6 +69,25 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLoudest } from "@/hooks/use-loudest";
 import {
   type ClipPeaks,
@@ -96,7 +100,7 @@ import {
   type SoundRange,
   soundOperationTiming,
 } from "@/lib/sound-operations";
-import { ScissorsIcon, MagicWandIcon, WaveformIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -1504,8 +1508,7 @@ function SourceEditMenu({ edits }: { edits: SourceEdits }) {
       <DropdownMenuTrigger
         render={<Button size="sm" title="Edit" variant="ghost" />}
       >
-        <ScissorsIcon
-        />
+        <ScissorsIcon />
         Edit
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
@@ -1537,8 +1540,7 @@ function SourceProcessMenu({
           />
         }
       >
-        <MagicWandIcon
-        />
+        <MagicWandIcon />
         Process
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
@@ -1586,8 +1588,7 @@ function SourceViewMenu({
           />
         }
       >
-        <WaveformIcon
-        />
+        <WaveformIcon />
         View
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">

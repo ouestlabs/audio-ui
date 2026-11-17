@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { polylinePoints } from "@audio-ui/core/envelope";
 import { renderToString } from "react-dom/server";
 import { createSSRApp, h } from "vue";
 import { renderToString as renderVue } from "vue/server-renderer";
+import { polylinePoints } from "@/registry-audio/bases/base/primitives/envelope/geometry";
 import { Envelope } from "@/registry-audio/bases/base/primitives/envelope/react/index.tsx";
 import { Envelope as VueEnvelope } from "@/registry-audio/bases/base/primitives/envelope/vue/index.ts";
 import { Fader } from "@/registry-audio/bases/base/primitives/fader/react/index.tsx";

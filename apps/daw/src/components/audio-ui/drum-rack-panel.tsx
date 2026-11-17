@@ -1,4 +1,3 @@
-import { pitchName } from "@audio-ui/core";
 import {
   CaretDownIcon,
   CaretUpIcon,
@@ -19,6 +18,7 @@ import {
 import { Knob } from "@/components/audio-ui/knob";
 import { Pad, PadItem } from "@/components/audio-ui/pad";
 import type { PadOnDetails } from "@/components/audio-ui/pad/pad";
+import { pitchName } from "@/components/audio-ui/pitch";
 import {
   decibels,
   formatPan,

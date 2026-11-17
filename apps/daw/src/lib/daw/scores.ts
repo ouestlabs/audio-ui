@@ -1,4 +1,3 @@
-import type { Note } from "@audio-ui/core/piano-roll";
 import {
   MIDI_FILE_ACCEPT,
   MUSICXML_FILE_ACCEPT,
@@ -7,6 +6,7 @@ import {
   type ScorePart,
 } from "@audio-ui/engine/files";
 import { secondsPerBar, secondsPerQuarter } from "@audio-ui/engine/time";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import {
   type ArrangementCommand,

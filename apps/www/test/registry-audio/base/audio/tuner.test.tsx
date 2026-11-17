@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render, within } from "@testing-library/react";
 import {
   Tuner,
   TunerDisplay,
 } from "@/registry-audio/bases/base/audio/elements/tuner";
 import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 const A4_LABEL = /A4/;
 

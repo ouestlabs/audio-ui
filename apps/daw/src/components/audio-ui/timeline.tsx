@@ -1,6 +1,6 @@
-import { FADE_SHAPES, type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   type ComponentProps,
   type CSSProperties,
@@ -19,7 +19,15 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { cn } from "@/lib/utils";
+import { Fader } from "@/components/audio-ui/fader";
+import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
+import {
+  FADE_SHAPES,
+  type FadeShape,
+  fadeGain,
+} from "@/components/audio-ui/timeline/clip";
+import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -40,19 +48,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
-import { Fader } from "@/components/audio-ui/fader";
-import { Knob } from "@/components/audio-ui/knob";
-import { Led } from "@/components/audio-ui/led";
-import type {
-  Mix,
-  TrackColor,
-} from "@/lib/arrangement";
-import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { Mix, TrackColor } from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;
 
@@ -570,10 +568,7 @@ function TimelinePlayhead({
 }: ComponentProps<typeof TimelinePrimitive.Playhead>) {
   return (
     <TimelinePrimitive.Playhead
-      className={cn(
-        "bg-primary pointer-events-none inset-y-0 w-px",
-        className
-      )}
+      className={cn("bg-primary pointer-events-none inset-y-0 w-px", className)}
       data-slot="timeline-playhead"
       {...props}
     />
@@ -792,7 +787,10 @@ function TimelineClipFade({
   const clip = use(ClipName);
   return (
     <TimelinePrimitive.ClipFade
-      className={cn("text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]", className)}
+      className={cn(
+        "text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]",
+        className
+      )}
       clip={clip}
       data-slot="timeline-clip-fade"
       {...props}
@@ -888,7 +886,10 @@ function TimelineNavigator({
 }) {
   return (
     <TimelinePrimitive.Navigator
-      className={cn("h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none", className)}
+      className={cn(
+        "h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none",
+        className
+      )}
       data-slot="timeline-navigator"
       minWindowWidth={48}
       {...props}

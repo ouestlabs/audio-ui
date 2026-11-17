@@ -49,6 +49,22 @@ const LLMS_FILE = /^\/llms(-full)?\.txt$/;
 
 const IMMUTABLE = "public, max-age=31536000, s-maxage=31536000, immutable";
 
+/** The controls the Core section had a page for, each now on its component's page. */
+const CORE_CONTROLS = [
+  "envelope",
+  "fader",
+  "knob",
+  "meter",
+  "pad",
+  "piano",
+  "piano-roll",
+  "plot",
+  "sequencer",
+  "timeline",
+  "waveform",
+  "xypad",
+];
+
 /** Docs pages merged into another: each old address and the page that holds it now. */
 const MOVED_PAGES = new Map([
   [
@@ -56,9 +72,21 @@ const MOVED_PAGES = new Map([
     "/docs/components/base/arrangement",
   ],
   ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
-  // The docs by the stack: pages that moved into the Core section.
-  ["/docs/engine/controllers", "/docs/core/controllers"],
-  ["/docs/engine/controllers.md", "/docs/core/controllers.md"],
+  // The Core section is gone with @audio-ui/core: its pages open the registry
+  // or the component the controller drove.
+  ["/docs/engine/controllers", "/docs/registry"],
+  ["/docs/engine/controllers.md", "/docs/registry.md"],
+  ["/docs/core", "/docs/registry"],
+  ["/docs/core.md", "/docs/registry.md"],
+  ["/docs/core/controllers", "/docs/registry"],
+  ["/docs/core/controllers.md", "/docs/registry.md"],
+  ...CORE_CONTROLS.flatMap((name) => {
+    const page = name === "timeline" ? "arrangement" : name;
+    return [
+      [`/docs/core/${name}`, `/docs/components/base/${page}`],
+      [`/docs/core/${name}.md`, `/docs/components/base/${page}.md`],
+    ] as const;
+  }),
   // The guides left /docs/engine for the engine package's pages; the two whose
   // names a module took, analysis and playback, now open that module's page.
   ["/docs/engine/output", "/docs/guides/output"],

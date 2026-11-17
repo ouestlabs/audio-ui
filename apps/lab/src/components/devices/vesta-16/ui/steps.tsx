@@ -1,5 +1,5 @@
-import type { Source } from "@audio-ui/core";
 import { useEffect, useRef } from "react";
+import type { Source } from "@/components/audio-ui/primitive";
 import { STEPS } from "../audio/engine";
 
 const STEP_LIST = Array.from({ length: STEPS }, (_, step) => step);

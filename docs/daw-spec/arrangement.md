@@ -4,15 +4,15 @@ The arrangement plays what is laid out on its tracks. Editing commands (split, c
 
 ### ARR-001 A clip plays where it lies
 A clip that starts at a time on the arrangement plays its first frame at the frame nearest that time on the audio clock, and lasts its length to the frame.
-Test: packages/core/src/audio/playback/render.test.ts "ARR-001"
+Test: packages/engine/src/playback/render.test.ts "ARR-001"
 
 ### ARR-002 Deactivated clips are silent
 A deactivated clip (key 0) stays on its track, drawn faded, and plays nothing.
-Test: packages/core/src/audio/playback/render.test.ts "ARR-002"
+Test: packages/engine/src/playback/render.test.ts "ARR-002"
 
 ### ARR-003 A split is seamless
 Splitting a clip anywhere changes nothing in what plays: the two pieces render the same frames as the clip did.
-Test: packages/core/src/audio/playback/render.test.ts "ARR-003"
+Test: packages/engine/src/playback/render.test.ts "ARR-003"
 
 ### ARR-004 Edits while playing
 Adding, moving, trimming or removing a clip while playing changes what plays within one render quantum of the engine receiving it, without stopping or restarting playback.
@@ -99,7 +99,7 @@ Test: apps/daw/test/browser/run.ts "ARR-023"
 
 ### ARR-024 A narrow range
 A range keeps room for both handles, apart and inside it, however narrow the zoom would draw it: from twice that room it is as wide as it is long, and under that it stays wider, with a line along its bottom showing its true length against the ruler. Dragged, its end handle stays under the pointer, and the range changes to match.
-Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/test/browser/run.ts "ARR-024"
+Test: apps/www/test/primitives/timeline-suite.ts; apps/daw/test/browser/run.ts "ARR-024"
 
 ### ARR-025 Room under the tracks
 Under the last track there is always room for more, at least a track's least lane high and all that the tracks leave: it takes audio files and devices, as the add-track button does, one new track for each, from the start of the arrangement. It says so. A file let go anywhere that takes nothing is refused, and never opens in the browser.

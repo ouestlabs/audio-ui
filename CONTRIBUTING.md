@@ -13,10 +13,9 @@ audio-ui/
 ├── apps/
 │   └── www/        # TanStack Start docs site + registry → localhost:4000
 └── packages/
-    ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
 ```
 
-Changes to `packages/core` (`@audio-ui/core`) are published to npm and require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
+Changes to the published packages (`packages/engine`, `packages/gl`, `packages/icons`) require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
 
 ---
 
@@ -270,7 +269,7 @@ registryDependencies: [
 ]
 ```
 
-npm packages the file imports go in `dependencies` (e.g. `"@audio-ui/core"`, `"zustand"`).
+npm packages the file imports go in `dependencies` (e.g. `"@audio-ui/engine"`, `"zustand"`).
 
 ### Site Manifests (generated, do not edit)
 

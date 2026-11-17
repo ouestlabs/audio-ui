@@ -25,7 +25,7 @@ describe("llms.txt", () => {
     const details = head(llms);
     expect(details).toContain("When to use audio/ui:");
     expect(details).toContain("It is not made for React Native");
-    expect(details).toContain("`@audio-ui/core`");
+    expect(details).toContain("the registry has every primitive for them");
   });
 
   test("tells an agent how to use it, step by step", () => {

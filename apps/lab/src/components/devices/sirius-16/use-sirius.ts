@@ -1,5 +1,5 @@
-import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createSource } from "@/components/audio-ui/primitive";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useTransportClock } from "@/hooks/use-transport-clock";
 import { usePublishInspector } from "@/lib/inspector";

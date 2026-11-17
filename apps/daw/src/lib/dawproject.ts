@@ -1,5 +1,3 @@
-import type { Breakpoint } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
@@ -10,6 +8,8 @@ import {
 } from "@/components/audio-ui/devices/equalizer/device";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import {
   type Arranged,
   type ArrangementTrack,

@@ -1,5 +1,3 @@
-import { clamp } from "../shared/math.ts";
-
 /**
  * How a value maps onto a control's travel, and back. `toPosition` gives
  * where `value` sits along the travel, from 0 at `min` to 1 at `max`;
@@ -10,6 +8,12 @@ export interface ParameterScale {
   toValue: (position: number, min: number, max: number) => number;
 }
 
+/** A scale as a parameter takes it: `"linear"`, `"log"`, or a scale of your own. */
+export type ParameterScaleProp = "linear" | "log" | ParameterScale;
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(value, max));
+
 /** Even steps: the right feel for levels, times and anything heard in differences. */
 export const LINEAR_SCALE: ParameterScale = {
   toPosition: (value, min, max) =>
@@ -19,16 +23,14 @@ export const LINEAR_SCALE: ParameterScale = {
 
 /**
  * Even ratios: the right feel for frequency, Q, ratios and times heard in
- * proportions, where a linear sweep hides the useful range in its first few
- * degrees. Needs a positive `min`; below that it falls back to linear.
+ * proportions. Needs a positive `min`; below that it falls back to linear.
  */
 export const LOGARITHMIC_SCALE: ParameterScale = {
   toPosition: (value, min, max) => {
     if (!(min > 0 && max > min)) {
       return LINEAR_SCALE.toPosition(value, min, max);
     }
-    const clamped = clamp(value, min, max);
-    return Math.log(clamped / min) / Math.log(max / min);
+    return Math.log(clamp(value, min, max) / min) / Math.log(max / min);
   },
   toValue: (position, min, max) => {
     if (!(min > 0 && max > min)) {
@@ -38,10 +40,7 @@ export const LOGARITHMIC_SCALE: ParameterScale = {
   },
 };
 
-/** A scale as an option takes it: `"linear"`, `"log"`, or a scale of your own. */
-export type ParameterScaleProp = "linear" | "log" | ParameterScale;
-
-/** The scale an option names: `"linear"` and `"log"` as `LINEAR_SCALE` and `LOGARITHMIC_SCALE`, a scale of your own as it is. */
+/** The scale a parameter names: `"linear"` and `"log"` as the two above, a scale of your own as it is. */
 export function resolveScale(scale: ParameterScaleProp): ParameterScale {
   if (scale === "log") {
     return LOGARITHMIC_SCALE;

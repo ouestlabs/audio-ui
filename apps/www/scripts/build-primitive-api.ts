@@ -13,7 +13,6 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const WEB = join(import.meta.dir, "..");
-const PACKAGES = join(WEB, "../../packages");
 const PRIMITIVES = join(WEB, "src/registry-audio/bases/base/primitives");
 const ADAPTERS = join(WEB, "src/registry-audio/bases/base/primitives");
 export const MANIFEST = join(
@@ -129,10 +128,7 @@ function interfaces() {
   const found = new Map<string, Declared>();
   const header =
     /export interface (\w+)(?:<[^{]*?>)?\s*(?:extends ([^{]+))?\{/g;
-  for (const file of [
-    ...sourcesOf(join(PACKAGES, "core/src")),
-    ...sourcesOf(PRIMITIVES),
-  ]) {
+  for (const file of sourcesOf(PRIMITIVES)) {
     const text = require("node:fs").readFileSync(file, "utf8") as string;
     for (const match of text.matchAll(header)) {
       const open = (match.index ?? 0) + match[0].length - 1;

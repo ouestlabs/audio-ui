@@ -1,6 +1,6 @@
 import writeMusicXml, { parse, type TempoPoint } from "@audio/musicxml";
-import type { Note } from "@audio-ui/core/piano-roll";
 import { strFromU8, unzipSync } from "fflate";
+import type { Note } from "../playback/note.ts";
 import type { ScoreNote, ScorePart } from "./midi-file.ts";
 
 const SECONDS_PER_MINUTE = 60;

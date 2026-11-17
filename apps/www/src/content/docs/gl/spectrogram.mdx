@@ -41,7 +41,7 @@ A full-scale sine reads 0 dB on its bin; the byte keeps a level to 0.6 dB.
 
 ## The band
 
-`band` is the frequencies shown, as shares of the axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: anything with `getSnapshot`, `set` and `subscribe`, such as `createSource([0, 1])` of `@audio-ui/core`. Shift and the wheel over the picture zoom it about the pointer. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
+`band` is the frequencies shown, as shares of the axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: anything with `getSnapshot`, `set` and `subscribe`, such as the `createSource([0, 1])` that ships with every primitive (`primitive.ts`). Shift and the wheel over the picture zoom it about the pointer. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
 
 ## The axis
 

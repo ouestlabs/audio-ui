@@ -12,12 +12,15 @@ const INSTALL_TAG = /<Install\s+([^>]*?)\/>/g;
 
 describe("installPlan", () => {
   test("a component installs by its name, and its source is shown as a file of the project", () => {
-    const plan = installPlan({ name: "knob", packages: "@audio-ui/core cva" });
+    const plan = installPlan({
+      name: "knob",
+      packages: "@audio-ui/engine cva",
+    });
     expect(plan.cli).toEqual([
       { code: "npx shadcn@latest add @audio-ui/knob", type: "command" },
     ]);
     expect(plan.manual[0]?.parts).toEqual([
-      { code: "npm install @audio-ui/core cva", type: "command" },
+      { code: "npm install @audio-ui/engine cva", type: "command" },
     ]);
     expect(plan.manual[1]?.parts).toEqual([
       { name: "knob", title: "components/audio-ui/knob.tsx", type: "source" },
@@ -69,12 +72,12 @@ describe("expandInstall", () => {
   test("the props of a tag are read as written", () => {
     expect(
       parseInstallProps(
-        'name="mixer" packages="@audio-ui/core" source="block-mixer" title="components/examples/block-mixer.tsx"'
+        'name="mixer" packages="@audio-ui/engine" source="block-mixer" title="components/examples/block-mixer.tsx"'
       )
     ).toEqual({
       kind: undefined,
       name: "mixer",
-      packages: "@audio-ui/core",
+      packages: "@audio-ui/engine",
       source: "block-mixer",
       title: "components/examples/block-mixer.tsx",
     });

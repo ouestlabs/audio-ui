@@ -1,7 +1,7 @@
-import { createSource } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
 import { useEffect, useState } from "react";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { Meter } from "@/components/audio-ui/meter/react";
+import { createSource } from "@/components/audio-ui/primitive";
 import { indexes } from "@/lib/indexes";
 import { TAPE_SECONDS } from "../audio/engine";
 

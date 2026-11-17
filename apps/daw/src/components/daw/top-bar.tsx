@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type {
   MetronomeRhythm,
   SignatureChange,
@@ -17,6 +16,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { type ComponentProps, type ReactNode, useCallback } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
+import type { Source } from "@/components/audio-ui/primitive";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
 import { Button } from "@/components/ui/button";

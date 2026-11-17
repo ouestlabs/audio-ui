@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { audio } from "@/registry-audio/bases/base/audio/_registry";
 import { components } from "@/registry-audio/bases/base/components/_registry";
 import { devices } from "@/registry-audio/bases/base/devices/_registry";
@@ -21,7 +21,6 @@ import {
 const ROOT = `${import.meta.dir}/../../..`;
 const SKILLS_DIR = SKILL_FOLDERS;
 const HUB_DIR = `${SKILLS_DIR}/audio-ui`;
-const CORE_DIR = `${SKILLS_DIR}/core`;
 const DESIGN_DIR = `${SKILLS_DIR}/design`;
 
 const FRONTMATTER = /^---\n([\s\S]*?)\n---/;
@@ -37,21 +36,14 @@ const INTL_UNIT = /unit: "([a-z-]+)"/g;
 const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
 // Not the `audio-ui` skill's own name.
 const RULE_ID =
-  /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
+  /`((?:audio|live|values|a11y|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
 // A primitive's adapter, as a project imports it once the CLI has copied it.
 const INSTALLED_PRIMITIVE = /"@\/components\/audio-ui\/([a-z-]+)\/react"/g;
 // What every primitive shares, as a project imports it.
 const INSTALLED_SHARED = /"@\/components\/audio-ui\/primitive"/g;
-const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
-// An `@audio-ui/core/<entry>` import specifier in code.
-const CORE_SPECIFIER = /"@audio-ui\/core\/([a-z-]+)"/g;
-// A row of core.md's export table: the package, the entry, then the names it exports.
-const CORE_EXPORT_ROW =
-  /^\| `@audio-ui\/(core|engine)(?:\/([a-z-]+))?` \| (.+) \|$/gm;
-const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
 
 // A number in a selector, such as the `.5` of a decimal value.
 const DIGIT_START = /^\d/;
@@ -59,7 +51,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["core", "engine", "gl"]);
+const PACKAGES = new Set(["engine", "gl"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -86,18 +78,14 @@ const registryNames = new Set(
     (item) => item.name
   )
 );
-const coreExports = Object.keys(
-  (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
-);
 const engineExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
 );
 const uiSource = (
   await Promise.all(
-    [
-      `${ROOT}/apps/www/src/registry-audio/bases/base/primitives`,
-      `${ROOT}/packages/core/src`,
-    ].map((folder) => read("**/*.{ts,tsx}", folder))
+    [`${ROOT}/apps/www/src/registry-audio/bases/base/primitives`].map(
+      (folder) => read("**/*.{ts,tsx}", folder)
+    )
   )
 )
   .flat()
@@ -162,13 +150,6 @@ describe.each(markdown)("$path", ({ path, text }) => {
     expect(missing).toEqual([]);
   });
 
-  test("every @audio-ui/core/<entry> is exported", () => {
-    const missing = matches(text, CORE_ENTRY).filter(
-      (entry) => !coreExports.includes(`./${entry}`)
-    );
-    expect(missing).toEqual([]);
-  });
-
   test("every @audio-ui/engine/<entry> is exported", () => {
     const missing = matches(text, ENGINE_ENTRY).filter(
       (entry) => !engineExports.includes(`./${entry}`)
@@ -225,109 +206,6 @@ describe.each(withRules)("skills/%s rules", (name) => {
     };
     expect(frontmatter.metadata?.version).toBe(metadata.version);
   });
-});
-
-test("core.md lists only names its entries export", async () => {
-  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
-  const rows = await Promise.all(
-    [...core.matchAll(CORE_EXPORT_ROW)].map(
-      async ([, pkg, entry, names = ""]) => {
-        // A core primitive lives in primitives/<entry>, an engine module in <entry>.
-        let index = `${ROOT}/packages/core/src/index.ts`;
-        if (pkg === "engine") {
-          index = `${ROOT}/packages/engine/src/${entry}/index.ts`;
-        } else if (entry) {
-          index = `${ROOT}/packages/core/src/primitives/${entry}/index.ts`;
-        }
-        const source = await Bun.file(index).text();
-        return matches(names, IDENTIFIER)
-          .filter((name) => !source.includes(name))
-          .map((name) => `${entry ?? "."}: ${name}`);
-      }
-    )
-  );
-  expect(rows.flat()).toEqual([]);
-});
-
-// The plain DOM example writes into the document: leave it as it was found,
-// so the component tests that query the whole body don't see its controls.
-afterEach(() => {
-  document.body.innerHTML = "";
-});
-
-test("core.md's plain DOM knob works", async () => {
-  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
-  const blocks = [...core.matchAll(CODE_FENCE)].map(([, code = ""]) => code);
-  const html = blocks.find((code) => code.includes('id="cutoff"'));
-  const example = blocks.find((code) =>
-    code.includes("export function mountKnob")
-  );
-  if (!(html && example)) {
-    throw new Error("core.md: the plain DOM knob example is missing");
-  }
-
-  // Run the example as written, with its import pointed at the source.
-  const source = new Bun.Transpiler({ loader: "ts" })
-    .transformSync(example)
-    .replace(
-      CORE_SPECIFIER,
-      (_, entry) => `"${ROOT}/packages/core/src/primitives/${entry}/index.ts"`
-    );
-  const file = Bun.file(
-    `${Bun.env.TMPDIR ?? "/tmp"}/mount-knob-${crypto.randomUUID()}.js`
-  );
-  await Bun.write(file, source);
-  const { mountKnob } = await import(file.name ?? "");
-  await file.delete();
-
-  document.body.innerHTML = html;
-  const root = document.getElementById("cutoff");
-  const input = root?.querySelector("input");
-  if (!(root && input)) {
-    throw new Error("core.md: the example's markup has no knob");
-  }
-  let changes = 0;
-  const knob = mountKnob(root, {
-    max: 20_000,
-    min: 20,
-    onValueChange: () => {
-      changes += 1;
-    },
-    scale: "log",
-  });
-
-  // The middle of a logarithmic travel, not the linear one.
-  expect(input.value).toBe("632");
-
-  // A press: the primary button only, no browser gesture, focus on the input.
-  const control = root.querySelector("[data-part=control]");
-  expect(control?.getAttribute("style")).toContain("touch-action: none");
-  const press = (button: number) => {
-    const event = new PointerEvent("pointerdown", {
-      bubbles: true,
-      button,
-      cancelable: true,
-      pointerId: 1,
-    });
-    control?.dispatchEvent(event);
-    document.dispatchEvent(new PointerEvent("pointerup", { pointerId: 1 }));
-    return event;
-  };
-  expect(press(2).defaultPrevented).toBe(false);
-  expect(document.activeElement).not.toBe(input);
-  expect(press(0).defaultPrevented).toBe(true);
-  expect(document.activeElement).toBe(input);
-  const key = () =>
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { cancelable: true, key: "ArrowUp" })
-    );
-  key();
-  expect(changes).toBe(1);
-  knob.update({ disabled: true });
-  expect(input.disabled).toBe(true);
-  knob.destroy();
-  key();
-  expect(changes).toBe(1);
 });
 
 describe("skills/design styles", () => {
@@ -436,74 +314,6 @@ describe("skills/design styles", () => {
       expect(unknown).toEqual([]);
     }
   );
-});
-
-test("core.md's kit knob and fader work in the plain DOM", async () => {
-  const core = await Bun.file(`${CORE_DIR}/core.md`).text();
-  const example = [...core.matchAll(CODE_FENCE)]
-    .map(([, code = ""]) => code)
-    .find((code) => code.includes("export function mountKitKnob"));
-  if (!example) {
-    throw new Error("core.md: the kit's plain DOM example is missing");
-  }
-  const source = new Bun.Transpiler({ loader: "ts" })
-    .transformSync(example)
-    .replace(
-      CORE_SPECIFIER,
-      (_, entry) => `"${ROOT}/packages/core/src/primitives/${entry}/index.ts"`
-    );
-  const copy = `${import.meta.dir}/skill-kit.tmp.js`;
-  await Bun.write(copy, source);
-  const { mountKitFader, mountKitKnob } = await import(copy).finally(() =>
-    Bun.file(copy).delete()
-  );
-
-  document.body.innerHTML =
-    '<div class="knob" id="k"></div><div class="fader" id="f"></div>';
-  const knobRoot = document.getElementById("k");
-  const faderRoot = document.getElementById("f");
-  if (!(knobRoot && faderRoot)) {
-    throw new Error("the kit's example has no roots");
-  }
-  const changes: number[] = [];
-  const cleanKnob = mountKitKnob(knobRoot, "Cutoff", {
-    dragMode: "vertical",
-    max: 100,
-    min: 0,
-    onValueChange: (value: number) => changes.push(value),
-  });
-  const cleanFader = mountKitFader(faderRoot, "Level", {
-    max: 0,
-    min: -60,
-    onValueChange: (value: number) => changes.push(value),
-    orientation: "vertical",
-  });
-  for (const name of [
-    "knob-control",
-    "knob-thumb",
-    "knob-track",
-    "knob-indicator",
-    "knob-mark",
-    "knob-label",
-    "knob-value",
-    "fader-control",
-    "fader-track",
-    "fader-indicator",
-    "fader-thumb",
-  ]) {
-    expect(document.querySelector(`.${name}`)).not.toBeNull();
-  }
-  expect(
-    knobRoot.querySelector(".knob-control")?.getAttribute("data-drag-mode")
-  ).toBe("vertical");
-  for (const input of document.querySelectorAll("input")) {
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { cancelable: true, key: "ArrowUp" })
-    );
-  }
-  expect(changes).toHaveLength(2);
-  cleanKnob();
-  cleanFader();
 });
 
 describe("the Claude Code marketplace", () => {

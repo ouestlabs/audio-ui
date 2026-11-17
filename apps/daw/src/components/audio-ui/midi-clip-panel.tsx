@@ -1,11 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import { pitchName } from "@audio-ui/core";
-import {
-  duplicateTime,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-} from "@audio-ui/core/piano-roll";
 import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
 import {
   CaretDownIcon,
@@ -54,10 +46,18 @@ import {
   PianoRollVelocityScale,
   PianoRollViewport,
 } from "@/components/audio-ui/piano-roll";
+import {
+  duplicateTime,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+} from "@/components/audio-ui/piano-roll/edits";
 import type {
   RollNoteOffDetails,
   RollNoteOnDetails,
 } from "@/components/audio-ui/piano-roll/piano-roll";
+import { pitchName } from "@/components/audio-ui/pitch";
+import type { Source } from "@/components/audio-ui/primitive";
 import {
   ScaleMenu,
   ScaleMenuContent,

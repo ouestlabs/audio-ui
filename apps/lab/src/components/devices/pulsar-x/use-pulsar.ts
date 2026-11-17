@@ -1,5 +1,5 @@
-import { pitchName } from "@audio-ui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { pitchName } from "@/components/audio-ui/pitch";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { usePublishInspector } from "@/lib/inspector";
 import {

@@ -31,7 +31,6 @@ The agent loads each skill on its own when a task needs it, so a Vue knob does n
 | `audio-ui` | Values and events, accessibility, styling, AI control | Picking and installing components, controlled values, change versus commit, accessible names, registry props and tokens, typed tools a model calls to compose, edit and mix |
 | `web-audio` | Web Audio, live data | Starting the audio context, ramping parameters, dB to gain, scheduling on the audio clock, meters, spectra, waveforms and playheads fed by a source, without a render per frame |
 | `design` | Design | Retro, minimal and modern skins for the headless primitives, and composing a look from a brief |
-| `core` | Without React | Building the controls for Vue, Svelte, web components or the plain DOM on the framework-free controllers of `@audio-ui/core` |
 
 The skills live in the [audio-ui repository](https://github.com/ouestlabs/audio-ui/tree/main/skills), and CI checks that every name they mention exists in the library. To install them by hand, copy the folders of `skills/` into your agent's skills directory (for Claude Code, `.claude/skills/`).
 
@@ -41,7 +40,7 @@ The skills live in the [audio-ui repository](https://github.com/ouestlabs/audio-
 
 Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in React. It will:
 
-1. Read your project to see if it uses shadcn/ui, plain React or another framework, then choose the registry, the primitives of its framework or `@audio-ui/core`.
+1. Read your project to see if it uses shadcn/ui, plain React or another framework, then choose the registry or the primitives of its framework.
 2. Find the right component and read its docs before writing code.
 3. Install it with your package manager.
 4. Connect the control to your audio code the safe way, without clicks while dragging, and feed live displays without re-rendering React.
@@ -53,7 +52,7 @@ Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, me
 
 Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in Vue, Svelte or plain HTML. It will:
 
-1. Read your project to see its framework, then take the primitives for it, with the `core` skill's rules.
+1. Read your project to see its framework, then take the primitives for it.
 2. Find the right element and read its docs before writing code.
 3. Install it with your package manager, and set up the primitives for your framework.
 4. Connect the control to your audio code the safe way, without clicks while dragging, and feed live displays without a render per frame.

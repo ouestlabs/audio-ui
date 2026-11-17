@@ -16,8 +16,6 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@audio-ui/core": ["../../packages/core/src/index.ts"],
-      "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
       "@/primitives/envelope": [
         "./src/registry-audio/bases/base/primitives/envelope/envelope.ts"
       ],
@@ -54,7 +52,6 @@
       "@/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],
-      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
       "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
       "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],

@@ -22,7 +22,7 @@ npx shadcn@latest add @audio-ui/knob
 
 See [Get started](https://www.audio-ui.dev/docs) for the registry setup.
 
-For coding agents, four skills (`audio-ui`, `web-audio`, `design`, `core`) install as one Claude Code plugin, or with the open skills CLI:
+For coding agents, three skills (`audio-ui`, `web-audio`, `design`) install as one Claude Code plugin, or with the open skills CLI:
 
 ```sh
 /plugin install audio-ui --marketplace ouestlabs/audio-ui
@@ -42,8 +42,7 @@ bun run dev    # the docs site on http://localhost:4000
 | --- | --- |
 | `apps/www` | The docs site and the registry (TanStack Start, Fumadocs) |
 | `apps/video` | Remotion videos of the real components |
-| `packages/core` | `@audio-ui/core`, framework-agnostic logic |
-| `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design`, `core` |
+| `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design` |
 
 Before opening a pull request:
 

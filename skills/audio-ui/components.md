@@ -109,7 +109,7 @@ The parts of `block-piano-roll`, each installed on its own.
 | Name | Registry import | Headless item | Use it for |
 | --- | --- | --- | --- |
 | `scale-menu` | `ScaleMenu`, `ScaleMenuTrigger`, `ScaleMenuContent`, `ScaleMenuToggle`, `ScaleMenuRoot`, `ScaleMenuName`, `ScaleMenuDetect`, `detectKeys` from `@/components/audio-ui/scale-menu` | registry only | Pick a root and a scale and turn it on or off. Pass `enabled ? scale : null` to the roll's `scale`. `ScaleMenuDetect notes={notes} audio={chroma}` offers the three likeliest keys of the notes and of recordings (`audioChroma` from `@/lib/arrangement`; pass every part of the song: one part alone is often ambiguous). Items of your own go in the content beside the parts |
-| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from `@audio-ui/core/piano-roll` the ids to select |
+| `note-find` | `NoteFind`, `NoteFindForm` from `@/components/audio-ui/note-find` | registry only | Find notes by pitch, scale, state, velocity, length, chance or every few: `onFind` gets a query, `findNotes(notes, query)` from the piano roll's edits the ids to select |
 | `export-dialog` | `ExportDialog` from `@/components/audio-ui/export-dialog`; `exportSound`, `DEFAULT_EXPORT_SETTINGS`, `ExportSettings` from `@/lib/audio-export`, which it installs too | registry only | The settings of an export in a dialog (format, bit depth or bitrate, normalize off, to the peak or to -14, -16 or -23 LUFS), controlled; `exportSound(channels, sampleRate, settings, onProgress)` measures, normalizes (true peak at -1 dBTP at most) and encodes, and says how loud the file came out |
 | `note-edit-menu` | `NoteEditMenu`, `NoteEditMenuTrigger`, `NoteEditMenuContent`, `NoteEditMenuItems`, `NoteEditMenuSub`, `NoteEditMenuProvider` from `@/components/audio-ui/note-edit-menu`; the commands, `TIME_EDITS`, `PITCH_EDITS`, `PLAY_EDITS`, `VELOCITY_EDITS`, `applyNoteEdit`, `canApplyNoteEdit`, `noteEditForKey`, from `@/lib/note-edits`, which it installs too | registry only | A menu of note commands (split, join, quantize, legato, time commands, up and down a step of the scale or a semitone, octaves, fit to scale, chance, velocity) with their keys, as items or submenus, beside items of your own (import, export, clear). `NoteEditMenuProvider` fills a right-click's menu with the same parts. The commands are data, so keys or a toolbar run them too |
 
@@ -186,7 +186,7 @@ Audio effects and instruments, like plugins in a DAW. A device is a state (`<nam
 
 ## Audio engine
 
-What makes the sound, on the Web Audio API: install each on its own, to `hooks/` or `lib/`. All optional: the components take values and live sources, so an engine of your own (an AudioWorklet, WASM) drives them the same way, through `createSource` from `@audio-ui/core`. Docs: https://www.audio-ui.dev/docs/guides.
+What makes the sound, on the Web Audio API: install each on its own, to `hooks/` or `lib/`. All optional: the components take values and live sources, so an engine of your own (an AudioWorklet, WASM) drives them the same way, through `createSource` from `@/components/audio-ui/primitive`. Docs: https://www.audio-ui.dev/docs/guides.
 
 | Name | Import | Use it for |
 | --- | --- | --- |

@@ -1,7 +1,7 @@
-import { createSource } from "@audio-ui/core";
 import { useLayoutEffect, useState } from "react";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 import { SpectrumAnalyzer } from "@/registry-audio/bases/base/audio/elements/spectrum-analyzer";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 import { noise } from "../motion.ts";
 
 const POINTS = 160;

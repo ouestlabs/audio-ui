@@ -1,5 +1,5 @@
-import type { Source } from "@audio-ui/core";
 import { useCallback, useMemo, useState } from "react";
+import type { Source } from "@/components/audio-ui/primitive";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useComputerKeyboard } from "@/hooks/use-computer-keyboard";
 import { useMidiInput } from "@/hooks/use-midi-input";

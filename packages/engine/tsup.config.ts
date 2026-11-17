@@ -1,8 +1,7 @@
 import { defineConfig } from "tsup";
 
 // Each module is its own `@audio-ui/engine/<name>` subpath that ships only
-// that module. `@audio-ui/core` is a dependency, so it stays an import: the UI
-// and the engine share one copy of it.
+// that module.
 const modules = [
   "analysis",
   "device",

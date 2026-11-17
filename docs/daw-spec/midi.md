@@ -20,7 +20,7 @@ Test: apps/daw/test/browser/run.ts "MID-009"
 
 ### MID-002 On time
 A note starts at the frame of the audio clock where it lies on the arrangement, and ends at the frame of its end, scheduled ahead on the same transport as the audio clips (TRN-015), so a note and an audio clip that start together start on the same frame.
-Test: packages/core/src/audio/playback/transport.test.ts "MID-002"
+Test: packages/engine/src/playback/transport.test.ts "MID-002"
 
 ### MID-003 Chase
 Playback started inside a note plays that note from there to its end.

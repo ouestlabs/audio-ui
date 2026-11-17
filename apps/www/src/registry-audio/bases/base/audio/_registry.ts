@@ -766,7 +766,7 @@ export const audio: RegistryItem[] = [
   {
     dependencies: [],
     description:
-      "A needle meter: a dial in dB that a live level moves, with the VU or the PPM ballistics of @audio-ui/core/meter. The needle turns outside React, so the dial does not re-render with the signal.",
+      "A needle meter: a dial in dB that a live level moves, with the VU or the PPM ballistics of the meter primitive. The needle turns outside React, so the dial does not re-render with the signal.",
     files: [
       {
         path: "audio/elements/needle-meter.tsx",
