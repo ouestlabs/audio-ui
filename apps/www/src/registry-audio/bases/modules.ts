@@ -1,44 +1,45 @@
 /**
- * The engine as the registry ships it: one item per module, `engine-<module>`,
- * from `base/lib/engine/<module>/`, installed to `lib/engine/<module>/`. A file
- * of the registry imports a module as `@/engine/<module>` (a tsconfig path),
- * which the build rewrites to `@/lib/engine/<module>`, and the item that
- * imports it gets the module's item. `test/engine-items.test.ts` keeps the
- * lists below in step with the folder.
+ * The engine and the GPU drawing as the registry ships them: one item per
+ * module, `<set>-<module>` (`engine-time`, `gl-waveform`), from
+ * `base/lib/<set>/<module>/`, installed to `lib/<set>/<module>/`. A file of the
+ * registry imports a module as `@/<set>/<module>` (a tsconfig path), which the
+ * build rewrites to `@/lib/<set>/<module>`, and the item that imports it gets
+ * the module's item. `test/lib-modules.test.ts` keeps the lists below in step
+ * with the folders.
  */
 
-const ENGINE_IMPORT = /(["'])@\/engine\/([a-z-]+)\1/g;
-const INSTALLED_ENGINE_IMPORT = /["']@\/lib\/engine\/([a-z-]+)["']/g;
+const MODULE_IMPORT = /(["'])@\/(engine|gl)\/([a-z-]+)\1/g;
+const INSTALLED_MODULE_IMPORT = /["']@\/lib\/(engine|gl)\/([a-z-]+)["']/g;
 
-/** A file of the registry imports a module of the engine where it installs: `@/engine/time` becomes `@/lib/engine/time`. */
-export function rewriteEngineImports(content: string) {
+/** A file of the registry imports a module where it installs: `@/engine/time` becomes `@/lib/engine/time`. */
+export function rewriteModuleImports(content: string) {
   return content.replace(
-    ENGINE_IMPORT,
-    (_match, quote: string, name: string) =>
-      `${quote}@/lib/engine/${name}${quote}`
+    MODULE_IMPORT,
+    (_match, quote: string, set: string, name: string) =>
+      `${quote}@/lib/${set}/${name}${quote}`
   );
 }
 
-/** The items of the engine's modules a built file imports: `engine-time` for `@/lib/engine/time`. */
-export function engineDependencies(content: string) {
+/** The items of the modules a built file imports: `engine-time` for `@/lib/engine/time`. */
+export function moduleDependencies(content: string) {
   return new Set(
-    [...content.matchAll(INSTALLED_ENGINE_IMPORT)].map(
-      ([, name]) => `engine-${name}`
+    [...content.matchAll(INSTALLED_MODULE_IMPORT)].map(
+      ([, set, name]) => `${set}-${name}`
     )
   );
 }
 
-export interface EngineModule {
+export interface LibModule {
   /** The npm packages its files import. */
   dependencies: string[];
   description: string;
-  /** Its files, by path from `base/lib/engine/<module>/`. */
+  /** Its files, by path from `base/lib/<set>/<module>/`. */
   files: string[];
   /** The other modules its files import. */
   modules: string[];
 }
 
-export const ENGINE_MODULES: Record<string, EngineModule> = {
+export const ENGINE_MODULES: Record<string, LibModule> = {
   analysis: {
     dependencies: [
       "@audio/beat-detect",
@@ -255,3 +256,30 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
     modules: [],
   },
 };
+
+export const GL_MODULES: Record<string, LibModule> = {
+  lane: {
+    dependencies: [],
+    description:
+      "What every GPU lane shares: placing the canvas on what the view shows, the clips in view with the frames they read, drawing again on a change of inputs, a resize, a scroll or the theme, and whether this browser has WebGL 2.",
+    files: ["index.ts"],
+    modules: [],
+  },
+  spectrogram: {
+    dependencies: ["gl-spectrogram"],
+    description:
+      "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU by gl-spectrogram on one of four frequency axes, with the band zoom, the pointer's cell and the frequency axis laid out for a lane.",
+    files: ["index.ts"],
+    modules: ["lane"],
+  },
+  waveform: {
+    dependencies: ["gl-waveform"],
+    description:
+      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: exact peaks and the RMS inside, a line through the samples zoomed in, plain or as the three bands of the sound.",
+    files: ["index.ts"],
+    modules: ["lane"],
+  },
+};
+
+/** Each set of modules, by the folder it is in and the prefix of its items. */
+export const MODULE_SETS = { engine: ENGINE_MODULES, gl: GL_MODULES } as const;

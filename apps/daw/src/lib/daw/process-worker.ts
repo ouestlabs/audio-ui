@@ -14,7 +14,7 @@
  * which `audio-files` keeps the encoders out of.
  */
 
-import { LEAF_FRAMES } from "@audio-ui/gl/waveform";
+import { LEAF_FRAMES } from "@/lib/gl/waveform";
 import type { StreamedSource } from "@/lib/clip-player";
 import {
   CACHE,

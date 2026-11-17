@@ -12,9 +12,6 @@ import {
   moduleOf,
 } from "@/lib/docs/content/entries";
 
-/** An engine module installs as an item of the registry: `@audio-ui/engine-time`. */
-const REGISTRY_ITEM = "@audio-ui/engine-";
-
 /** A line of TypeScript as the page's fences draw it. */
 function Code({ code }: { code: string }) {
   const { elements } = highlightedElements(code, "ts", false);
@@ -167,7 +164,7 @@ export function Entry({ name }: { name: string }) {
 
 /**
  * The head of a module's page, such as `@/lib/engine/time`, read from its
- * sources: the install (a registry item, or an npm package), the import, the
+ * sources: the install of its registry item, the import, the
  * registry's hooks and libs that build on it, the audio.js packages it is
  * built on, and what it exports. The registry follows the reader's framework.
  */
@@ -178,13 +175,7 @@ export function Module({ from }: { from: string }) {
   const usedBy = framework && framework !== "react" ? [] : packageModule.usedBy;
   return (
     <>
-      <Command
-        code={
-          packageModule.package.startsWith(REGISTRY_ITEM)
-            ? `npx shadcn@latest add ${packageModule.package}`
-            : `npm install ${packageModule.package}`
-        }
-      />
+      <Command code={`npx shadcn@latest add ${packageModule.package}`} />
       <Code code={importLine(packageModule)} />
       <Facts
         rows={[

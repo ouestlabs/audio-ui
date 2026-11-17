@@ -1,5 +1,3 @@
-import { hasWebGL2 } from "@audio-ui/gl/lane";
-import type { WaveformBands } from "@audio-ui/gl/waveform";
 import {
   MagicWandIcon,
   ScissorsIcon,
@@ -95,6 +93,8 @@ import {
   warpedTime,
   warpRate,
 } from "@/lib/engine/time";
+import { hasWebGL2 } from "@/lib/gl/lane";
+import type { WaveformBands } from "@/lib/gl/waveform";
 import {
   type SoundOperation,
   type SoundRange,

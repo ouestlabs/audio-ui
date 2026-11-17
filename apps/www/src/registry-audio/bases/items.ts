@@ -1,5 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
-import { ENGINE_MODULES } from "./engine.ts";
+import { MODULE_SETS } from "./modules.ts";
 import { primitiveFiles, SHARED_ITEMS } from "./primitives.ts";
 
 /**
@@ -172,24 +172,26 @@ export function movedItem(name: string, module: string): RegistryItem {
   };
 }
 
-/** The engine, one item per module, installed to `lib/engine/<module>/`. */
-export function engineItems(): RegistryItem[] {
-  return Object.entries(ENGINE_MODULES).map(([module, spec]) => ({
-    dependencies: spec.dependencies,
-    description: spec.description,
-    files: spec.files.map((file) =>
-      fileOf(
-        `lib/engine/${module}/${file}`,
-        "registry:lib",
-        `lib/engine/${module}/${file}`
-      )
-    ),
-    name: `engine-${module}`,
-    registryDependencies: spec.modules.map(
-      (name) => `@audio-ui/engine-${name}`
-    ),
-    type: "registry:lib",
-  }));
+/** The engine and the GPU drawing, one item per module, installed to `lib/<set>/<module>/`. */
+export function libModuleItems(): RegistryItem[] {
+  return Object.entries(MODULE_SETS).flatMap(([set, modules]) =>
+    Object.entries(modules).map(([module, spec]) => ({
+      dependencies: spec.dependencies,
+      description: spec.description,
+      files: spec.files.map((file) =>
+        fileOf(
+          `lib/${set}/${module}/${file}`,
+          "registry:lib",
+          `lib/${set}/${module}/${file}`
+        )
+      ),
+      name: `${set}-${module}`,
+      registryDependencies: spec.modules.map(
+        (name) => `@audio-ui/${set}-${name}`
+      ),
+      type: "registry:lib" as const,
+    }))
+  );
 }
 
 /**

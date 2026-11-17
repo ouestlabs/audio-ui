@@ -1,18 +1,8 @@
-/**
- * A lane of clips drawn on the GPU: one canvas in the lane's box, sized to the
- * stretch the view shows, with every clip in its own viewport of one WebGL
- * context. A browser keeps some sixteen contexts and drops the oldest past
- * that, so a canvas a clip would lose its picture once a sound is cut into
- * enough pieces. This is what the waveform and spectrogram lanes share, and
- * what a lane over another renderer would build on.
- */
-
-/** A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`. */
 export interface LaneSamples {
   frames: number;
   /**
    * The recording summed up 256 frames at a time, `[min, max, Σx², count]`
-   * each, as `waveformLeaves` of `@audio-ui/gl/waveform` makes them: for a
+   * each, as `waveformLeaves` of `@/gl/waveform` makes them: for a
    * recording streamed from a file, which a lane then never reads whole. A
    * waveform lane draws it from them zoomed out, and zoomed in reads only the
    * frames it shows, `CHUNK_FRAMES` at a time. Left out, a lane reads the

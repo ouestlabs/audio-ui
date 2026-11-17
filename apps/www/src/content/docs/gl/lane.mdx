@@ -3,14 +3,14 @@ title: lane
 description: "What every GPU lane shares: placing the canvas on what the view shows, the clips in view with the frames they read, drawing again on a change of inputs, a resize, a scroll or the theme, and whether this browser has WebGL 2."
 ---
 
-<Module from="@audio-ui/gl/lane" />
+<Module from="@/lib/gl/lane" />
 
 ## Usage
 
 `createLane` starts a lane on a canvas that sits in the lane's box. You give it what to keep between paints, how to draw, and the inputs; it places the canvas, draws in the next frame whenever the inputs change, the lane resizes, the view scrolls a good way or the theme changes, and lets go of everything on `destroy`.
 
 ```ts
-import { createLane, placeLane, visibleClips } from "@audio-ui/gl/lane";
+import { createLane, placeLane, visibleClips } from "@/lib/gl/lane";
 
 const lane = createLane({
   canvas,

@@ -1,5 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
-import { engineItems, libItem, movedItem } from "../../items";
+import { libItem, libModuleItems, movedItem } from "../../items";
 
 const items: RegistryItem[] = [
   libItem("web-audio", {
@@ -383,7 +383,7 @@ const movedToEngine: [name: string, entry: string][] = [
 
 export const lib: RegistryItem[] = [
   ...items,
-  ...engineItems(),
+  ...libModuleItems(),
   ...movedToEngine.map(
     ([name, entry]): RegistryItem => ({
       dependencies: [],

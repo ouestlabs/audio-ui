@@ -53,7 +53,7 @@
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],
       "@/engine/*": ["./src/registry-audio/bases/base/lib/engine/*/index.ts"],
-      "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],
+      "@/gl/*": ["./src/registry-audio/bases/base/lib/gl/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [
         "../../packages/icons/src/providers/react/index.tsx"

@@ -16,7 +16,7 @@ import {
   type SampleCache,
   sameSamples,
   type VisiblePart,
-} from "../lane/index.ts";
+} from "../lane/index";
 
 /** The three signals a sound is split into to colour it by its frequencies: what it has low, between and high. */
 export interface WaveformBands {
@@ -780,7 +780,7 @@ function paint(
  * recording share what is on the GPU for it. A clip is read in stretches, as a
  * DAW paints it (`LaneClip.segments`); a stretch read backwards is not drawn,
  * `gl-waveform` has no such range, so a reversed clip is the host's own
- * drawing, and `hasWebGL2` of `@audio-ui/gl/lane` says whether to draw this
+ * drawing, and `hasWebGL2` of `@/gl/lane` says whether to draw this
  * way at all. The color is the canvas' text color.
  *
  * A recording streamed from a file gives its `leaves` (`LaneSamples.leaves`)
@@ -832,4 +832,4 @@ export {
   type Lane,
   type LaneClip,
   type LaneSamples,
-} from "../lane/index.ts";
+} from "../lane/index";

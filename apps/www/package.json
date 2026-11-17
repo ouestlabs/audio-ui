@@ -7,6 +7,8 @@
     "cf-typegen": "wrangler types",
     "deploy": "bun run build && wrangler deploy",
     "dev": "vite dev",
+    "engine:kernels": "bun scripts/engine/build-kernels.ts",
+    "engine:worklet": "bun scripts/engine/worklet.ts",
     "entries:build": "bun ./scripts/build-entries.ts",
     "icons:build": "bun ./scripts/build-icons.ts",
     "icons:scan": "bun ./scripts/scan-icons.ts",
@@ -21,12 +23,9 @@
     "test": "bun test",
     "test:browser": "bun test/browser/run.ts",
     "test:primitives": "bun test --conditions browser --path-ignore-patterns '' ./test/primitives && SVELTE_GENERATE=server bun test --path-ignore-patterns '' ./test/primitives/ssr-svelte.test.ts",
-    "typecheck": "tsc --noEmit",
-    "engine:kernels": "bun scripts/engine/build-kernels.ts",
-    "engine:worklet": "bun scripts/engine/worklet.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",
     "@audio/beat-detect": "1.1.0",
     "@audio/biquad": "1.2.2",

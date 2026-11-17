@@ -1,5 +1,3 @@
-import { dbToGain } from "@/engine/analysis";
-import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
   type FocusEvent,
   Fragment,
@@ -13,6 +11,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { dbToGain } from "@/engine/analysis";
+import { hasWebGL2 } from "@/gl/lane";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,

@@ -1,5 +1,4 @@
 import { type ComponentProps, useLayoutEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
 import {
   type ClipPeaks,
   type ClipReading,
@@ -10,6 +9,7 @@ import {
   sampleBands,
   sampleLine,
 } from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 /**
  * A recording's samples, for a waveform drawn closer than its peaks allow:
@@ -20,7 +20,7 @@ export interface ClipSamples {
   frames: number;
   /**
    * For a recording streamed from a file: it summed up 256 frames at a time,
-   * as `waveformLeaves` of `@audio-ui/gl/waveform` makes it. A waveform drawn
+   * as `waveformLeaves` of `@/lib/gl/waveform` makes it. A waveform drawn
    * on the GPU then never reads it whole, only the frames it shows zoomed in.
    */
   leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
@@ -30,7 +30,7 @@ export interface ClipSamples {
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
   /**
    * For a recording streamed from a file: its spectra, as
-   * `spectrogramSpectra` of `@audio-ui/gl/spectrogram` makes them. A
+   * `spectrogramSpectra` of `@/lib/gl/spectrogram` makes them. A
    * spectrogram drawn on the GPU then never reads it whole, only the frames it
    * shows zoomed in.
    */

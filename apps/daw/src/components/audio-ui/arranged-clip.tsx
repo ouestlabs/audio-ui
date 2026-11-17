@@ -1,4 +1,3 @@
-import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
   type FocusEvent,
   Fragment,
@@ -50,6 +49,7 @@ import {
   type TrackColor,
 } from "@/lib/arrangement";
 import { dbToGain } from "@/lib/engine/analysis";
+import { hasWebGL2 } from "@/lib/gl/lane";
 import { cn } from "@/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */

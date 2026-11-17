@@ -14,7 +14,7 @@ import {
   LEAF_FRAMES,
   type WaveformBands,
   waveformLeaves,
-} from "@audio-ui/gl/waveform";
+} from "@/lib/gl/waveform";
 import type { ClipSamples } from "@/components/audio-ui/clip-waveform";
 import type { RecordingSource, StreamedSource } from "@/lib/clip-player";
 import {

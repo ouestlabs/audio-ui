@@ -14,7 +14,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",
     "@audio/beat-detect": "catalog:",
     "@audio/biquad": "catalog:",
@@ -73,6 +72,8 @@
     "class-variance-authority": "catalog:",
     "cn": "catalog:",
     "fflate": "catalog:",
+    "gl-spectrogram": "^2.4.0",
+    "gl-waveform": "^5.3.0",
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

@@ -1,16 +1,3 @@
-import type { WarpMode } from "@/engine/playback";
-import {
-  addWarpMarker,
-  moveWarpMarker,
-  removeWarpMarker,
-  scaleWarp,
-  unwarpedTime,
-  type WarpMarker,
-  warpedTime,
-  warpRate,
-} from "@/engine/time";
-import { hasWebGL2 } from "@audio-ui/gl/lane";
-import type { WaveformBands } from "@audio-ui/gl/waveform";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -25,6 +12,19 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import type { WarpMode } from "@/engine/playback";
+import {
+  addWarpMarker,
+  moveWarpMarker,
+  removeWarpMarker,
+  scaleWarp,
+  unwarpedTime,
+  type WarpMarker,
+  warpedTime,
+  warpRate,
+} from "@/engine/time";
+import { hasWebGL2 } from "@/gl/lane";
+import type { WaveformBands } from "@/gl/waveform";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import {

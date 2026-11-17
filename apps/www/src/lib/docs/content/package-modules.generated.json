@@ -1,366 +1,5 @@
 [
   {
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "LaneSamples",
-        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneSpectra",
-        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
-      },
-      {
-        "kind": "const",
-        "name": "CHUNK_FRAMES",
-        "summary": "The frames a renderer keeps its samples in, and a streamed recording is read in: 65536."
-      },
-      {
-        "kind": "interface",
-        "name": "ChunkFeed",
-        "summary": "What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read."
-      },
-      {
-        "kind": "interface",
-        "name": "ChunkRenderer",
-        "summary": "What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do."
-      },
-      {
-        "kind": "function",
-        "name": "feedChunks",
-        "summary": "Hands a renderer the chunks of a streamed recording that `ranges` read, in frames: those it lacks are read, each handed over once read, and `ready` draws again."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneSegment",
-        "summary": "A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneClip",
-        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
-      },
-      {
-        "kind": "interface",
-        "name": "VisiblePart",
-        "summary": "A part of a clip the view shows: its part of the canvas in CSS px from the canvas' left, and the frames of the recording it reads there."
-      },
-      {
-        "kind": "interface",
-        "name": "VisibleClip",
-        "summary": "A clip the view shows, with its parts and its samples."
-      },
-      {
-        "kind": "const",
-        "name": "OVERSCAN",
-        "summary": "The pixels drawn past each edge of the view, so a scroll shows them at once."
-      },
-      {
-        "kind": "function",
-        "name": "groundOf",
-        "summary": "The nearest background that is not transparent, from `element` up: what a picture's silence lies over."
-      },
-      {
-        "kind": "function",
-        "name": "hasWebGL2",
-        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
-      },
-      {
-        "kind": "function",
-        "name": "releaseContext",
-        "summary": "Lets go of a lane's own WebGL context once the lane is destroyed: a browser keeps only some sixteen, frees a dropped canvas's only when it collects it, and past that loses the oldest, which may be one a page still draws on."
-      },
-      {
-        "kind": "function",
-        "name": "keepContext",
-        "summary": "A lane starts on a canvas whose context was being let go of: it keeps it."
-      },
-      {
-        "kind": "function",
-        "name": "sameSamples",
-        "summary": "Whether two readings are the same samples: a reader may hand out a new view of the same memory each time, which is not new data to upload."
-      },
-      {
-        "kind": "function",
-        "name": "clearLane",
-        "summary": "Clears the whole canvas of a lane's context."
-      },
-      {
-        "kind": "interface",
-        "name": "Placed",
-        "summary": "What `placeLane` gives: where the canvas starts on the lane, in CSS px, where it ends, and the device pixel ratio."
-      },
-      {
-        "kind": "function",
-        "name": "placeLane",
-        "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows: the lane scrolled out of sight to either side, or up or down."
-      },
-      {
-        "kind": "function",
-        "name": "joinParts",
-        "summary": "Parts that follow one another on the canvas and in the recording, joined into one while every junction between them stays within a quarter of a pixel of where the one line reading them all puts it: a warped clip's stretches, a pixel or two wide zoomed out, are drawn as one part, not hundreds, and stay apart zoomed in, where a junction would show."
-      },
-      {
-        "kind": "function",
-        "name": "partsInView",
-        "summary": "The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`)."
-      },
-      {
-        "kind": "type",
-        "name": "SampleCache",
-        "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
-      },
-      {
-        "kind": "type",
-        "name": "KeptCache",
-        "summary": "What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with."
-      },
-      {
-        "kind": "function",
-        "name": "readKept",
-        "summary": "What `read` gives for `samples`, from `cache` under `key` when that reader is the one it was read with, else read now and kept: once a promise is settled, the cache holds what it gave, so the next paint has it at once."
-      },
-      {
-        "kind": "function",
-        "name": "readOnce",
-        "summary": "A recording's samples, from the cache when its reader is the one it was read with, else read now and kept."
-      },
-      {
-        "kind": "function",
-        "name": "visibleClipsNow",
-        "summary": "The clips of a lane the view shows, as `visibleClips` gives them, when every recording they read hands its samples at once: what lets a lane draw a zoom in the frame it happens."
-      },
-      {
-        "kind": "function",
-        "name": "visibleClips",
-        "summary": "The clips of a lane the view shows, each with its parts of the canvas and the frames it reads there, and their samples read once a recording."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneContext",
-        "summary": "What a lane hands its painter and its listeners."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneOptions",
-        "summary": "What a lane is made of."
-      },
-      {
-        "kind": "interface",
-        "name": "Lane",
-        "summary": "A lane that is drawing."
-      },
-      {
-        "kind": "function",
-        "name": "createLane",
-        "summary": "Starts a lane on `canvas`, which sits in the lane's box: placed on the stretch the view shows, drawn again when its inputs change, the lane resizes, the view scrolls a good way or the theme changes, and let go of with `destroy`."
-      }
-    ],
-    "from": "@audio-ui/gl/lane",
-    "package": "@audio-ui/gl",
-    "audiojs": [],
-    "usedBy": []
-  },
-  {
-    "exports": [
-      {
-        "kind": "type",
-        "name": "SpectrogramScale",
-        "summary": "The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrogramBand",
-        "summary": "The frequencies a spectrogram shows, as shares of its axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: the clips draw this band, the axis labels it."
-      },
-      {
-        "kind": "function",
-        "name": "zoomBand",
-        "summary": "The band `factor` times as wide (under 1 zooms in), the share `at` of it (0 at its foot) staying where it is."
-      },
-      {
-        "kind": "function",
-        "name": "panBand",
-        "summary": "The band moved by `share` of its own width, up or down, kept inside the axis."
-      },
-      {
-        "kind": "function",
-        "name": "loadScales",
-        "summary": "The axes the rows are spaced on, for labels that match them: `scales[name].at(f, lo, hi)` is where `f` hertz sits between `lo` and `hi`, 0 to 1."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrogramHit",
-        "summary": "What the pointer is over on a spectrogram: the cell's frequencies and level, the floor of the levels drawn, and where the pointer is."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrogramInputs",
-        "summary": "What a spectrogram lane draws."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrogramHooks",
-        "summary": "What a spectrogram lane tells its host."
-      },
-      {
-        "kind": "function",
-        "name": "createSpectrogramLane",
-        "summary": "Draws the spectrograms of a lane's clips on `canvas`, which sits in the lane's box, each clip in its own part of it: their frequencies over the stretch of the lane the view shows, computed on the GPU by `gl-spectrogram` at every zoom, in the text colour over the ground under it."
-      },
-      {
-        "kind": "const",
-        "name": "readHertz",
-        "summary": "A frequency the pointer reads, as the axis writes it: three significant digits, five characters at most (12.3k, 523, 52.3)."
-      },
-      {
-        "kind": "const",
-        "name": "hertzLabel",
-        "summary": "A frequency as the axis writes it, no unit: 500, 1.25k, 20k."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrogramAxisLayout",
-        "summary": "What `spectrogramAxis` lays out: a frequency's place, the labels with their ticks, the ticks between, and where the pointer is."
-      },
-      {
-        "kind": "function",
-        "name": "spectrogramAxis",
-        "summary": "Lays out a spectrogram's frequency axis for a lane `height` px tall, as audio.js draws it: labels roundest first (20k, 2k, 200, then between as room allows), each with its tick at the row its frequency sits on by the axis the picture is spaced on, and shorter ticks between, the band in view respected."
-      },
-      {
-        "kind": "function",
-        "name": "hasWebGL2",
-        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
-      },
-      {
-        "kind": "interface",
-        "name": "Lane",
-        "summary": "A lane that is drawing."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneClip",
-        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneSamples",
-        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneSpectra",
-        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
-      }
-    ],
-    "from": "@audio-ui/gl/spectrogram",
-    "package": "@audio-ui/gl",
-    "audiojs": [],
-    "usedBy": []
-  },
-  {
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "WaveformBands",
-        "summary": "The three signals a sound is split into to colour it by its frequencies: what it has low, between and high."
-      },
-      {
-        "kind": "interface",
-        "name": "WaveformClip",
-        "summary": "A clip of the lane, with what its waveform needs besides what every lane clip has."
-      },
-      {
-        "kind": "type",
-        "name": "WaveformLook",
-        "summary": "How the lane draws a waveform: as one, or as the three bands of the sound one over the other, the lows warm and the highs cool."
-      },
-      {
-        "kind": "type",
-        "name": "WaveformLayout",
-        "summary": "How a recording with several channels is laid out: `mix` draws them as one waveform; `split` draws each channel in a row of its own, as a DAW does on a tall track; `auto` splits when each row would be at least `SPLIT_ROW_PX` tall, and mixes below that, as a short track shows one lane."
-      },
-      {
-        "kind": "const",
-        "name": "SPLIT_ROW_PX",
-        "summary": "The least height of a channel's row, in CSS px, for `auto` to split."
-      },
-      {
-        "kind": "interface",
-        "name": "WaveformInputs",
-        "summary": "What a waveform lane draws."
-      },
-      {
-        "kind": "interface",
-        "name": "WaveformLaneOptions",
-        "summary": "How a waveform lane draws."
-      },
-      {
-        "kind": "const",
-        "name": "LEAF_FRAMES",
-        "summary": "The frames a leaf of `waveformLeaves` sums up."
-      },
-      {
-        "kind": "function",
-        "name": "waveformLeaves",
-        "summary": "The leaves of `samples`, from its first frame: `[min, max, Σx², count]` of each 256 frames, the last leaf of what is left, NaN left out (a leaf of nothing else is `[Infinity, -Infinity, 0, 0]`)."
-      },
-      {
-        "kind": "function",
-        "name": "leavesPeak",
-        "summary": "The loudest sample the leaves sum up, 0 to 1 for a recording at full scale at most: what a streamed clip's `peak` is."
-      },
-      {
-        "kind": "interface",
-        "name": "WaveformRow",
-        "summary": "What a clip draws in one row of the lane: a layer of its recording, its samples, the loudest of them, and the row's place and height."
-      },
-      {
-        "kind": "function",
-        "name": "splitsChannels",
-        "summary": "Whether a clip draws each channel in a row of its own at this layout, look and height."
-      },
-      {
-        "kind": "function",
-        "name": "waveformRows",
-        "summary": "The rows a clip draws in a lane `height` px tall, with the samples of each: a channel apiece (`channels`, read), its recording whole, or its three bands."
-      },
-      {
-        "kind": "function",
-        "name": "createWaveformLane",
-        "summary": "Draws the waveforms of a lane's clips on `canvas`, which sits in the lane's box, each clip in its own parts of it, on the GPU by `gl-waveform`: every pixel column shows the exact lowest and highest of its samples with the RMS inside, and zoomed in a line through the samples, however long the recording."
-      },
-      {
-        "kind": "function",
-        "name": "hasWebGL2",
-        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
-      },
-      {
-        "kind": "interface",
-        "name": "Lane",
-        "summary": "A lane that is drawing."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneClip",
-        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneSamples",
-        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
-      }
-    ],
-    "from": "@audio-ui/gl/waveform",
-    "package": "@audio-ui/gl",
-    "audiojs": [],
-    "usedBy": [
-      "use-loudest"
-    ]
-  },
-  {
     "audiojs": [
       "@audio/beat-detect",
       "@audio/biquad",
@@ -2452,6 +2091,367 @@
     "usedBy": [
       "clip-player",
       "recording"
+    ]
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "LaneSamples",
+        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
+      },
+      {
+        "kind": "const",
+        "name": "CHUNK_FRAMES",
+        "summary": "The frames a renderer keeps its samples in, and a streamed recording is read in: 65536."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkFeed",
+        "summary": "What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkRenderer",
+        "summary": "What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do."
+      },
+      {
+        "kind": "function",
+        "name": "feedChunks",
+        "summary": "Hands a renderer the chunks of a streamed recording that `ranges` read, in frames: those it lacks are read, each handed over once read, and `ready` draws again."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSegment",
+        "summary": "A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneClip",
+        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
+      },
+      {
+        "kind": "interface",
+        "name": "VisiblePart",
+        "summary": "A part of a clip the view shows: its part of the canvas in CSS px from the canvas' left, and the frames of the recording it reads there."
+      },
+      {
+        "kind": "interface",
+        "name": "VisibleClip",
+        "summary": "A clip the view shows, with its parts and its samples."
+      },
+      {
+        "kind": "const",
+        "name": "OVERSCAN",
+        "summary": "The pixels drawn past each edge of the view, so a scroll shows them at once."
+      },
+      {
+        "kind": "function",
+        "name": "groundOf",
+        "summary": "The nearest background that is not transparent, from `element` up: what a picture's silence lies over."
+      },
+      {
+        "kind": "function",
+        "name": "hasWebGL2",
+        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
+      },
+      {
+        "kind": "function",
+        "name": "releaseContext",
+        "summary": "Lets go of a lane's own WebGL context once the lane is destroyed: a browser keeps only some sixteen, frees a dropped canvas's only when it collects it, and past that loses the oldest, which may be one a page still draws on."
+      },
+      {
+        "kind": "function",
+        "name": "keepContext",
+        "summary": "A lane starts on a canvas whose context was being let go of: it keeps it."
+      },
+      {
+        "kind": "function",
+        "name": "sameSamples",
+        "summary": "Whether two readings are the same samples: a reader may hand out a new view of the same memory each time, which is not new data to upload."
+      },
+      {
+        "kind": "function",
+        "name": "clearLane",
+        "summary": "Clears the whole canvas of a lane's context."
+      },
+      {
+        "kind": "interface",
+        "name": "Placed",
+        "summary": "What `placeLane` gives: where the canvas starts on the lane, in CSS px, where it ends, and the device pixel ratio."
+      },
+      {
+        "kind": "function",
+        "name": "placeLane",
+        "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows: the lane scrolled out of sight to either side, or up or down."
+      },
+      {
+        "kind": "function",
+        "name": "joinParts",
+        "summary": "Parts that follow one another on the canvas and in the recording, joined into one while every junction between them stays within a quarter of a pixel of where the one line reading them all puts it: a warped clip's stretches, a pixel or two wide zoomed out, are drawn as one part, not hundreds, and stay apart zoomed in, where a junction would show."
+      },
+      {
+        "kind": "function",
+        "name": "partsInView",
+        "summary": "The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`)."
+      },
+      {
+        "kind": "type",
+        "name": "SampleCache",
+        "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
+      },
+      {
+        "kind": "type",
+        "name": "KeptCache",
+        "summary": "What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with."
+      },
+      {
+        "kind": "function",
+        "name": "readKept",
+        "summary": "What `read` gives for `samples`, from `cache` under `key` when that reader is the one it was read with, else read now and kept: once a promise is settled, the cache holds what it gave, so the next paint has it at once."
+      },
+      {
+        "kind": "function",
+        "name": "readOnce",
+        "summary": "A recording's samples, from the cache when its reader is the one it was read with, else read now and kept."
+      },
+      {
+        "kind": "function",
+        "name": "visibleClipsNow",
+        "summary": "The clips of a lane the view shows, as `visibleClips` gives them, when every recording they read hands its samples at once: what lets a lane draw a zoom in the frame it happens."
+      },
+      {
+        "kind": "function",
+        "name": "visibleClips",
+        "summary": "The clips of a lane the view shows, each with its parts of the canvas and the frames it reads there, and their samples read once a recording."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneContext",
+        "summary": "What a lane hands its painter and its listeners."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneOptions",
+        "summary": "What a lane is made of."
+      },
+      {
+        "kind": "interface",
+        "name": "Lane",
+        "summary": "A lane that is drawing."
+      },
+      {
+        "kind": "function",
+        "name": "createLane",
+        "summary": "Starts a lane on `canvas`, which sits in the lane's box: placed on the stretch the view shows, drawn again when its inputs change, the lane resizes, the view scrolls a good way or the theme changes, and let go of with `destroy`."
+      }
+    ],
+    "from": "@/lib/gl/lane",
+    "package": "@audio-ui/gl-lane",
+    "usedBy": []
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "type",
+        "name": "SpectrogramScale",
+        "summary": "The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramBand",
+        "summary": "The frequencies a spectrogram shows, as shares of its axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: the clips draw this band, the axis labels it."
+      },
+      {
+        "kind": "function",
+        "name": "zoomBand",
+        "summary": "The band `factor` times as wide (under 1 zooms in), the share `at` of it (0 at its foot) staying where it is."
+      },
+      {
+        "kind": "function",
+        "name": "panBand",
+        "summary": "The band moved by `share` of its own width, up or down, kept inside the axis."
+      },
+      {
+        "kind": "function",
+        "name": "loadScales",
+        "summary": "The axes the rows are spaced on, for labels that match them: `scales[name].at(f, lo, hi)` is where `f` hertz sits between `lo` and `hi`, 0 to 1."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramHit",
+        "summary": "What the pointer is over on a spectrogram: the cell's frequencies and level, the floor of the levels drawn, and where the pointer is."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramInputs",
+        "summary": "What a spectrogram lane draws."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramHooks",
+        "summary": "What a spectrogram lane tells its host."
+      },
+      {
+        "kind": "function",
+        "name": "createSpectrogramLane",
+        "summary": "Draws the spectrograms of a lane's clips on `canvas`, which sits in the lane's box, each clip in its own part of it: their frequencies over the stretch of the lane the view shows, computed on the GPU by `gl-spectrogram` at every zoom, in the text colour over the ground under it."
+      },
+      {
+        "kind": "const",
+        "name": "readHertz",
+        "summary": "A frequency the pointer reads, as the axis writes it: three significant digits, five characters at most (12.3k, 523, 52.3)."
+      },
+      {
+        "kind": "const",
+        "name": "hertzLabel",
+        "summary": "A frequency as the axis writes it, no unit: 500, 1.25k, 20k."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramAxisLayout",
+        "summary": "What `spectrogramAxis` lays out: a frequency's place, the labels with their ticks, the ticks between, and where the pointer is."
+      },
+      {
+        "kind": "function",
+        "name": "spectrogramAxis",
+        "summary": "Lays out a spectrogram's frequency axis for a lane `height` px tall, as audio.js draws it: labels roundest first (20k, 2k, 200, then between as room allows), each with its tick at the row its frequency sits on by the axis the picture is spaced on, and shorter ticks between, the band in view respected."
+      },
+      {
+        "kind": "function",
+        "name": "hasWebGL2",
+        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
+      },
+      {
+        "kind": "interface",
+        "name": "Lane",
+        "summary": "A lane that is drawing."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneClip",
+        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSamples",
+        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
+      }
+    ],
+    "from": "@/lib/gl/spectrogram",
+    "package": "@audio-ui/gl-spectrogram",
+    "usedBy": []
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "WaveformBands",
+        "summary": "The three signals a sound is split into to colour it by its frequencies: what it has low, between and high."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformClip",
+        "summary": "A clip of the lane, with what its waveform needs besides what every lane clip has."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformLook",
+        "summary": "How the lane draws a waveform: as one, or as the three bands of the sound one over the other, the lows warm and the highs cool."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformLayout",
+        "summary": "How a recording with several channels is laid out: `mix` draws them as one waveform; `split` draws each channel in a row of its own, as a DAW does on a tall track; `auto` splits when each row would be at least `SPLIT_ROW_PX` tall, and mixes below that, as a short track shows one lane."
+      },
+      {
+        "kind": "const",
+        "name": "SPLIT_ROW_PX",
+        "summary": "The least height of a channel's row, in CSS px, for `auto` to split."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformInputs",
+        "summary": "What a waveform lane draws."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformLaneOptions",
+        "summary": "How a waveform lane draws."
+      },
+      {
+        "kind": "const",
+        "name": "LEAF_FRAMES",
+        "summary": "The frames a leaf of `waveformLeaves` sums up."
+      },
+      {
+        "kind": "function",
+        "name": "waveformLeaves",
+        "summary": "The leaves of `samples`, from its first frame: `[min, max, Σx², count]` of each 256 frames, the last leaf of what is left, NaN left out (a leaf of nothing else is `[Infinity, -Infinity, 0, 0]`)."
+      },
+      {
+        "kind": "function",
+        "name": "leavesPeak",
+        "summary": "The loudest sample the leaves sum up, 0 to 1 for a recording at full scale at most: what a streamed clip's `peak` is."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformRow",
+        "summary": "What a clip draws in one row of the lane: a layer of its recording, its samples, the loudest of them, and the row's place and height."
+      },
+      {
+        "kind": "function",
+        "name": "splitsChannels",
+        "summary": "Whether a clip draws each channel in a row of its own at this layout, look and height."
+      },
+      {
+        "kind": "function",
+        "name": "waveformRows",
+        "summary": "The rows a clip draws in a lane `height` px tall, with the samples of each: a channel apiece (`channels`, read), its recording whole, or its three bands."
+      },
+      {
+        "kind": "function",
+        "name": "createWaveformLane",
+        "summary": "Draws the waveforms of a lane's clips on `canvas`, which sits in the lane's box, each clip in its own parts of it, on the GPU by `gl-waveform`: every pixel column shows the exact lowest and highest of its samples with the RMS inside, and zoomed in a line through the samples, however long the recording."
+      },
+      {
+        "kind": "function",
+        "name": "hasWebGL2",
+        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
+      },
+      {
+        "kind": "interface",
+        "name": "Lane",
+        "summary": "A lane that is drawing."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneClip",
+        "summary": "A clip of a lane to draw: where it lies, how long it is, and how it reads its recording."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSamples",
+        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
+      }
+    ],
+    "from": "@/lib/gl/waveform",
+    "package": "@audio-ui/gl-waveform",
+    "usedBy": [
+      "use-loudest"
     ]
   }
 ]

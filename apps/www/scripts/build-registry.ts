@@ -22,9 +22,9 @@ import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
-  engineDependencies,
-  rewriteEngineImports,
-} from "../src/registry-audio/bases/engine.ts";
+  moduleDependencies,
+  rewriteModuleImports,
+} from "../src/registry-audio/bases/modules.ts";
 import {
   relativizeRepeatedImports,
   rewriteAdapter,
@@ -378,8 +378,8 @@ async function buildFile(
     );
   }
 
-  // 7. A module of the engine is imported where it installs, `@/lib/engine/<module>`
-  content = rewriteEngineImports(content);
+  // 7. A module of the engine or of gl is imported where it installs, `@/lib/engine/<module>`
+  content = rewriteModuleImports(content);
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
   const target = file.target || defaultTarget(item, file, fileName);
@@ -406,11 +406,11 @@ function withSharedItems(item: SourceItem, files: BuiltFile[]) {
   const needed = files
     .flatMap((file) => [
       ...sharedDependencies(file.content),
-      ...engineDependencies(file.content),
+      ...moduleDependencies(file.content),
     ])
     .filter((name) => {
       const shared = SHARED_ITEMS[name];
-      // A module of the engine is installed by its own item, never shipped by another.
+      // A module of the engine or of gl is installed by its own item, never shipped by another.
       if (!shared) {
         return name !== item.name;
       }

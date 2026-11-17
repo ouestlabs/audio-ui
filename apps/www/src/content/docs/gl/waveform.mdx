@@ -3,14 +3,14 @@ title: waveform
 description: "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: exact peaks and the RMS inside, a line through the samples zoomed in, plain or as the three bands of the sound."
 ---
 
-<Module from="@audio-ui/gl/waveform" />
+<Module from="@/lib/gl/waveform" />
 
 ## Usage
 
 `createWaveformLane` draws the waveforms of a lane's clips on a canvas in the lane's box, each clip in its own parts of it. Drawn by `gl-waveform`, every pixel column shows the exact lowest and highest of its samples with the RMS inside, and zoomed in it is a line through the samples with a dot on each: at any zoom, over recordings of any length. The color is the canvas' text color.
 
 ```ts
-import { createWaveformLane } from "@audio-ui/gl/waveform";
+import { createWaveformLane } from "@/lib/gl/waveform";
 
 const lane = createWaveformLane(canvas, {
   clips, // WaveformClip[]: a LaneClip with the recording's `peak`, and `bands` for the band look
@@ -27,14 +27,14 @@ A clip's `peak` is its recording's loudest sample, 0 to 1: the waveform is drawn
 
 ## Many lanes
 
-A browser keeps some sixteen WebGL contexts and loses the oldest past that. `createWaveformLane(canvas, inputs, { shared: true })` draws on the page's one context instead, a canvas never on the page, and copies the picture onto `canvas`, a 2D one: a page draws as many lanes as it has clips, one a clip as an arrangement draws them, and lanes reading one recording share its renderers, each let go of once no lane draws it. Leave `zoom` out for a lane that fits its clips to its box, and a clip's `peak` for the lane to read it, from its leaves or its samples. A lane of its own lets go of its context when it is destroyed (`releaseContext` of `@audio-ui/gl/lane`), unless it starts again on the same canvas at once, as React does in development.
+A browser keeps some sixteen WebGL contexts and loses the oldest past that. `createWaveformLane(canvas, inputs, { shared: true })` draws on the page's one context instead, a canvas never on the page, and copies the picture onto `canvas`, a 2D one: a page draws as many lanes as it has clips, one a clip as an arrangement draws them, and lanes reading one recording share its renderers, each let go of once no lane draws it. Leave `zoom` out for a lane that fits its clips to its box, and a clip's `peak` for the lane to read it, from its leaves or its samples. A lane of its own lets go of its context when it is destroyed (`releaseContext` of `@/lib/gl/lane`), unless it starts again on the same canvas at once, as React does in development.
 
 ## Streamed recordings
 
 A recording streamed from a file is never read whole. Its `samples` give `leaves`: the recording summed up 256 frames at a time, `[min, max, Σx², count]` each, as `waveformLeaves` makes them from its samples, once, as it is written, and kept beside it. Zoomed out the lane draws from them alone, exact at a leaf a device pixel or more; past that it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and lets go of the oldest chunks it no longer shows. `leavesPeak` gives the clip's `peak` from them.
 
 ```ts
-import { leavesPeak, waveformLeaves } from "@audio-ui/gl/waveform";
+import { leavesPeak, waveformLeaves } from "@/lib/gl/waveform";
 
 // Once, while the recording is written: whole leaves a stretch at a time, laid end to end.
 const leaves = waveformLeaves(mix);

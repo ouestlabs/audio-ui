@@ -69,9 +69,9 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
-    dependencies: ["@audio-ui/gl"],
+    dependencies: [],
     description:
-      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform through @audio-ui/gl: the exact lowest and highest sample of every pixel column with the RMS inside, a line through the samples zoomed in, however long the recording. Plain, or as the three bands of the sound one over the other, the lows warm and the highs cool. Nothing without WebGL 2",
+      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: the exact lowest and highest sample of every pixel column with the RMS inside, a line through the samples zoomed in, however long the recording. Plain, or as the three bands of the sound one over the other, the lows warm and the highs cool. Nothing without WebGL 2",
     files: [
       {
         path: "audio/elements/waveform-lane.tsx",
@@ -82,9 +82,9 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/gl"],
+    dependencies: [],
     description:
-      "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU at every zoom by gl-spectrogram through @audio-ui/gl, on the frequency axis of your choice (octaves, mel, ERB or hertz), with the frequency and level under the pointer and an axis of frequency labels for the lane. It draws only what the view shows, in the text colour over the ground under it, and nothing without WebGL 2.",
+      "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice (octaves, mel, ERB or hertz), with the frequency and level under the pointer and an axis of frequency labels for the lane. It draws only what the view shows, in the text colour over the ground under it, and nothing without WebGL 2.",
     files: [
       {
         path: "audio/elements/clip-spectrogram.tsx",
@@ -96,7 +96,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
-    dependencies: ["@audio-ui/gl"],
+    dependencies: [],
     description:
       "A lane's clips drawn on the GPU in the view you pick: the waveform, the waveform by band, or the spectrogram on octaves, mel, ERB or hertz with its frequency axis and the reading under the pointer. With the views labelled for a menu",
     files: [
@@ -113,7 +113,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/gl"],
+    dependencies: [],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body; an audio clip given its recording draws its waveform on the GPU, a row a channel on a tall track, on the page's one WebGL context.",
     files: [
@@ -792,7 +792,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "waveform", "knob"],
-    dependencies: ["@audio-ui/gl"],
+    dependencies: [],
     description:
       "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp and its mode, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu. The source is edited as in an audio editor: a bar over it with Edit, Process and View, a drag selects a stretch framed with fades and a level to drag, a right-click opens Crop, Reverse, Louder and Quieter and, given onProcess, Cut, Copy, Paste, Delete and the Process menu, with their keys; on the selection they rewrite it, with none they set the clip; processedSettings says where the clip's start, end and loop go.",
     files: [

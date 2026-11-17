@@ -6,7 +6,7 @@ import {
   readHertz,
   spectrogramAxis,
   zoomBand,
-} from "./index.ts";
+} from "./index";
 
 describe("zoomBand", () => {
   test("zooming in keeps the frequency under the pointer where it is", () => {
