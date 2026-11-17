@@ -125,6 +125,9 @@ const styleOf = (element: HTMLElement | undefined) =>
 const pathOf = (part: HTMLElement | undefined) =>
   part?.querySelector("path")?.getAttribute("d") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function plotSuite(framework: string, mount: MountPlot) {
   describe(`the plot in ${framework}`, () => {
     test("a surface that is positioned and contained", async () => {
@@ -295,6 +298,8 @@ export function plotSuite(framework: string, mount: MountPlot) {
           pointerId: 1,
         });
       });
+      await frame();
+      await p.act(() => undefined);
       const [value, , reason] = p.changes.at(-1) ?? [];
       expect(reason).toBe("drag");
       expect(value?.x).toBeCloseTo(70, 0);
@@ -336,6 +341,19 @@ export function plotSuite(framework: string, mount: MountPlot) {
       });
       expect(styleOf(p.handle)).toContain("left: 20%");
       expect(styleOf(p.handle)).toMatch(HANDLE_TOP);
+      p.unmount();
+    });
+
+    test("a key on a controlled handle commits the value it reported", async () => {
+      // The app has not given the new value back yet when the commit is made.
+      const p = await render(mount, {
+        handle: { handle: "a", label: "A", value: { x: 20, y: 80 } },
+      });
+      await p.act(() => key(p.inputs()[0] as HTMLInputElement, "ArrowRight"));
+      const [changed] = p.changes.at(-1) ?? [];
+      const [committed] = p.commits.at(-1) ?? [];
+      expect(changed?.x).toBeCloseTo(21, 1);
+      expect(committed?.x).toBeCloseTo(21, 1);
       p.unmount();
     });
 

@@ -708,7 +708,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "Curves and draggable points, for equalizers, filters and compressors.",
     files: [

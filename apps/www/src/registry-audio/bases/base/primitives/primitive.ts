@@ -133,6 +133,69 @@ export function formatPair(formatter: Intl.NumberFormat, a: number, b: number) {
   return `${formatter.format(a)}${decimalComma ? "; " : ", "}${formatter.format(b)}`;
 }
 
+/** Where in an interval a curve is checked against its chord, how many times an interval may be halved, and a ceiling on the vertices of one curve. */
+const PROBES = [0.25, 0.5, 0.75];
+const MAX_DEPTH = 8;
+const MAX_SAMPLES = 4096;
+
+/**
+ * The vertices of a polyline that draws `f(t)` for `t` from 0 to 1 without
+ * straying more than `tolerance` from it: it starts from `grid` and halves
+ * every interval whose curve leaves its chord. `width` is how wide `t` from 0
+ * to 1 spans in the box the curve is drawn in.
+ */
+export function adaptiveSamples(
+  f: (t: number) => number,
+  grid: readonly number[],
+  tolerance: number,
+  width = 1
+) {
+  const samples: [number, number][] = [];
+  let budget = MAX_SAMPLES - grid.length;
+  const refine = (
+    from: number,
+    start: number,
+    to: number,
+    end: number,
+    depth: number
+  ) => {
+    if (depth >= MAX_DEPTH || budget <= 0) {
+      return;
+    }
+    let stray = 0;
+    let middle = Number.NaN;
+    for (const probe of PROBES) {
+      const value = f(from + (to - from) * probe);
+      stray = Math.max(
+        stray,
+        Math.abs(value - (start + (end - start) * probe))
+      );
+      if (probe === 0.5) {
+        middle = value;
+      }
+    }
+    const slope = (end - start) / ((to - from) * width);
+    if (stray / Math.sqrt(1 + slope * slope) <= tolerance) {
+      return;
+    }
+    const half = (from + to) / 2;
+    budget -= 1;
+    refine(from, start, half, middle, depth + 1);
+    samples.push([half, middle]);
+    refine(half, middle, to, end, depth + 1);
+  };
+  const values = grid.map(f);
+  grid.forEach((t, index) => {
+    const value = values[index] ?? 0;
+    samples.push([t, value]);
+    const next = grid[index + 1];
+    if (next !== undefined) {
+      refine(t, value, next, values[index + 1] ?? 0, 0);
+    }
+  });
+  return samples;
+}
+
 /** What a gesture hears, from the press that started it to its release. */
 export interface GestureHandlers<Data> {
   /** The pointer lifted, or the browser took it over (`canceled`). */

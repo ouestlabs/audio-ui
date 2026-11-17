@@ -36,6 +36,9 @@
       "@audio-ui/primitives/piano": [
         "./src/registry-audio/bases/base/primitives/piano/piano.ts"
       ],
+      "@audio-ui/primitives/plot": [
+        "./src/registry-audio/bases/base/primitives/plot/plot.ts"
+      ],
       "@audio-ui/primitives/sequencer": [
         "./src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
       ],

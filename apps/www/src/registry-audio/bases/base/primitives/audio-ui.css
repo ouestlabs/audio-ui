@@ -629,4 +629,145 @@
       outline: 4px solid var(--audio-ui-ring);
     }
   }
+
+  /* Plot */
+
+  [data-slot="plot"] {
+    display: block;
+    width: 20rem;
+    height: 10rem;
+    overflow: hidden;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  :is([data-slot="plot-curve"], [data-slot="plot-trace"]) {
+    fill: none;
+    stroke: var(--audio-ui-foreground);
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+  }
+
+  [data-slot="plot-line"] {
+    stroke: var(--audio-ui-muted-foreground);
+    stroke-width: 1px;
+    stroke-dasharray: 3 3;
+  }
+
+  [data-slot="plot-band"] {
+    fill: color-mix(in oklch, var(--audio-ui-foreground) 8%, transparent);
+  }
+
+  [data-slot="plot-grid"] {
+    [data-part="line"] {
+      stroke: var(--audio-ui-input);
+      stroke-width: 1px;
+    }
+
+    [data-part="line"][data-zero] {
+      stroke: var(--audio-ui-muted-foreground);
+    }
+
+    /* The labels sit at the bottom for x and at the left for y, just inside the frame. */
+    [data-part="label"] {
+      padding: 0.125rem 0.25rem;
+      font-size: 0.625rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: var(--audio-ui-muted-foreground);
+    }
+
+    [data-part="label"][data-axis="x"] {
+      bottom: 0;
+      translate: -50% 0;
+    }
+
+    [data-part="label"][data-axis="y"] {
+      left: 0;
+      translate: 0 -50%;
+    }
+  }
+
+  [data-slot="plot-handle"] {
+    width: 0.75rem;
+    height: 0.75rem;
+    cursor: grab;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-dragging] {
+      cursor: grabbing;
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="plot-dot"] {
+    width: 0.375rem;
+    height: 0.375rem;
+    background: var(--audio-ui-foreground);
+    border-radius: 50%;
+  }
+
+  [data-slot="plot-mark"] {
+    width: 1px;
+    height: 0.375rem;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-axis="x"] {
+      bottom: 0;
+    }
+
+    &[data-axis="y"] {
+      left: 0;
+      width: 0.375rem;
+      height: 1px;
+    }
+  }
+
+  /* A crosshair at the pointer, while it is over the plot. */
+  [data-slot="plot-cursor"] {
+    visibility: hidden;
+
+    &[data-active] {
+      visibility: visible;
+    }
+
+    &::before,
+    &::after {
+      position: absolute;
+      content: "";
+      background: var(--audio-ui-muted-foreground);
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: var(--plot-cursor-x);
+      width: 1px;
+    }
+
+    &::after {
+      top: var(--plot-cursor-y);
+      right: 0;
+      left: 0;
+      height: 1px;
+    }
+  }
+
+  [data-slot="plot-cursor-readout"] {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--audio-ui-foreground);
+    pointer-events: none;
+    translate: 0.5rem -100%;
+  }
 }
