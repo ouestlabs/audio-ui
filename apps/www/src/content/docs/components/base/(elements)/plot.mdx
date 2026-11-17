@@ -49,9 +49,60 @@ The styled component, with a frame, a graph layer and themed parts, is one comma
 
 For the equalizer above, with its pink noise and spectrum, ready to run: `npx shadcn@latest add @audio-ui/plot-demo`.
 
-The rest of this section is the primitive alone, without the styling.
+</ForFrameworks>
+
+The primitive and its adapter, without the styling:
+
+<CodeTabs>
+
+<TabsList>
+  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+</TabsList>
+
+<TabsContent value="cli">
+
+<ForFrameworks only="react">
+
+```bash component
+npx shadcn@latest add @audio-ui/plot-react
+```
 
 </ForFrameworks>
+
+<ForFrameworks only="vue">
+
+```bash component
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-vue.json
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+```bash component
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+```bash component
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-web.json
+```
+
+</ForFrameworks>
+
+It writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte) and installs the kernel's packages and what each file imports. The optional styles are one more command:
+
+```bash component
+npx shadcn@latest add @audio-ui/primitives-css
+```
+
+</TabsContent>
+
+<TabsContent value="manual">
 
 ### 1. The kernel
 
@@ -137,12 +188,6 @@ Your framework's few parts, over the primitive. They import it by a relative pat
   title="components/audio-ui/plot/react.tsx"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add @audio-ui/plot-react
-```
-
 </TabsContent>
 
 <TabsContent value="vue">
@@ -153,12 +198,6 @@ npx shadcn@latest add @audio-ui/plot-react
   name="plot-vue"
   title="components/audio-ui/plot/vue.ts"
 />
-
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-vue.json
-```
 
 </TabsContent>
 
@@ -236,12 +275,6 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
   title="src/lib/components/audio-ui/plot/svelte/parts.ts"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
-```
-
 </TabsContent>
 
 <TabsContent value="web">
@@ -255,17 +288,9 @@ Import it once, and it registers the `audio-ui-plot` tags.
   title="components/audio-ui/plot/web.ts"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-web.json
-```
-
 </TabsContent>
 
 </FrameworkTabs>
-
-The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
 
 ### 4. The styles
 
@@ -277,11 +302,11 @@ Optional, and the same for every framework: the anatomy of the primitives, drawn
   title="src/audio-ui-primitives.css"
 />
 
-Import it once, or let the CLI write it:
+Import it once.
 
-```bash
-npx shadcn@latest add @audio-ui/primitives-css
-```
+</TabsContent>
+
+</CodeTabs>
 
 ## Usage
 
