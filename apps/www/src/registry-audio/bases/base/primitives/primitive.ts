@@ -196,6 +196,138 @@ export function adaptiveSamples(
   return samples;
 }
 
+/**
+ * What a change reports: why it happened (`reason`), the event behind it,
+ * and `cancel()` to refuse the change.
+ */
+export interface ChangeEventDetails<Reason extends string, E extends Event> {
+  cancel: () => void;
+  event: E;
+  readonly isCanceled: boolean;
+  reason: Reason;
+}
+
+/** What a commit reports once a gesture ends: why it happened and the event behind it. */
+export interface CommitEventDetails<Reason extends string, E extends Event> {
+  event: E;
+  reason: Reason;
+}
+
+/** The details of a change for `reason` and `event`, with `cancel()` to refuse it. */
+export function createChangeEventDetails<
+  Reason extends string,
+  E extends Event,
+>(reason: Reason, event: E): ChangeEventDetails<Reason, E> {
+  let canceled = false;
+  return {
+    cancel: () => {
+      canceled = true;
+    },
+    event,
+    get isCanceled() {
+      return canceled;
+    },
+    reason,
+  };
+}
+
+/**
+ * One pointer at a time on a control: while one drags, a press from another is
+ * ignored, and the same pointer pressing again means its release was missed,
+ * so the drag it left ends there. Moves arrive at most once per frame, each
+ * with where the pointer was at the last one.
+ */
+export function createPointerLock() {
+  type Held = {
+    end: (event: PointerEvent) => void;
+    pointerId: number;
+    stop: () => void;
+  };
+  let held: Held | null = null;
+  return {
+    claim: (event: PointerEvent) => {
+      if (!held) {
+        return true;
+      }
+      if (held.pointerId !== event.pointerId) {
+        return false;
+      }
+      const stale = held;
+      held = null;
+      stale.stop();
+      stale.end(event);
+      return true;
+    },
+    follow: (
+      target: Element,
+      down: PointerEvent,
+      move: (event: PointerEvent, from: { x: number; y: number }) => void,
+      end: (event: PointerEvent) => void
+    ) => {
+      let last = { x: down.clientX, y: down.clientY };
+      const entry: Held = {
+        end,
+        pointerId: down.pointerId,
+        stop: () => undefined,
+      };
+      held = entry;
+      entry.stop = bindDrag(target as HTMLElement, down, {
+        onEnd: (event) => {
+          if (held === entry) {
+            held = null;
+          }
+          end(event);
+        },
+        onMove: ({ event }) => {
+          const from = last;
+          last = { x: event.clientX, y: event.clientY };
+          move(event, from);
+        },
+      });
+    },
+  };
+}
+
+/**
+ * A value that changes outside the framework, in the shape of an external
+ * store: `subscribe` registers a listener called on each change, and
+ * `getSnapshot` returns the current value. What a primitive's `source` reads
+ * from, so that following a signal costs no render.
+ */
+export interface Source<Value> {
+  getSnapshot: () => Value;
+  subscribe: (listener: () => void) => () => void;
+}
+
+/** A value the primitive holds and its parts read outside any render. */
+export interface Store<Value> {
+  get: () => Value;
+  set: (next: Value) => void;
+  subscribe: (listener: () => void) => () => void;
+}
+
+/** A store holding `initial`: `set` tells every listener, unless the value is the same one. */
+export function createStore<Value>(initial: Value): Store<Value> {
+  let value = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => value,
+    set: (next) => {
+      if (Object.is(next, value)) {
+        return;
+      }
+      value = next;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+}
+
 /** What a gesture hears, from the press that started it to its release. */
 export interface GestureHandlers<Data> {
   /** The pointer lifted, or the browser took it over (`canceled`). */

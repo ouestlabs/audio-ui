@@ -45,6 +45,9 @@
       "@audio-ui/primitives/sequencer": [
         "./src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
       ],
+      "@audio-ui/primitives/waveform": [
+        "./src/registry-audio/bases/base/primitives/waveform/waveform.ts"
+      ],
       "@audio-ui/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],

@@ -1,6 +1,11 @@
-import { bindDrag } from "@ui-sdk/core";
 import { clamp } from "@ui-sdk/core/number";
 import { bypassesGrid, type Grid, snapMove, snapToGrid } from "../grid";
+import {
+  type ChangeEventDetails,
+  type CommitEventDetails,
+  createChangeEventDetails,
+  createPointerLock,
+} from "../primitive";
 import {
   cellStart,
   changeLevel,
@@ -26,41 +31,6 @@ import {
 } from "./edits";
 import { type RollScale, type Rows, rollRows } from "./rows";
 
-/**
- * What a change reports: why it happened (`reason`), the event behind it,
- * and `cancel()` to refuse the change.
- */
-export interface ChangeEventDetails<Reason extends string, E extends Event> {
-  cancel: () => void;
-  event: E;
-  readonly isCanceled: boolean;
-  reason: Reason;
-}
-
-/** What a commit reports once a gesture ends: why it happened and the event behind it. */
-export interface CommitEventDetails<Reason extends string, E extends Event> {
-  event: E;
-  reason: Reason;
-}
-
-/** The details of a change for `reason` and `event`, with `cancel()` to refuse it. */
-function createChangeEventDetails<Reason extends string, E extends Event>(
-  reason: Reason,
-  event: E
-): ChangeEventDetails<Reason, E> {
-  let canceled = false;
-  return {
-    cancel: () => {
-      canceled = true;
-    },
-    event,
-    get isCanceled() {
-      return canceled;
-    },
-    reason,
-  };
-}
-
 /** A gesture between two frames is followed in steps this long, in px, so a quick stroke misses no cell. */
 const STROKE_SAMPLE_PX = 4;
 
@@ -79,63 +49,6 @@ function strokePoints(
     const t = (index + 1) / count;
     return { x: from.x + (x - from.x) * t, y: from.y + (y - from.y) * t };
   });
-}
-
-/**
- * One pointer at a time on the roll: while one drags, a press from another is
- * ignored, and the same pointer pressing again means its release was missed,
- * so the drag it left ends there. Moves arrive at most once per frame, each
- * with where the pointer was at the last one.
- */
-function createPointerLock() {
-  type Held = {
-    end: (event: PointerEvent) => void;
-    pointerId: number;
-    stop: () => void;
-  };
-  let held: Held | null = null;
-  return {
-    claim: (event: PointerEvent) => {
-      if (!held) {
-        return true;
-      }
-      if (held.pointerId !== event.pointerId) {
-        return false;
-      }
-      const stale = held;
-      held = null;
-      stale.stop();
-      stale.end(event);
-      return true;
-    },
-    follow: (
-      target: Element,
-      down: PointerEvent,
-      move: (event: PointerEvent, from: { x: number; y: number }) => void,
-      end: (event: PointerEvent) => void
-    ) => {
-      let last = { x: down.clientX, y: down.clientY };
-      const entry: Held = {
-        end,
-        pointerId: down.pointerId,
-        stop: () => undefined,
-      };
-      held = entry;
-      entry.stop = bindDrag(target as HTMLElement, down, {
-        onEnd: (event) => {
-          if (held === entry) {
-            held = null;
-          }
-          end(event);
-        },
-        onMove: ({ event }) => {
-          const from = last;
-          last = { x: event.clientX, y: event.clientY };
-          move(event, from);
-        },
-      });
-    },
-  };
 }
 
 /** How far a pointer moves before a press on the grid or a note becomes a drag. */

@@ -122,6 +122,20 @@ waveformSuite("custom elements", async (tree: WaveformTree) => {
       region: detail.region,
     });
   });
+  root.addEventListener("regioncommit", (event) => {
+    const { detail } = event as Event as CustomEvent<{
+      edge: string;
+      reason: string;
+      region: string;
+      value: number[];
+    }>;
+    tree.options.onRegionCommitted(detail.value, {
+      cancel: () => undefined,
+      edge: detail.edge,
+      reason: detail.reason,
+      region: detail.region,
+    });
+  });
   root.addEventListener("selectionchange", (event) => {
     const { detail } = event as Event as CustomEvent<{
       reason: string;

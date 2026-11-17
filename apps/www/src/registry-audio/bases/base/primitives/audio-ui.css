@@ -7,6 +7,23 @@
  */
 @layer ui-sdk;
 
+/*
+ * The waveform's canvas reads these two as colors, not as text: registered as
+ * colors, the browser resolves a `light-dark()` or a `var()` before the
+ * canvas reads it.
+ */
+@property --waveform-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: currentcolor;
+}
+
+@property --waveform-progress-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: currentcolor;
+}
+
 @layer ui-sdk {
   :where(:root, :host) {
     --audio-ui-background: var(
@@ -898,5 +915,138 @@
     &:has(:focus-visible) {
       outline: 2px solid var(--audio-ui-ring);
     }
+  }
+
+  /* Waveform */
+
+  [data-slot="waveform"] {
+    display: block;
+    width: 24rem;
+    height: 4rem;
+    --waveform-color: var(--audio-ui-muted-foreground);
+    --waveform-progress-color: var(--audio-ui-foreground);
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+
+    /* Audio on its way: the parts wait. */
+    &[data-loading] {
+      opacity: 0.6;
+    }
+  }
+
+  [data-slot="waveform-control"] {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background: var(--audio-ui-muted);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="waveform-canvas"] {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="waveform-bars"] {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="waveform-bar"] {
+    flex: 1;
+    height: calc(var(--waveform-level, 0.08) * 100%);
+    background: var(--waveform-color);
+    border-radius: 1px;
+
+    &[data-played] {
+      background: var(--waveform-progress-color);
+    }
+  }
+
+  /* The playhead and the thumb stand at the played share. */
+  [data-slot="waveform-playhead"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-foreground);
+
+    [data-outside] > & {
+      display: none;
+    }
+  }
+
+  [data-slot="waveform-thumb"] {
+    top: 50%;
+    width: 0.625rem;
+    height: 0.625rem;
+    pointer-events: none;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+    translate: 0 -50%;
+  }
+
+  [data-slot="waveform-marker"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-muted-foreground);
+  }
+
+  [data-slot="waveform-hover"] {
+    top: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-input);
+    translate: -50% -100%;
+  }
+
+  [data-slot="waveform-region"] {
+    top: 0;
+    bottom: 0;
+    cursor: grab;
+    background: color-mix(
+      in oklch,
+      var(--audio-ui-foreground) 12%,
+      transparent
+    );
+
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+  }
+
+  :is([data-slot="waveform-region-start"], [data-slot="waveform-region-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="waveform-region-start"] {
+    left: 0;
+  }
+
+  [data-slot="waveform-region-end"] {
+    right: 0;
   }
 }

@@ -23,6 +23,7 @@ export const SHIPPED_PRIMITIVES = new Set([
   "piano-roll",
   "plot",
   "sequencer",
+  "waveform",
   "xypad",
 ]);
 
@@ -33,6 +34,18 @@ const MORE_FILES: Record<string, string[]> = {
     "piano-roll/controller.ts",
     "piano-roll/edits.ts",
     "piano-roll/rows.ts",
+  ],
+  waveform: [
+    "frame.ts",
+    "grid.ts",
+    "waveform/bar-layout.ts",
+    "waveform/level-history.ts",
+    "waveform/levels-engine.ts",
+    "waveform/levels.ts",
+    "waveform/paint-bars.ts",
+    "waveform/paint-canvas.ts",
+    "waveform/peaks.ts",
+    "waveform/scope.ts",
   ],
 };
 
