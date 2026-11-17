@@ -5,6 +5,7 @@ import { menuSections, shownTo } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
+  nodeText,
 } from "@/lib/docs/content/page-tree";
 import {
   DOCS_SECTIONS,
@@ -215,11 +216,18 @@ export function useSidebarGroups(tree: PageTree) {
           sections: group.sections
             .map((part) => ({
               ...part,
-              pages: part.pages.filter(
-                (page) =>
-                  !(otherThanReact && REACT_PAGES.has(page.url)) &&
-                  shownTo(page.url, framework ?? "react")
-              ),
+              pages: part.pages
+                .filter(
+                  (page) =>
+                    !(otherThanReact && REACT_PAGES.has(page.url)) &&
+                    shownTo(page.url, framework ?? "react")
+                )
+                // A group's own page, named as the group (Engine under Engine), reads Overview.
+                .map((page) =>
+                  titled && nodeText(page.name) === group.title
+                    ? { ...page, name: "Overview" }
+                    : page
+                ),
             }))
             .filter((part) => part.pages.length > 0),
           titled,
