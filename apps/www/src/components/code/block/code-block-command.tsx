@@ -114,7 +114,7 @@ export function CodeBlockCommand({
           variant="outline"
         />
       </FrameHeader>
-      <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto">
+      <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto bg-site-code">
         <div className="px-4 py-3.5">
           <pre>
             <code
