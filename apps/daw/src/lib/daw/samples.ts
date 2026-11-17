@@ -10,11 +10,6 @@
  * in a worker.
  */
 
-import {
-  LEAF_FRAMES,
-  type WaveformBands,
-  waveformLeaves,
-} from "@audio-ui/gl/waveform";
 import type { ClipSamples } from "@/components/audio-ui/clip-waveform";
 import type { RecordingSource, StreamedSource } from "@/lib/clip-player";
 import {
@@ -25,6 +20,11 @@ import {
   spectrogramSpectra,
   splitBands,
 } from "@/lib/engine/analysis";
+import {
+  LEAF_FRAMES,
+  type WaveformBands,
+  waveformLeaves,
+} from "@/lib/gl/waveform";
 
 const BYTES = Float32Array.BYTES_PER_ELEMENT;
 

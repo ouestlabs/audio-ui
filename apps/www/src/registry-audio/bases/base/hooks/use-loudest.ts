@@ -1,5 +1,5 @@
-import { leavesPeak } from "@audio-ui/gl/waveform";
 import { useEffect, useState } from "react";
+import { leavesPeak } from "@/gl/waveform";
 
 /** How many frames are read at a time, so a long recording does not hold the page. */
 const CHUNK = 1 << 20;

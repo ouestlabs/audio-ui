@@ -6,7 +6,7 @@ import {
   type WaveformClip,
   waveformLeaves,
   waveformRows,
-} from "./index.ts";
+} from "./index";
 
 const samples = (frames: number) => ({
   frames,

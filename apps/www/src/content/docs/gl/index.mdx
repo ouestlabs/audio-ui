@@ -1,11 +1,11 @@
 ---
 title: GL
-description: "@audio-ui/gl: audio drawn on the GPU, with no UI framework in it: a lane of clips as waveforms or a spectrogram on one canvas and one WebGL context, over gl-waveform and gl-spectrogram, with the frequency axis, the band zoom and the pointer reading that go with them."
+description: "GL: audio drawn on the GPU, with no UI framework in it: a lane of clips as waveforms or a spectrogram on one canvas and one WebGL context, over gl-waveform and gl-spectrogram, with the frequency axis, the band zoom and the pointer reading that go with them."
 ---
 
-`@audio-ui/gl` draws what a timeline's lane shows, on the GPU: the waveforms of its clips, exact at any zoom and over recordings of any length, or their spectrogram. It is a layer of audio/ui over [`gl-waveform`](https://github.com/dy/gl-waveform) and [`gl-spectrogram`](https://github.com/dy/gl-spectrogram), the renderers audio.js draws its own editor with: they do the drawing, and this package is how a lane uses them. It has no UI framework in it, so a React hook, a custom element or a script all start a lane the same way.
+GL draws what a timeline's lane shows, on the GPU: the waveforms of its clips, exact at any zoom and over recordings of any length, or their spectrogram. It is a layer of audio/ui over [`gl-waveform`](https://github.com/dy/gl-waveform) and [`gl-spectrogram`](https://github.com/dy/gl-spectrogram), the renderers audio.js draws its own editor with: they do the drawing, and this package is how a lane uses them. It has no UI framework in it, so a React hook, a custom element or a script all start a lane the same way.
 
-It is one package, `npm install @audio-ui/gl`, and each module is its own entry point, so a page that draws a waveform does not load the spectrogram's renderer. It is optional: `@audio-ui/react` does not need it, and a page without WebGL 2 draws the lane another way (`hasWebGL2` says which).
+Each module is an item of the registry, copied into `lib/gl/<module>/` (`npx shadcn@latest add @audio-ui/gl-waveform`), so a page that draws a waveform does not load the spectrogram's renderer. It is optional: the primitives do not need it, and a page without WebGL 2 draws the lane another way (`hasWebGL2` says which).
 
 ## What a lane is
 

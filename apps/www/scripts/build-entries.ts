@@ -10,7 +10,7 @@
  */
 
 import type { RegistryItem } from "shadcn/schema";
-import { ENGINE_MODULES } from "../src/registry-audio/bases/engine.ts";
+import { MODULE_SETS } from "../src/registry-audio/bases/modules.ts";
 
 const WEB = `${import.meta.dir}/..`;
 const BASE = `${WEB}/src/registry-audio/bases/base`;
@@ -96,9 +96,11 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
 
 export async function buildEntries(): Promise<Entry[]> {
   const all = await loadItems(FOLDERS);
-  // An engine module has its page under Engine, headed by its module.
+  // A module of the engine or of gl has its page in its own section, headed by its module.
   const own = (await loadItems(["hooks", "lib"])).filter(
-    (item) => (item.files?.length ?? 0) > 0 && !item.name.startsWith("engine-")
+    (item) =>
+      (item.files?.length ?? 0) > 0 &&
+      !(item.name.startsWith("engine-") || item.name.startsWith("gl-"))
   );
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
@@ -127,8 +129,6 @@ export async function buildEntries(): Promise<Entry[]> {
   return entries.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-// Normalized: the paths the resolver reaches have no `..` in them.
-const PACKAGES = new URL("../../../packages", import.meta.url).pathname;
 export const MODULES_MANIFEST = `${WEB}/src/lib/docs/content/package-modules.generated.json`;
 // `export { a, b as c } from "x"`, `export * as Name from "x"` and `export * from "x"`.
 const EXPORT_FROM =
@@ -138,24 +138,22 @@ const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
 // `export default function name`, with its JSDoc, in a module or its declarations.
 const DEFAULT_EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
-// A module of the engine, as the registry's files import it: `@/engine/time`.
-const ENGINE_MODULE = /^@\/engine\/([a-z-]+)$/;
+// A module of the engine or of gl, as the registry's files import it: `@/engine/time`.
+const LIB_MODULE = /^@\/(engine|gl)\/([a-z-]+)$/;
 const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const SOURCE_FILE = /\.tsx?$/;
 
-/** The published packages whose modules have a page of their own: the folder of each under `packages/`. */
-const MODULE_PACKAGES = [{ folder: "gl", name: "@audio-ui/gl" }] as const;
-/** Where the engine's modules are, in the registry. */
-const ENGINE = `${BASE}/lib/engine`;
+/** Where the modules of the engine and of gl are, in the registry. */
+const LIB = `${BASE}/lib`;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
   /** The audio.js packages it builds on, such as `@audio/note`: those its files import, and those whose code its kernels carry. */
   audiojs: string[];
   exports: EntryExport[];
-  /** What a project imports it from, such as `@/lib/engine/time` or `@audio-ui/gl/lane`: the module's key. */
+  /** What a project imports it from, such as `@/lib/engine/time`: the module's key. */
   from: string;
-  /** What a project installs: the registry item of an engine module (`@audio-ui/engine-time`), or the npm package. */
+  /** What a project installs: the module's registry item, `@audio-ui/engine-time`. */
   package: string;
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
@@ -196,21 +194,20 @@ async function fileOf(from: string, specifier: string): Promise<string | null> {
   if (specifier.startsWith(".")) {
     const path = resolvePath(from, specifier);
     // An import names a file with or without its extension, or a folder by its index.
-    for (const file of [
+    const candidates = [
       path,
       `${path}.ts`,
       `${path}.tsx`,
       `${path}/index.ts`,
-    ]) {
-      if (SOURCE_FILE.test(file) && (await Bun.file(file).exists())) {
-        return file;
-      }
-    }
-    return null;
+    ].filter((file) => SOURCE_FILE.test(file));
+    const found = await Promise.all(
+      candidates.map((file) => Bun.file(file).exists())
+    );
+    return candidates[found.indexOf(true)] ?? null;
   }
-  const engine = ENGINE_MODULE.exec(specifier);
-  if (engine) {
-    return `${ENGINE}/${engine[1]}/index.ts`;
+  const module = LIB_MODULE.exec(specifier);
+  if (module) {
+    return `${LIB}/${module[1]}/${module[2]}/index.ts`;
   }
   try {
     const entry = Bun.resolveSync(
@@ -366,60 +363,29 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
       ),
     }))
   );
-  const modules = await Promise.all(
-    MODULE_PACKAGES.map(async ({ folder, name }) => {
-      const pkg = (await Bun.file(
-        `${PACKAGES}/${folder}/package.json`
-      ).json()) as {
-        exports: Record<string, { import?: string; types: string }>;
-      };
-      const subpaths = Object.entries(pkg.exports).filter(
-        ([subpath]) => subpath !== "./internal"
-      );
-      return Promise.all(
-        subpaths.map(async ([subpath, target]): Promise<PackageModule> => {
-          const from = subpath === "." ? name : `${name}/${subpath.slice(2)}`;
-          // The declaration file names the source: dist/time/index.d.ts is src/time/index.ts.
-          const entry = `${PACKAGES}/${folder}/src/${target.types.replace("./dist/", "").replace(".d.ts", ".ts")}`;
-          const resolved = await moduleExports(entry);
-          return {
-            exports: resolved.map((each) => each.declared),
-            from,
-            package: name,
-            audiojs: await audioJsOf(entry),
-            usedBy: itemFiles
-              .filter((item) =>
-                item.sources.some((text) => text.includes(`from "${from}"`))
+  // Registry items, installed to `lib/<set>/<module>`.
+  return Promise.all(
+    Object.entries(MODULE_SETS).flatMap(([set, modules]) =>
+      Object.keys(modules).map(async (module): Promise<PackageModule> => {
+        const entry = `${LIB}/${set}/${module}/index.ts`;
+        const resolved = await moduleExports(entry);
+        return {
+          audiojs: await audioJsOf(entry),
+          exports: resolved.map((each) => each.declared),
+          from: `@/lib/${set}/${module}`,
+          package: `@audio-ui/${set}-${module}`,
+          usedBy: itemFiles
+            .filter((item) =>
+              item.sources.some((text) =>
+                text.includes(`from "@/${set}/${module}"`)
               )
-              .map((item) => item.name)
-              .sort(),
-          };
-        })
-      );
-    })
-  );
-  // The engine's modules: registry items, installed to `lib/engine/<module>`.
-  const engine = await Promise.all(
-    Object.keys(ENGINE_MODULES).map(async (module): Promise<PackageModule> => {
-      const entry = `${ENGINE}/${module}/index.ts`;
-      const resolved = await moduleExports(entry);
-      return {
-        audiojs: await audioJsOf(entry),
-        exports: resolved.map((each) => each.declared),
-        from: `@/lib/engine/${module}`,
-        package: `@audio-ui/engine-${module}`,
-        usedBy: itemFiles
-          .filter((item) =>
-            item.sources.some((text) =>
-              text.includes(`from "@/engine/${module}"`)
             )
-          )
-          .map((item) => item.name)
-          .sort(),
-      };
-    })
+            .map((item) => item.name)
+            .sort(),
+        };
+      })
+    )
   );
-  return [...modules.flat(), ...engine];
 }
 
 const MANIFESTS = [

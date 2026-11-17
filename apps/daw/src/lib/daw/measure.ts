@@ -4,13 +4,13 @@
  * chroma. Nothing here touches the page, so a worker reads it too.
  */
 
-import { LEAF_FRAMES } from "@audio-ui/gl/waveform";
 import type { RecordingPeaks } from "@/lib/daw/recordings";
 import {
   audioChroma,
   computePeaks,
   normalizePeaks,
 } from "@/lib/engine/analysis";
+import { LEAF_FRAMES } from "@/lib/gl/waveform";
 
 /** How many peaks a recording keeps per second: one per pixel at the closest zoom. */
 const PEAKS_PER_SECOND = 256;

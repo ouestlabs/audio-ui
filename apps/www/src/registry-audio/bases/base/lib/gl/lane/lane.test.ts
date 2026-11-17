@@ -13,7 +13,7 @@ import {
   sameSamples,
   visibleClips,
   visibleClipsNow,
-} from "./index.ts";
+} from "./index";
 
 const RATE = 1000;
 const memory = new Float32Array(10_000);

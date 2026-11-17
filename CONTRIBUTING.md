@@ -15,7 +15,7 @@ audio-ui/
 └── packages/
 ```
 
-Changes to the published packages (`packages/gl`, `packages/icons`) require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
+Changes to the published package (`packages/icons`) require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
 
 ---
 
@@ -269,7 +269,7 @@ registryDependencies: [
 ]
 ```
 
-npm packages the file imports go in `dependencies` (e.g. `"@audio-ui/gl"`, `"zustand"`).
+npm packages the file imports go in `dependencies` (e.g. `"zod"`, `"zustand"`).
 
 ### Site Manifests (generated, do not edit)
 

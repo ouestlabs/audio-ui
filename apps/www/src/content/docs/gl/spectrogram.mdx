@@ -3,14 +3,14 @@ title: spectrogram
 description: "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU by gl-spectrogram on one of four frequency axes, with the band zoom, the pointer's cell and the frequency axis laid out for a lane."
 ---
 
-<Module from="@audio-ui/gl/spectrogram" />
+<Module from="@/lib/gl/spectrogram" />
 
 ## Usage
 
 `createSpectrogramLane` draws the spectrograms of a lane's clips on a canvas in the lane's box, each clip in its own parts of it. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom.
 
 ```ts
-import { createSpectrogramLane } from "@audio-ui/gl/spectrogram";
+import { createSpectrogramLane } from "@/lib/gl/spectrogram";
 
 const lane = createSpectrogramLane(
   canvas,

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { leavesPeak, waveformLeaves } from "@audio-ui/gl/waveform";
 import {
   makeLeaves,
   readChannels,
@@ -7,6 +6,7 @@ import {
   recordingChannels,
   recordingSamples,
 } from "@/lib/daw/samples";
+import { leavesPeak, waveformLeaves } from "@/lib/gl/waveform";
 
 describe("a recording's samples for the clip view (CLP-024)", () => {
   test("reads the middle of its channels, only the frames asked for", async () => {

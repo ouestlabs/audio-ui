@@ -1,3 +1,18 @@
+import { Toolbar } from "@base-ui/react/toolbar";
+import {
+  type ChangeEvent,
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import {
   type AudioPeaks,
   computePeaks,
@@ -18,28 +33,9 @@ import {
   mixChannels,
   resampleChannels,
 } from "@/engine/files";
-import {
-  formatLevel,
-  formatSampleRate,
-  formatTime,
-} from "@/engine/format";
+import { formatLevel, formatSampleRate, formatTime } from "@/engine/format";
 import { secondsPerBeat, type Tempo } from "@/engine/time";
-import { hasWebGL2 } from "@audio-ui/gl/lane";
-import { Toolbar } from "@base-ui/react/toolbar";
-import {
-  type ChangeEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-  type PointerEvent,
-  type RefObject,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
+import { hasWebGL2 } from "@/gl/lane";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import {

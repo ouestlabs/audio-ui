@@ -20,7 +20,7 @@ import {
   type SampleCache,
   sameSamples,
   type VisiblePart,
-} from "../lane/index.ts";
+} from "../lane/index";
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
 export type SpectrogramScale = Scale;
@@ -724,4 +724,4 @@ export {
   type LaneClip,
   type LaneSamples,
   type LaneSpectra,
-} from "../lane/index.ts";
+} from "../lane/index";

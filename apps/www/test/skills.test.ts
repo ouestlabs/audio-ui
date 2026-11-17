@@ -5,7 +5,7 @@ import { devices } from "@/registry-audio/bases/base/devices/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
 import { primitives } from "@/registry-audio/bases/base/primitives/_registry";
-import { ENGINE_MODULES } from "@/registry-audio/bases/engine";
+import { ENGINE_MODULES } from "@/registry-audio/bases/modules";
 import {
   compileSkill,
   readRules,
@@ -53,7 +53,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["gl"]);
+const PACKAGES = new Set<string>();
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
