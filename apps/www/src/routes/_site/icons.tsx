@@ -47,7 +47,6 @@ function IconsPage() {
           </h1>
           <Button
             className="shrink-0"
-            nativeButton={false}
             render={
               <Link params={{ _splat: "icons" }} to="/docs/$">
                 <BookOpenTextIcon className="size-3.5 opacity-60" />

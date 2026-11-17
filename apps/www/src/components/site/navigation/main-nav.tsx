@@ -31,7 +31,6 @@ export function MainNav({
         ) : (
           <Button
             className={buttonClassName}
-            nativeButton={false}
             render={
               item.href.startsWith("https://") ? (
                 <Link

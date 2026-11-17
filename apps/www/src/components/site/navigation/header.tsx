@@ -84,7 +84,6 @@ function SiteLogo() {
     <Button
       // pl-2: the icon's built-in margin plus its round edge make 10px read wider than the right side
       className="pl-2"
-      nativeButton={false}
       render={
         <Link aria-label="audio/ui home" className="flex items-center" to="/">
           <Wordmark className="text-foreground text-xl" />
@@ -183,7 +182,6 @@ export function SiteHeader({
           <SiteHeaderMobileNav navItems={siteConfig.navItems} tree={pageTree} />
           <Button
             className="hidden pl-2 md:flex"
-            nativeButton={false}
             render={
               <Link
                 aria-label="audio/ui home"

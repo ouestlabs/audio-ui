@@ -47,7 +47,7 @@ export function DemoSounds() {
     };
   }, [master, playing]);
 
-  const toggle = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const toggle = useCallback((event: React.MouseEvent<HTMLElement>) => {
     const name = event.currentTarget.dataset.name as DemoSourceName;
     setPlaying((current) => (current === name ? null : name));
   }, []);

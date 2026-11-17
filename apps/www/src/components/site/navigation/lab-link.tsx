@@ -7,7 +7,6 @@ export function LabLink() {
   return (
     <Button
       className="shadow-none"
-      nativeButton={false}
       render={
         <a href={siteConfig.links.lab} rel="noreferrer" target="_blank" />
       }

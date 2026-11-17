@@ -37,7 +37,6 @@ export function IconCatalog() {
       </div>
       <Button
         className="shrink-0"
-        nativeButton={false}
         render={
           <Link to="/icons">
             Browse the icons

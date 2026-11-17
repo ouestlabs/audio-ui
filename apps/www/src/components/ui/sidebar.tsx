@@ -254,8 +254,8 @@ function SidebarTrigger({
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar } = useSidebar();
   const handleClick = React.useCallback(
-    (event: Parameters<NonNullable<typeof onClick>>[0]) => {
-      onClick?.(event);
+    (...args: Parameters<NonNullable<typeof onClick>>) => {
+      onClick?.(...args);
       toggleSidebar();
     },
     [onClick, toggleSidebar]

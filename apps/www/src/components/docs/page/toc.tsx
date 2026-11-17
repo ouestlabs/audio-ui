@@ -223,7 +223,6 @@ export function DocsTableOfContents({
                       "w-full justify-start",
                       index === activeIndex && "underline"
                     )}
-                    nativeButton={false}
                     render={
                       <a href={item.url}>
                         <span className="truncate">{item.title}</span>

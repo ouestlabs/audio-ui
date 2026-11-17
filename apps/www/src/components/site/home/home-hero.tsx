@@ -111,7 +111,6 @@ export function HomeHero() {
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button
-          nativeButton={false}
           render={
             <Link to="/docs">
               Get started <ArrowRightIcon aria-hidden weight="bold" />
@@ -119,7 +118,6 @@ export function HomeHero() {
           }
         />
         <Button
-          nativeButton={false}
           render={
             <Link params={{ _splat: "components" }} to="/docs/$">
               Browse components
