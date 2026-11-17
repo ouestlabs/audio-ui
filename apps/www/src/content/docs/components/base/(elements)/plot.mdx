@@ -136,18 +136,7 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 The same two files for every framework: `plot.ts`, the plot's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="plot-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="plot-react"
-  title="components/audio-ui/plot/plot.ts"
-/>
+<ItemFiles name="plot-react" to={2} />
 
 ### 3. The adapter
 
@@ -164,23 +153,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="plot-react"
-  title="components/audio-ui/plot/react.tsx"
-/>
+<ItemFiles name="plot-react" from={2} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="plot-vue"
-  title="components/audio-ui/plot/vue.ts"
-/>
+<ItemFiles name="plot-vue" from={2} />
 
 </TabsContent>
 
@@ -188,75 +167,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Band.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Curve.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Grid.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={5}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/GridLines.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Handle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={7}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Line.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={8}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Path.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={9}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/Trace.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={10}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={11}
-  name="plot-svelte"
-  title="src/lib/components/audio-ui/plot/svelte/parts.ts"
-/>
+<ItemFiles name="plot-svelte" from={2} />
 
 </TabsContent>
 
@@ -264,12 +175,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-plot` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="plot-web"
-  title="components/audio-ui/plot/web.ts"
-/>
+<ItemFiles name="plot-web" from={2} />
 
 </TabsContent>
 
@@ -279,11 +185,7 @@ Import it once, and it registers the `audio-ui-plot` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -293,11 +195,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="plot"
-  title="components/audio-ui/plot.tsx"
-/>
+<ItemFiles name="plot" />
 
 </ForFrameworks>
 

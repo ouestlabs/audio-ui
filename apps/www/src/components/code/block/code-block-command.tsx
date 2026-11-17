@@ -71,10 +71,10 @@ export function CodeBlockCommand({
                 {(value: PackageManager) => {
                   const Icon = Icons[value];
                   return (
-                    <>
-                      <Icon aria-hidden="true" className="size-3.5" />
+                    <span className="flex items-center gap-2">
+                      <Icon aria-hidden="true" className="size-3.5 shrink-0" />
                       {value}
-                    </>
+                    </span>
                   );
                 }}
               </SelectValue>
@@ -85,8 +85,13 @@ export function CodeBlockCommand({
                   const Icon = Icons[key];
                   return (
                     <SelectItem key={key} value={key}>
-                      <Icon aria-hidden="true" className="size-3.5" />
-                      {key}
+                      <span className="flex items-center gap-2">
+                        <Icon
+                          aria-hidden="true"
+                          className="size-3.5 shrink-0"
+                        />
+                        {key}
+                      </span>
                     </SelectItem>
                   );
                 })}
@@ -109,7 +114,7 @@ export function CodeBlockCommand({
           variant="outline"
         />
       </FrameHeader>
-      <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto">
+      <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto bg-site-code">
         <div className="px-4 py-3.5">
           <pre>
             <code

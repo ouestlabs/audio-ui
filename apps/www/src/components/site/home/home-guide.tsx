@@ -1,8 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import {
-  type HomeFigure,
-  HomeFigures,
-} from "@/components/site/home/home-figures";
 import { JsonLd } from "@/components/site/json-ld";
 import { GroupIcon } from "@/components/site/navigation/group-icon";
 import { useFramework } from "@/hooks/use-framework";
@@ -83,12 +79,7 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
  * it does, the guides to the sound, what an agent gets, and answers to the
  * usual questions. Search engines and agents read the page without running it.
  */
-export function HomeGuide({
-  figures,
-  guides,
-  primitives,
-  spaces,
-}: HomeIndex & { figures: HomeFigure[] }) {
+export function HomeGuide({ guides, primitives, spaces }: HomeIndex) {
   // A reader of another framework than React sees what is theirs: the primitives, not the registry's styled components and its guides.
   const [framework] = useFramework();
   const forReact = framework === null || framework === "react";
@@ -100,18 +91,10 @@ export function HomeGuide({
         className="scroll-mt-4"
         id="components"
       >
-        {/* Named for screen readers and search engines: the figures and the columns say what it holds. */}
+        {/* Named for screen readers and search engines: the columns say what it holds. */}
         <h2 className="sr-only" id="home-components">
           Components
         </h2>
-        {/* From one edge of the panel to the other, out of the section's own margins. */}
-        <div className="-mx-4 sm:-mx-6">
-          <HomeFigures
-            figures={
-              forReact ? figures : figures.filter((each) => !each.reactOnly)
-            }
-          />
-        </div>
         {forReact ? null : (
           <ul className="mt-10 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
             {primitives.map((page) => (

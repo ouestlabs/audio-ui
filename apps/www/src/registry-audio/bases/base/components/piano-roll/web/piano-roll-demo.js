@@ -1,7 +1,6 @@
-import type { Note } from "@/primitives/piano-roll";
 import "@/registry-audio/bases/base/primitives/piano-roll/web";
 
-const NOTES: Note[] = [
+const NOTES = [
   { id: "1", length: 1, pitch: 60, start: 0 },
   { id: "2", length: 0.5, pitch: 63, start: 1 },
   { id: "3", length: 1.5, pitch: 67, start: 1.5 },
@@ -13,7 +12,7 @@ const NOTES: Note[] = [
 ];
 
 /** Draws the piano roll into `element`, and returns what takes it away. The rows and the notes are made for you: styled here from their tags. */
-export default function pianoRollWebDemo(element: HTMLElement) {
+export default function pianoRollWebDemo(element) {
   element.innerHTML = `
     <style>
       audio-ui-piano-roll-row { border-bottom: 1px solid var(--border); }

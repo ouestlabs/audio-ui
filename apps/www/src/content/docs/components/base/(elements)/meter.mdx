@@ -139,20 +139,9 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 ### 2. The primitive
 
-The same two files for every framework: `meter.ts`, the meter's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+The same three files for every framework: `meter.ts`, the meter's behavior written on the kernel's helpers; `levels.ts`, how a level in dB is placed along the meter; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="meter-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="meter-react"
-  title="components/audio-ui/meter/meter.ts"
-/>
+<ItemFiles name="meter-react" to={3} />
 
 ### 3. The adapter
 
@@ -169,23 +158,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="meter-react"
-  title="components/audio-ui/meter/react.tsx"
-/>
+<ItemFiles name="meter-react" from={3} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="meter-vue"
-  title="components/audio-ui/meter/vue.ts"
-/>
+<ItemFiles name="meter-vue" from={3} />
 
 </TabsContent>
 
@@ -193,26 +172,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="meter-svelte"
-  title="src/lib/components/audio-ui/meter/svelte/Value.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="meter-svelte"
-  title="src/lib/components/audio-ui/meter/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="meter-svelte"
-  title="src/lib/components/audio-ui/meter/svelte/parts.ts"
-/>
+<ItemFiles name="meter-svelte" from={3} />
 
 </TabsContent>
 
@@ -220,12 +180,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-meter` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="meter-web"
-  title="components/audio-ui/meter/web.ts"
-/>
+<ItemFiles name="meter-web" from={3} />
 
 </TabsContent>
 
@@ -235,11 +190,7 @@ Import it once, and it registers the `audio-ui-meter` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -253,11 +204,7 @@ Optional: size variants and theme styles over the primitive.
 npm install class-variance-authority
 ```
 
-<ComponentSource
-  styleName="base-nova"
-  name="meter"
-  title="components/audio-ui/meter.tsx"
-/>
+<ItemFiles name="meter" />
 
 </ForFrameworks>
 

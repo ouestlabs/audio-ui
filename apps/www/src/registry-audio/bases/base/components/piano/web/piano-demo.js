@@ -4,7 +4,7 @@ const MIN_PITCH = 48;
 const MAX_PITCH = 72;
 
 /** Draws the keyboard into `element`, and returns what takes it away. */
-export default function pianoWebDemo(element: HTMLElement) {
+export default function pianoWebDemo(element) {
   const keys = Array.from(
     { length: MAX_PITCH - MIN_PITCH + 1 },
     (_, index) =>

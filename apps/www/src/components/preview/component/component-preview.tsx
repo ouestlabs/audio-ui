@@ -35,6 +35,21 @@ export function ComponentPreview({
   code?: string;
 }) {
   const Component = getRegistryComponent(name, styleName);
+  // The code without its own copy button: the panel's bar copies it.
+  const source = React.useCallback(
+    (onCode: (code: string) => void) => (
+      <ComponentSource
+        code={code}
+        collapsible={false}
+        iconLibrary={iconLibrary}
+        name={name}
+        onCode={onCode}
+        showCopyButton={false}
+        styleName={styleName}
+      />
+    ),
+    [code, iconLibrary, name, styleName]
+  );
 
   if (!Component) {
     return (
@@ -64,27 +79,7 @@ export function ComponentPreview({
       hint={getPreviewHint(name)}
       name={name}
       previewClassName={previewClassName}
-      source={
-        <ComponentSource
-          code={code}
-          collapsible={false}
-          iconLibrary={iconLibrary}
-          name={name}
-          showCopyButton
-          styleName={styleName}
-        />
-      }
-      sourcePreview={
-        <ComponentSource
-          code={code}
-          collapsible={false}
-          iconLibrary={iconLibrary}
-          maxLines={3}
-          name={name}
-          showCopyButton={false}
-          styleName={styleName}
-        />
-      }
+      source={source}
       {...props}
     />
   );

@@ -34,6 +34,8 @@ export interface ComponentSourceProps {
   language?: string;
   maxLines?: number;
   name?: string;
+  /** Called with the code shown, once it is loaded: for a bar drawn outside it. */
+  onCode?: (code: string) => void;
   showCopyButton?: boolean;
   src?: string;
   styleName?: string;
@@ -53,6 +55,7 @@ export function ComponentSource({
   maxLines,
   code: initialCode,
   eventName,
+  onCode,
   showCopyButton = true,
 }: React.ComponentProps<"div"> & ComponentSourceProps) {
   const [config] = useConfig();
@@ -152,6 +155,12 @@ export function ComponentSource({
       abortControllerRef.current?.abort();
     };
   }, [name, src, file, initialCode, styleName, _iconLibrary, maxLines]);
+
+  React.useEffect(() => {
+    if (code) {
+      onCode?.(code);
+    }
+  }, [code, onCode]);
 
   if (isLoading) {
     // The room the code takes, with nothing moving in it.

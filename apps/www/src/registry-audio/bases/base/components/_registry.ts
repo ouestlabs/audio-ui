@@ -334,7 +334,7 @@ export const components: RegistryItem[] = [
     description: "fader example, in the web adapter",
     files: [
       {
-        path: "components/fader/web/fader-demo.ts",
+        path: "components/fader/web/fader-demo.js",
         type: "registry:example",
       },
     ],
@@ -473,7 +473,7 @@ export const components: RegistryItem[] = [
     description: "Knob example, in the web adapter",
     files: [
       {
-        path: "components/knob/web/knob-demo.ts",
+        path: "components/knob/web/knob-demo.js",
         type: "registry:example",
       },
     ],
@@ -539,7 +539,7 @@ export const components: RegistryItem[] = [
     description: "envelope example, in the web adapter",
     files: [
       {
-        path: "components/envelope/web/envelope-demo.ts",
+        path: "components/envelope/web/envelope-demo.js",
         type: "registry:example",
       },
     ],
@@ -604,7 +604,7 @@ export const components: RegistryItem[] = [
     description: "piano example, in the web adapter",
     files: [
       {
-        path: "components/piano/web/piano-demo.ts",
+        path: "components/piano/web/piano-demo.js",
         type: "registry:example",
       },
     ],
@@ -688,7 +688,7 @@ export const components: RegistryItem[] = [
     description: "piano-roll example, in the web adapter",
     files: [
       {
-        path: "components/piano-roll/web/piano-roll-demo.ts",
+        path: "components/piano-roll/web/piano-roll-demo.js",
         type: "registry:example",
       },
     ],
@@ -841,7 +841,7 @@ export const components: RegistryItem[] = [
     description: "meter example, in the web adapter",
     files: [
       {
-        path: "components/meter/web/meter-demo.ts",
+        path: "components/meter/web/meter-demo.js",
         type: "registry:example",
       },
     ],
@@ -912,7 +912,7 @@ export const components: RegistryItem[] = [
     description: "xypad example, in the web adapter",
     files: [
       {
-        path: "components/xypad/web/xypad-demo.ts",
+        path: "components/xypad/web/xypad-demo.js",
         type: "registry:example",
       },
     ],
@@ -1102,7 +1102,7 @@ export const components: RegistryItem[] = [
     description: "timeline example, in the web adapter",
     files: [
       {
-        path: "components/timeline/web/timeline-demo.ts",
+        path: "components/timeline/web/timeline-demo.js",
         type: "registry:example",
       },
     ],
@@ -1155,7 +1155,7 @@ export const components: RegistryItem[] = [
     description: "waveform example, in the web adapter",
     files: [
       {
-        path: "components/waveform/web/waveform-demo.ts",
+        path: "components/waveform/web/waveform-demo.js",
         type: "registry:example",
       },
     ],
@@ -1219,7 +1219,7 @@ export const components: RegistryItem[] = [
     description: "plot example, in the web adapter",
     files: [
       {
-        path: "components/plot/web/plot-demo.ts",
+        path: "components/plot/web/plot-demo.js",
         type: "registry:example",
       },
     ],
@@ -2154,7 +2154,7 @@ export const components: RegistryItem[] = [
     description: "pad example, in the web adapter",
     files: [
       {
-        path: "components/pad/web/pad-demo.ts",
+        path: "components/pad/web/pad-demo.js",
         type: "registry:example",
       },
     ],
@@ -2259,7 +2259,7 @@ export const components: RegistryItem[] = [
     description: "sequencer example, in the web adapter",
     files: [
       {
-        path: "components/sequencer/web/sequencer-demo.ts",
+        path: "components/sequencer/web/sequencer-demo.js",
         type: "registry:example",
       },
     ],

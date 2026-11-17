@@ -129,7 +129,8 @@
 
   --site-surface: color-mix(in oklab, var(--muted) 60%, var(--background));
   --site-surface-foreground: var(--foreground);
-  --site-code: var(--site-surface);
+  /* Code sits on white in light, on the surface in dark (below), where it stands out of the page. */
+  --site-code: var(--background);
   --site-code-foreground: var(--site-surface-foreground);
   --site-code-highlight: var(--muted);
   --site-code-number: var(--muted-foreground);

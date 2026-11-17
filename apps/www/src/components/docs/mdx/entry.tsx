@@ -1,9 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
-import { DocsComponentSource } from "@/components/code/source/docs-component-source";
+import { FileStack } from "@/components/code/source/file-stack";
 import { Command } from "@/components/docs/mdx/install";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFramework } from "@/hooks/use-framework";
 import {
   audioJsUrl,
@@ -174,34 +173,7 @@ function ItemInstall({ dependencies, files, name, needs }: ItemInstallProps) {
       {dependencies.length > 0 ? (
         <Command code={`npm install ${dependencies.join(" ")}`} />
       ) : null}
-      {files.length === 1 ? (
-        <DocsComponentSource
-          className="not-typeset"
-          name={name}
-          styleName="base-nova"
-          title={files[0]}
-        />
-      ) : (
-        <Tabs className="not-typeset" defaultValue={files[0]}>
-          <TabsList className="max-w-full overflow-x-auto">
-            {files.map((file) => (
-              <TabsTrigger key={file} value={file}>
-                {file.slice(file.lastIndexOf("/") + 1)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {files.map((file, index) => (
-            <TabsContent key={file} value={file}>
-              <DocsComponentSource
-                file={index}
-                name={name}
-                styleName="base-nova"
-                title={file}
-              />
-            </TabsContent>
-          ))}
-        </Tabs>
-      )}
+      <FileStack name={name} paths={files} />
       {own.length > 0 ? (
         <p>
           It needs{" "}

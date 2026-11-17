@@ -1,7 +1,7 @@
 import "@/registry-audio/bases/base/primitives/envelope/web";
 
 /** Draws the envelope into `element`, and returns what takes it away. The points and the curve handles are made for you: styled here from their tags. */
-export default function envelopeWebDemo(element: HTMLElement) {
+export default function envelopeWebDemo(element) {
   element.innerHTML = `
     <style>
       audio-ui-envelope-point { width: 1rem; height: 1rem; border-radius: 9999px; background: var(--primary); cursor: grab; }

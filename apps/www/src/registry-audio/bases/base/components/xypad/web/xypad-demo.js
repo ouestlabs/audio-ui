@@ -1,7 +1,7 @@
 import "@/registry-audio/bases/base/primitives/xypad/web";
 
 /** Draws the pad into `element`, and returns what takes it away. */
-export default function xypadWebDemo(element: HTMLElement) {
+export default function xypadWebDemo(element) {
   element.innerHTML = `
     <div class="flex flex-col items-center gap-2">
       <audio-ui-xypad class="data-disabled:cursor-not-allowed" max-x="100" max-y="100" min-x="0" min-y="0" value='{"x":50,"y":50}'>
@@ -30,8 +30,8 @@ export default function xypadWebDemo(element: HTMLElement) {
     </div>`;
   const pad = element.querySelector("audio-ui-xypad");
   const output = element.querySelector("output");
-  const update = (event: Event) => {
-    const { x, y } = (event as CustomEvent).detail.value;
+  const update = (event) => {
+    const { x, y } = event.detail.value;
     if (output) {
       output.textContent = `X: ${x} - Y: ${y}`;
     }

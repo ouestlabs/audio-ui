@@ -301,6 +301,12 @@ export function envelopeSuite(framework: string, mount: MountEnvelope) {
       expect(value?.[1]?.y).toBeCloseTo(0.6, 2);
       expect(e.root.hasAttribute("data-dragging")).toBe(true);
       expect(peak.hasAttribute("data-dragging")).toBe(true);
+      // A point or a segment says it is dragged only when it is the one: the others stay as they are.
+      for (const other of [...e.points(), ...e.segments()]) {
+        if (other !== peak) {
+          expect(other.hasAttribute("data-dragging")).toBe(false);
+        }
+      }
       await e.act(() =>
         pointer(peak, "pointerup", { clientX: 30, clientY: 40, pointerId: 1 })
       );

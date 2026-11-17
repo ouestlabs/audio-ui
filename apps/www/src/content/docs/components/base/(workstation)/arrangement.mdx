@@ -140,130 +140,7 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 The same files for every framework: `timeline.ts`, the timeline itself, with a controller for each of its gestures beside it (the position and the zoom, the tracks, the ranges, the clips, the navigator); `grid.ts`, the grid they snap to, and `frame.ts`, which scrolls a view while a drag is held at its edge, both shared with the piano roll and the waveform; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="timeline-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="timeline-react"
-  title="components/audio-ui/timeline/timeline.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="timeline-react"
-  title="components/audio-ui/frame.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="timeline-react"
-  title="components/audio-ui/grid.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="timeline-react"
-  title="components/audio-ui/timeline/clip-controller.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={5}
-  name="timeline-react"
-  title="components/audio-ui/timeline/clip.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="timeline-react"
-  title="components/audio-ui/timeline/clips.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={7}
-  name="timeline-react"
-  title="components/audio-ui/timeline/edge-scroll.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={8}
-  name="timeline-react"
-  title="components/audio-ui/timeline/layout.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={9}
-  name="timeline-react"
-  title="components/audio-ui/timeline/locators.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={10}
-  name="timeline-react"
-  title="components/audio-ui/timeline/navigator-controller.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={11}
-  name="timeline-react"
-  title="components/audio-ui/timeline/navigator.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="timeline-react"
-  title="components/audio-ui/timeline/position.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={13}
-  name="timeline-react"
-  title="components/audio-ui/timeline/range-controller.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={14}
-  name="timeline-react"
-  title="components/audio-ui/timeline/ranges.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={15}
-  name="timeline-react"
-  title="components/audio-ui/timeline/scale.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={16}
-  name="timeline-react"
-  title="components/audio-ui/timeline/track-controller.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={17}
-  name="timeline-react"
-  title="components/audio-ui/timeline/wheel-zoom.ts"
-/>
+<ItemFiles name="timeline-react" to={18} />
 
 ### 3. The adapter
 
@@ -280,23 +157,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={18}
-  name="timeline-react"
-  title="components/audio-ui/timeline/react.tsx"
-/>
+<ItemFiles name="timeline-react" from={18} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={18}
-  name="timeline-vue"
-  title="components/audio-ui/timeline/vue.ts"
-/>
+<ItemFiles name="timeline-vue" from={18} />
 
 </TabsContent>
 
@@ -304,96 +171,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={18}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/Clip.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={19}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/ClipFade.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={20}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/ClipFadeHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={21}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/ClipHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={22}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/Mark.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={23}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/NavigatorHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={24}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/NavigatorWindow.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={25}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/Range.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={26}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/RangeHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={27}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/Ruler.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={28}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/TrackResizeHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={29}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={30}
-  name="timeline-svelte"
-  title="src/lib/components/audio-ui/timeline/svelte/parts.ts"
-/>
+<ItemFiles name="timeline-svelte" from={18} />
 
 </TabsContent>
 
@@ -401,12 +179,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-timeline` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={18}
-  name="timeline-web"
-  title="components/audio-ui/timeline/web.ts"
-/>
+<ItemFiles name="timeline-web" from={18} />
 
 </TabsContent>
 
@@ -416,11 +189,7 @@ Import it once, and it registers the `audio-ui-timeline` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -430,11 +199,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="timeline"
-  title="components/audio-ui/timeline.tsx"
-/>
+<ItemFiles name="timeline" />
 
 </ForFrameworks>
 

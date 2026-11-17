@@ -57,19 +57,61 @@ The same works for every item of the [Docs](/docs), including the `block-*` bloc
 
 <ForFrameworks only="vue">
 
-The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-vue.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`): write each entry of `files` to its path, and install `@ui-sdk/core`, `@ui-sdk/vue` and `vue`. For the knob, that is `components/audio-ui/knob/vue.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
+The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+
+<Steps>
+
+<Step>Install the kernel:</Step>
+
+```bash
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
+```
+
+<Step>Copy each file to its path, under `src/components/audio-ui/`:</Step>
+
+<ItemFiles name="knob-vue" under="src/" />
+
+</Steps>
 
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
 
-The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-svelte.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json`): write each entry of `files` to its path, and install `@ui-sdk/core`, `@ui-sdk/svelte` and `svelte`. For the knob, that is a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, the primitive beside them (`knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
+The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+
+<Steps>
+
+<Step>Install the kernel:</Step>
+
+```bash
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
+```
+
+<Step>Copy each file to its path, under `src/lib/components/audio-ui/`:</Step>
+
+<ItemFiles name="knob-svelte" />
+
+</Steps>
 
 </ForFrameworks>
 
 <ForFrameworks only="web">
 
-The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-web.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-web.json`): write each entry of `files` to its path, and install `@ui-sdk/core` and `@ui-sdk/web`. For the knob, that is `components/audio-ui/knob/web.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
+The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+
+<Steps>
+
+<Step>Install the kernel:</Step>
+
+```bash
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
+```
+
+<Step>Copy each file to its path, under `src/components/audio-ui/`:</Step>
+
+<ItemFiles name="knob-web" under="src/" />
+
+</Steps>
 
 </ForFrameworks>
 
@@ -138,7 +180,7 @@ The page of each component has its parts, its options and an example in your fra
 A plain HTML page can run a primitive with no CLI, no bundler and no `node_modules`: the site serves each web adapter as a script, with its packages inside. Load the one you need, and write its tags:
 
 ```html title="index.html"
-<script type="module" src="https://www.audio-ui.dev/web/0.1.2/knob.js"></script>
+<script type="module" src="https://www.audio-ui.dev/web/0.1.3/knob.js"></script>
 
 <audio-ui-knob value="40">
   <audio-ui-knob-control>

@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FilePanel } from "@/components/code/source/file-panel";
 import {
   PreviewBar,
   PreviewLoading,
@@ -8,9 +9,9 @@ import {
   HostedPreview,
   usePreviewHost,
 } from "@/components/preview/frame/preview-host";
-import { Frame, FrameContent } from "@/components/site/layout/frame";
-import { Button } from "@/components/ui/button";
+import { Frame } from "@/components/site/layout/frame";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { getRegistryItemMetadata } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
@@ -26,7 +27,6 @@ export function ComponentPreviewTabs({
   fitContent = false,
   name,
   source,
-  sourcePreview,
   ...props
 }: Omit<React.ComponentProps<"div">, "ref"> & {
   previewClassName?: string;
@@ -42,11 +42,13 @@ export function ComponentPreviewTabs({
   hint?: string;
   /** The registry name of what is shown. */
   name: string;
-  source: React.ReactNode;
-  sourcePreview?: React.ReactNode;
+  /** The code, given where to report it once loaded: the panel's copy button copies it, open or closed. */
+  source: (onCode: (code: string) => void) => React.ReactNode;
 }) {
-  const [isCodeExpanded, setIsCodeExpanded] = React.useState(false);
   const previewRef = React.useRef<HTMLDivElement>(null);
+  // The file as the registry names it (`knob-demo.js`), known before anything loads: the bar never changes once drawn.
+  const fileName =
+    getRegistryItemMetadata(name)?.files?.[0]?.path?.split("/").at(-1) ?? name;
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
   // elements, pointer listeners, etc.). Defer mounting each one until it's
@@ -59,7 +61,6 @@ export function ComponentPreviewTabs({
   });
 
   const hosted = usePreviewHost(expand);
-  const expandCode = React.useCallback(() => setIsCodeExpanded(true), []);
   const shown = expand ? (
     <HostedPreview host={hosted.host} open={hosted.open}>
       {component}
@@ -85,38 +86,14 @@ export function ComponentPreviewTabs({
         >
           {hasBeenVisible ? shown : <PreviewLoading />}
         </PreviewPanel>
+        {/* The code is the frame's second panel, folded as an accordion's item: closed, its bar still names the file and copies it. */}
         {hideCode ? null : (
-          <FrameContent
-            className="mt-0.5 bg-site-code [&_pre]:max-h-72"
-            data-mobile-code-visible={isCodeExpanded}
-            data-slot="code"
-          >
-            {isCodeExpanded ? (
-              source
-            ) : (
-              <div className="relative">
-                {sourcePreview}
-                <div className="absolute inset-0 flex items-end justify-center pb-3">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
-                    }}
-                  />
-                  <Button
-                    className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                    onClick={expandCode}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    View Code
-                  </Button>
-                </div>
-              </div>
-            )}
-          </FrameContent>
+          <FilePanel
+            className="mt-0.5"
+            name={name}
+            path={fileName}
+            source={source}
+          />
         )}
       </Frame>
     </AudioSessionProvider>

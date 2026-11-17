@@ -1,7 +1,7 @@
 import "@/registry-audio/bases/base/primitives/timeline/web";
 
 /** Draws the timeline into `element`, and returns what takes it away. */
-export default function timelineWebDemo(element: HTMLElement) {
+export default function timelineWebDemo(element) {
   element.innerHTML = `
     <audio-ui-timeline class="cn-timeline flex w-full min-w-0 flex-col data-disabled:opacity-50" duration="32" snap-step="1">
       <audio-ui-timeline-viewport class="cn-timeline-viewport relative min-h-0 min-w-0 overscroll-x-contain">

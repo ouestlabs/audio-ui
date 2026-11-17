@@ -18,6 +18,7 @@ import { ForStyling } from "@/components/docs/mdx/for-styling";
 import { FrameworkTabs } from "@/components/docs/mdx/framework-tabs";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
+import { ItemFiles } from "@/components/docs/mdx/item-files";
 import { LinkCard, LinkCards } from "@/components/docs/mdx/link-cards";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
 import {
@@ -70,6 +71,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DemoSounds,
     ForFrameworks,
     ComponentIndex,
+    ItemFiles,
     LinkCard,
     LinkCards,
     PrimitiveEvents,
@@ -248,7 +250,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Steps: ({ className, ...props }: React.ComponentProps<"div">) => (
       <div
         className={cn(
-          "[&>h3]:step steps mb-12 [counter-reset:step] md:ml-4 md:border-l md:pl-8",
+          "[&>h3]:step steps relative mb-12 [counter-reset:step] md:ml-4 md:border-l md:pl-8",
           className
         )}
         {...props}

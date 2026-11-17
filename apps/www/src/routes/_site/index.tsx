@@ -5,77 +5,18 @@ import {
   setEditorExpanded,
   useEditorExpanded,
 } from "@/components/site/home/editor-expanded";
-import type { HomeFigure } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
-import { PRIMITIVE_PAGES } from "@/lib/docs/content/framework-paths";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/react/block-audio-editor";
 
-const PACKAGES = ["core", "engine", "gl", "icons"];
-
-/** Last month's npm downloads of every package, or null when npm does not answer. */
-async function monthlyDownloads(): Promise<number | null> {
-  try {
-    const counts = await Promise.all(
-      PACKAGES.map(async (name) => {
-        const response = await fetch(
-          `https://api.npmjs.org/downloads/point/last-month/@audio-ui/${name}`,
-          { signal: AbortSignal.timeout(4000) }
-        );
-        const body = (await response.json()) as { downloads?: number };
-        return body.downloads ?? 0;
-      })
-    );
-    return counts.reduce((sum, count) => sum + count, 0);
-  } catch {
-    return null;
-  }
-}
-
-/** The component spaces, the guides and the figures, read once on the server. */
-const loadHome = createServerFn({ method: "GET" }).handler(async () => {
-  const { guides, primitives, spaces } = getHomeIndex();
-  // A space's component pages, not the overview it may link to.
-  const pagesOf = (name: string) =>
-    spaces
-      .find((space) => space.title === name)
-      ?.sections.flatMap((section) => section.pages)
-      .filter((page) => page.url.startsWith("/docs/components/")).length ?? 0;
-  const downloads = await monthlyDownloads();
-  const figures: HomeFigure[] = [
-    {
-      href: "/docs/components",
-      label: "Components",
-      reactOnly: true,
-      value: String(pagesOf("Elements") + pagesOf("Workstation")),
-    },
-    {
-      href: "/docs/devices",
-      label: "Devices",
-      reactOnly: true,
-      value: String(pagesOf("Devices")),
-    },
-    {
-      href: "/docs/components",
-      label: "Primitives",
-      value: String(Object.keys(PRIMITIVE_PAGES).length),
-    },
-    ...(downloads === null
-      ? []
-      : [
-          {
-            href: "https://www.npmjs.com/org/audio-ui",
-            label: "npm downloads a month",
-            value: `${Math.floor(downloads / 1000)}K+`,
-          },
-        ]),
-  ];
-  return { figures, guides, primitives, spaces };
-});
+/** The component spaces and the guides, read once on the server. */
+const loadHome = createServerFn({ method: "GET" }).handler(() =>
+  getHomeIndex()
+);
 
 const title = "audio/ui: the Audio UI Component Library for React";
 
@@ -116,7 +57,7 @@ export const Route = createFileRoute("/_site/")({
 });
 
 function IndexPage() {
-  const { figures, guides, primitives, spaces } = Route.useLoaderData();
+  const { guides, primitives, spaces } = Route.useLoaderData();
   // The bar's button gives the editor the whole inset; leaving the home gives it back.
   const expanded = useEditorExpanded();
   useEffect(() => () => setEditorExpanded(false), []);
@@ -137,17 +78,12 @@ function IndexPage() {
       {/* A hatched band between the editor and the rest of the page: the editor ends here. */}
       <div
         aria-hidden="true"
-        className="h-6 shrink-0 border-t bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
+        className="h-6 shrink-0 border-y bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
         hidden={expanded}
       />
       {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
       {expanded ? null : (
-        <HomeGuide
-          figures={figures}
-          guides={guides}
-          primitives={primitives}
-          spaces={spaces}
-        />
+        <HomeGuide guides={guides} primitives={primitives} spaces={spaces} />
       )}
     </>
   );

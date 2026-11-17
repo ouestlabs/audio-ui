@@ -1,7 +1,7 @@
 import "@/registry-audio/bases/base/primitives/knob/web";
 
 /** Draws the knob into `element`, and returns what takes it away. */
-export default function knobWebDemo(element: HTMLElement) {
+export default function knobWebDemo(element) {
   element.innerHTML = `
     <audio-ui-knob class="cn-knob cn-knob-size-lg group/knob relative m-5 mb-12 inline-flex outline-none data-disabled:cursor-not-allowed" value="50" min="0" max="100" step="1">
       <audio-ui-knob-control class="cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-disabled:pointer-events-none data-disabled:opacity-50 data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">

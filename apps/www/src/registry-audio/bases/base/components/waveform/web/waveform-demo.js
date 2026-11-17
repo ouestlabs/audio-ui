@@ -13,16 +13,13 @@ const PEAKS = Array.from({ length: 512 }, (_, index) => {
   return Math.round(Math.min(1, level) * 1000) / 1000;
 });
 
-function formatTime(seconds: number): string {
+function formatTime(seconds) {
   const whole = Math.floor(seconds);
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 }
 
-type Waveform = HTMLElement & { peaks?: readonly number[] };
-type Hover = HTMLElement & { format?: (value: number) => string };
-
 /** Draws the waveform into `element`, and returns what takes it away. The canvas and the inputs are made for you. */
-export default function waveformWebDemo(element: HTMLElement) {
+export default function waveformWebDemo(element) {
   element.innerHTML = `
     <div class="flex w-full min-w-0 flex-col gap-2">
       <audio-ui-waveform class="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed" default-value="30" duration="${DURATION_SECONDS}">
@@ -41,12 +38,8 @@ export default function waveformWebDemo(element: HTMLElement) {
       </audio-ui-waveform>
       <p class="text-muted-foreground text-sm tabular-nums" data-loop>Loop 0:48 – 1:36</p>
     </div>`;
-  const waveform = element.querySelector(
-    "audio-ui-waveform"
-  ) as Waveform | null;
-  const hover = element.querySelector(
-    "audio-ui-waveform-hover"
-  ) as Hover | null;
+  const waveform = element.querySelector("audio-ui-waveform");
+  const hover = element.querySelector("audio-ui-waveform-hover");
   const label = element.querySelector("[data-loop]");
   if (waveform) {
     waveform.peaks = PEAKS;
@@ -54,8 +47,8 @@ export default function waveformWebDemo(element: HTMLElement) {
   if (hover) {
     hover.format = formatTime;
   }
-  const onRegion = (event: Event) => {
-    const [start, end] = (event as CustomEvent).detail.value;
+  const onRegion = (event) => {
+    const [start, end] = event.detail.value;
     if (label) {
       label.textContent = `Loop ${formatTime(start)} – ${formatTime(end)}`;
     }

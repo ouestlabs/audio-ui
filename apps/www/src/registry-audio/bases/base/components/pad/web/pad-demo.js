@@ -24,17 +24,17 @@ const PADS = [
   {
     chokeGroup: "hat",
     label: "Open hat",
-    trigger: (ctx: AudioContext, destination: AudioNode, time: number) =>
+    trigger: (ctx, destination, time) =>
       triggerHihat(ctx, destination, time, { decay: OPEN_HAT_DECAY }),
     value: "open-hat",
   },
 ];
 
 // The hits each pad still has ringing, so a choke can silence them.
-const ringing = new Map<string, GainNode[]>();
+const ringing = new Map();
 
 /** Each hit goes through a gain of its own: how hard the pad was struck. */
-function strike(value: string, details: { velocity: number }) {
+function strike(value, details) {
   const ctx = webAudio.resume();
   const pad = PADS.find((item) => item.value === value);
   if (!(ctx && pad)) {
@@ -50,7 +50,7 @@ function strike(value: string, details: { velocity: number }) {
 }
 
 /** Drum hits ring on after the pad is released: only a choke stops them. */
-function choke(value: string, details: { reason: string }) {
+function choke(value, details) {
   const ctx = webAudio.resume();
   if (!ctx || details.reason !== "choke") {
     return;
@@ -62,7 +62,7 @@ function choke(value: string, details: { reason: string }) {
 }
 
 /** Draws the pads into `element`, and returns what takes them away. */
-export default function padWebDemo(element: HTMLElement) {
+export default function padWebDemo(element) {
   element.innerHTML = `
     <audio-ui-pad aria-label="Drum pads" class="grid w-full max-w-56 select-none grid-cols-[repeat(var(--pad-columns),minmax(0,1fr))] gap-2 data-disabled:opacity-50" columns="2" style="--pad-columns: 2">
       ${PADS.map(
@@ -71,12 +71,12 @@ export default function padWebDemo(element: HTMLElement) {
       ).join("")}
     </audio-ui-pad>`;
   const grid = element.querySelector("audio-ui-pad");
-  const on = (event: Event) => {
-    const { value, velocity } = (event as CustomEvent).detail;
+  const on = (event) => {
+    const { value, velocity } = event.detail;
     strike(value, { velocity });
   };
-  const off = (event: Event) => {
-    const { value, reason } = (event as CustomEvent).detail;
+  const off = (event) => {
+    const { value, reason } = event.detail;
     choke(value, { reason });
   };
   grid?.addEventListener("padon", on);

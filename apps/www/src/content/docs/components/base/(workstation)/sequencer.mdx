@@ -134,18 +134,7 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 The same two files for every framework: `sequencer.ts`, the sequencer's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="sequencer-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="sequencer-react"
-  title="components/audio-ui/sequencer/sequencer.ts"
-/>
+<ItemFiles name="sequencer-react" to={2} />
 
 ### 3. The adapter
 
@@ -162,23 +151,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="sequencer-react"
-  title="components/audio-ui/sequencer/react.tsx"
-/>
+<ItemFiles name="sequencer-react" from={2} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="sequencer-vue"
-  title="components/audio-ui/sequencer/vue.ts"
-/>
+<ItemFiles name="sequencer-vue" from={2} />
 
 </TabsContent>
 
@@ -186,33 +165,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="sequencer-svelte"
-  title="src/lib/components/audio-ui/sequencer/svelte/Cell.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="sequencer-svelte"
-  title="src/lib/components/audio-ui/sequencer/svelte/Velocity.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="sequencer-svelte"
-  title="src/lib/components/audio-ui/sequencer/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={5}
-  name="sequencer-svelte"
-  title="src/lib/components/audio-ui/sequencer/svelte/parts.ts"
-/>
+<ItemFiles name="sequencer-svelte" from={2} />
 
 </TabsContent>
 
@@ -220,12 +173,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-sequencer` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="sequencer-web"
-  title="components/audio-ui/sequencer/web.ts"
-/>
+<ItemFiles name="sequencer-web" from={2} />
 
 </TabsContent>
 
@@ -235,11 +183,7 @@ Import it once, and it registers the `audio-ui-sequencer` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -249,11 +193,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="sequencer"
-  title="components/audio-ui/sequencer.tsx"
-/>
+<ItemFiles name="sequencer" />
 
 </ForFrameworks>
 

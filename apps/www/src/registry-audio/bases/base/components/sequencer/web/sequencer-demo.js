@@ -20,13 +20,13 @@ const VELOCITIES = [
     0.9, 0.6,
   ],
 ];
-const on = (steps: number[]) =>
+const on = (steps) =>
   Array.from({ length: STEPS }, (_, step) => steps.includes(step));
 const BEAT = [on([0, 4, 8, 12]), on([4, 12]), on([2, 6, 10, 14])];
 const EMPTY = () => ROWS.map(() => Array.from({ length: STEPS }, () => false));
 
 /** Plays what the pattern holds on a step: each hit goes through a gain of its own, the step's velocity. */
-function playStep(rows: boolean[][], levels: number[][], step: number) {
+function playStep(rows, levels, step) {
   const ctx = webAudio.resume();
   if (!ctx) {
     return;
@@ -43,7 +43,7 @@ function playStep(rows: boolean[][], levels: number[][], step: number) {
 }
 
 /** Draws the sequencer into `element`, and returns what takes it away. The rows, the steps and the velocity bars are made for you: styled here from their tags. */
-export default function sequencerWebDemo(element: HTMLElement) {
+export default function sequencerWebDemo(element) {
   let pattern = BEAT;
   let velocities = VELOCITIES;
   const player = createStepPlayer({
@@ -68,17 +68,15 @@ export default function sequencerWebDemo(element: HTMLElement) {
         <button class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted" data-action="clear" type="button">Clear</button>
       </div>
     </div>`;
-  const grid = element.querySelector("audio-ui-sequencer") as
-    | (HTMLElement & { source?: unknown })
-    | null;
+  const grid = element.querySelector("audio-ui-sequencer");
   if (grid) {
     grid.source = player.source;
   }
-  const onInput = (event: Event) => {
-    pattern = (event as CustomEvent).detail.value;
+  const onInput = (event) => {
+    pattern = event.detail.value;
   };
-  const onClick = (event: Event) => {
-    const action = (event.target as HTMLElement)
+  const onClick = (event) => {
+    const action = event.target
       .closest("[data-action]")
       ?.getAttribute("data-action");
     if (action === "toggle") {
@@ -98,8 +96,8 @@ export default function sequencerWebDemo(element: HTMLElement) {
       }
     }
   };
-  const onVelocity = (event: Event) => {
-    velocities = (event as CustomEvent).detail.value;
+  const onVelocity = (event) => {
+    velocities = event.detail.value;
   };
   grid?.addEventListener("input", onInput);
   grid?.addEventListener("velocitychange", onVelocity);
