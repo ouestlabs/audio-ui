@@ -143,18 +143,7 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 The same two files for every framework: `pad.ts`, the pad grid's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="pad-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="pad-react"
-  title="components/audio-ui/pad/pad.ts"
-/>
+<ItemFiles name="pad-react" to={2} />
 
 ### 3. The adapter
 
@@ -171,23 +160,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="pad-react"
-  title="components/audio-ui/pad/react.tsx"
-/>
+<ItemFiles name="pad-react" from={2} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="pad-vue"
-  title="components/audio-ui/pad/vue.ts"
-/>
+<ItemFiles name="pad-vue" from={2} />
 
 </TabsContent>
 
@@ -195,19 +174,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 The parts, made from the primitive in `parts.ts`, and an `index.ts` that names them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="pad-svelte"
-  title="src/lib/components/audio-ui/pad/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="pad-svelte"
-  title="src/lib/components/audio-ui/pad/svelte/parts.ts"
-/>
+<ItemFiles name="pad-svelte" from={2} />
 
 </TabsContent>
 
@@ -215,12 +182,7 @@ The parts, made from the primitive in `parts.ts`, and an `index.ts` that names t
 
 Import it once, and it registers the `audio-ui-pad` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="pad-web"
-  title="components/audio-ui/pad/web.ts"
-/>
+<ItemFiles name="pad-web" from={2} />
 
 </TabsContent>
 
@@ -230,11 +192,7 @@ Import it once, and it registers the `audio-ui-pad` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -244,11 +202,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="pad"
-  title="components/audio-ui/pad.tsx"
-/>
+<ItemFiles name="pad" />
 
 </ForFrameworks>
 

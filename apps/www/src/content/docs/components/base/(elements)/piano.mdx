@@ -141,20 +141,9 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 ### 2. The primitive
 
-The same two files for every framework: `piano.ts`, the piano's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+The same three files for every framework: `piano.ts`, the piano's behavior written on the kernel's helpers; `pitch.ts`, the note names it labels its keys with, which the piano roll shares; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="piano-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="piano-react"
-  title="components/audio-ui/piano/piano.ts"
-/>
+<ItemFiles name="piano-react" to={3} />
 
 ### 3. The adapter
 
@@ -171,23 +160,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="piano-react"
-  title="components/audio-ui/piano/react.tsx"
-/>
+<ItemFiles name="piano-react" from={3} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="piano-vue"
-  title="components/audio-ui/piano/vue.ts"
-/>
+<ItemFiles name="piano-vue" from={3} />
 
 </TabsContent>
 
@@ -195,26 +174,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 The label's component, the parts made from the primitive in `parts.ts`, and an `index.ts` that names them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="piano-svelte"
-  title="src/lib/components/audio-ui/piano/svelte/Label.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="piano-svelte"
-  title="src/lib/components/audio-ui/piano/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="piano-svelte"
-  title="src/lib/components/audio-ui/piano/svelte/parts.ts"
-/>
+<ItemFiles name="piano-svelte" from={3} />
 
 </TabsContent>
 
@@ -222,12 +182,7 @@ The label's component, the parts made from the primitive in `parts.ts`, and an `
 
 Import it once, and it registers the `audio-ui-piano` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="piano-web"
-  title="components/audio-ui/piano/web.ts"
-/>
+<ItemFiles name="piano-web" from={3} />
 
 </TabsContent>
 
@@ -237,11 +192,7 @@ Import it once, and it registers the `audio-ui-piano` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -255,11 +206,7 @@ Optional: size variants and theme styles over the primitive.
 npm install class-variance-authority
 ```
 
-<ComponentSource
-  styleName="base-nova"
-  name="piano"
-  title="components/audio-ui/piano.tsx"
-/>
+<ItemFiles name="piano" />
 
 </ForFrameworks>
 

@@ -144,48 +144,9 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 ### 2. The primitive
 
-The same files for every framework: `piano-roll.ts`, the roll itself, beside its controller, the edits it makes and its rows; `grid.ts`, the grid it snaps to, which the timeline shares; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+The same files for every framework: `piano-roll.ts`, the roll itself, beside its controller, the edits it makes and its rows; `pitch.ts`, the note names of its rows, which the piano shares; `grid.ts`, the grid it snaps to, which the timeline shares; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="piano-roll-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="piano-roll-react"
-  title="components/audio-ui/grid.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="piano-roll-react"
-  title="components/audio-ui/piano-roll/piano-roll.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="piano-roll-react"
-  title="components/audio-ui/piano-roll/controller.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="piano-roll-react"
-  title="components/audio-ui/piano-roll/edits.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={5}
-  name="piano-roll-react"
-  title="components/audio-ui/piano-roll/rows.ts"
-/>
+<ItemFiles name="piano-roll-react" to={7} />
 
 ### 3. The adapter
 
@@ -202,23 +163,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="piano-roll-react"
-  title="components/audio-ui/piano-roll/react.tsx"
-/>
+<ItemFiles name="piano-roll-react" from={7} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="piano-roll-vue"
-  title="components/audio-ui/piano-roll/vue.ts"
-/>
+<ItemFiles name="piano-roll-vue" from={7} />
 
 </TabsContent>
 
@@ -226,61 +177,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/Note.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={7}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/NoteHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={8}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/Notes.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={9}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/Rows.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={10}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/StretchHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={11}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/Velocity.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={13}
-  name="piano-roll-svelte"
-  title="src/lib/components/audio-ui/piano-roll/svelte/parts.ts"
-/>
+<ItemFiles name="piano-roll-svelte" from={7} />
 
 </TabsContent>
 
@@ -288,12 +185,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-piano-roll` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="piano-roll-web"
-  title="components/audio-ui/piano-roll/web.ts"
-/>
+<ItemFiles name="piano-roll-web" from={7} />
 
 </TabsContent>
 
@@ -303,11 +195,7 @@ Import it once, and it registers the `audio-ui-piano-roll` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -317,11 +205,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="piano-roll"
-  title="components/audio-ui/piano-roll.tsx"
-/>
+<ItemFiles name="piano-roll" />
 
 </ForFrameworks>
 

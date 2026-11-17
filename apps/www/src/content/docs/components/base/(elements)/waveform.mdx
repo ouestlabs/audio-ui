@@ -146,88 +146,7 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 The same files for every framework: `waveform.ts`, the waveform itself, with the painters of the canvas and the bars beside it (`paint-canvas.ts`, `paint-bars.ts`, and what they draw from); `frame.ts`, which runs them on animation frames; `grid.ts`, the ranges a region moves in, shared with the piano roll and the timeline; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
-<ComponentSource
-  styleName="base-nova"
-  name="waveform-react"
-  title="components/audio-ui/primitive.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={1}
-  name="waveform-react"
-  title="components/audio-ui/waveform/waveform.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="waveform-react"
-  title="components/audio-ui/frame.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={3}
-  name="waveform-react"
-  title="components/audio-ui/grid.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={4}
-  name="waveform-react"
-  title="components/audio-ui/waveform/bar-layout.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={5}
-  name="waveform-react"
-  title="components/audio-ui/waveform/level-history.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={6}
-  name="waveform-react"
-  title="components/audio-ui/waveform/levels-engine.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={7}
-  name="waveform-react"
-  title="components/audio-ui/waveform/levels.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={8}
-  name="waveform-react"
-  title="components/audio-ui/waveform/paint-bars.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={9}
-  name="waveform-react"
-  title="components/audio-ui/waveform/paint-canvas.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={10}
-  name="waveform-react"
-  title="components/audio-ui/waveform/peaks.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={11}
-  name="waveform-react"
-  title="components/audio-ui/waveform/scope.ts"
-/>
+<ItemFiles name="waveform-react" to={12} />
 
 ### 3. The adapter
 
@@ -244,23 +163,13 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 <TabsContent value="react">
 
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="waveform-react"
-  title="components/audio-ui/waveform/react.tsx"
-/>
+<ItemFiles name="waveform-react" from={12} />
 
 </TabsContent>
 
 <TabsContent value="vue">
 
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="waveform-vue"
-  title="components/audio-ui/waveform/vue.ts"
-/>
+<ItemFiles name="waveform-vue" from={12} />
 
 </TabsContent>
 
@@ -268,40 +177,7 @@ Your framework's few parts, over the primitive. They import it by a relative pat
 
 A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="waveform-svelte"
-  title="src/lib/components/audio-ui/waveform/svelte/Bars.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={13}
-  name="waveform-svelte"
-  title="src/lib/components/audio-ui/waveform/svelte/Control.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={14}
-  name="waveform-svelte"
-  title="src/lib/components/audio-ui/waveform/svelte/RegionHandle.svelte"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={15}
-  name="waveform-svelte"
-  title="src/lib/components/audio-ui/waveform/svelte/index.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={16}
-  name="waveform-svelte"
-  title="src/lib/components/audio-ui/waveform/svelte/parts.ts"
-/>
+<ItemFiles name="waveform-svelte" from={12} />
 
 </TabsContent>
 
@@ -309,12 +185,7 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
 
 Import it once, and it registers the `audio-ui-waveform` tags.
 
-<ComponentSource
-  styleName="base-nova"
-  file={12}
-  name="waveform-web"
-  title="components/audio-ui/waveform/web.ts"
-/>
+<ItemFiles name="waveform-web" from={12} />
 
 </TabsContent>
 
@@ -324,11 +195,7 @@ Import it once, and it registers the `audio-ui-waveform` tags.
 
 Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
 
-<ComponentSource
-  styleName="base-nova"
-  name="primitives-css"
-  title="src/audio-ui-primitives.css"
-/>
+<ItemFiles name="primitives-css" />
 
 Import it once.
 
@@ -338,11 +205,7 @@ Import it once.
 
 Optional: size variants and theme styles over the primitive.
 
-<ComponentSource
-  styleName="base-nova"
-  name="waveform"
-  title="components/audio-ui/waveform.tsx"
-/>
+<ItemFiles name="waveform" />
 
 </ForFrameworks>
 

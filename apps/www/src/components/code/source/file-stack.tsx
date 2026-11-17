@@ -39,14 +39,17 @@ function StackedFile({
 export function FileStack({
   name,
   paths,
+  start = 0,
 }: {
   name: string;
   paths: readonly string[];
+  /** The place in the item of the first path, when the stack shows only some of its files. @default 0 */
+  start?: number;
 }) {
   return (
     <div className="not-typeset mt-6 flex flex-col gap-0.5 overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5">
       {paths.map((path, index) => (
-        <StackedFile index={index} key={path} name={name} path={path} />
+        <StackedFile index={start + index} key={path} name={name} path={path} />
       ))}
     </div>
   );

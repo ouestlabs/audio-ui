@@ -11,15 +11,21 @@ interface BuiltFile {
 }
 
 /**
- * The files of a registry item, to copy and paste where they land: a tab
- * each, named by its file, its code with a copy button under its path. Read
- * from the item itself, so it shows what the CLI would write.
+ * The files of a registry item, to copy and paste where they land: a panel
+ * each, stacked, named by where it lands. Read from the item itself, so it
+ * shows what the CLI would write.
  */
 export function ItemFiles({
   name,
+  from = 0,
+  to,
   under = "",
 }: {
   name: string;
+  /** The first of the item's files to show, by its place in the item. @default 0 */
+  from?: number;
+  /** The place after the last file to show. @default every file */
+  to?: number;
   /** Where a target under the components alias lands in the project: `src/` in a Vite app. */
   under?: string;
 }) {
@@ -48,5 +54,11 @@ export function ItemFiles({
   if (files.length === 0) {
     return <div aria-hidden="true" className="min-h-24" />;
   }
-  return <FileStack name={name} paths={files.map(where)} />;
+  return (
+    <FileStack
+      name={name}
+      paths={files.slice(from, to).map(where)}
+      start={from}
+    />
+  );
 }
