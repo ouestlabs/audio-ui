@@ -1,3 +1,4 @@
+import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import {
   PreviewBar,
@@ -8,8 +9,13 @@ import {
   HostedPreview,
   usePreviewHost,
 } from "@/components/preview/frame/preview-host";
+import { getIconForLanguageExtension } from "@/components/site/icons";
 import { Frame, FrameContent } from "@/components/site/layout/frame";
-import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { cn } from "@/lib/utils";
 import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
@@ -26,7 +32,6 @@ export function ComponentPreviewTabs({
   fitContent = false,
   name,
   source,
-  sourcePreview,
   ...props
 }: Omit<React.ComponentProps<"div">, "ref"> & {
   previewClassName?: string;
@@ -43,9 +48,7 @@ export function ComponentPreviewTabs({
   /** The registry name of what is shown. */
   name: string;
   source: React.ReactNode;
-  sourcePreview?: React.ReactNode;
 }) {
-  const [isCodeExpanded, setIsCodeExpanded] = React.useState(false);
   const previewRef = React.useRef<HTMLDivElement>(null);
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
@@ -59,8 +62,6 @@ export function ComponentPreviewTabs({
   });
 
   const hosted = usePreviewHost(expand);
-  const expandCode = React.useCallback(() => setIsCodeExpanded(true), []);
-  const collapseCode = React.useCallback(() => setIsCodeExpanded(false), []);
   const shown = expand ? (
     <HostedPreview host={hosted.host} open={hosted.open}>
       {component}
@@ -86,52 +87,31 @@ export function ComponentPreviewTabs({
         >
           {hasBeenVisible ? shown : <PreviewLoading />}
         </PreviewPanel>
+        {/* The code folds under the preview, as an accordion's item: closed until the reader opens it. */}
         {hideCode ? null : (
-          <FrameContent
-            className="mt-0.5 bg-site-code [&_pre]:max-h-72"
-            data-mobile-code-visible={isCodeExpanded}
-            data-slot="code"
-          >
-            {isCodeExpanded ? (
-              <>
+          <Collapsible>
+            <CollapsibleTrigger className="flex h-9 w-full items-center justify-between rounded-(--frame-radius-inner) px-3 font-medium text-site-muted-foreground text-sm outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 [&[data-panel-open]>svg]:rotate-180">
+              {/* Named as a file, as each item of a stack of files would be. */}
+              <span className="flex items-center gap-2 font-mono text-xs">
+                {getIconForLanguageExtension("tsx", {
+                  className: "size-3.5 shrink-0",
+                })}
+                {name}.tsx
+              </span>
+              <CaretDownIcon
+                aria-hidden="true"
+                className="size-4 transition-transform motion-reduce:transition-none"
+              />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none">
+              <FrameContent
+                className="bg-site-code [&_pre]:max-h-96"
+                data-slot="code"
+              >
                 {source}
-                {/* Where View Code was: the code folds back to its first lines. */}
-                <div className="flex justify-center pb-3">
-                  <Button
-                    className="bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                    onClick={collapseCode}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    Hide Code
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="relative">
-                {sourcePreview}
-                <div className="absolute inset-0 flex items-end justify-center pb-3">
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, var(--color-site-code), color-mix(in oklab, var(--color-site-code) 60%, transparent), transparent)",
-                    }}
-                  />
-                  <Button
-                    className="relative z-10 bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
-                    onClick={expandCode}
-                    size="sm"
-                    type="button"
-                    variant="outline"
-                  >
-                    View Code
-                  </Button>
-                </div>
-              </div>
-            )}
-          </FrameContent>
+              </FrameContent>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </Frame>
     </AudioSessionProvider>

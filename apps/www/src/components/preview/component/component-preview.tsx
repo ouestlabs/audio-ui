@@ -74,17 +74,6 @@ export function ComponentPreview({
           styleName={styleName}
         />
       }
-      sourcePreview={
-        <ComponentSource
-          code={code}
-          collapsible={false}
-          iconLibrary={iconLibrary}
-          maxLines={3}
-          name={name}
-          showCopyButton={false}
-          styleName={styleName}
-        />
-      }
       {...props}
     />
   );
