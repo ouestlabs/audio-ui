@@ -122,7 +122,7 @@ export function ComponentPreviewTabs({
             </div>
             {/* Kept mounted once the preview is near, so the code is there to copy before it opens. */}
             <CollapsibleContent
-              className="h-(--collapsible-panel-height) overflow-hidden border-site-border border-t transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
+              className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
               keepMounted
             >
               {hasBeenVisible ? source(setCode) : null}
