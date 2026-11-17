@@ -1,13 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 import { useCallback } from "react";
-import { LogoOf } from "@/components/site/navigation/framework-select";
-import { useFramework } from "@/hooks/use-framework";
-import {
-  FRAMEWORKS,
-  type FrameworkId,
-  isFramework,
-  shownTo,
-} from "@/lib/docs/content/frameworks";
+import { Icons } from "@/components/site/icons";
 import {
   Select,
   SelectContent,
@@ -15,7 +8,25 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/base/ui/select";
+} from "@/components/ui/select";
+import { useFramework } from "@/hooks/use-framework";
+import {
+  FRAMEWORKS,
+  type FrameworkId,
+  isFramework,
+  shownTo,
+} from "@/lib/docs/content/frameworks";
+
+/** Each framework's logo, as the sidebar's switch draws it; the web's is JavaScript's. */
+const LOGOS: Record<
+  FrameworkId,
+  (props: React.SVGAttributes<SVGElement>) => React.ReactNode
+> = {
+  react: Icons.reactColor,
+  svelte: Icons.svelte,
+  vue: Icons.vue,
+  web: Icons.javascript,
+};
 
 /**
  * The framework a preview is drawn in, from its bar: the frameworks this page
@@ -42,32 +53,35 @@ export function FrameworkPreviewSelect({
   if (offered.length < 2) {
     return fallback;
   }
-  const items = offered.map((each) => ({ label: each.label, value: each.id }));
   const current: FrameworkId = offered.some((each) => each.id === framework)
     ? framework
     : "react";
   return (
-    <Select items={items} onValueChange={pick} value={current}>
-      <SelectTrigger aria-label="Framework" className="h-8 w-32">
+    <Select onValueChange={pick} value={current}>
+      <SelectTrigger aria-label="Framework">
         <SelectValue>
-          {(value: FrameworkId) => (
-            <span className="flex items-center gap-1.5">
-              <LogoOf id={value} />
-              {FRAMEWORKS.find((each) => each.id === value)?.label}
-            </span>
-          )}
+          {(value: FrameworkId) => {
+            const Logo = LOGOS[value];
+            return (
+              <>
+                <Logo aria-hidden="true" className="size-3.5" />
+                {FRAMEWORKS.find((each) => each.id === value)?.label}
+              </>
+            );
+          }}
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {items.map((item) => (
-            <SelectItem key={item.value} value={item.value}>
-              <span className="flex items-center gap-1.5">
-                <LogoOf id={item.value} />
-                {item.label}
-              </span>
-            </SelectItem>
-          ))}
+          {offered.map((each) => {
+            const Logo = LOGOS[each.id];
+            return (
+              <SelectItem key={each.id} value={each.id}>
+                <Logo aria-hidden="true" className="size-3.5" />
+                {each.label}
+              </SelectItem>
+            );
+          })}
         </SelectGroup>
       </SelectContent>
     </Select>
