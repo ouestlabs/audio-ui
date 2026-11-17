@@ -518,7 +518,13 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: tooltip ? <TooltipTrigger render={render} /> : render,
+    render: tooltip ? (
+      <TooltipTrigger
+        render={render as React.ComponentProps<typeof TooltipTrigger>["render"]}
+      />
+    ) : (
+      render
+    ),
     state: {
       active: isActive,
       sidebar: "menu-button",
