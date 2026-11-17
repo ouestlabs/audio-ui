@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import writeMidi from "@audio/midi-write";
-import { secondsPerBar, secondsPerQuarter } from "@audio-ui/engine/time";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import { newProject } from "@/lib/daw/project";
 import {
@@ -11,6 +10,7 @@ import {
   scoreCommands,
 } from "@/lib/daw/scores";
 import { libraryDevice } from "@/lib/device-library";
+import { secondsPerBar, secondsPerQuarter } from "@/lib/engine/time";
 
 const doc = newProject();
 const QUARTER = secondsPerQuarter(doc.tempo);

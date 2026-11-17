@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { BASS_ENHANCER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { formatFrequency } from "@/engine/format";
+import { BASS_ENHANCER_KERNELS } from "@/engine/kernels";
 
 /** The kernel's two filters: the sub it takes, under the frequency, and the band its harmonics go to, 2.5 times above. */
 const SUB_DAMPING = 1.2;

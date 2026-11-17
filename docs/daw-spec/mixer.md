@@ -4,7 +4,7 @@ What each track does to its sound on the way to the main output, the sends and t
 
 ### MIX-001 Signal flow
 In a track, the clips (or the instrument) feed the device chain, left to right, then the volume, then the pan, then the track activator, then the track's output. A send set to post-fader taps the signal after the activator; one set to pre-fader taps it before the pan, the volume and the activator.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-001"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-001"
 
 ### MIX-002 Volume
 The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB. A track's volume and pan are its mixer channel's: its header in the arrangement keeps its name, solo, mute and arm. Each send knob is labeled with its return's letter, and the pan knob with Pan.
@@ -13,38 +13,38 @@ Test: apps/www/test/mixer.test.ts "MIX-002"; apps/daw/test/browser/run.ts "MIX-0
 
 ### MIX-003 Pan
 The pan runs from 50 left to 50 right, centred by default, and follows a constant-power law with sine curves: 0 dB on both channels at the centre, +3 dB on the side it is turned to and silence on the other at either end. Each channel of a stereo signal is set by its own gain: nothing of the left channel moves into the right.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-003"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-003"
 
 ### MIX-004 Track activator
 A track switched off sends nothing to its output and nothing through its post-fader sends; its pre-fader sends still feed their returns.
 Deviation: the reference's activator is a numbered button, lit while the track is on, and it has no mute. Here the switch is a Mute (M), lit while the track is muted: the same effect in the opposite sense, kept because the header's and the mixer's Solo, Mute and Arm are one group of switches.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-004"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-004"
 
 ### MIX-005 Solo
 Soloing a track silences every track that is not soloed and that does not feed a soloed one. One track is soloed at a time; Cmd adds a track to the solo. Soloed tracks keep their pan.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-005"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-005"
 
 ### MIX-006 Return tracks and solo
 With solo in place on, soloing a track keeps the return tracks heard, so the track is heard with its reverb. Soloing a return track silences the main output of the other tracks but keeps what they send to that return.
 Checked against the reference: solo in place is on by default (OBS-005).
-Test: packages/engine/src/playback/mixer.test.ts "MIX-006"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-006"
 
 ### MIX-007 Sends
 Each track has a send per return track, from silence to 0 dB, silent by default, and post-fader unless the return is set to pre.
 Checked against the reference: a send reaches 0.0 dB at the top and starts at -inf (OBS-004).
-Test: packages/engine/src/playback/mixer.test.ts "MIX-007"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-007"
 
 ### MIX-008 Return tracks
 A return track has a device chain, a volume, a pan, an activator and a solo, and plays no clips. Its own sends are off until turned on, so nothing feeds back by default.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-008"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-008"
 
 ### MIX-009 The main track
 Every track and return goes to the main track, which has a device chain and a volume, no sends, and goes to the audio output. Nothing limits it: a mix that goes over full scale is shown by the meters, not hidden.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-009"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-009"
 
 ### MIX-010 No clipping inside
 Between devices and tracks the signal is floating point: a level over 0 dBFS passes through and comes back down without distortion. Only the output and an export to whole-number samples can clip.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-010"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-010"
 
 ### MIX-011 Meters
 Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
@@ -53,7 +53,7 @@ Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-0
 
 ### MIX-012 Delay compensation
 Whatever the latency its devices declare, every path (each track, each send, each return) reaches the main track lined up to the frame. A bypassed device keeps the latency its settings declare, so bypassing it moves nothing.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-012"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-012"
 
 ### MIX-013 Changes without zipper
 A volume, a pan or a send moved by hand glides to its new value within 10 ms instead of jumping.
@@ -69,11 +69,11 @@ Test: apps/daw/test/browser/run.ts "MIX-015"
 
 ### MIX-020 Group tracks
 Cmd+G puts the picked tracks into a new group track where the first of them was; a group can hold groups. A group is a track of its own, with its chain, its volume, pan, mute, solo and sends, and the tracks in it play into it instead of into the main track. It holds no clip: its lane shows what its tracks play. Folding it hides its tracks; moving it, duplicating it or removing it takes them along; a track moved among a group's tracks joins it. A track's menu has Group, a group's has Ungroup. In the mixer, a track in a group names the group it plays into, and a folded group hides its tracks' channels. Cmd+Shift+G dissolves the group picked, or the one a picked track is in, its tracks going up a level. Soloing a track keeps the groups it is in heard; soloing a group lets its tracks be heard. A group goes out to DAWproject as a track holding its tracks, its channel a submix, and comes back in as a group.
-Test: apps/www/test/registry-audio/base/lib/arrangement-groups.test.ts "MIX-020"; packages/engine/src/playback/mixer.test.ts "MIX-020"; apps/www/test/browser/arrangement-engine.check.ts "MIX-020"; apps/daw/test/browser/run.ts "MIX-020"
+Test: apps/www/test/registry-audio/base/lib/arrangement-groups.test.ts "MIX-020"; apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-020"; apps/www/test/browser/arrangement-engine.check.ts "MIX-020"; apps/daw/test/browser/run.ts "MIX-020"
 
 ### MIX-021 Delay compensation through groups
 Wherever paths meet, at a group, a return or the main track, they meet on the same frame: a track waits for the slowest of its group's tracks, a group for the slowest of the groups it meets, and each send waits on its own for the slowest send into the same return, whatever depth it leaves from.
-Test: packages/engine/src/playback/mixer.test.ts "MIX-021"; apps/www/test/browser/arrangement-engine.check.ts "MIX-021"
+Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/mixer.test.ts "MIX-021"; apps/www/test/browser/arrangement-engine.check.ts "MIX-021"
 
 ### MIX-022 A meter in each track's header
 A track's header meters what its channel sends on, after its volume, pan and switch, down its right edge, as a thin pair: a track that plays reads a level, and a silent or muted one reads none.

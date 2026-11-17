@@ -3,2100 +3,6 @@
     "exports": [
       {
         "kind": "interface",
-        "name": "AutoWarp",
-        "summary": "How a file plays in time at an arrangement's tempo, as `autoWarp` works it out."
-      },
-      {
-        "kind": "function",
-        "name": "autoWarp",
-        "summary": "The warp that plays a recording of `duration` seconds in time at `tempo` BPM (CLP-019): a short one that a whole number of 1, 2, 4, 8 or 16 bars fits at its estimated tempo, as that loop, marked at its start and end; any other on a marker at the first beat of each bar, moved onto the transient within an eighth of a beat."
-      },
-      {
-        "kind": "function",
-        "name": "detectTransients",
-        "summary": "Where `channels` have their transients, in seconds: each frame where the level rises sharply above what it does around it, found to the sample where the slope first reaches half its height there."
-      },
-      {
-        "kind": "interface",
-        "name": "TempoEstimate",
-        "summary": "A recording's tempo, as `@audio/beat-detect` reads it and the registry's `analyzeBeat` fits it to the transients."
-      },
-      {
-        "kind": "interface",
-        "name": "CompressorSettings",
-        "summary": "The transfer curve of a compressor: the output level in dB for each input level in dB, the textbook curve with a knee centred on the threshold, what a plug-in draws."
-      },
-      {
-        "kind": "function",
-        "name": "compressorOutput",
-        "summary": "A compressor's transfer curve: the output level in dB for each input level in dB."
-      },
-      {
-        "kind": "interface",
-        "name": "BiquadSettings",
-        "summary": "One filter as `biquadResponse` draws it: its type, frequency, gain and Q, at a sample rate."
-      },
-      {
-        "kind": "type",
-        "name": "BiquadType",
-        "summary": "The kinds of band an equalizer draws: cuts, shelves, a peak, a notch and a band-pass."
-      },
-      {
-        "kind": "function",
-        "name": "bandGainForHandle",
-        "summary": "The inverse, for dragging: the gain a band needs at `frequency` for its handle to sit at `responseDb` on the curve, so the handle follows the pointer one to one instead of the gain drifting from it."
-      },
-      {
-        "kind": "function",
-        "name": "bandHandleDb",
-        "summary": "Where a band's handle sits on an equalizer's curve: the response of all the bands at the band's own frequency."
-      },
-      {
-        "kind": "function",
-        "name": "biquadResponse",
-        "summary": "A biquad's gain in dB at `hz`, 0 being unity."
-      },
-      {
-        "kind": "interface",
-        "name": "EqBand",
-        "summary": "One band of an equalizer: a filter that can be switched out of the chain."
-      },
-      {
-        "kind": "function",
-        "name": "eqResponse",
-        "summary": "An equalizer's bands in series: their gains in dB add up at each frequency."
-      },
-      {
-        "kind": "const",
-        "name": "SAMPLE_RATE",
-        "summary": "The sample rate a curve is drawn at unless a band says another."
-      },
-      {
-        "kind": "function",
-        "name": "toWebAudioQ",
-        "summary": "The value to give a `BiquadFilterNode`'s `Q` for a band's `q`."
-      },
-      {
-        "kind": "const",
-        "name": "WEB_AUDIO_FILTER_TYPES",
-        "summary": "The Web Audio `BiquadFilterNode` type that does what each band type draws."
-      },
-      {
-        "kind": "function",
-        "name": "dbToGain",
-        "summary": "The amplitude ratio of a level in dB: 0 dB is 1, -6.02 dB is 0.5."
-      },
-      {
-        "kind": "function",
-        "name": "gainToDb",
-        "summary": "The level in dB of an amplitude ratio: 1 is 0 dB, 0.5 is -6.02 dB."
-      },
-      {
-        "kind": "function",
-        "name": "peakDb",
-        "summary": "The level in dBFS of the loudest sample of `samples`, either way: how near the signal comes to clipping, where `rmsDb` says how loud it sounds."
-      },
-      {
-        "kind": "function",
-        "name": "rmsDb",
-        "summary": "The RMS level of `samples` in dBFS: 0 dB for a square wave at full scale, -3 dB for a sine at full scale."
-      },
-      {
-        "kind": "function",
-        "name": "createLoudnessMeter",
-        "summary": "Measures what is connected to it while it plays, on the audio thread, and calls `onLoudness` with its momentary, short-term and integrated loudness every 100 ms."
-      },
-      {
-        "kind": "function",
-        "name": "createLoudnessReader",
-        "summary": "Reads loudness block by block: `add` takes the K-weighted mean square of the next 100 ms, summed over the channels, as the meter's processor posts it, and gives the loudness up to it."
-      },
-      {
-        "kind": "interface",
-        "name": "LiveLoudness",
-        "summary": "How loud a sound is while it plays, in LUFS."
-      },
-      {
-        "kind": "const",
-        "name": "LOUDNESS_TARGETS",
-        "summary": "Targets in LUFS: what streaming services, podcasts and broadcast (EBU R 128) ask a file to be."
-      },
-      {
-        "kind": "const",
-        "name": "LOUDNESS_WORKLET",
-        "summary": "The meter's processor: it K-weights each channel of its input (a high shelf, then a high-pass, with the coefficients `@audio/weighting-k` gives for the context's rate), and posts the mean square of each block of 100 ms, summed over the channels."
-      },
-      {
-        "kind": "interface",
-        "name": "Loudness",
-        "summary": "How loud a sound is."
-      },
-      {
-        "kind": "interface",
-        "name": "LoudnessMeter",
-        "summary": "A live loudness meter on a context, as `createLoudnessMeter` makes it."
-      },
-      {
-        "kind": "function",
-        "name": "loudnessGain",
-        "summary": "The gain in dB that brings a sound to `target` LUFS, as far as its true peak stays at or under `ceiling` dBTP: a sound that would pass it lands under the target instead, and nothing is limited."
-      },
-      {
-        "kind": "function",
-        "name": "measureLoudness",
-        "summary": "Measures whole channels at once."
-      },
-      {
-        "kind": "interface",
-        "name": "AudioPeaks",
-        "summary": "The lowest and highest sample of each slice of the audio, -1 to 1: what the Waveform draws as the waveform really is, lopsided where the audio is."
-      },
-      {
-        "kind": "function",
-        "name": "computePeaks",
-        "summary": "Reduces PCM samples to `bucketCount` slices, keeping each slice's lowest and highest sample across every channel, a take panned hard to one side still draws, rather than reading as a flat line on the channel it isn't on."
-      },
-      {
-        "kind": "function",
-        "name": "downsampleWaveform",
-        "summary": "Downsamples raw PCM samples into `targetLength` blocks, each block's value the peak (max) absolute amplitude within it, the reduction waveform visualizers use, since a block average flattens short transients into a softer-looking curve than the audio actually has."
-      },
-      {
-        "kind": "function",
-        "name": "normalizePeaks",
-        "summary": "Scales peaks so the loudest sample, either way, reaches full height, keeping each slice's lopsidedness."
-      },
-      {
-        "kind": "function",
-        "name": "normalizeWaveform",
-        "summary": "Scales `values` so the largest entry becomes 1, keeps a waveform's peak reaching full height regardless of the source audio's own loudness."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectrumBandsOptions",
-        "summary": "The frequencies and levels `spectrumBands` spreads its bands over."
-      },
-      {
-        "kind": "function",
-        "name": "spectrumBands",
-        "summary": "Reduces an analyser's spectrum (`getFloatFrequencyData`: decibels per frequency bin) to `bands.length` levels of 0-1, low to high, written into `bands`."
-      },
-      {
-        "kind": "interface",
-        "name": "DetectPitchOptions",
-        "summary": "What `detectPitch` looks for."
-      },
-      {
-        "kind": "function",
-        "name": "detectPitch",
-        "summary": "The pitch the samples hold and how clear it is, or nothing: too quiet a signal, or no clear period."
-      },
-      {
-        "kind": "interface",
-        "name": "PitchEstimate",
-        "summary": "What a detection found: the pitch and how periodic the sound is there."
-      },
-      {
-        "kind": "function",
-        "name": "analyzeBeat",
-        "summary": "Reads a recording's beat, once, as it is decoded: what `warpOnImport` warps its clips by."
-      },
-      {
-        "kind": "function",
-        "name": "audioChroma",
-        "summary": "How much of a recording's sound lies in each pitch class, C to B, summing to 1, read once as it is decoded: what a key is read from, with notes or without (`detectKeys` of the Scale menu)."
-      },
-      {
-        "kind": "interface",
-        "name": "BeatAnalysis",
-        "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
-      },
-      {
-        "kind": "const",
-        "name": "ACX",
-        "summary": "What ACX asks of an audiobook: the RMS between -23 and -18 dBFS, the peak at most -3 dBFS, the noise floor at most -60 dBFS RMS."
-      },
-      {
-        "kind": "interface",
-        "name": "AcxCheck",
-        "summary": "One requirement and how the sound stands against it."
-      },
-      {
-        "kind": "interface",
-        "name": "AcxReport",
-        "summary": "A sound against the ACX audiobook requirements."
-      },
-      {
-        "kind": "function",
-        "name": "checkAcx",
-        "summary": "Checks a sound against ACX's requirements for an audiobook."
-      },
-      {
-        "kind": "function",
-        "name": "reportSound",
-        "summary": "Reads a sound once, to tell what it is: its loudness, its key, its tempo, and whether it meets ACX's requirements."
-      },
-      {
-        "kind": "interface",
-        "name": "SoundReport",
-        "summary": "What `reportSound` reads from a sound."
-      },
-      {
-        "kind": "function",
-        "name": "detectSilences",
-        "summary": "Where `channels` pause between their sounds, as `[from, to]` in seconds, in order: each stretch of at least `minDuration` where every sample of every channel stays under the threshold, found to a block of 1024 frames."
-      },
-      {
-        "kind": "interface",
-        "name": "SilenceOptions",
-        "summary": "What `detectSilences` takes, both optional."
-      },
-      {
-        "kind": "const",
-        "name": "SPECTRA_SIZE",
-        "summary": "The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window a spectrogram fits a view with."
-      },
-      {
-        "kind": "interface",
-        "name": "Spectra",
-        "summary": "A recording summed up as spectra, for a spectrogram drawn on the GPU that does not hold the recording: a column every `hop` frames, each bin's level from DC to Nyquist over windows of `size` frames, a byte each."
-      },
-      {
-        "kind": "interface",
-        "name": "SpectraSource",
-        "summary": "A reader of a recording, mixed to one: how many frames it holds, and its frames from `from` to `to`, at once or later."
-      },
-      {
-        "kind": "function",
-        "name": "spectrogramSpectra",
-        "summary": "The spectra of a recording (`Spectra`): a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in the column every `size / 2` frames (the short-time transform of `@audio/stft`), their mean, as a byte."
-      },
-      {
-        "kind": "function",
-        "name": "holdPeaks",
-        "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
-      },
-      {
-        "kind": "interface",
-        "name": "LogSpectrumOptions",
-        "summary": "The frequencies the axis of `logSpectrum` spans."
-      },
-      {
-        "kind": "function",
-        "name": "logSpectrum",
-        "summary": "Fills `out` with `bins` (dB per analyser bin, as `getFloatFrequencyData` writes them) resampled onto a log axis."
-      },
-      {
-        "kind": "interface",
-        "name": "PeakHoldOptions",
-        "summary": "How long `holdPeaks` holds a peak, and how fast it lets it fall."
-      },
-      {
-        "kind": "const",
-        "name": "SPECTRUM_FLOOR_DB",
-        "summary": "The quietest a point is drawn: what a silent bin, `-Infinity` dB, becomes."
-      },
-      {
-        "kind": "function",
-        "name": "stereoCorrelation",
-        "summary": "How alike the two channels of a sound are, from -1 to 1, as a correlation meter reads it: 1 when both carry the same sound (mono, at any levels), 0 when they have nothing in common or only one side sounds, and -1 when one is the other upside down, which cancels out once the two are summed to mono."
-      },
-      {
-        "kind": "interface",
-        "name": "BandShares",
-        "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
-      },
-      {
-        "kind": "interface",
-        "name": "Bands",
-        "summary": "The three bands of a stretch of sound: its lows under 250 Hz, its highs over 2.5 kHz, and the mids between."
-      },
-      {
-        "kind": "function",
-        "name": "bandShares",
-        "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
-      },
-      {
-        "kind": "function",
-        "name": "createBandSplit",
-        "summary": "Splits a sound in three a stretch at a time, as `splitBands` does: each call takes the stretch that follows the one before and carries the crossover's state over, so stretches split in order are the sound split whole."
-      },
-      {
-        "kind": "interface",
-        "name": "SplitBands",
-        "summary": "A sound as three signals: what it has under 250 Hz, between, and over 2.5 kHz."
-      },
-      {
-        "kind": "function",
-        "name": "splitBands",
-        "summary": "The sound's channels mixed to one and split in three by a Linkwitz-Riley crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz: the three bands add back to the mix, level and phase."
-      }
-    ],
-    "from": "@audio-ui/engine/analysis",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/beat-detect",
-      "@audio/biquad",
-      "@audio/eq-crossover",
-      "@audio/loudness-lufs",
-      "@audio/loudness-truepeak",
-      "@audio/mir-chroma",
-      "@audio/pitch-yin",
-      "@audio/stft",
-      "@audio/weighting-k"
-    ],
-    "usedBy": [
-      "arrangement",
-      "audio-export",
-      "device-signal",
-      "sound-operations",
-      "use-audio-levels",
-      "use-audio-signal",
-      "use-loudness",
-      "use-noise-through-eq",
-      "use-pitch",
-      "use-sound-report",
-      "use-spectrum"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "ChoiceOption",
-        "summary": "One entry of a choice: the `value` that goes in the state and the `label` a panel shows."
-      },
-      {
-        "kind": "interface",
-        "name": "ChoiceParameter",
-        "summary": "A pick from a short list: a waveform, a filter type, a mode."
-      },
-      {
-        "kind": "interface",
-        "name": "Device",
-        "summary": "A defined device: its parameters, and everything that reads or changes a state of it, with no sound and no view."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceApplied",
-        "summary": "What `apply` returns: the new state, the changes made, and the changes refused with their reason."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceBinding",
-        "summary": "What a host gives a device to drive: an engine, a view, a store."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceChange",
-        "summary": "One parameter `apply` changed."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceContext",
-        "summary": "What the host knows and the device does not: the tempo a time parameter that follows it is read against."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceDefinition",
-        "summary": "What `defineDevice` takes: the device's id, name, description and parameters, and whether it is an instrument, takes a sidechain or adds latency."
-      },
-      {
-        "kind": "class",
-        "name": "DeviceDefinitionError",
-        "summary": "Raised when a device is defined with parameters that cannot work."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceDescription",
-        "summary": "A device as an agent or a catalog reads it."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceReadings",
-        "summary": "What a device reports about what it is doing right now, for a meter."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceRejection",
-        "summary": "One parameter `apply` did not change, and why."
-      },
-      {
-        "kind": "type",
-        "name": "DeviceSignalName",
-        "summary": "What a device's engine lets a host watch of its sound beyond its input and its output."
-      },
-      {
-        "kind": "type",
-        "name": "DeviceState",
-        "summary": "The state of a device: each parameter's id to its value."
-      },
-      {
-        "kind": "function",
-        "name": "defineDevice",
-        "summary": "Defines a device from its parameters."
-      },
-      {
-        "kind": "interface",
-        "name": "NumberParameter",
-        "summary": "A continuous parameter: a number in a range, on a scale, in steps."
-      },
-      {
-        "kind": "interface",
-        "name": "ParameterDescription",
-        "summary": "A parameter as an agent or a catalog reads it: JSON-safe, with no function in it."
-      },
-      {
-        "kind": "type",
-        "name": "ParameterDescriptor",
-        "summary": "A parameter of a device: a number, a toggle or a choice."
-      },
-      {
-        "kind": "type",
-        "name": "ParameterValue",
-        "summary": "What a parameter holds: a number, a boolean or the value of a choice."
-      },
-      {
-        "kind": "interface",
-        "name": "ToggleParameter",
-        "summary": "An on or off parameter: a bypass, a mode, an auto switch."
-      },
-      {
-        "kind": "function",
-        "name": "createFeed",
-        "summary": "Feeds a worklet only while the path it plays is heard: a worklet fed nothing costs nothing."
-      },
-      {
-        "kind": "function",
-        "name": "createWorkletStage",
-        "summary": "A stage of an engine that runs a worklet: the sound passes clean while the worklet loads, then fades over to it."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceTaps",
-        "summary": "The points of an engine's graph a host may listen to beyond its input and its output, by the names its device declares in `signals`."
-      },
-      {
-        "kind": "interface",
-        "name": "EffectEngine",
-        "summary": "The engine of an effect on the Web Audio API: the binding of its state (`update`, `dispose`, `readings`) between an input and an output."
-      },
-      {
-        "kind": "type",
-        "name": "EngineFactory",
-        "summary": "What every `create<Name>Engine` is: an engine on a context, for the state it starts with and the host's tempo."
-      },
-      {
-        "kind": "const",
-        "name": "FEED_RELEASE_MS",
-        "summary": "How long after a path stops a worklet is still fed, in ms: its fade is over by then."
-      },
-      {
-        "kind": "interface",
-        "name": "Feed",
-        "summary": "Connections made while a path plays and taken away once it has faded out."
-      },
-      {
-        "kind": "type",
-        "name": "FeedConnection",
-        "summary": "A connection a feed makes: `from` into `to`, at an output and an input of their own if given."
-      },
-      {
-        "kind": "interface",
-        "name": "InstrumentEngine",
-        "summary": "The engine of an instrument: one voice, notes in, sound out."
-      },
-      {
-        "kind": "type",
-        "name": "NoiseColor",
-        "summary": "The colors of noise a buffer is made in, as `@audio/synth-noise` makes them."
-      },
-      {
-        "kind": "function",
-        "name": "noiseBuffer",
-        "summary": "Two seconds of noise on a context, from `@audio/synth-noise` (seeded, its peak at 0.9), made once per color and context and shared by everything that plays it: a synth's noise source, a snare's rattle, the pink noise an equalizer is heard through."
-      },
-      {
-        "kind": "interface",
-        "name": "WorkletStage",
-        "summary": "A worklet that takes over from the clean sound once it is in the graph."
-      },
-      {
-        "kind": "interface",
-        "name": "InstrumentBinding",
-        "summary": "What a host gives an instrument to play: a `DeviceBinding` that also takes notes."
-      },
-      {
-        "kind": "interface",
-        "name": "NoteTiming",
-        "summary": "When a note starts or ends, and which note it is."
-      },
-      {
-        "kind": "function",
-        "name": "playNote",
-        "summary": "Plays a note for `seconds` on an instrument: `noteOn` now, `noteOff` when the time is up."
-      },
-      {
-        "kind": "interface",
-        "name": "SidechainBinding",
-        "summary": "What a host gives a device that takes a key signal: a `DeviceBinding` whose engine has a second input, `sidechain`, that the key is connected to."
-      },
-      {
-        "kind": "function",
-        "name": "measureLatency",
-        "summary": "How long an engine delays a signal, in milliseconds: where what comes out of an impulse lines up with it."
-      },
-      {
-        "kind": "function",
-        "name": "measureResponse",
-        "summary": "How far an engine's frequency response is from `curve`, the gain in dB the device draws at each frequency."
-      },
-      {
-        "kind": "interface",
-        "name": "ResponseMeasurement",
-        "summary": "What a measurement of a frequency response found."
-      },
-      {
-        "kind": "const",
-        "name": "LINEAR_SCALE",
-        "summary": "Even steps: the right feel for levels, times and anything heard in differences."
-      },
-      {
-        "kind": "const",
-        "name": "LOGARITHMIC_SCALE",
-        "summary": "Even ratios: the right feel for frequency, Q, ratios and times heard in proportions."
-      },
-      {
-        "kind": "interface",
-        "name": "ParameterScale",
-        "summary": "How a value maps onto a control's travel, and back."
-      },
-      {
-        "kind": "type",
-        "name": "ParameterScaleProp",
-        "summary": "A scale as a parameter takes it: `\"linear\"`, `\"log\"`, or a scale of your own."
-      },
-      {
-        "kind": "function",
-        "name": "resolveScale",
-        "summary": "The scale a parameter names: `\"linear\"` and `\"log\"` as the two above, a scale of your own as it is."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceTool",
-        "summary": "A tool a model can call to drive a device: agent-agnostic, with no SDK in it."
-      },
-      {
-        "kind": "interface",
-        "name": "DeviceToolResult",
-        "summary": "What a tool's `run` returns: the state after the call, a summary for the model, and the note to play for a `<id>_play` call."
-      },
-      {
-        "kind": "function",
-        "name": "deviceTools",
-        "summary": "The tools that drive a device, derived from its parameters: `<id>_set` takes any of its parameters by id, `<id>_reset` puts some or all back to their defaults."
-      },
-      {
-        "kind": "interface",
-        "name": "JsonSchema",
-        "summary": "The subset of JSON Schema the tools use: what OpenAI, Anthropic, MCP and the AI SDK all accept as an input schema."
-      },
-      {
-        "kind": "const",
-        "name": "NOTE_DURATION",
-        "summary": "How long a note lasts when a call does not say, and the shortest and longest it may ask for, in seconds."
-      }
-    ],
-    "from": "@audio-ui/engine/device",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/measure-latency",
-      "@audio/measure-response",
-      "@audio/synth-noise"
-    ],
-    "usedBy": [
-      "arrangement",
-      "arrangement-engine",
-      "dawproject",
-      "device-library",
-      "device-signal",
-      "drum-rack",
-      "instrument-rack",
-      "polyphony",
-      "rack",
-      "use-device-engines",
-      "use-device-loop",
-      "use-device-signal",
-      "use-noise-through-eq",
-      "use-polyphony",
-      "voice-pool"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "highshelf",
-        "summary": "High-shelf."
-      },
-      {
-        "kind": "function",
-        "name": "lowshelf",
-        "summary": "Low-shelf."
-      },
-      {
-        "kind": "function",
-        "name": "magnitude",
-        "summary": "|H(f)| of one section at frequency `f` — analysis/plotting."
-      },
-      {
-        "kind": "function",
-        "name": "compandStream",
-        "summary": "{ write, flush } streaming primitive underlying the default export's streaming form."
-      },
-      {
-        "kind": "function",
-        "name": "compressorGain",
-        "summary": "Soft-knee downward compression curve."
-      },
-      {
-        "kind": "const",
-        "name": "compressor",
-        "summary": "The smooth compressor's manifest: an AudioWorklet processor's parameters and state, as its package publishes them."
-      },
-      {
-        "kind": "const",
-        "name": "deesser",
-        "summary": "The de-esser's manifest: its processor's parameters and latency."
-      },
-      {
-        "kind": "function",
-        "name": "expanderGain",
-        "summary": "Soft-knee downward expansion curve."
-      },
-      {
-        "kind": "function",
-        "name": "upwardExpanderGain",
-        "summary": "Soft-knee upward expansion curve — the above-threshold complement of expanderGain."
-      },
-      {
-        "kind": "const",
-        "name": "expander",
-        "summary": "The expander's manifest: its processor's parameters and modes."
-      },
-      {
-        "kind": "const",
-        "name": "fet",
-        "summary": "The FET compressor model's manifest."
-      },
-      {
-        "kind": "function",
-        "name": "limiterLatency",
-        "summary": "Samples the output trails the input by: the lookahead, and 96 with `truePeak`."
-      },
-      {
-        "kind": "const",
-        "name": "opto",
-        "summary": "The opto compressor model's manifest."
-      },
-      {
-        "kind": "function",
-        "name": "unlimitDeficitGain",
-        "summary": "adaptive (default) pure mapping: transient deficit (crestTarget − peak-held transientness) → target lift (dB), gated by onset presence."
-      },
-      {
-        "kind": "function",
-        "name": "unlimitGain",
-        "summary": "adaptive:false pure mapping: transientness (fast-over-slow envelope gap, dB) → target lift (dB), before ballistic smoothing."
-      },
-      {
-        "kind": "const",
-        "name": "unlimit",
-        "summary": "The de-limiter's manifest: its processor's parameters."
-      },
-      {
-        "kind": "const",
-        "name": "varimu",
-        "summary": "The vari-mu compressor model's manifest."
-      },
-      {
-        "kind": "const",
-        "name": "vca",
-        "summary": "The VCA compressor model's manifest."
-      },
-      {
-        "kind": "function",
-        "name": "distortion",
-        "summary": "Mutates `data` in place and returns the same reference."
-      },
-      {
-        "kind": "function",
-        "name": "diodeLadder",
-        "summary": "The diode ladder filter, run over a buffer in place."
-      },
-      {
-        "kind": "function",
-        "name": "korg35",
-        "summary": "The Korg35 filter, run over a buffer in place."
-      },
-      {
-        "kind": "function",
-        "name": "moogLadder",
-        "summary": "The Moog ladder filter, two or four poles, run over a buffer in place."
-      },
-      {
-        "kind": "function",
-        "name": "oberheim",
-        "summary": "The Oberheim SEM state-variable filter, run over a buffer in place."
-      },
-      {
-        "kind": "function",
-        "name": "dattorro",
-        "summary": "Process in place."
-      },
-      {
-        "kind": "function",
-        "name": "fdn",
-        "summary": "Process in place."
-      },
-      {
-        "kind": "function",
-        "name": "freeverb",
-        "summary": "Process in place."
-      },
-      {
-        "kind": "function",
-        "name": "schroeder",
-        "summary": "Process a mono buffer in place; returns the same array."
-      },
-      {
-        "kind": "function",
-        "name": "spring",
-        "summary": "Process a mono buffer in place; returns the same array."
-      }
-    ],
-    "from": "@audio-ui/engine/dsp",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/biquad",
-      "@audio/dynamics-compand",
-      "@audio/dynamics-compressor",
-      "@audio/dynamics-deesser",
-      "@audio/dynamics-expander",
-      "@audio/dynamics-fet",
-      "@audio/dynamics-limiter",
-      "@audio/dynamics-opto",
-      "@audio/dynamics-unlimit",
-      "@audio/dynamics-varimu",
-      "@audio/dynamics-vca",
-      "@audio/effect-distortion",
-      "@audio/filter-diode-ladder",
-      "@audio/filter-korg35",
-      "@audio/filter-moog-ladder",
-      "@audio/filter-oberheim",
-      "@audio/reverb-dattorro",
-      "@audio/reverb-fdn",
-      "@audio/reverb-freeverb",
-      "@audio/reverb-schroeder",
-      "@audio/reverb-spring"
-    ],
-    "usedBy": []
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "decodeAudioChannels",
-        "summary": "Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`."
-      },
-      {
-        "kind": "function",
-        "name": "decodeAudioSamples",
-        "summary": "Decodes raw audio bytes into one channel's PCM samples, ready for `downsampleWaveform`: `decodeAudioChannels`, then the channel asked for, or the last there is."
-      },
-      {
-        "kind": "type",
-        "name": "AudioFileFormat",
-        "summary": "The formats `encodeAudio` writes."
-      },
-      {
-        "kind": "function",
-        "name": "downloadFile",
-        "summary": "Saves a file through the browser's downloads, named `name`."
-      },
-      {
-        "kind": "interface",
-        "name": "EncodeAudioOptions",
-        "summary": "What `encodeAudio` writes: the format, its bit depth or bitrate, the channels' sample rate, and a callback for its progress."
-      },
-      {
-        "kind": "function",
-        "name": "encodeAudio",
-        "summary": "Encodes channels of samples, from -1 to 1, as a file."
-      },
-      {
-        "kind": "const",
-        "name": "CHANNEL_LAYOUTS",
-        "summary": "The layouts a sound can be mixed to: one channel, two, or the surround layouts of film."
-      },
-      {
-        "kind": "type",
-        "name": "ChannelLayout",
-        "summary": ""
-      },
-      {
-        "kind": "const",
-        "name": "LAYOUT_CHANNELS",
-        "summary": "How many channels a layout has."
-      },
-      {
-        "kind": "function",
-        "name": "mixChannels",
-        "summary": "The same sound in another layout: a down-mix folds the centre and the surrounds into the sides at -3 dB and drops the low-frequency channel, and scales so the sum stays at full scale at most; an up-mix keeps the sides where they are, spreads them to the surrounds at -6 dB and leaves the centre and the low-frequency channel silent."
-      },
-      {
-        "kind": "function",
-        "name": "padChannels",
-        "summary": "Silence, in samples, added before and after the sound."
-      },
-      {
-        "kind": "function",
-        "name": "repeatChannels",
-        "summary": "The sound played `times` times in a row, the first included."
-      },
-      {
-        "kind": "function",
-        "name": "resampleChannels",
-        "summary": "Every channel at another sample rate, by a windowed sinc: the same sound, heard as a converter of that rate would give it, over `channels.length` arrays as long as the new rate needs."
-      },
-      {
-        "kind": "function",
-        "name": "reverseChannels",
-        "summary": "Every channel played backwards: the end first."
-      },
-      {
-        "kind": "function",
-        "name": "downloadMidiFile",
-        "summary": "Saves the notes as a `.mid` file, named `filename`."
-      },
-      {
-        "kind": "const",
-        "name": "MIDI_FILE_ACCEPT",
-        "summary": "What a file input or a drop zone accepts as a MIDI file."
-      },
-      {
-        "kind": "interface",
-        "name": "MidiFileGrid",
-        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
-      },
-      {
-        "kind": "function",
-        "name": "readMidiFile",
-        "summary": "Reads a MIDI file's notes onto a grid of steps, with the file's own tempo (clamped to the BPM range)."
-      },
-      {
-        "kind": "function",
-        "name": "readMidiFileParts",
-        "summary": "Reads a MIDI file as parts, for a host that lays each on a track of its own: a part per track and channel, named after its track (and its channel, when a track holds several), its notes in beats as they were written, not quantized and not cut, at least a tick long, and the first program its channel plays."
-      },
-      {
-        "kind": "interface",
-        "name": "ScoreNote",
-        "summary": "A note of a score in beats: where it starts and how long it lasts, in quarter notes."
-      },
-      {
-        "kind": "interface",
-        "name": "ScorePart",
-        "summary": "One part of a score: its name, whether it is drums, and its notes in beats."
-      },
-      {
-        "kind": "function",
-        "name": "writeMidiFile",
-        "summary": "The notes as a Standard MIDI File, the inverse of `readMidiFile`."
-      },
-      {
-        "kind": "function",
-        "name": "downloadMusicXmlFile",
-        "summary": "Saves the notes as a `.musicxml` file, named `filename`."
-      },
-      {
-        "kind": "const",
-        "name": "MUSICXML_FILE_ACCEPT",
-        "summary": "What a file input or a drop zone accepts as a MusicXML file: a score, or one compressed as `.mxl`."
-      },
-      {
-        "kind": "interface",
-        "name": "MusicXmlFileGrid",
-        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
-      },
-      {
-        "kind": "function",
-        "name": "readMusicXmlFile",
-        "summary": "Reads a MusicXML score's notes onto a grid of steps, with its first tempo (clamped to the BPM range), every part into the one clip."
-      },
-      {
-        "kind": "function",
-        "name": "readMusicXmlFileParts",
-        "summary": "Reads a MusicXML score as parts, for a host that lays each on a track of its own: a part each, by its name, its notes in beats as they were written, through changes of tempo, not quantized and not cut."
-      },
-      {
-        "kind": "function",
-        "name": "writeMusicXmlFile",
-        "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
-      },
-      {
-        "kind": "const",
-        "name": "DITHER_METHODS",
-        "summary": "How a sound is brought to fewer bits: `tpdf` adds triangular noise one step wide before rounding, so the error is steady noise instead of distortion that follows the sound; `shaped` does the same with the error fed back through two delays, which moves the noise up toward the highest frequencies, where the ear hears it least; `feedback` rounds with the error fed back once (`@audio/effect-noiseshaper`), with no added noise."
-      },
-      {
-        "kind": "type",
-        "name": "DitherMethod",
-        "summary": ""
-      },
-      {
-        "kind": "function",
-        "name": "ditherChannels",
-        "summary": "Every channel rounded to `bits` bits, by one of `DITHER_METHODS`, the way a sound is mastered to 16 bits or 8: as many steps as that depth has, and the error made into noise by the method."
-      },
-      {
-        "kind": "type",
-        "name": "FilterType",
-        "summary": "A filter's shape: what it lets through, 12 dB an octave."
-      },
-      {
-        "kind": "function",
-        "name": "filterChannels",
-        "summary": "Every channel through one filter of the cookbook, at `frequency` in hertz and a `q` (one over the square root of two by default, the flattest)."
-      },
-      {
-        "kind": "function",
-        "name": "gainChannels",
-        "summary": "Every channel, `db` louder or quieter."
-      },
-      {
-        "kind": "type",
-        "name": "NormalizeTarget",
-        "summary": "What a sound is normalized to: its loudest sample, or its integrated loudness held under a true-peak ceiling."
-      },
-      {
-        "kind": "function",
-        "name": "normalizeChannels",
-        "summary": "The sound, with one gain on every channel, so the balance between them stays: to a peak in dBFS, or to a loudness in LUFS as far as its true peak stays under `ceiling` (-1 dBTP by default)."
-      },
-      {
-        "kind": "function",
-        "name": "panChannels",
-        "summary": "A sound's balance: -1 is all left, 1 all right, 0 as it is."
-      },
-      {
-        "kind": "const",
-        "name": "SHIFT_METHODS",
-        "summary": "How a pitch is shifted: let the library choose from the sound (`auto`), or a method by name."
-      },
-      {
-        "kind": "type",
-        "name": "ShiftMethod",
-        "summary": ""
-      },
-      {
-        "kind": "const",
-        "name": "STRETCH_METHODS",
-        "summary": "The ways a sound is stretched in time with its pitch kept, each with what it suits: a phase vocoder that keeps the attacks of drums (`transient`), one for general music (`pvocLock`), waveform overlap-add for speech made shorter (`wsola`) or longer (`pvsola`), a vocoder with the harmonic and percussive parts apart for full mixes (`hybrid`), and the extreme stretch of ambient textures (`paulstretch`)."
-      },
-      {
-        "kind": "type",
-        "name": "StretchMethod",
-        "summary": ""
-      },
-      {
-        "kind": "function",
-        "name": "shiftChannels",
-        "summary": "Every channel `semitones` higher or lower, its length unchanged."
-      },
-      {
-        "kind": "function",
-        "name": "speedChannels",
-        "summary": "The sound played `speed` times as fast, its pitch moving with it as on a tape or a record: 2 is twice as fast and an octave up."
-      },
-      {
-        "kind": "function",
-        "name": "stretchChannels",
-        "summary": "Every channel `factor` times as long, its pitch unchanged: 2 is twice as slow, 0.5 twice as fast."
-      }
-    ],
-    "from": "@audio-ui/engine/files",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/biquad",
-      "@audio/decode-aiff",
-      "@audio/decode-caf",
-      "@audio/decode-mp4",
-      "@audio/effect-noiseshaper",
-      "@audio/encode",
-      "@audio/midi-parse",
-      "@audio/midi-write",
-      "@audio/musicxml",
-      "@audio/resample-sinc",
-      "@audio/shift",
-      "@audio/stretch"
-    ],
-    "usedBy": [
-      "audio-export",
-      "sound-operations"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "FormatOptions",
-        "summary": "What every formatter takes, over its own defaults."
-      },
-      {
-        "kind": "type",
-        "name": "LevelUnit",
-        "summary": "The units of a level: decibels of a gain, of full scale, of a true peak, of a voltage; loudness in LUFS and its range in LU."
-      },
-      {
-        "kind": "function",
-        "name": "formatLevel",
-        "summary": "A level or a gain: `-6.0 dBFS`, `-23.0 LUFS`, `+3.0 dB`, `-1.0 dBTP`."
-      },
-      {
-        "kind": "type",
-        "name": "FrequencyStyle",
-        "summary": "How a frequency is written: by size (`auto`), always in hertz, or always in kilohertz."
-      },
-      {
-        "kind": "function",
-        "name": "formatFrequency",
-        "summary": "A frequency: `120 Hz`, `1.2 kHz`, `12 kHz`."
-      },
-      {
-        "kind": "function",
-        "name": "formatSampleRate",
-        "summary": "A sample rate: `44.1 kHz`, `48 kHz`, `11.025 kHz`: in kilohertz, with the places it needs and no more."
-      },
-      {
-        "kind": "type",
-        "name": "TimeStyle",
-        "summary": "How a time is written: a clock to the second, a clock to the millisecond, or a length in seconds."
-      },
-      {
-        "kind": "function",
-        "name": "formatTime",
-        "summary": "A time: `1:05` (`clock`), `1:05.250` (`precise`, to the millisecond, with hours past an hour: `1:02:03.500`), or `65.25 s` (`seconds`)."
-      },
-      {
-        "kind": "function",
-        "name": "formatDuration",
-        "summary": "A length of time by its size: `120 ms` under a second, `1.25 s` above."
-      },
-      {
-        "kind": "function",
-        "name": "formatTempo",
-        "summary": "The tempo, `120 BPM`, with a decimal only when it has one."
-      },
-      {
-        "kind": "interface",
-        "name": "NoteOptions",
-        "summary": "How a note is spelled: sharps or flats, the octave of the middle C (`4` in scientific pitch, `3` on Yamaha's), and the typographic ♯ and ♭ or plain `#` and `b`."
-      },
-      {
-        "kind": "function",
-        "name": "formatNote",
-        "summary": "A MIDI note as a name: `60` is `C4`, `61` `C#4`, `69` `A4`."
-      },
-      {
-        "kind": "type",
-        "name": "PanStyle",
-        "summary": "How a pan is written: `L30`, `C`, `R30` (`lr`), or a signed number, `-30`, `0`, `+30` (`signed`)."
-      },
-      {
-        "kind": "function",
-        "name": "formatPan",
-        "summary": "A pan from -1 (left) to 1 (right) as a percentage of the way: `L50`, `C`, `R100`."
-      },
-      {
-        "kind": "function",
-        "name": "formatPercent",
-        "summary": "A share as a percentage."
-      },
-      {
-        "kind": "function",
-        "name": "formatRatio",
-        "summary": "A compressor's ratio: `4.0:1`, and `∞:1` for a limiter."
-      },
-      {
-        "kind": "function",
-        "name": "formatChannels",
-        "summary": "The layout of a sound by its channel count: `mono`, `stereo`, `quad`, `5.1`, `7.1`; any other count as `N ch`."
-      },
-      {
-        "kind": "interface",
-        "name": "Formatter",
-        "summary": "The formatters of this module with options bound: each call may still override them."
-      },
-      {
-        "kind": "function",
-        "name": "createFormatter",
-        "summary": "A set of formatters that share their options: a locale, a true minus, a thin space, a note spelling."
-      }
-    ],
-    "from": "@audio-ui/engine/format",
-    "package": "@audio-ui/engine",
-    "audiojs": [],
-    "usedBy": [
-      "sound-operations"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "const",
-        "name": "REPAIRS",
-        "summary": "The defects of a recording that can be taken out of it, each by the method made for it: `clean` finds what the sound carries and picks the method itself; `clicks` and `crackle` rebuild impulses from the sound around them (vinyl ticks, mouth clicks, shellac); `hum50` and `hum60` take out the mains hum and its harmonics; `noise` and `speechNoise` take out steady broadband noise, and noise that changes under a voice; `clipping` rebuilds peaks cut at full scale; `wind` and `plosives` take out low rumble and the bursts of p and b; `breaths` and `reverb` take down the breaths between phrases and a room's late reverb."
-      },
-      {
-        "kind": "type",
-        "name": "Repair",
-        "summary": ""
-      },
-      {
-        "kind": "function",
-        "name": "repairChannels",
-        "summary": "Every channel with one defect taken out, by the method made for it, each channel on its own."
-      }
-    ],
-    "from": "@audio-ui/engine/repair",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/denoise"
-    ],
-    "usedBy": [
-      "sound-operations"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "const",
-        "name": "BASS_ENHANCER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`"
-      },
-      {
-        "kind": "const",
-        "name": "BINAURAL_PANNER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-binaural` 0.1.1 (MIT, Dmitry Iv.): `binaural`"
-      },
-      {
-        "kind": "const",
-        "name": "CHORUS_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-chorus` 2.0.2 (MIT, Dmitry Iv.): `chorus`"
-      },
-      {
-        "kind": "const",
-        "name": "COMPANDER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compandStream`, as `module3` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compand`"
-      },
-      {
-        "kind": "const",
-        "name": "COMPRESSOR_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module4` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vcaStream`, as `module5` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vca` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module7` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fetStream`, as `module8` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fet` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module10` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `optoStream`, as `module11` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `opto` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module13` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimuStream`, as `module14` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimu` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module16` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compress`, `compressorState`, as `module17` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compressor`"
-      },
-      {
-        "kind": "const",
-        "name": "DEESSER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowpass`, `highpass`, `step`, `state`, as `module4` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `writer`, `db2lin`, `timeCoef`, `smoother`, as `module5` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesserStream`, `latency`, as `module6` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesser`"
-      },
-      {
-        "kind": "const",
-        "name": "DELAY_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-pingpong` 1.1.5 (MIT, Dmitry Iv.): `pingPong` - `@audio/effect-multitap` 1.1.6 (MIT, Dmitry Iv.): `multitap` - `@audio/effect-graindelay` 1.1.6 (MIT, Dmitry Iv.): `graindelay`"
-      },
-      {
-        "kind": "const",
-        "name": "DUCKER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `ducker`"
-      },
-      {
-        "kind": "const",
-        "name": "EXCITER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-exciter` 1.2.1 (MIT, Dmitry Iv.): `exciter`"
-      },
-      {
-        "kind": "const",
-        "name": "EXPANDER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expanderGain`, `upwardExpanderGain`, as `module3` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expander`"
-      },
-      {
-        "kind": "const",
-        "name": "FILTER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/filter-moog-ladder` 1.2.0 (MIT, Dmitry Iv.): `moogLadder` - `@audio/filter-diode-ladder` 1.2.2 (MIT, Dmitry Iv.): `diodeLadder` - `@audio/filter-korg35` 1.2.1 (MIT, Dmitry Iv.): `korg35` - `@audio/filter-oberheim` 1.2.1 (MIT, Dmitry Iv.): `oberheim`"
-      },
-      {
-        "kind": "const",
-        "name": "FREQUENCY_SHIFTER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-freqshift` 1.1.6 (MIT, Dmitry Iv.): `frequencyShifter` - `@audio/effect-ringmod` 1.1.5 (MIT, Dmitry Iv.): `ringMod`"
-      },
-      {
-        "kind": "const",
-        "name": "GATE_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module2` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gateStream`, as `module3` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gate`"
-      },
-      {
-        "kind": "const",
-        "name": "LIMITER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module0` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiterStream`, `latency`, as `module1` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiter`"
-      },
-      {
-        "kind": "const",
-        "name": "LOFI_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-lofi` 1.1.6 (MIT, Dmitry Iv.): `lofi`"
-      },
-      {
-        "kind": "const",
-        "name": "MID_SIDE_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-microshift` 1.1.3 (MIT, Dmitry Iv.): `shifter`"
-      },
-      {
-        "kind": "const",
-        "name": "PHASER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-phaser` 1.1.6 (MIT, Dmitry Iv.): `phaser`"
-      },
-      {
-        "kind": "const",
-        "name": "REDUX_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-bitcrusher` 1.1.5 (MIT, Dmitry Iv.): `bitcrusher` - `@audio/effect-noiseshaper` 1.1.5 (MIT, Dmitry Iv.): `noiseShaping`"
-      },
-      {
-        "kind": "const",
-        "name": "ROTARY_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `polesSos` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `butterworth` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `linkwitzRiley` - `@audio/eq-crossover` 1.0.2 (MIT, Dmitry Iv.): `crossover` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `step`, `state` - `@audio/effect-rotary` 0.1.2 (MIT, Dmitry Iv.): `rotary`"
-      },
-      {
-        "kind": "const",
-        "name": "STUTTER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-stutter` 1.1.6 (MIT, Dmitry Iv.): `stutter`"
-      },
-      {
-        "kind": "const",
-        "name": "TILT_EQ_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowshelf`, `highshelf`, `filter` - `@audio/eq-tilt` 1.2.3 (MIT, Dmitry Iv.): `tilt`"
-      },
-      {
-        "kind": "const",
-        "name": "TRANSIENT_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`, as `module0` - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`"
-      },
-      {
-        "kind": "const",
-        "name": "UNLIMITER_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `upwardExpanderGain`, as `module3` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimitGain`, `unlimitDeficitGain`, as `module5` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimit`"
-      },
-      {
-        "kind": "const",
-        "name": "WAH_KERNELS",
-        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-autowah` 1.1.5 (MIT, Dmitry Iv.): `autoWah` - `@audio/effect-wah` 1.1.5 (MIT, Dmitry Iv.): `wah`"
-      }
-    ],
-    "from": "@audio-ui/engine/kernels",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/biquad",
-      "@audio/dynamics-compand",
-      "@audio/dynamics-compressor",
-      "@audio/dynamics-deesser",
-      "@audio/dynamics-ducker",
-      "@audio/dynamics-envelope",
-      "@audio/dynamics-expander",
-      "@audio/dynamics-fet",
-      "@audio/dynamics-gate",
-      "@audio/dynamics-limiter",
-      "@audio/dynamics-opto",
-      "@audio/dynamics-transient-shaper",
-      "@audio/dynamics-unlimit",
-      "@audio/dynamics-varimu",
-      "@audio/dynamics-vca",
-      "@audio/effect-autowah",
-      "@audio/effect-bitcrusher",
-      "@audio/effect-chorus",
-      "@audio/effect-exciter",
-      "@audio/effect-freqshift",
-      "@audio/effect-graindelay",
-      "@audio/effect-lofi",
-      "@audio/effect-multitap",
-      "@audio/effect-noiseshaper",
-      "@audio/effect-phaser",
-      "@audio/effect-pingpong",
-      "@audio/effect-ringmod",
-      "@audio/effect-rotary",
-      "@audio/effect-stutter",
-      "@audio/effect-subbass",
-      "@audio/effect-wah",
-      "@audio/eq-crossover",
-      "@audio/eq-tilt",
-      "@audio/filter-diode-ladder",
-      "@audio/filter-korg35",
-      "@audio/filter-moog-ladder",
-      "@audio/filter-oberheim",
-      "@audio/spatial-binaural",
-      "@audio/spatial-microshift"
-    ],
-    "usedBy": []
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "createMidiInput",
-        "summary": "The MIDI inputs of the page through the Web MIDI API, as one source: every listener hears the messages of every connected device, and devices plugged or unplugged later are picked up, and a device switched off with `setInputEnabled` is not heard."
-      },
-      {
-        "kind": "interface",
-        "name": "MidiInput",
-        "summary": "The page's MIDI inputs as one source: connect, listen to messages, switch inputs off, and follow its state."
-      },
-      {
-        "kind": "interface",
-        "name": "MidiInputState",
-        "summary": "What `createMidiInput` knows of the page's MIDI: whether it is supported and connected, the inputs, the muted ones, and why it is not connected."
-      },
-      {
-        "kind": "const",
-        "name": "DEFAULT_PITCH_BEND_RANGE",
-        "summary": "The bend range most synths start with, in semitones."
-      },
-      {
-        "kind": "type",
-        "name": "MidiMessage",
-        "summary": "Live MIDI 1.0 channel messages, as a Web MIDI input delivers them (one message per event, a status byte then its data bytes)."
-      },
-      {
-        "kind": "function",
-        "name": "parseMidiMessage",
-        "summary": "Parses one channel voice message: note on, note off, control change or pitch bend."
-      },
-      {
-        "kind": "function",
-        "name": "pitchBendToSemitones",
-        "summary": "A pitch bend value in semitones, for a receiver whose bend range is `range` semitones each way."
-      }
-    ],
-    "from": "@audio-ui/engine/midi",
-    "package": "@audio-ui/engine",
-    "audiojs": [],
-    "usedBy": [
-      "use-midi-input"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "cents",
-        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
-      },
-      {
-        "kind": "function",
-        "name": "midiToHz",
-        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
-      },
-      {
-        "kind": "function",
-        "name": "detectKeys",
-        "summary": "The keys `notes` are likeliest in, likeliest first, at most `count`: each pitch class weighed by how long it sounds, against the major and minor key profiles of `@audio/mir-key` (Krumhansl-Schmuckler)."
-      },
-      {
-        "kind": "interface",
-        "name": "KeyNote",
-        "summary": "What a key is read from: a note's pitch and how long it lasts, in any unit."
-      },
-      {
-        "kind": "function",
-        "name": "inScale",
-        "summary": "Whether a MIDI pitch is in a scale."
-      },
-      {
-        "kind": "function",
-        "name": "nearestInScale",
-        "summary": "The pitch in a scale nearest `pitch`: itself when it is in it, else the nearest one, the lower of two as near."
-      },
-      {
-        "kind": "function",
-        "name": "rollScale",
-        "summary": "A scale as a piano roll reads it: its pitch classes and its root."
-      },
-      {
-        "kind": "const",
-        "name": "SCALES",
-        "summary": "The steps of each scale, as semitones above the root."
-      },
-      {
-        "kind": "interface",
-        "name": "Scale",
-        "summary": "A scale on a root: C major is `{ name: \"major\", root: 0 }`."
-      },
-      {
-        "kind": "type",
-        "name": "ScaleName",
-        "summary": "The name of a scale of `SCALES`."
-      },
-      {
-        "kind": "function",
-        "name": "scalePitchClasses",
-        "summary": "The pitch classes a scale keeps, from 0 (C) to 11 (B), in order."
-      }
-    ],
-    "from": "@audio-ui/engine/pitch",
-    "package": "@audio-ui/engine",
-    "audiojs": [
-      "@audio/mir-key",
-      "@audio/note"
-    ],
-    "usedBy": [
-      "arrangement",
-      "use-pitch",
-      "use-synth-voices",
-      "voice-pool"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "ArrangedAudio",
-        "summary": "An audio clip as an arrangement holds it, in seconds: where it lies, the stretch of its recording it plays, its gain, loop, direction and warp."
-      },
-      {
-        "kind": "function",
-        "name": "createWarpReader",
-        "summary": "Reads a warp map from a clip's own time back to its source's, fast enough to be asked for every frame: it keeps the stretch it last answered from, since frames come in order."
-      },
-      {
-        "kind": "type",
-        "name": "FadeShape",
-        "summary": "How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends."
-      },
-      {
-        "kind": "function",
-        "name": "fadeGain",
-        "summary": "The gain a fade of `shape` has `progress` of the way through it, from 0 (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards."
-      },
-      {
-        "kind": "interface",
-        "name": "PlayedClip",
-        "summary": "An audio clip as a player reads it: in whole frames of the arrangement, at the engine's sample rate."
-      },
-      {
-        "kind": "interface",
-        "name": "PlayedStretch",
-        "summary": "How a clip stretches time, in frames of the arrangement: how far apart its grains start and how long they cross, how fast each reads, and whether each is lined up on the last."
-      },
-      {
-        "kind": "function",
-        "name": "playedClip",
-        "summary": "The clip a player reads from `clip`, playing the recording `recording`, at `sampleRate`: every time turned into the nearest frame, the fades shortened to fit, the gain as a ratio."
-      },
-      {
-        "kind": "function",
-        "name": "playedClips",
-        "summary": "The clips a track's player reads, from an arrangement's audio clips: those that play (not deactivated, with a recording to play), each through `playedClip`, in the order they start."
-      },
-      {
-        "kind": "type",
-        "name": "WarpMode",
-        "summary": "How a clip plays at another speed than its recording's: with its pitch moving with it, in slices that keep their attacks, or in grains that keep a held note."
-      },
-      {
-        "kind": "const",
-        "name": "RECORDING_LOADER_WORKER",
-        "summary": "The loader of streamed recordings, as the source of a module: start it with `new Worker(url, { type: \"module\" })` (from a Blob URL), then post it `RecordingLoaderMessage`s."
-      },
-      {
-        "kind": "interface",
-        "name": "Compensation",
-        "summary": "How long each path waits, in frames, so that all of them line up at the main track."
-      },
-      {
-        "kind": "interface",
-        "name": "DelayedTrack",
-        "summary": "A path into the mixer as delay compensation sees it: how many frames its devices delay it."
-      },
-      {
-        "kind": "function",
-        "name": "delayCompensation",
-        "summary": "The waits that line every path up at the main track."
-      },
-      {
-        "kind": "function",
-        "name": "panGains",
-        "summary": "The gains of the left and right channels for a pan from -1 (left) to 1 (right): a constant-power law on sine curves, with both channels at unity in the centre and the side it is turned to at +3 dB at either end."
-      },
-      {
-        "kind": "interface",
-        "name": "RoutedCompensation",
-        "summary": "How long each path waits, in frames, so that everything meeting anywhere meets on the same frame."
-      },
-      {
-        "kind": "interface",
-        "name": "RoutedTrack",
-        "summary": "A path into the mixer as routing sees it: its delay, where it plays into, and the returns it sends to."
-      },
-      {
-        "kind": "function",
-        "name": "routedCompensation",
-        "summary": "The waits that line every path up wherever paths meet: at a group, the sound of each of its tracks; at a return, each send; at the main track, the top tracks and groups and the returns."
-      },
-      {
-        "kind": "interface",
-        "name": "SoloState",
-        "summary": "What a solo lets through: each track's own output, and each of its sends."
-      },
-      {
-        "kind": "interface",
-        "name": "SoloTrack",
-        "summary": "A track as the solo sees it."
-      },
-      {
-        "kind": "function",
-        "name": "soloState",
-        "summary": "Which tracks a solo silences."
-      },
-      {
-        "kind": "interface",
-        "name": "Note",
-        "summary": "A note of a MIDI clip: its pitch, start and length, how hard and how likely it plays, how far its velocity may stray, and whether it is deactivated."
-      },
-      {
-        "kind": "type",
-        "name": "NoteId",
-        "summary": "A note's id: unique within its clip."
-      },
-      {
-        "kind": "function",
-        "name": "playedVelocity",
-        "summary": "How hard a note plays this time round, from 0 to 1, or `null` when it does not: a deactivated note never plays, one with a `chance` plays that share of the times, and a `deviation` strays its velocity by up to that much, a new roll each time."
-      },
-      {
-        "kind": "interface",
-        "name": "PlannedRecording",
-        "summary": "What the planner needs of a recording: its rate and its length in frames."
-      },
-      {
-        "kind": "function",
-        "name": "pagesAhead",
-        "summary": "The pages a track's clips read over the `count` frames of the audio clock from `frame`, the soonest read first: what a loader should have in the pool before then."
-      },
-      {
-        "kind": "const",
-        "name": "CLIP_PLAYER_PROCESSOR",
-        "summary": "The name the clip player's processor is registered under in an AudioWorklet."
-      },
-      {
-        "kind": "type",
-        "name": "ClipPlayerMessage",
-        "summary": "What the main thread posts to a clip player's port."
-      },
-      {
-        "kind": "type",
-        "name": "ClipPlayerReply",
-        "summary": "What a clip player's processor posts back."
-      },
-      {
-        "kind": "type",
-        "name": "RecordingLoaderMessage",
-        "summary": "What the main thread posts to the loader of streamed recordings, a Worker."
-      },
-      {
-        "kind": "type",
-        "name": "RecordingLoaderReply",
-        "summary": "What the loader posts back."
-      },
-      {
-        "kind": "const",
-        "name": "DECLICK_SECONDS",
-        "summary": "How long a stop or a jump fades the sound out, and the sound after a jump in."
-      },
-      {
-        "kind": "interface",
-        "name": "DecodedRecording",
-        "summary": "A recording held in memory, decoded: one array of samples per channel."
-      },
-      {
-        "kind": "type",
-        "name": "Recording",
-        "summary": "A recording a clip plays: decoded in memory, or streamed."
-      },
-      {
-        "kind": "type",
-        "name": "Recordings",
-        "summary": "The recordings a player can read, by id."
-      },
-      {
-        "kind": "function",
-        "name": "renderClips",
-        "summary": "Adds what `clips` play over `length` frames of the arrangement from `position` into `output`, from index `at`."
-      },
-      {
-        "kind": "interface",
-        "name": "StreamedRecording",
-        "summary": "A recording read from the pages of a stream, which something else keeps filled ahead of playback."
-      },
-      {
-        "kind": "function",
-        "name": "sourceIndexer",
-        "summary": "Where in its recording `clip` reads at the arrangement's frame `frame`, in frames of the recording (fractional when warped or at another rate), or NaN where it plays nothing: what both the player and the planner of a stream's pages follow."
-      },
-      {
-        "kind": "class",
-        "name": "TrackRenderer",
-        "summary": "What one track plays, block after block: its clips, through the states of the transport it is given, each from its own frame of the audio clock."
-      },
-      {
-        "kind": "function",
-        "name": "createPagePool",
-        "summary": "A pool of `slots` pages, in shared memory unless `shared` is false."
-      },
-      {
-        "kind": "function",
-        "name": "createRecordingStream",
-        "summary": "A recording of `length` frames read from `pool`, none of its pages there yet."
-      },
-      {
-        "kind": "const",
-        "name": "PAGE_FRAMES",
-        "summary": "How many frames a page holds: about 0.7 s at 48 kHz."
-      },
-      {
-        "kind": "class",
-        "name": "PageCache",
-        "summary": "Keeps the pages that are asked for in the pool: it loads those missing, in the order they come, into free slots or into the slots asked for longest ago, and never into a slot asked for in the same call."
-      },
-      {
-        "kind": "interface",
-        "name": "PagePool",
-        "summary": "The slots every streamed recording of a context reads from."
-      },
-      {
-        "kind": "type",
-        "name": "PageReader",
-        "summary": "Reads a page of a recording into its slot: one array per channel of the recording, `pageFrames` long, to fill from the page's first frame."
-      },
-      {
-        "kind": "interface",
-        "name": "PageRequest",
-        "summary": "One page of one recording."
-      },
-      {
-        "kind": "interface",
-        "name": "RecordingStream",
-        "summary": "A recording as the player reads it from the pool."
-      },
-      {
-        "kind": "function",
-        "name": "slotOffset",
-        "summary": "Where a slot's channel starts in the pool's samples."
-      },
-      {
-        "kind": "function",
-        "name": "streamedSample",
-        "summary": "A channel's sample at a frame: silence outside the recording, and while its page is not there."
-      },
-      {
-        "kind": "function",
-        "name": "arrangementFrame",
-        "summary": "The frame of the arrangement that plays at the audio clock's `frame`, at or after `state.at`: the state's position while stopped."
-      },
-      {
-        "kind": "function",
-        "name": "continuesFrom",
-        "summary": "Whether going from `before` to `after` at `after.at` carries on without a break: both play, and the frame of the arrangement at `after.at` is the same in both."
-      },
-      {
-        "kind": "function",
-        "name": "heardFrame",
-        "summary": "The frame of the audio clock heard at the speakers at `contextTime`, the context's time of what is heard now (`getOutputTimestamp().contextTime`, or `currentTime` less the output latency where the browser has no timestamp), less `delay` frames the engine adds on the way (its delay compensation)."
-      },
-      {
-        "kind": "interface",
-        "name": "PlaybackRun",
-        "summary": "A stretch of a block that plays frames of the arrangement one after the other."
-      },
-      {
-        "kind": "interface",
-        "name": "PlaybackState",
-        "summary": "What the transport does from a frame of the audio clock on."
-      },
-      {
-        "kind": "function",
-        "name": "playbackRuns",
-        "summary": "The runs of the block of `count` frames from the audio clock's `frame`: the arrangement's frames it plays, cut where the loop comes round."
-      },
-      {
-        "kind": "function",
-        "name": "rescaled",
-        "summary": "The state that carries on from the audio clock's frame `at` once every time of the arrangement is `ratio` times what it was (a change of tempo: half the tempo makes every time twice as late): the position playing at `at`, and the loop, scaled, so the playhead stays on its bar and beat."
-      },
-      {
-        "kind": "const",
-        "name": "STOPPED",
-        "summary": "Stopped at the start, from the first frame on."
-      },
-      {
-        "kind": "function",
-        "name": "startsInWindow",
-        "summary": "The items that start in the block of `count` frames from the audio clock's `frame`, each with the frame of the clock it starts at: what a scheduler of notes asks for its look-ahead window."
-      },
-      {
-        "kind": "function",
-        "name": "toFrames",
-        "summary": "A time in seconds as a whole number of frames: the nearest one."
-      },
-      {
-        "kind": "const",
-        "name": "CLIP_PLAYER_WORKLET",
-        "summary": "The clip player's processor, as the source of a module: load it into a context with `audioWorklet.addModule` (from a Blob URL), then make a player with `new AudioWorkletNode(context, CLIP_PLAYER_PROCESSOR)`."
-      },
-      {
-        "kind": "const",
-        "name": "CLIP_PLAYER_WORKLET_INPUTS",
-        "summary": "A hash of the sources this bundle was made from, checked by a test."
-      }
-    ],
-    "from": "@audio-ui/engine/playback",
-    "package": "@audio-ui/engine",
-    "audiojs": [],
-    "usedBy": [
-      "arrangement",
-      "arrangement-engine",
-      "clip-player",
-      "dawproject",
-      "mixer-engine",
-      "rack",
-      "use-piano-roll-playback"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "adjacentDivision",
-        "summary": "The fixed division next to `division`: a finer one (`direction` 1, twice as dense) or a coarser one (-1), held at the ends of the list."
-      },
-      {
-        "kind": "function",
-        "name": "barLabelInterval",
-        "summary": "Seconds between labelled bars on a ruler at `zoom` px per second: always a whole number of bars, doubled until labels are at least `minSpacing` px apart, so they never collide or fall mid-bar."
-      },
-      {
-        "kind": "const",
-        "name": "DOTTED_FACTOR",
-        "summary": "Three halves: a dotted note is its straight one and half again."
-      },
-      {
-        "kind": "function",
-        "name": "divisionAt",
-        "summary": "The fixed division whose step is nearest `seconds` at `tempo`: what a grid that follows the zoom becomes when it is fixed where it is."
-      },
-      {
-        "kind": "function",
-        "name": "divisionSeconds",
-        "summary": "How long one fixed division lasts at `tempo`, in seconds."
-      },
-      {
-        "kind": "type",
-        "name": "FixedGridDivision",
-        "summary": "The id of a fixed grid division: `\"4-bars\"` to `\"1/32\"`."
-      },
-      {
-        "kind": "const",
-        "name": "GRID_DIVISIONS",
-        "summary": "The fixed grid divisions, coarsest first: a number of bars, or a note value."
-      },
-      {
-        "kind": "type",
-        "name": "GridDivision",
-        "summary": "`adaptive` follows the zoom; a fixed division stays put however far you zoom."
-      },
-      {
-        "kind": "interface",
-        "name": "GridIntervalOptions",
-        "summary": "How close adaptive grid lines may be, and whether the grid is in triplets."
-      },
-      {
-        "kind": "function",
-        "name": "gridInterval",
-        "summary": "Seconds between grid lines at `zoom` px per second: the lines a timeline draws and the step it snaps to, so what you see is where you land."
-      },
-      {
-        "kind": "function",
-        "name": "gridLabel",
-        "summary": "Names an interval the way a grid readout does: \"1 bar\", \"4 bars\", \"1/16\", \"1/8T\"."
-      },
-      {
-        "kind": "const",
-        "name": "METRONOME_RHYTHMS",
-        "summary": "How often a metronome clicks: with the beat, or a note value, straight or triplet."
-      },
-      {
-        "kind": "type",
-        "name": "MetronomeRhythm",
-        "summary": "The id of a metronome rhythm: `\"auto\"` (the beat), a bar, or a note value, straight or triplet."
-      },
-      {
-        "kind": "function",
-        "name": "metronomeRhythmSeconds",
-        "summary": "Seconds between clicks for a rhythm, or `null` for `auto`, which has no interval of its own: it is the beat, whatever the signature makes one."
-      },
-      {
-        "kind": "const",
-        "name": "SYNCED_DIVISIONS",
-        "summary": "The note values a time parameter that follows the tempo can take, shortest first: `1/16` is a sixteenth note, `1/8t` a triplet eighth (two thirds of it) and `1/8d` a dotted eighth (one and a half times it)."
-      },
-      {
-        "kind": "type",
-        "name": "SyncedDivision",
-        "summary": "A note value as `syncedSeconds` reads it: `\"1/8\"`, its triplet `\"1/8t\"` or its dotted `\"1/8d\"`."
-      },
-      {
-        "kind": "function",
-        "name": "syncedSeconds",
-        "summary": "How long a synced note value lasts at `tempo`, in seconds: `1/8` an eighth, `1/8t` its triplet, `1/8d` its dotted one."
-      },
-      {
-        "kind": "const",
-        "name": "TRIPLET_FACTOR",
-        "summary": "Three in the space of two: a triplet division is 2/3 of its straight one."
-      },
-      {
-        "kind": "interface",
-        "name": "Bar",
-        "summary": "A bar as a ruler draws it."
-      },
-      {
-        "kind": "function",
-        "name": "barsBeatsWith",
-        "summary": "Where `seconds` falls in bars, beats and sixteenths through the signature changes, each counted from one."
-      },
-      {
-        "kind": "function",
-        "name": "barsOf",
-        "summary": "The bars from 0 to `until` seconds, through the signature changes: whole bars of each signature, and a partial bar where a change cuts one short."
-      },
-      {
-        "kind": "function",
-        "name": "isSignature",
-        "summary": "Whether a signature is one a bar can have: 1 to 99 beats of a whole, half, quarter, eighth or sixteenth note."
-      },
-      {
-        "kind": "interface",
-        "name": "MetronomeClick",
-        "summary": "A click of a metronome."
-      },
-      {
-        "kind": "function",
-        "name": "metronomeClicks",
-        "summary": "The clicks of a metronome from 0 to `until` seconds, through the signature changes."
-      },
-      {
-        "kind": "interface",
-        "name": "SignatureChange",
-        "summary": "A new signature from `at` on, in seconds: `beatsPerBar` beats of a `beatUnit` note."
-      },
-      {
-        "kind": "function",
-        "name": "advance",
-        "summary": "Advances `cursor`, emitting every step boundary now within `SCHEDULE_AHEAD_SECONDS` of `now`."
-      },
-      {
-        "kind": "function",
-        "name": "anchoredCursor",
-        "summary": "A cursor that emits `step` at `now`, the seed for `start()` and for every re-anchor (seek, region commit)."
-      },
-      {
-        "kind": "function",
-        "name": "anchorForTempoChange",
-        "summary": "The anchor to carry on with when the tempo changes while playing."
-      },
-      {
-        "kind": "const",
-        "name": "MAX_CATCH_UP_SECONDS",
-        "summary": "How late a boundary may be and still be played, half a second."
-      },
-      {
-        "kind": "function",
-        "name": "positionAt",
-        "summary": "The continuous playhead position, in fractional full-grid steps, at `now`."
-      },
-      {
-        "kind": "const",
-        "name": "SCHEDULE_AHEAD_SECONDS",
-        "summary": "How far ahead of `now` boundaries are committed, in seconds: the article's 100 ms."
-      },
-      {
-        "kind": "const",
-        "name": "SCHEDULER_POLL_MS",
-        "summary": "How often to poll the scheduler, in milliseconds: the article's 25 ms."
-      },
-      {
-        "kind": "interface",
-        "name": "SchedulerAnchor",
-        "summary": "The audio-time / step pair a running clock is anchored to, for deriving the display position."
-      },
-      {
-        "kind": "interface",
-        "name": "SchedulerConfig",
-        "summary": "What the scheduler steps through: the window of steps it loops over and how long a step lasts, read on every call."
-      },
-      {
-        "kind": "interface",
-        "name": "SchedulerCursor",
-        "summary": "Where the scheduler is: the next step it will emit and when."
-      },
-      {
-        "kind": "interface",
-        "name": "StepBoundary",
-        "summary": "A step to play and the audio time it starts at."
-      },
-      {
-        "kind": "interface",
-        "name": "BarsBeats",
-        "summary": "A position in bars, beats and sixteenths, each counted from one."
-      },
-      {
-        "kind": "function",
-        "name": "barsBeatsAt",
-        "summary": "Where `seconds` falls in bars, beats and sixteenths, each counted from one."
-      },
-      {
-        "kind": "function",
-        "name": "bpmToMicrosecondsPerQuarterNote",
-        "summary": "A tempo in BPM as microseconds per quarter note, the unit a MIDI file stores: 120 BPM is 500000."
-      },
-      {
-        "kind": "const",
-        "name": "DEFAULT_MICROSECONDS_PER_QUARTER_NOTE",
-        "summary": "What a file with no Set Tempo event plays at: 120 BPM, 500,000 microseconds a quarter note."
-      },
-      {
-        "kind": "const",
-        "name": "DEFAULT_TEMPO",
-        "summary": "120 BPM in 4/4."
-      },
-      {
-        "kind": "function",
-        "name": "describeBarsBeats",
-        "summary": "\"Bar 3, beat 2\", the way a position is read out to a screen reader."
-      },
-      {
-        "kind": "function",
-        "name": "microsecondsPerQuarterNoteToBpm",
-        "summary": "The BPM of a Set Tempo's microseconds per quarter note: 500000 is 120."
-      },
-      {
-        "kind": "function",
-        "name": "secondsPerBar",
-        "summary": "Seconds per bar: a beat times the beats in a bar."
-      },
-      {
-        "kind": "function",
-        "name": "secondsPerBeat",
-        "summary": "Seconds per beat, a beat being one `beatUnit` note: in 6/8, half a quarter."
-      },
-      {
-        "kind": "function",
-        "name": "secondsPerQuarter",
-        "summary": "Seconds per quarter note: BPM counts quarters whatever the signature says."
-      },
-      {
-        "kind": "interface",
-        "name": "Tempo",
-        "summary": "Tempo and time signature: how long a quarter note, a beat and a bar last in seconds, and where a position in seconds falls in bars and beats."
-      },
-      {
-        "kind": "function",
-        "name": "addWarpMarker",
-        "summary": "Adds a marker at a time on the clip, pinning what plays there; nothing changes in how it plays until it moves."
-      },
-      {
-        "kind": "function",
-        "name": "moveWarpMarker",
-        "summary": "Moves the marker at `index` to a new time on the clip, stretching the recording on either side of it: it stops short of its neighbours."
-      },
-      {
-        "kind": "function",
-        "name": "removeWarpMarker",
-        "summary": "Takes the marker at `index` away, as long as two are left to make a map."
-      },
-      {
-        "kind": "function",
-        "name": "scaleWarp",
-        "summary": "Plays the whole map `factor` times as long: 2 is half the speed, an octave down; 0.5 twice the speed."
-      },
-      {
-        "kind": "function",
-        "name": "unwarpedTime",
-        "summary": "What time in the source plays at a time on the clip."
-      },
-      {
-        "kind": "interface",
-        "name": "WarpMarker",
-        "summary": "A time in the source, pinned to a time on the clip."
-      },
-      {
-        "kind": "function",
-        "name": "warpedTime",
-        "summary": "Where on the clip a time in the source plays."
-      },
-      {
-        "kind": "function",
-        "name": "warpMarkers",
-        "summary": "The markers that make a map: finite ones, in order, each later than the one before in both times."
-      },
-      {
-        "kind": "function",
-        "name": "warpRate",
-        "summary": "How fast the source plays at a time on the clip: 1 as recorded, 2 twice as fast."
-      }
-    ],
-    "from": "@audio-ui/engine/time",
-    "package": "@audio-ui/engine",
-    "audiojs": [],
-    "usedBy": [
-      "arrangement",
-      "arrangement-engine",
-      "dawproject",
-      "demo-song",
-      "demo-sound",
-      "synced-rate",
-      "use-arrangement",
-      "use-piano-roll-playback",
-      "use-timeline-grid",
-      "use-transport-clock"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "function",
-        "name": "loadWorklet",
-        "summary": "Loads the source of an `AudioWorklet` processor into a context, from a blob, so there is no file to serve."
-      }
-    ],
-    "from": "@audio-ui/engine/worklet",
-    "package": "@audio-ui/engine",
-    "audiojs": [],
-    "usedBy": [
-      "clip-player",
-      "recording"
-    ]
-  },
-  {
-    "exports": [
-      {
-        "kind": "interface",
         "name": "LaneSamples",
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
       },
@@ -2452,6 +358,2100 @@
     "audiojs": [],
     "usedBy": [
       "use-loudest"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/beat-detect",
+      "@audio/biquad",
+      "@audio/eq-crossover",
+      "@audio/loudness-lufs",
+      "@audio/loudness-truepeak",
+      "@audio/mir-chroma",
+      "@audio/pitch-yin",
+      "@audio/stft",
+      "@audio/weighting-k"
+    ],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "AutoWarp",
+        "summary": "How a file plays in time at an arrangement's tempo, as `autoWarp` works it out."
+      },
+      {
+        "kind": "function",
+        "name": "autoWarp",
+        "summary": "The warp that plays a recording of `duration` seconds in time at `tempo` BPM (CLP-019): a short one that a whole number of 1, 2, 4, 8 or 16 bars fits at its estimated tempo, as that loop, marked at its start and end; any other on a marker at the first beat of each bar, moved onto the transient within an eighth of a beat."
+      },
+      {
+        "kind": "function",
+        "name": "detectTransients",
+        "summary": "Where `channels` have their transients, in seconds: each frame where the level rises sharply above what it does around it, found to the sample where the slope first reaches half its height there."
+      },
+      {
+        "kind": "interface",
+        "name": "TempoEstimate",
+        "summary": "A recording's tempo, as `@audio/beat-detect` reads it and the registry's `analyzeBeat` fits it to the transients."
+      },
+      {
+        "kind": "interface",
+        "name": "CompressorSettings",
+        "summary": "The transfer curve of a compressor: the output level in dB for each input level in dB, the textbook curve with a knee centred on the threshold, what a plug-in draws."
+      },
+      {
+        "kind": "function",
+        "name": "compressorOutput",
+        "summary": "A compressor's transfer curve: the output level in dB for each input level in dB."
+      },
+      {
+        "kind": "interface",
+        "name": "BiquadSettings",
+        "summary": "One filter as `biquadResponse` draws it: its type, frequency, gain and Q, at a sample rate."
+      },
+      {
+        "kind": "type",
+        "name": "BiquadType",
+        "summary": "The kinds of band an equalizer draws: cuts, shelves, a peak, a notch and a band-pass."
+      },
+      {
+        "kind": "function",
+        "name": "bandGainForHandle",
+        "summary": "The inverse, for dragging: the gain a band needs at `frequency` for its handle to sit at `responseDb` on the curve, so the handle follows the pointer one to one instead of the gain drifting from it."
+      },
+      {
+        "kind": "function",
+        "name": "bandHandleDb",
+        "summary": "Where a band's handle sits on an equalizer's curve: the response of all the bands at the band's own frequency."
+      },
+      {
+        "kind": "function",
+        "name": "biquadResponse",
+        "summary": "A biquad's gain in dB at `hz`, 0 being unity."
+      },
+      {
+        "kind": "interface",
+        "name": "EqBand",
+        "summary": "One band of an equalizer: a filter that can be switched out of the chain."
+      },
+      {
+        "kind": "function",
+        "name": "eqResponse",
+        "summary": "An equalizer's bands in series: their gains in dB add up at each frequency."
+      },
+      {
+        "kind": "const",
+        "name": "SAMPLE_RATE",
+        "summary": "The sample rate a curve is drawn at unless a band says another."
+      },
+      {
+        "kind": "function",
+        "name": "toWebAudioQ",
+        "summary": "The value to give a `BiquadFilterNode`'s `Q` for a band's `q`."
+      },
+      {
+        "kind": "const",
+        "name": "WEB_AUDIO_FILTER_TYPES",
+        "summary": "The Web Audio `BiquadFilterNode` type that does what each band type draws."
+      },
+      {
+        "kind": "function",
+        "name": "dbToGain",
+        "summary": "The amplitude ratio of a level in dB: 0 dB is 1, -6.02 dB is 0.5."
+      },
+      {
+        "kind": "function",
+        "name": "gainToDb",
+        "summary": "The level in dB of an amplitude ratio: 1 is 0 dB, 0.5 is -6.02 dB."
+      },
+      {
+        "kind": "function",
+        "name": "peakDb",
+        "summary": "The level in dBFS of the loudest sample of `samples`, either way: how near the signal comes to clipping, where `rmsDb` says how loud it sounds."
+      },
+      {
+        "kind": "function",
+        "name": "rmsDb",
+        "summary": "The RMS level of `samples` in dBFS: 0 dB for a square wave at full scale, -3 dB for a sine at full scale."
+      },
+      {
+        "kind": "function",
+        "name": "createLoudnessMeter",
+        "summary": "Measures what is connected to it while it plays, on the audio thread, and calls `onLoudness` with its momentary, short-term and integrated loudness every 100 ms."
+      },
+      {
+        "kind": "function",
+        "name": "createLoudnessReader",
+        "summary": "Reads loudness block by block: `add` takes the K-weighted mean square of the next 100 ms, summed over the channels, as the meter's processor posts it, and gives the loudness up to it."
+      },
+      {
+        "kind": "interface",
+        "name": "LiveLoudness",
+        "summary": "How loud a sound is while it plays, in LUFS."
+      },
+      {
+        "kind": "const",
+        "name": "LOUDNESS_TARGETS",
+        "summary": "Targets in LUFS: what streaming services, podcasts and broadcast (EBU R 128) ask a file to be."
+      },
+      {
+        "kind": "const",
+        "name": "LOUDNESS_WORKLET",
+        "summary": "The meter's processor: it K-weights each channel of its input (a high shelf, then a high-pass, with the coefficients `@audio/weighting-k` gives for the context's rate), and posts the mean square of each block of 100 ms, summed over the channels."
+      },
+      {
+        "kind": "interface",
+        "name": "Loudness",
+        "summary": "How loud a sound is."
+      },
+      {
+        "kind": "interface",
+        "name": "LoudnessMeter",
+        "summary": "A live loudness meter on a context, as `createLoudnessMeter` makes it."
+      },
+      {
+        "kind": "function",
+        "name": "loudnessGain",
+        "summary": "The gain in dB that brings a sound to `target` LUFS, as far as its true peak stays at or under `ceiling` dBTP: a sound that would pass it lands under the target instead, and nothing is limited."
+      },
+      {
+        "kind": "function",
+        "name": "measureLoudness",
+        "summary": "Measures whole channels at once."
+      },
+      {
+        "kind": "interface",
+        "name": "AudioPeaks",
+        "summary": "The lowest and highest sample of each slice of the audio, -1 to 1: what the Waveform draws as the waveform really is, lopsided where the audio is."
+      },
+      {
+        "kind": "function",
+        "name": "computePeaks",
+        "summary": "Reduces PCM samples to `bucketCount` slices, keeping each slice's lowest and highest sample across every channel, a take panned hard to one side still draws, rather than reading as a flat line on the channel it isn't on."
+      },
+      {
+        "kind": "function",
+        "name": "downsampleWaveform",
+        "summary": "Downsamples raw PCM samples into `targetLength` blocks, each block's value the peak (max) absolute amplitude within it, the reduction waveform visualizers use, since a block average flattens short transients into a softer-looking curve than the audio actually has."
+      },
+      {
+        "kind": "function",
+        "name": "normalizePeaks",
+        "summary": "Scales peaks so the loudest sample, either way, reaches full height, keeping each slice's lopsidedness."
+      },
+      {
+        "kind": "function",
+        "name": "normalizeWaveform",
+        "summary": "Scales `values` so the largest entry becomes 1, keeps a waveform's peak reaching full height regardless of the source audio's own loudness."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrumBandsOptions",
+        "summary": "The frequencies and levels `spectrumBands` spreads its bands over."
+      },
+      {
+        "kind": "function",
+        "name": "spectrumBands",
+        "summary": "Reduces an analyser's spectrum (`getFloatFrequencyData`: decibels per frequency bin) to `bands.length` levels of 0-1, low to high, written into `bands`."
+      },
+      {
+        "kind": "interface",
+        "name": "DetectPitchOptions",
+        "summary": "What `detectPitch` looks for."
+      },
+      {
+        "kind": "function",
+        "name": "detectPitch",
+        "summary": "The pitch the samples hold and how clear it is, or nothing: too quiet a signal, or no clear period."
+      },
+      {
+        "kind": "interface",
+        "name": "PitchEstimate",
+        "summary": "What a detection found: the pitch and how periodic the sound is there."
+      },
+      {
+        "kind": "function",
+        "name": "analyzeBeat",
+        "summary": "Reads a recording's beat, once, as it is decoded: what `warpOnImport` warps its clips by."
+      },
+      {
+        "kind": "function",
+        "name": "audioChroma",
+        "summary": "How much of a recording's sound lies in each pitch class, C to B, summing to 1, read once as it is decoded: what a key is read from, with notes or without (`detectKeys` of the Scale menu)."
+      },
+      {
+        "kind": "interface",
+        "name": "BeatAnalysis",
+        "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
+      },
+      {
+        "kind": "const",
+        "name": "ACX",
+        "summary": "What ACX asks of an audiobook: the RMS between -23 and -18 dBFS, the peak at most -3 dBFS, the noise floor at most -60 dBFS RMS."
+      },
+      {
+        "kind": "interface",
+        "name": "AcxCheck",
+        "summary": "One requirement and how the sound stands against it."
+      },
+      {
+        "kind": "interface",
+        "name": "AcxReport",
+        "summary": "A sound against the ACX audiobook requirements."
+      },
+      {
+        "kind": "function",
+        "name": "checkAcx",
+        "summary": "Checks a sound against ACX's requirements for an audiobook."
+      },
+      {
+        "kind": "function",
+        "name": "reportSound",
+        "summary": "Reads a sound once, to tell what it is: its loudness, its key, its tempo, and whether it meets ACX's requirements."
+      },
+      {
+        "kind": "interface",
+        "name": "SoundReport",
+        "summary": "What `reportSound` reads from a sound."
+      },
+      {
+        "kind": "function",
+        "name": "detectSilences",
+        "summary": "Where `channels` pause between their sounds, as `[from, to]` in seconds, in order: each stretch of at least `minDuration` where every sample of every channel stays under the threshold, found to a block of 1024 frames."
+      },
+      {
+        "kind": "interface",
+        "name": "SilenceOptions",
+        "summary": "What `detectSilences` takes, both optional."
+      },
+      {
+        "kind": "const",
+        "name": "SPECTRA_SIZE",
+        "summary": "The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window a spectrogram fits a view with."
+      },
+      {
+        "kind": "interface",
+        "name": "Spectra",
+        "summary": "A recording summed up as spectra, for a spectrogram drawn on the GPU that does not hold the recording: a column every `hop` frames, each bin's level from DC to Nyquist over windows of `size` frames, a byte each."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectraSource",
+        "summary": "A reader of a recording, mixed to one: how many frames it holds, and its frames from `from` to `to`, at once or later."
+      },
+      {
+        "kind": "function",
+        "name": "spectrogramSpectra",
+        "summary": "The spectra of a recording (`Spectra`): a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in the column every `size / 2` frames (the short-time transform of `@audio/stft`), their mean, as a byte."
+      },
+      {
+        "kind": "function",
+        "name": "holdPeaks",
+        "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
+      },
+      {
+        "kind": "interface",
+        "name": "LogSpectrumOptions",
+        "summary": "The frequencies the axis of `logSpectrum` spans."
+      },
+      {
+        "kind": "function",
+        "name": "logSpectrum",
+        "summary": "Fills `out` with `bins` (dB per analyser bin, as `getFloatFrequencyData` writes them) resampled onto a log axis."
+      },
+      {
+        "kind": "interface",
+        "name": "PeakHoldOptions",
+        "summary": "How long `holdPeaks` holds a peak, and how fast it lets it fall."
+      },
+      {
+        "kind": "const",
+        "name": "SPECTRUM_FLOOR_DB",
+        "summary": "The quietest a point is drawn: what a silent bin, `-Infinity` dB, becomes."
+      },
+      {
+        "kind": "function",
+        "name": "stereoCorrelation",
+        "summary": "How alike the two channels of a sound are, from -1 to 1, as a correlation meter reads it: 1 when both carry the same sound (mono, at any levels), 0 when they have nothing in common or only one side sounds, and -1 when one is the other upside down, which cancels out once the two are summed to mono."
+      },
+      {
+        "kind": "interface",
+        "name": "BandShares",
+        "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
+      },
+      {
+        "kind": "interface",
+        "name": "Bands",
+        "summary": "The three bands of a stretch of sound: its lows under 250 Hz, its highs over 2.5 kHz, and the mids between."
+      },
+      {
+        "kind": "function",
+        "name": "bandShares",
+        "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
+      },
+      {
+        "kind": "function",
+        "name": "createBandSplit",
+        "summary": "Splits a sound in three a stretch at a time, as `splitBands` does: each call takes the stretch that follows the one before and carries the crossover's state over, so stretches split in order are the sound split whole."
+      },
+      {
+        "kind": "interface",
+        "name": "SplitBands",
+        "summary": "A sound as three signals: what it has under 250 Hz, between, and over 2.5 kHz."
+      },
+      {
+        "kind": "function",
+        "name": "splitBands",
+        "summary": "The sound's channels mixed to one and split in three by a Linkwitz-Riley crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz: the three bands add back to the mix, level and phase."
+      }
+    ],
+    "from": "@/lib/engine/analysis",
+    "package": "@audio-ui/engine-analysis",
+    "usedBy": [
+      "arrangement",
+      "audio-export",
+      "device-signal",
+      "sound-operations",
+      "use-audio-levels",
+      "use-audio-signal",
+      "use-loudness",
+      "use-noise-through-eq",
+      "use-pitch",
+      "use-sound-report",
+      "use-spectrum"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/measure-latency",
+      "@audio/measure-response",
+      "@audio/synth-noise"
+    ],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "ChoiceOption",
+        "summary": "One entry of a choice: the `value` that goes in the state and the `label` a panel shows."
+      },
+      {
+        "kind": "interface",
+        "name": "ChoiceParameter",
+        "summary": "A pick from a short list: a waveform, a filter type, a mode."
+      },
+      {
+        "kind": "interface",
+        "name": "Device",
+        "summary": "A defined device: its parameters, and everything that reads or changes a state of it, with no sound and no view."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceApplied",
+        "summary": "What `apply` returns: the new state, the changes made, and the changes refused with their reason."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceBinding",
+        "summary": "What a host gives a device to drive: an engine, a view, a store."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceChange",
+        "summary": "One parameter `apply` changed."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceContext",
+        "summary": "What the host knows and the device does not: the tempo a time parameter that follows it is read against."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceDefinition",
+        "summary": "What `defineDevice` takes: the device's id, name, description and parameters, and whether it is an instrument, takes a sidechain or adds latency."
+      },
+      {
+        "kind": "class",
+        "name": "DeviceDefinitionError",
+        "summary": "Raised when a device is defined with parameters that cannot work."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceDescription",
+        "summary": "A device as an agent or a catalog reads it."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceReadings",
+        "summary": "What a device reports about what it is doing right now, for a meter."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceRejection",
+        "summary": "One parameter `apply` did not change, and why."
+      },
+      {
+        "kind": "type",
+        "name": "DeviceSignalName",
+        "summary": "What a device's engine lets a host watch of its sound beyond its input and its output."
+      },
+      {
+        "kind": "type",
+        "name": "DeviceState",
+        "summary": "The state of a device: each parameter's id to its value."
+      },
+      {
+        "kind": "function",
+        "name": "defineDevice",
+        "summary": "Defines a device from its parameters."
+      },
+      {
+        "kind": "interface",
+        "name": "NumberParameter",
+        "summary": "A continuous parameter: a number in a range, on a scale, in steps."
+      },
+      {
+        "kind": "interface",
+        "name": "ParameterDescription",
+        "summary": "A parameter as an agent or a catalog reads it: JSON-safe, with no function in it."
+      },
+      {
+        "kind": "type",
+        "name": "ParameterDescriptor",
+        "summary": "A parameter of a device: a number, a toggle or a choice."
+      },
+      {
+        "kind": "type",
+        "name": "ParameterValue",
+        "summary": "What a parameter holds: a number, a boolean or the value of a choice."
+      },
+      {
+        "kind": "interface",
+        "name": "ToggleParameter",
+        "summary": "An on or off parameter: a bypass, a mode, an auto switch."
+      },
+      {
+        "kind": "function",
+        "name": "createFeed",
+        "summary": "Feeds a worklet only while the path it plays is heard: a worklet fed nothing costs nothing."
+      },
+      {
+        "kind": "function",
+        "name": "createWorkletStage",
+        "summary": "A stage of an engine that runs a worklet: the sound passes clean while the worklet loads, then fades over to it."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceTaps",
+        "summary": "The points of an engine's graph a host may listen to beyond its input and its output, by the names its device declares in `signals`."
+      },
+      {
+        "kind": "interface",
+        "name": "EffectEngine",
+        "summary": "The engine of an effect on the Web Audio API: the binding of its state (`update`, `dispose`, `readings`) between an input and an output."
+      },
+      {
+        "kind": "type",
+        "name": "EngineFactory",
+        "summary": "What every `create<Name>Engine` is: an engine on a context, for the state it starts with and the host's tempo."
+      },
+      {
+        "kind": "const",
+        "name": "FEED_RELEASE_MS",
+        "summary": "How long after a path stops a worklet is still fed, in ms: its fade is over by then."
+      },
+      {
+        "kind": "interface",
+        "name": "Feed",
+        "summary": "Connections made while a path plays and taken away once it has faded out."
+      },
+      {
+        "kind": "type",
+        "name": "FeedConnection",
+        "summary": "A connection a feed makes: `from` into `to`, at an output and an input of their own if given."
+      },
+      {
+        "kind": "interface",
+        "name": "InstrumentEngine",
+        "summary": "The engine of an instrument: one voice, notes in, sound out."
+      },
+      {
+        "kind": "type",
+        "name": "NoiseColor",
+        "summary": "The colors of noise a buffer is made in, as `@audio/synth-noise` makes them."
+      },
+      {
+        "kind": "function",
+        "name": "noiseBuffer",
+        "summary": "Two seconds of noise on a context, from `@audio/synth-noise` (seeded, its peak at 0.9), made once per color and context and shared by everything that plays it: a synth's noise source, a snare's rattle, the pink noise an equalizer is heard through."
+      },
+      {
+        "kind": "interface",
+        "name": "WorkletStage",
+        "summary": "A worklet that takes over from the clean sound once it is in the graph."
+      },
+      {
+        "kind": "interface",
+        "name": "InstrumentBinding",
+        "summary": "What a host gives an instrument to play: a `DeviceBinding` that also takes notes."
+      },
+      {
+        "kind": "interface",
+        "name": "NoteTiming",
+        "summary": "When a note starts or ends, and which note it is."
+      },
+      {
+        "kind": "function",
+        "name": "playNote",
+        "summary": "Plays a note for `seconds` on an instrument: `noteOn` now, `noteOff` when the time is up."
+      },
+      {
+        "kind": "interface",
+        "name": "SidechainBinding",
+        "summary": "What a host gives a device that takes a key signal: a `DeviceBinding` whose engine has a second input, `sidechain`, that the key is connected to."
+      },
+      {
+        "kind": "function",
+        "name": "measureLatency",
+        "summary": "How long an engine delays a signal, in milliseconds: where what comes out of an impulse lines up with it."
+      },
+      {
+        "kind": "function",
+        "name": "measureResponse",
+        "summary": "How far an engine's frequency response is from `curve`, the gain in dB the device draws at each frequency."
+      },
+      {
+        "kind": "interface",
+        "name": "ResponseMeasurement",
+        "summary": "What a measurement of a frequency response found."
+      },
+      {
+        "kind": "const",
+        "name": "LINEAR_SCALE",
+        "summary": "Even steps: the right feel for levels, times and anything heard in differences."
+      },
+      {
+        "kind": "const",
+        "name": "LOGARITHMIC_SCALE",
+        "summary": "Even ratios: the right feel for frequency, Q, ratios and times heard in proportions."
+      },
+      {
+        "kind": "interface",
+        "name": "ParameterScale",
+        "summary": "How a value maps onto a control's travel, and back."
+      },
+      {
+        "kind": "type",
+        "name": "ParameterScaleProp",
+        "summary": "A scale as a parameter takes it: `\"linear\"`, `\"log\"`, or a scale of your own."
+      },
+      {
+        "kind": "function",
+        "name": "resolveScale",
+        "summary": "The scale a parameter names: `\"linear\"` and `\"log\"` as the two above, a scale of your own as it is."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceTool",
+        "summary": "A tool a model can call to drive a device: agent-agnostic, with no SDK in it."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceToolResult",
+        "summary": "What a tool's `run` returns: the state after the call, a summary for the model, and the note to play for a `<id>_play` call."
+      },
+      {
+        "kind": "function",
+        "name": "deviceTools",
+        "summary": "The tools that drive a device, derived from its parameters: `<id>_set` takes any of its parameters by id, `<id>_reset` puts some or all back to their defaults."
+      },
+      {
+        "kind": "interface",
+        "name": "JsonSchema",
+        "summary": "The subset of JSON Schema the tools use: what OpenAI, Anthropic, MCP and the AI SDK all accept as an input schema."
+      },
+      {
+        "kind": "const",
+        "name": "NOTE_DURATION",
+        "summary": "How long a note lasts when a call does not say, and the shortest and longest it may ask for, in seconds."
+      }
+    ],
+    "from": "@/lib/engine/device",
+    "package": "@audio-ui/engine-device",
+    "usedBy": [
+      "arrangement",
+      "arrangement-engine",
+      "dawproject",
+      "device-library",
+      "device-signal",
+      "drum-rack",
+      "instrument-rack",
+      "polyphony",
+      "rack",
+      "use-device-engines",
+      "use-device-loop",
+      "use-device-signal",
+      "use-noise-through-eq",
+      "use-polyphony",
+      "voice-pool"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/biquad",
+      "@audio/dynamics-compand",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-deesser",
+      "@audio/dynamics-expander",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-limiter",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-unlimit",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+      "@audio/effect-distortion",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+      "@audio/filter-oberheim",
+      "@audio/reverb-dattorro",
+      "@audio/reverb-fdn",
+      "@audio/reverb-freeverb",
+      "@audio/reverb-schroeder",
+      "@audio/reverb-spring"
+    ],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "highshelf",
+        "summary": "High-shelf."
+      },
+      {
+        "kind": "function",
+        "name": "lowshelf",
+        "summary": "Low-shelf."
+      },
+      {
+        "kind": "function",
+        "name": "magnitude",
+        "summary": "|H(f)| of one section at frequency `f` — analysis/plotting."
+      },
+      {
+        "kind": "function",
+        "name": "compandStream",
+        "summary": "{ write, flush } streaming primitive underlying the default export's streaming form."
+      },
+      {
+        "kind": "function",
+        "name": "compressorGain",
+        "summary": "Soft-knee downward compression curve."
+      },
+      {
+        "kind": "const",
+        "name": "compressor",
+        "summary": "The smooth compressor's manifest: an AudioWorklet processor's parameters and state, as its package publishes them."
+      },
+      {
+        "kind": "const",
+        "name": "deesser",
+        "summary": "The de-esser's manifest: its processor's parameters and latency."
+      },
+      {
+        "kind": "function",
+        "name": "expanderGain",
+        "summary": "Soft-knee downward expansion curve."
+      },
+      {
+        "kind": "function",
+        "name": "upwardExpanderGain",
+        "summary": "Soft-knee upward expansion curve — the above-threshold complement of expanderGain."
+      },
+      {
+        "kind": "const",
+        "name": "expander",
+        "summary": "The expander's manifest: its processor's parameters and modes."
+      },
+      {
+        "kind": "const",
+        "name": "fet",
+        "summary": "The FET compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "limiterLatency",
+        "summary": "Samples the output trails the input by: the lookahead, and 96 with `truePeak`."
+      },
+      {
+        "kind": "const",
+        "name": "opto",
+        "summary": "The opto compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "unlimitDeficitGain",
+        "summary": "adaptive (default) pure mapping: transient deficit (crestTarget − peak-held transientness) → target lift (dB), gated by onset presence."
+      },
+      {
+        "kind": "function",
+        "name": "unlimitGain",
+        "summary": "adaptive:false pure mapping: transientness (fast-over-slow envelope gap, dB) → target lift (dB), before ballistic smoothing."
+      },
+      {
+        "kind": "const",
+        "name": "unlimit",
+        "summary": "The de-limiter's manifest: its processor's parameters."
+      },
+      {
+        "kind": "const",
+        "name": "varimu",
+        "summary": "The vari-mu compressor model's manifest."
+      },
+      {
+        "kind": "const",
+        "name": "vca",
+        "summary": "The VCA compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "distortion",
+        "summary": "Mutates `data` in place and returns the same reference."
+      },
+      {
+        "kind": "function",
+        "name": "diodeLadder",
+        "summary": "The diode ladder filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "korg35",
+        "summary": "The Korg35 filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "moogLadder",
+        "summary": "The Moog ladder filter, two or four poles, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "oberheim",
+        "summary": "The Oberheim SEM state-variable filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "dattorro",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "fdn",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "freeverb",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "schroeder",
+        "summary": "Process a mono buffer in place; returns the same array."
+      },
+      {
+        "kind": "function",
+        "name": "spring",
+        "summary": "Process a mono buffer in place; returns the same array."
+      }
+    ],
+    "from": "@/lib/engine/dsp",
+    "package": "@audio-ui/engine-dsp",
+    "usedBy": []
+  },
+  {
+    "audiojs": [
+      "@audio/biquad",
+      "@audio/decode-aiff",
+      "@audio/decode-caf",
+      "@audio/decode-mp4",
+      "@audio/effect-noiseshaper",
+      "@audio/encode",
+      "@audio/midi-parse",
+      "@audio/midi-write",
+      "@audio/musicxml",
+      "@audio/resample-sinc",
+      "@audio/shift",
+      "@audio/stretch"
+    ],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "decodeAudioChannels",
+        "summary": "Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`."
+      },
+      {
+        "kind": "function",
+        "name": "decodeAudioSamples",
+        "summary": "Decodes raw audio bytes into one channel's PCM samples, ready for `downsampleWaveform`: `decodeAudioChannels`, then the channel asked for, or the last there is."
+      },
+      {
+        "kind": "type",
+        "name": "AudioFileFormat",
+        "summary": "The formats `encodeAudio` writes."
+      },
+      {
+        "kind": "function",
+        "name": "downloadFile",
+        "summary": "Saves a file through the browser's downloads, named `name`."
+      },
+      {
+        "kind": "interface",
+        "name": "EncodeAudioOptions",
+        "summary": "What `encodeAudio` writes: the format, its bit depth or bitrate, the channels' sample rate, and a callback for its progress."
+      },
+      {
+        "kind": "function",
+        "name": "encodeAudio",
+        "summary": "Encodes channels of samples, from -1 to 1, as a file."
+      },
+      {
+        "kind": "const",
+        "name": "CHANNEL_LAYOUTS",
+        "summary": "The layouts a sound can be mixed to: one channel, two, or the surround layouts of film."
+      },
+      {
+        "kind": "type",
+        "name": "ChannelLayout",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "LAYOUT_CHANNELS",
+        "summary": "How many channels a layout has."
+      },
+      {
+        "kind": "function",
+        "name": "mixChannels",
+        "summary": "The same sound in another layout: a down-mix folds the centre and the surrounds into the sides at -3 dB and drops the low-frequency channel, and scales so the sum stays at full scale at most; an up-mix keeps the sides where they are, spreads them to the surrounds at -6 dB and leaves the centre and the low-frequency channel silent."
+      },
+      {
+        "kind": "function",
+        "name": "padChannels",
+        "summary": "Silence, in samples, added before and after the sound."
+      },
+      {
+        "kind": "function",
+        "name": "repeatChannels",
+        "summary": "The sound played `times` times in a row, the first included."
+      },
+      {
+        "kind": "function",
+        "name": "resampleChannels",
+        "summary": "Every channel at another sample rate, by a windowed sinc: the same sound, heard as a converter of that rate would give it, over `channels.length` arrays as long as the new rate needs."
+      },
+      {
+        "kind": "function",
+        "name": "reverseChannels",
+        "summary": "Every channel played backwards: the end first."
+      },
+      {
+        "kind": "function",
+        "name": "downloadMidiFile",
+        "summary": "Saves the notes as a `.mid` file, named `filename`."
+      },
+      {
+        "kind": "const",
+        "name": "MIDI_FILE_ACCEPT",
+        "summary": "What a file input or a drop zone accepts as a MIDI file."
+      },
+      {
+        "kind": "interface",
+        "name": "MidiFileGrid",
+        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
+      },
+      {
+        "kind": "function",
+        "name": "readMidiFile",
+        "summary": "Reads a MIDI file's notes onto a grid of steps, with the file's own tempo (clamped to the BPM range)."
+      },
+      {
+        "kind": "function",
+        "name": "readMidiFileParts",
+        "summary": "Reads a MIDI file as parts, for a host that lays each on a track of its own: a part per track and channel, named after its track (and its channel, when a track holds several), its notes in beats as they were written, not quantized and not cut, at least a tick long, and the first program its channel plays."
+      },
+      {
+        "kind": "interface",
+        "name": "ScoreNote",
+        "summary": "A note of a score in beats: where it starts and how long it lasts, in quarter notes."
+      },
+      {
+        "kind": "interface",
+        "name": "ScorePart",
+        "summary": "One part of a score: its name, whether it is drums, and its notes in beats."
+      },
+      {
+        "kind": "function",
+        "name": "writeMidiFile",
+        "summary": "The notes as a Standard MIDI File, the inverse of `readMidiFile`."
+      },
+      {
+        "kind": "function",
+        "name": "downloadMusicXmlFile",
+        "summary": "Saves the notes as a `.musicxml` file, named `filename`."
+      },
+      {
+        "kind": "const",
+        "name": "MUSICXML_FILE_ACCEPT",
+        "summary": "What a file input or a drop zone accepts as a MusicXML file: a score, or one compressed as `.mxl`."
+      },
+      {
+        "kind": "interface",
+        "name": "MusicXmlFileGrid",
+        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
+      },
+      {
+        "kind": "function",
+        "name": "readMusicXmlFile",
+        "summary": "Reads a MusicXML score's notes onto a grid of steps, with its first tempo (clamped to the BPM range), every part into the one clip."
+      },
+      {
+        "kind": "function",
+        "name": "readMusicXmlFileParts",
+        "summary": "Reads a MusicXML score as parts, for a host that lays each on a track of its own: a part each, by its name, its notes in beats as they were written, through changes of tempo, not quantized and not cut."
+      },
+      {
+        "kind": "function",
+        "name": "writeMusicXmlFile",
+        "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
+      },
+      {
+        "kind": "const",
+        "name": "DITHER_METHODS",
+        "summary": "How a sound is brought to fewer bits: `tpdf` adds triangular noise one step wide before rounding, so the error is steady noise instead of distortion that follows the sound; `shaped` does the same with the error fed back through two delays, which moves the noise up toward the highest frequencies, where the ear hears it least; `feedback` rounds with the error fed back once (`@audio/effect-noiseshaper`), with no added noise."
+      },
+      {
+        "kind": "type",
+        "name": "DitherMethod",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "ditherChannels",
+        "summary": "Every channel rounded to `bits` bits, by one of `DITHER_METHODS`, the way a sound is mastered to 16 bits or 8: as many steps as that depth has, and the error made into noise by the method."
+      },
+      {
+        "kind": "type",
+        "name": "FilterType",
+        "summary": "A filter's shape: what it lets through, 12 dB an octave."
+      },
+      {
+        "kind": "function",
+        "name": "filterChannels",
+        "summary": "Every channel through one filter of the cookbook, at `frequency` in hertz and a `q` (one over the square root of two by default, the flattest)."
+      },
+      {
+        "kind": "function",
+        "name": "gainChannels",
+        "summary": "Every channel, `db` louder or quieter."
+      },
+      {
+        "kind": "type",
+        "name": "NormalizeTarget",
+        "summary": "What a sound is normalized to: its loudest sample, or its integrated loudness held under a true-peak ceiling."
+      },
+      {
+        "kind": "function",
+        "name": "normalizeChannels",
+        "summary": "The sound, with one gain on every channel, so the balance between them stays: to a peak in dBFS, or to a loudness in LUFS as far as its true peak stays under `ceiling` (-1 dBTP by default)."
+      },
+      {
+        "kind": "function",
+        "name": "panChannels",
+        "summary": "A sound's balance: -1 is all left, 1 all right, 0 as it is."
+      },
+      {
+        "kind": "const",
+        "name": "SHIFT_METHODS",
+        "summary": "How a pitch is shifted: let the library choose from the sound (`auto`), or a method by name."
+      },
+      {
+        "kind": "type",
+        "name": "ShiftMethod",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "STRETCH_METHODS",
+        "summary": "The ways a sound is stretched in time with its pitch kept, each with what it suits: a phase vocoder that keeps the attacks of drums (`transient`), one for general music (`pvocLock`), waveform overlap-add for speech made shorter (`wsola`) or longer (`pvsola`), a vocoder with the harmonic and percussive parts apart for full mixes (`hybrid`), and the extreme stretch of ambient textures (`paulstretch`)."
+      },
+      {
+        "kind": "type",
+        "name": "StretchMethod",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "shiftChannels",
+        "summary": "Every channel `semitones` higher or lower, its length unchanged."
+      },
+      {
+        "kind": "function",
+        "name": "speedChannels",
+        "summary": "The sound played `speed` times as fast, its pitch moving with it as on a tape or a record: 2 is twice as fast and an octave up."
+      },
+      {
+        "kind": "function",
+        "name": "stretchChannels",
+        "summary": "Every channel `factor` times as long, its pitch unchanged: 2 is twice as slow, 0.5 twice as fast."
+      }
+    ],
+    "from": "@/lib/engine/files",
+    "package": "@audio-ui/engine-files",
+    "usedBy": [
+      "audio-export",
+      "sound-operations"
+    ]
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "FormatOptions",
+        "summary": "What every formatter takes, over its own defaults."
+      },
+      {
+        "kind": "type",
+        "name": "LevelUnit",
+        "summary": "The units of a level: decibels of a gain, of full scale, of a true peak, of a voltage; loudness in LUFS and its range in LU."
+      },
+      {
+        "kind": "function",
+        "name": "formatLevel",
+        "summary": "A level or a gain: `-6.0 dBFS`, `-23.0 LUFS`, `+3.0 dB`, `-1.0 dBTP`."
+      },
+      {
+        "kind": "type",
+        "name": "FrequencyStyle",
+        "summary": "How a frequency is written: by size (`auto`), always in hertz, or always in kilohertz."
+      },
+      {
+        "kind": "function",
+        "name": "formatFrequency",
+        "summary": "A frequency: `120 Hz`, `1.2 kHz`, `12 kHz`."
+      },
+      {
+        "kind": "function",
+        "name": "formatSampleRate",
+        "summary": "A sample rate: `44.1 kHz`, `48 kHz`, `11.025 kHz`: in kilohertz, with the places it needs and no more."
+      },
+      {
+        "kind": "type",
+        "name": "TimeStyle",
+        "summary": "How a time is written: a clock to the second, a clock to the millisecond, or a length in seconds."
+      },
+      {
+        "kind": "function",
+        "name": "formatTime",
+        "summary": "A time: `1:05` (`clock`), `1:05.250` (`precise`, to the millisecond, with hours past an hour: `1:02:03.500`), or `65.25 s` (`seconds`)."
+      },
+      {
+        "kind": "function",
+        "name": "formatDuration",
+        "summary": "A length of time by its size: `120 ms` under a second, `1.25 s` above."
+      },
+      {
+        "kind": "function",
+        "name": "formatTempo",
+        "summary": "The tempo, `120 BPM`, with a decimal only when it has one."
+      },
+      {
+        "kind": "interface",
+        "name": "NoteOptions",
+        "summary": "How a note is spelled: sharps or flats, the octave of the middle C (`4` in scientific pitch, `3` on Yamaha's), and the typographic ♯ and ♭ or plain `#` and `b`."
+      },
+      {
+        "kind": "function",
+        "name": "formatNote",
+        "summary": "A MIDI note as a name: `60` is `C4`, `61` `C#4`, `69` `A4`."
+      },
+      {
+        "kind": "type",
+        "name": "PanStyle",
+        "summary": "How a pan is written: `L30`, `C`, `R30` (`lr`), or a signed number, `-30`, `0`, `+30` (`signed`)."
+      },
+      {
+        "kind": "function",
+        "name": "formatPan",
+        "summary": "A pan from -1 (left) to 1 (right) as a percentage of the way: `L50`, `C`, `R100`."
+      },
+      {
+        "kind": "function",
+        "name": "formatPercent",
+        "summary": "A share as a percentage."
+      },
+      {
+        "kind": "function",
+        "name": "formatRatio",
+        "summary": "A compressor's ratio: `4.0:1`, and `∞:1` for a limiter."
+      },
+      {
+        "kind": "function",
+        "name": "formatChannels",
+        "summary": "The layout of a sound by its channel count: `mono`, `stereo`, `quad`, `5.1`, `7.1`; any other count as `N ch`."
+      },
+      {
+        "kind": "interface",
+        "name": "Formatter",
+        "summary": "The formatters of this module with options bound: each call may still override them."
+      },
+      {
+        "kind": "function",
+        "name": "createFormatter",
+        "summary": "A set of formatters that share their options: a locale, a true minus, a thin space, a note spelling."
+      }
+    ],
+    "from": "@/lib/engine/format",
+    "package": "@audio-ui/engine-format",
+    "usedBy": [
+      "sound-operations"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/biquad",
+      "@audio/dynamics-compand",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-deesser",
+      "@audio/dynamics-ducker",
+      "@audio/dynamics-envelope",
+      "@audio/dynamics-expander",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-gate",
+      "@audio/dynamics-limiter",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-transient-shaper",
+      "@audio/dynamics-unlimit",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+      "@audio/effect-autowah",
+      "@audio/effect-bitcrusher",
+      "@audio/effect-chorus",
+      "@audio/effect-exciter",
+      "@audio/effect-freqshift",
+      "@audio/effect-graindelay",
+      "@audio/effect-lofi",
+      "@audio/effect-multitap",
+      "@audio/effect-noiseshaper",
+      "@audio/effect-phaser",
+      "@audio/effect-pingpong",
+      "@audio/effect-ringmod",
+      "@audio/effect-rotary",
+      "@audio/effect-stutter",
+      "@audio/effect-subbass",
+      "@audio/effect-wah",
+      "@audio/eq-crossover",
+      "@audio/eq-tilt",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+      "@audio/filter-oberheim",
+      "@audio/spatial-binaural",
+      "@audio/spatial-microshift"
+    ],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "BASS_ENHANCER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`"
+      },
+      {
+        "kind": "const",
+        "name": "BINAURAL_PANNER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-binaural` 0.1.1 (MIT, Dmitry Iv.): `binaural`"
+      },
+      {
+        "kind": "const",
+        "name": "CHORUS_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-chorus` 2.0.2 (MIT, Dmitry Iv.): `chorus`"
+      },
+      {
+        "kind": "const",
+        "name": "COMPANDER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compandStream`, as `module3` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compand`"
+      },
+      {
+        "kind": "const",
+        "name": "COMPRESSOR_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module4` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vcaStream`, as `module5` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vca` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module7` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fetStream`, as `module8` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fet` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module10` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `optoStream`, as `module11` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `opto` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module13` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimuStream`, as `module14` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimu` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module16` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compress`, `compressorState`, as `module17` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compressor`"
+      },
+      {
+        "kind": "const",
+        "name": "DEESSER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowpass`, `highpass`, `step`, `state`, as `module4` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `writer`, `db2lin`, `timeCoef`, `smoother`, as `module5` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesserStream`, `latency`, as `module6` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesser`"
+      },
+      {
+        "kind": "const",
+        "name": "DELAY_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-pingpong` 1.1.5 (MIT, Dmitry Iv.): `pingPong` - `@audio/effect-multitap` 1.1.6 (MIT, Dmitry Iv.): `multitap` - `@audio/effect-graindelay` 1.1.6 (MIT, Dmitry Iv.): `graindelay`"
+      },
+      {
+        "kind": "const",
+        "name": "DUCKER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `ducker`"
+      },
+      {
+        "kind": "const",
+        "name": "EXCITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-exciter` 1.2.1 (MIT, Dmitry Iv.): `exciter`"
+      },
+      {
+        "kind": "const",
+        "name": "EXPANDER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expanderGain`, `upwardExpanderGain`, as `module3` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expander`"
+      },
+      {
+        "kind": "const",
+        "name": "FILTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/filter-moog-ladder` 1.2.0 (MIT, Dmitry Iv.): `moogLadder` - `@audio/filter-diode-ladder` 1.2.2 (MIT, Dmitry Iv.): `diodeLadder` - `@audio/filter-korg35` 1.2.1 (MIT, Dmitry Iv.): `korg35` - `@audio/filter-oberheim` 1.2.1 (MIT, Dmitry Iv.): `oberheim`"
+      },
+      {
+        "kind": "const",
+        "name": "FREQUENCY_SHIFTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-freqshift` 1.1.6 (MIT, Dmitry Iv.): `frequencyShifter` - `@audio/effect-ringmod` 1.1.5 (MIT, Dmitry Iv.): `ringMod`"
+      },
+      {
+        "kind": "const",
+        "name": "GATE_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module2` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gateStream`, as `module3` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gate`"
+      },
+      {
+        "kind": "const",
+        "name": "LIMITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module0` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiterStream`, `latency`, as `module1` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiter`"
+      },
+      {
+        "kind": "const",
+        "name": "LOFI_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-lofi` 1.1.6 (MIT, Dmitry Iv.): `lofi`"
+      },
+      {
+        "kind": "const",
+        "name": "MID_SIDE_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-microshift` 1.1.3 (MIT, Dmitry Iv.): `shifter`"
+      },
+      {
+        "kind": "const",
+        "name": "PHASER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-phaser` 1.1.6 (MIT, Dmitry Iv.): `phaser`"
+      },
+      {
+        "kind": "const",
+        "name": "REDUX_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-bitcrusher` 1.1.5 (MIT, Dmitry Iv.): `bitcrusher` - `@audio/effect-noiseshaper` 1.1.5 (MIT, Dmitry Iv.): `noiseShaping`"
+      },
+      {
+        "kind": "const",
+        "name": "ROTARY_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `polesSos` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `butterworth` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `linkwitzRiley` - `@audio/eq-crossover` 1.0.2 (MIT, Dmitry Iv.): `crossover` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `step`, `state` - `@audio/effect-rotary` 0.1.2 (MIT, Dmitry Iv.): `rotary`"
+      },
+      {
+        "kind": "const",
+        "name": "STUTTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-stutter` 1.1.6 (MIT, Dmitry Iv.): `stutter`"
+      },
+      {
+        "kind": "const",
+        "name": "TILT_EQ_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowshelf`, `highshelf`, `filter` - `@audio/eq-tilt` 1.2.3 (MIT, Dmitry Iv.): `tilt`"
+      },
+      {
+        "kind": "const",
+        "name": "TRANSIENT_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`, as `module0` - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`"
+      },
+      {
+        "kind": "const",
+        "name": "UNLIMITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `upwardExpanderGain`, as `module3` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimitGain`, `unlimitDeficitGain`, as `module5` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimit`"
+      },
+      {
+        "kind": "const",
+        "name": "WAH_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-autowah` 1.1.5 (MIT, Dmitry Iv.): `autoWah` - `@audio/effect-wah` 1.1.5 (MIT, Dmitry Iv.): `wah`"
+      }
+    ],
+    "from": "@/lib/engine/kernels",
+    "package": "@audio-ui/engine-kernels",
+    "usedBy": []
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "createMidiInput",
+        "summary": "The MIDI inputs of the page through the Web MIDI API, as one source: every listener hears the messages of every connected device, and devices plugged or unplugged later are picked up, and a device switched off with `setInputEnabled` is not heard."
+      },
+      {
+        "kind": "interface",
+        "name": "MidiInput",
+        "summary": "The page's MIDI inputs as one source: connect, listen to messages, switch inputs off, and follow its state."
+      },
+      {
+        "kind": "interface",
+        "name": "MidiInputState",
+        "summary": "What `createMidiInput` knows of the page's MIDI: whether it is supported and connected, the inputs, the muted ones, and why it is not connected."
+      },
+      {
+        "kind": "const",
+        "name": "DEFAULT_PITCH_BEND_RANGE",
+        "summary": "The bend range most synths start with, in semitones."
+      },
+      {
+        "kind": "type",
+        "name": "MidiMessage",
+        "summary": "Live MIDI 1.0 channel messages, as a Web MIDI input delivers them (one message per event, a status byte then its data bytes)."
+      },
+      {
+        "kind": "function",
+        "name": "parseMidiMessage",
+        "summary": "Parses one channel voice message: note on, note off, control change or pitch bend."
+      },
+      {
+        "kind": "function",
+        "name": "pitchBendToSemitones",
+        "summary": "A pitch bend value in semitones, for a receiver whose bend range is `range` semitones each way."
+      }
+    ],
+    "from": "@/lib/engine/midi",
+    "package": "@audio-ui/engine-midi",
+    "usedBy": [
+      "use-midi-input"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/mir-key",
+      "@audio/note"
+    ],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "cents",
+        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
+      },
+      {
+        "kind": "function",
+        "name": "midiToHz",
+        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
+      },
+      {
+        "kind": "function",
+        "name": "detectKeys",
+        "summary": "The keys `notes` are likeliest in, likeliest first, at most `count`: each pitch class weighed by how long it sounds, against the major and minor key profiles of `@audio/mir-key` (Krumhansl-Schmuckler)."
+      },
+      {
+        "kind": "interface",
+        "name": "KeyNote",
+        "summary": "What a key is read from: a note's pitch and how long it lasts, in any unit."
+      },
+      {
+        "kind": "function",
+        "name": "inScale",
+        "summary": "Whether a MIDI pitch is in a scale."
+      },
+      {
+        "kind": "function",
+        "name": "nearestInScale",
+        "summary": "The pitch in a scale nearest `pitch`: itself when it is in it, else the nearest one, the lower of two as near."
+      },
+      {
+        "kind": "function",
+        "name": "rollScale",
+        "summary": "A scale as a piano roll reads it: its pitch classes and its root."
+      },
+      {
+        "kind": "const",
+        "name": "SCALES",
+        "summary": "The steps of each scale, as semitones above the root."
+      },
+      {
+        "kind": "interface",
+        "name": "Scale",
+        "summary": "A scale on a root: C major is `{ name: \"major\", root: 0 }`."
+      },
+      {
+        "kind": "type",
+        "name": "ScaleName",
+        "summary": "The name of a scale of `SCALES`."
+      },
+      {
+        "kind": "function",
+        "name": "scalePitchClasses",
+        "summary": "The pitch classes a scale keeps, from 0 (C) to 11 (B), in order."
+      }
+    ],
+    "from": "@/lib/engine/pitch",
+    "package": "@audio-ui/engine-pitch",
+    "usedBy": [
+      "arrangement",
+      "use-pitch",
+      "use-synth-voices",
+      "voice-pool"
+    ]
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "ArrangedAudio",
+        "summary": "An audio clip as an arrangement holds it, in seconds: where it lies, the stretch of its recording it plays, its gain, loop, direction and warp."
+      },
+      {
+        "kind": "function",
+        "name": "createWarpReader",
+        "summary": "Reads a warp map from a clip's own time back to its source's, fast enough to be asked for every frame: it keeps the stretch it last answered from, since frames come in order."
+      },
+      {
+        "kind": "type",
+        "name": "FadeShape",
+        "summary": "How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends."
+      },
+      {
+        "kind": "function",
+        "name": "fadeGain",
+        "summary": "The gain a fade of `shape` has `progress` of the way through it, from 0 (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards."
+      },
+      {
+        "kind": "interface",
+        "name": "PlayedClip",
+        "summary": "An audio clip as a player reads it: in whole frames of the arrangement, at the engine's sample rate."
+      },
+      {
+        "kind": "interface",
+        "name": "PlayedStretch",
+        "summary": "How a clip stretches time, in frames of the arrangement: how far apart its grains start and how long they cross, how fast each reads, and whether each is lined up on the last."
+      },
+      {
+        "kind": "function",
+        "name": "playedClip",
+        "summary": "The clip a player reads from `clip`, playing the recording `recording`, at `sampleRate`: every time turned into the nearest frame, the fades shortened to fit, the gain as a ratio."
+      },
+      {
+        "kind": "function",
+        "name": "playedClips",
+        "summary": "The clips a track's player reads, from an arrangement's audio clips: those that play (not deactivated, with a recording to play), each through `playedClip`, in the order they start."
+      },
+      {
+        "kind": "type",
+        "name": "WarpMode",
+        "summary": "How a clip plays at another speed than its recording's: with its pitch moving with it, in slices that keep their attacks, or in grains that keep a held note."
+      },
+      {
+        "kind": "const",
+        "name": "RECORDING_LOADER_WORKER",
+        "summary": "The loader of streamed recordings, as the source of a module: start it with `new Worker(url, { type: \"module\" })` (from a Blob URL), then post it `RecordingLoaderMessage`s."
+      },
+      {
+        "kind": "interface",
+        "name": "Compensation",
+        "summary": "How long each path waits, in frames, so that all of them line up at the main track."
+      },
+      {
+        "kind": "interface",
+        "name": "DelayedTrack",
+        "summary": "A path into the mixer as delay compensation sees it: how many frames its devices delay it."
+      },
+      {
+        "kind": "function",
+        "name": "delayCompensation",
+        "summary": "The waits that line every path up at the main track."
+      },
+      {
+        "kind": "function",
+        "name": "panGains",
+        "summary": "The gains of the left and right channels for a pan from -1 (left) to 1 (right): a constant-power law on sine curves, with both channels at unity in the centre and the side it is turned to at +3 dB at either end."
+      },
+      {
+        "kind": "interface",
+        "name": "RoutedCompensation",
+        "summary": "How long each path waits, in frames, so that everything meeting anywhere meets on the same frame."
+      },
+      {
+        "kind": "interface",
+        "name": "RoutedTrack",
+        "summary": "A path into the mixer as routing sees it: its delay, where it plays into, and the returns it sends to."
+      },
+      {
+        "kind": "function",
+        "name": "routedCompensation",
+        "summary": "The waits that line every path up wherever paths meet: at a group, the sound of each of its tracks; at a return, each send; at the main track, the top tracks and groups and the returns."
+      },
+      {
+        "kind": "interface",
+        "name": "SoloState",
+        "summary": "What a solo lets through: each track's own output, and each of its sends."
+      },
+      {
+        "kind": "interface",
+        "name": "SoloTrack",
+        "summary": "A track as the solo sees it."
+      },
+      {
+        "kind": "function",
+        "name": "soloState",
+        "summary": "Which tracks a solo silences."
+      },
+      {
+        "kind": "interface",
+        "name": "Note",
+        "summary": "A note of a MIDI clip: its pitch, start and length, how hard and how likely it plays, how far its velocity may stray, and whether it is deactivated."
+      },
+      {
+        "kind": "type",
+        "name": "NoteId",
+        "summary": "A note's id: unique within its clip."
+      },
+      {
+        "kind": "function",
+        "name": "playedVelocity",
+        "summary": "How hard a note plays this time round, from 0 to 1, or `null` when it does not: a deactivated note never plays, one with a `chance` plays that share of the times, and a `deviation` strays its velocity by up to that much, a new roll each time."
+      },
+      {
+        "kind": "interface",
+        "name": "PlannedRecording",
+        "summary": "What the planner needs of a recording: its rate and its length in frames."
+      },
+      {
+        "kind": "function",
+        "name": "pagesAhead",
+        "summary": "The pages a track's clips read over the `count` frames of the audio clock from `frame`, the soonest read first: what a loader should have in the pool before then."
+      },
+      {
+        "kind": "const",
+        "name": "CLIP_PLAYER_PROCESSOR",
+        "summary": "The name the clip player's processor is registered under in an AudioWorklet."
+      },
+      {
+        "kind": "type",
+        "name": "ClipPlayerMessage",
+        "summary": "What the main thread posts to a clip player's port."
+      },
+      {
+        "kind": "type",
+        "name": "ClipPlayerReply",
+        "summary": "What a clip player's processor posts back."
+      },
+      {
+        "kind": "type",
+        "name": "RecordingLoaderMessage",
+        "summary": "What the main thread posts to the loader of streamed recordings, a Worker."
+      },
+      {
+        "kind": "type",
+        "name": "RecordingLoaderReply",
+        "summary": "What the loader posts back."
+      },
+      {
+        "kind": "const",
+        "name": "DECLICK_SECONDS",
+        "summary": "How long a stop or a jump fades the sound out, and the sound after a jump in."
+      },
+      {
+        "kind": "interface",
+        "name": "DecodedRecording",
+        "summary": "A recording held in memory, decoded: one array of samples per channel."
+      },
+      {
+        "kind": "type",
+        "name": "Recording",
+        "summary": "A recording a clip plays: decoded in memory, or streamed."
+      },
+      {
+        "kind": "type",
+        "name": "Recordings",
+        "summary": "The recordings a player can read, by id."
+      },
+      {
+        "kind": "function",
+        "name": "renderClips",
+        "summary": "Adds what `clips` play over `length` frames of the arrangement from `position` into `output`, from index `at`."
+      },
+      {
+        "kind": "interface",
+        "name": "StreamedRecording",
+        "summary": "A recording read from the pages of a stream, which something else keeps filled ahead of playback."
+      },
+      {
+        "kind": "function",
+        "name": "sourceIndexer",
+        "summary": "Where in its recording `clip` reads at the arrangement's frame `frame`, in frames of the recording (fractional when warped or at another rate), or NaN where it plays nothing: what both the player and the planner of a stream's pages follow."
+      },
+      {
+        "kind": "class",
+        "name": "TrackRenderer",
+        "summary": "What one track plays, block after block: its clips, through the states of the transport it is given, each from its own frame of the audio clock."
+      },
+      {
+        "kind": "function",
+        "name": "createPagePool",
+        "summary": "A pool of `slots` pages, in shared memory unless `shared` is false."
+      },
+      {
+        "kind": "function",
+        "name": "createRecordingStream",
+        "summary": "A recording of `length` frames read from `pool`, none of its pages there yet."
+      },
+      {
+        "kind": "const",
+        "name": "PAGE_FRAMES",
+        "summary": "How many frames a page holds: about 0.7 s at 48 kHz."
+      },
+      {
+        "kind": "class",
+        "name": "PageCache",
+        "summary": "Keeps the pages that are asked for in the pool: it loads those missing, in the order they come, into free slots or into the slots asked for longest ago, and never into a slot asked for in the same call."
+      },
+      {
+        "kind": "interface",
+        "name": "PagePool",
+        "summary": "The slots every streamed recording of a context reads from."
+      },
+      {
+        "kind": "type",
+        "name": "PageReader",
+        "summary": "Reads a page of a recording into its slot: one array per channel of the recording, `pageFrames` long, to fill from the page's first frame."
+      },
+      {
+        "kind": "interface",
+        "name": "PageRequest",
+        "summary": "One page of one recording."
+      },
+      {
+        "kind": "interface",
+        "name": "RecordingStream",
+        "summary": "A recording as the player reads it from the pool."
+      },
+      {
+        "kind": "function",
+        "name": "slotOffset",
+        "summary": "Where a slot's channel starts in the pool's samples."
+      },
+      {
+        "kind": "function",
+        "name": "streamedSample",
+        "summary": "A channel's sample at a frame: silence outside the recording, and while its page is not there."
+      },
+      {
+        "kind": "function",
+        "name": "arrangementFrame",
+        "summary": "The frame of the arrangement that plays at the audio clock's `frame`, at or after `state.at`: the state's position while stopped."
+      },
+      {
+        "kind": "function",
+        "name": "continuesFrom",
+        "summary": "Whether going from `before` to `after` at `after.at` carries on without a break: both play, and the frame of the arrangement at `after.at` is the same in both."
+      },
+      {
+        "kind": "function",
+        "name": "heardFrame",
+        "summary": "The frame of the audio clock heard at the speakers at `contextTime`, the context's time of what is heard now (`getOutputTimestamp().contextTime`, or `currentTime` less the output latency where the browser has no timestamp), less `delay` frames the engine adds on the way (its delay compensation)."
+      },
+      {
+        "kind": "interface",
+        "name": "PlaybackRun",
+        "summary": "A stretch of a block that plays frames of the arrangement one after the other."
+      },
+      {
+        "kind": "interface",
+        "name": "PlaybackState",
+        "summary": "What the transport does from a frame of the audio clock on."
+      },
+      {
+        "kind": "function",
+        "name": "playbackRuns",
+        "summary": "The runs of the block of `count` frames from the audio clock's `frame`: the arrangement's frames it plays, cut where the loop comes round."
+      },
+      {
+        "kind": "function",
+        "name": "rescaled",
+        "summary": "The state that carries on from the audio clock's frame `at` once every time of the arrangement is `ratio` times what it was (a change of tempo: half the tempo makes every time twice as late): the position playing at `at`, and the loop, scaled, so the playhead stays on its bar and beat."
+      },
+      {
+        "kind": "const",
+        "name": "STOPPED",
+        "summary": "Stopped at the start, from the first frame on."
+      },
+      {
+        "kind": "function",
+        "name": "startsInWindow",
+        "summary": "The items that start in the block of `count` frames from the audio clock's `frame`, each with the frame of the clock it starts at: what a scheduler of notes asks for its look-ahead window."
+      },
+      {
+        "kind": "function",
+        "name": "toFrames",
+        "summary": "A time in seconds as a whole number of frames: the nearest one."
+      },
+      {
+        "kind": "const",
+        "name": "CLIP_PLAYER_WORKLET",
+        "summary": "The clip player's processor, as the source of a module: load it into a context with `audioWorklet.addModule` (from a Blob URL), then make a player with `new AudioWorkletNode(context, CLIP_PLAYER_PROCESSOR)`."
+      },
+      {
+        "kind": "const",
+        "name": "CLIP_PLAYER_WORKLET_INPUTS",
+        "summary": "A hash of the sources this bundle was made from, checked by a test."
+      }
+    ],
+    "from": "@/lib/engine/playback",
+    "package": "@audio-ui/engine-playback",
+    "usedBy": [
+      "arrangement",
+      "arrangement-engine",
+      "clip-player",
+      "dawproject",
+      "mixer-engine",
+      "rack",
+      "use-piano-roll-playback"
+    ]
+  },
+  {
+    "audiojs": [
+      "@audio/denoise"
+    ],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "REPAIRS",
+        "summary": "The defects of a recording that can be taken out of it, each by the method made for it: `clean` finds what the sound carries and picks the method itself; `clicks` and `crackle` rebuild impulses from the sound around them (vinyl ticks, mouth clicks, shellac); `hum50` and `hum60` take out the mains hum and its harmonics; `noise` and `speechNoise` take out steady broadband noise, and noise that changes under a voice; `clipping` rebuilds peaks cut at full scale; `wind` and `plosives` take out low rumble and the bursts of p and b; `breaths` and `reverb` take down the breaths between phrases and a room's late reverb."
+      },
+      {
+        "kind": "type",
+        "name": "Repair",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "repairChannels",
+        "summary": "Every channel with one defect taken out, by the method made for it, each channel on its own."
+      }
+    ],
+    "from": "@/lib/engine/repair",
+    "package": "@audio-ui/engine-repair",
+    "usedBy": [
+      "sound-operations"
+    ]
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "adjacentDivision",
+        "summary": "The fixed division next to `division`: a finer one (`direction` 1, twice as dense) or a coarser one (-1), held at the ends of the list."
+      },
+      {
+        "kind": "function",
+        "name": "barLabelInterval",
+        "summary": "Seconds between labelled bars on a ruler at `zoom` px per second: always a whole number of bars, doubled until labels are at least `minSpacing` px apart, so they never collide or fall mid-bar."
+      },
+      {
+        "kind": "const",
+        "name": "DOTTED_FACTOR",
+        "summary": "Three halves: a dotted note is its straight one and half again."
+      },
+      {
+        "kind": "function",
+        "name": "divisionAt",
+        "summary": "The fixed division whose step is nearest `seconds` at `tempo`: what a grid that follows the zoom becomes when it is fixed where it is."
+      },
+      {
+        "kind": "function",
+        "name": "divisionSeconds",
+        "summary": "How long one fixed division lasts at `tempo`, in seconds."
+      },
+      {
+        "kind": "type",
+        "name": "FixedGridDivision",
+        "summary": "The id of a fixed grid division: `\"4-bars\"` to `\"1/32\"`."
+      },
+      {
+        "kind": "const",
+        "name": "GRID_DIVISIONS",
+        "summary": "The fixed grid divisions, coarsest first: a number of bars, or a note value."
+      },
+      {
+        "kind": "type",
+        "name": "GridDivision",
+        "summary": "`adaptive` follows the zoom; a fixed division stays put however far you zoom."
+      },
+      {
+        "kind": "interface",
+        "name": "GridIntervalOptions",
+        "summary": "How close adaptive grid lines may be, and whether the grid is in triplets."
+      },
+      {
+        "kind": "function",
+        "name": "gridInterval",
+        "summary": "Seconds between grid lines at `zoom` px per second: the lines a timeline draws and the step it snaps to, so what you see is where you land."
+      },
+      {
+        "kind": "function",
+        "name": "gridLabel",
+        "summary": "Names an interval the way a grid readout does: \"1 bar\", \"4 bars\", \"1/16\", \"1/8T\"."
+      },
+      {
+        "kind": "const",
+        "name": "METRONOME_RHYTHMS",
+        "summary": "How often a metronome clicks: with the beat, or a note value, straight or triplet."
+      },
+      {
+        "kind": "type",
+        "name": "MetronomeRhythm",
+        "summary": "The id of a metronome rhythm: `\"auto\"` (the beat), a bar, or a note value, straight or triplet."
+      },
+      {
+        "kind": "function",
+        "name": "metronomeRhythmSeconds",
+        "summary": "Seconds between clicks for a rhythm, or `null` for `auto`, which has no interval of its own: it is the beat, whatever the signature makes one."
+      },
+      {
+        "kind": "const",
+        "name": "SYNCED_DIVISIONS",
+        "summary": "The note values a time parameter that follows the tempo can take, shortest first: `1/16` is a sixteenth note, `1/8t` a triplet eighth (two thirds of it) and `1/8d` a dotted eighth (one and a half times it)."
+      },
+      {
+        "kind": "type",
+        "name": "SyncedDivision",
+        "summary": "A note value as `syncedSeconds` reads it: `\"1/8\"`, its triplet `\"1/8t\"` or its dotted `\"1/8d\"`."
+      },
+      {
+        "kind": "function",
+        "name": "syncedSeconds",
+        "summary": "How long a synced note value lasts at `tempo`, in seconds: `1/8` an eighth, `1/8t` its triplet, `1/8d` its dotted one."
+      },
+      {
+        "kind": "const",
+        "name": "TRIPLET_FACTOR",
+        "summary": "Three in the space of two: a triplet division is 2/3 of its straight one."
+      },
+      {
+        "kind": "interface",
+        "name": "Bar",
+        "summary": "A bar as a ruler draws it."
+      },
+      {
+        "kind": "function",
+        "name": "barsBeatsWith",
+        "summary": "Where `seconds` falls in bars, beats and sixteenths through the signature changes, each counted from one."
+      },
+      {
+        "kind": "function",
+        "name": "barsOf",
+        "summary": "The bars from 0 to `until` seconds, through the signature changes: whole bars of each signature, and a partial bar where a change cuts one short."
+      },
+      {
+        "kind": "function",
+        "name": "isSignature",
+        "summary": "Whether a signature is one a bar can have: 1 to 99 beats of a whole, half, quarter, eighth or sixteenth note."
+      },
+      {
+        "kind": "interface",
+        "name": "MetronomeClick",
+        "summary": "A click of a metronome."
+      },
+      {
+        "kind": "function",
+        "name": "metronomeClicks",
+        "summary": "The clicks of a metronome from 0 to `until` seconds, through the signature changes."
+      },
+      {
+        "kind": "interface",
+        "name": "SignatureChange",
+        "summary": "A new signature from `at` on, in seconds: `beatsPerBar` beats of a `beatUnit` note."
+      },
+      {
+        "kind": "function",
+        "name": "advance",
+        "summary": "Advances `cursor`, emitting every step boundary now within `SCHEDULE_AHEAD_SECONDS` of `now`."
+      },
+      {
+        "kind": "function",
+        "name": "anchoredCursor",
+        "summary": "A cursor that emits `step` at `now`, the seed for `start()` and for every re-anchor (seek, region commit)."
+      },
+      {
+        "kind": "function",
+        "name": "anchorForTempoChange",
+        "summary": "The anchor to carry on with when the tempo changes while playing."
+      },
+      {
+        "kind": "const",
+        "name": "MAX_CATCH_UP_SECONDS",
+        "summary": "How late a boundary may be and still be played, half a second."
+      },
+      {
+        "kind": "function",
+        "name": "positionAt",
+        "summary": "The continuous playhead position, in fractional full-grid steps, at `now`."
+      },
+      {
+        "kind": "const",
+        "name": "SCHEDULE_AHEAD_SECONDS",
+        "summary": "How far ahead of `now` boundaries are committed, in seconds: the article's 100 ms."
+      },
+      {
+        "kind": "const",
+        "name": "SCHEDULER_POLL_MS",
+        "summary": "How often to poll the scheduler, in milliseconds: the article's 25 ms."
+      },
+      {
+        "kind": "interface",
+        "name": "SchedulerAnchor",
+        "summary": "The audio-time / step pair a running clock is anchored to, for deriving the display position."
+      },
+      {
+        "kind": "interface",
+        "name": "SchedulerConfig",
+        "summary": "What the scheduler steps through: the window of steps it loops over and how long a step lasts, read on every call."
+      },
+      {
+        "kind": "interface",
+        "name": "SchedulerCursor",
+        "summary": "Where the scheduler is: the next step it will emit and when."
+      },
+      {
+        "kind": "interface",
+        "name": "StepBoundary",
+        "summary": "A step to play and the audio time it starts at."
+      },
+      {
+        "kind": "interface",
+        "name": "BarsBeats",
+        "summary": "A position in bars, beats and sixteenths, each counted from one."
+      },
+      {
+        "kind": "function",
+        "name": "barsBeatsAt",
+        "summary": "Where `seconds` falls in bars, beats and sixteenths, each counted from one."
+      },
+      {
+        "kind": "function",
+        "name": "bpmToMicrosecondsPerQuarterNote",
+        "summary": "A tempo in BPM as microseconds per quarter note, the unit a MIDI file stores: 120 BPM is 500000."
+      },
+      {
+        "kind": "const",
+        "name": "DEFAULT_MICROSECONDS_PER_QUARTER_NOTE",
+        "summary": "What a file with no Set Tempo event plays at: 120 BPM, 500,000 microseconds a quarter note."
+      },
+      {
+        "kind": "const",
+        "name": "DEFAULT_TEMPO",
+        "summary": "120 BPM in 4/4."
+      },
+      {
+        "kind": "function",
+        "name": "describeBarsBeats",
+        "summary": "\"Bar 3, beat 2\", the way a position is read out to a screen reader."
+      },
+      {
+        "kind": "function",
+        "name": "microsecondsPerQuarterNoteToBpm",
+        "summary": "The BPM of a Set Tempo's microseconds per quarter note: 500000 is 120."
+      },
+      {
+        "kind": "function",
+        "name": "secondsPerBar",
+        "summary": "Seconds per bar: a beat times the beats in a bar."
+      },
+      {
+        "kind": "function",
+        "name": "secondsPerBeat",
+        "summary": "Seconds per beat, a beat being one `beatUnit` note: in 6/8, half a quarter."
+      },
+      {
+        "kind": "function",
+        "name": "secondsPerQuarter",
+        "summary": "Seconds per quarter note: BPM counts quarters whatever the signature says."
+      },
+      {
+        "kind": "interface",
+        "name": "Tempo",
+        "summary": "Tempo and time signature: how long a quarter note, a beat and a bar last in seconds, and where a position in seconds falls in bars and beats."
+      },
+      {
+        "kind": "function",
+        "name": "addWarpMarker",
+        "summary": "Adds a marker at a time on the clip, pinning what plays there; nothing changes in how it plays until it moves."
+      },
+      {
+        "kind": "function",
+        "name": "moveWarpMarker",
+        "summary": "Moves the marker at `index` to a new time on the clip, stretching the recording on either side of it: it stops short of its neighbours."
+      },
+      {
+        "kind": "function",
+        "name": "removeWarpMarker",
+        "summary": "Takes the marker at `index` away, as long as two are left to make a map."
+      },
+      {
+        "kind": "function",
+        "name": "scaleWarp",
+        "summary": "Plays the whole map `factor` times as long: 2 is half the speed, an octave down; 0.5 twice the speed."
+      },
+      {
+        "kind": "function",
+        "name": "unwarpedTime",
+        "summary": "What time in the source plays at a time on the clip."
+      },
+      {
+        "kind": "interface",
+        "name": "WarpMarker",
+        "summary": "A time in the source, pinned to a time on the clip."
+      },
+      {
+        "kind": "function",
+        "name": "warpedTime",
+        "summary": "Where on the clip a time in the source plays."
+      },
+      {
+        "kind": "function",
+        "name": "warpMarkers",
+        "summary": "The markers that make a map: finite ones, in order, each later than the one before in both times."
+      },
+      {
+        "kind": "function",
+        "name": "warpRate",
+        "summary": "How fast the source plays at a time on the clip: 1 as recorded, 2 twice as fast."
+      }
+    ],
+    "from": "@/lib/engine/time",
+    "package": "@audio-ui/engine-time",
+    "usedBy": [
+      "arrangement",
+      "arrangement-engine",
+      "dawproject",
+      "demo-song",
+      "demo-sound",
+      "synced-rate",
+      "use-arrangement",
+      "use-piano-roll-playback",
+      "use-timeline-grid",
+      "use-transport-clock"
+    ]
+  },
+  {
+    "audiojs": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "loadWorklet",
+        "summary": "Loads the source of an `AudioWorklet` processor into a context, from a blob, so there is no file to serve."
+      }
+    ],
+    "from": "@/lib/engine/worklet",
+    "package": "@audio-ui/engine-worklet",
+    "usedBy": [
+      "clip-player",
+      "recording"
     ]
   }
 ]

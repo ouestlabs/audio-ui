@@ -1,4 +1,4 @@
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import { loadWorklet } from "@/lib/engine/worklet";
 import type { RecordedBlock } from "@/lib/recording";
 
 const PROCESSOR = "audioui-input-recorder";

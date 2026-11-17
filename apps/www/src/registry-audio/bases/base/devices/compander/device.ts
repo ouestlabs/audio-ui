@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { compandStream } from "@audio-ui/engine/dsp";
-import { COMPANDER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { compandStream } from "@/engine/dsp";
+import { COMPANDER_KERNELS } from "@/engine/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 
 /** The levels in, in dB, whose levels out the compander's points set: the manifest's own. */

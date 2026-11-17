@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { type DeviceState, defineDevice } from "@/engine/device";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const MIN_FREQUENCY = 55;

@@ -11,6 +11,11 @@ function pickQuote(dq: string | undefined, sq: string | undefined): string {
   return "`";
 }
 
+/** A string Step 1 emptied of its classes, until its line is dropped: never in a source. */
+const EMPTIED = "\u0000emptied\u0000";
+const EMPTIED_LINE = /^\s*(["'`])\u0000emptied\u0000\1\s*,?\s*\n/gm;
+const EMPTIED_STRING = /\u0000emptied\u0000/g;
+
 /**
  * Transforms style-specific class names based on the current style.
  * Finds ALL string literals (in any context, className, cn(), cva(), etc.)
@@ -61,13 +66,13 @@ export function transformStyleClassNames(
         .join(" ")
         .trim();
 
-      return `${quote}${resolved}${quote}`;
+      return `${quote}${resolved || EMPTIED}${quote}`;
     }
   );
 
-  // Step 2: Remove lines that are now just empty string entries ("" or '')
-  // with an optional trailing comma, leftover from fully-stripped style strings.
-  result = result.replace(/^\s*(?:""|'')\s*,?\s*\n/gm, "");
+  // Step 2: Remove the lines that are now just a string Step 1 emptied, with
+  // an optional trailing comma; an empty string written as such stays.
+  result = result.replace(EMPTIED_LINE, "").replace(EMPTIED_STRING, "");
 
   // Step 3: Collapse 3+ consecutive newlines into one blank line.
   result = result.replace(/\n{3,}/g, "\n\n");

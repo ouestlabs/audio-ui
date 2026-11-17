@@ -3,7 +3,7 @@ import {
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import { useCallback, useEffect, useState } from "react";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { createSource } from "@/registry-audio/bases/base/primitives/primitive";

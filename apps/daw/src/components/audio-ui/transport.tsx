@@ -1,16 +1,4 @@
 import {
-  barsBeatsWith,
-  gridLabel,
-  METRONOME_RHYTHMS,
-  type MetronomeRhythm,
-  metronomeRhythmSeconds,
-  type SignatureChange,
-  secondsPerBar,
-  secondsPerBeat,
-  secondsPerQuarter,
-  type Tempo,
-} from "@audio-ui/engine/time";
-import {
   LoopIcon,
   PauseIcon,
   PlayIcon,
@@ -46,6 +34,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  barsBeatsWith,
+  gridLabel,
+  METRONOME_RHYTHMS,
+  type MetronomeRhythm,
+  metronomeRhythmSeconds,
+  type SignatureChange,
+  secondsPerBar,
+  secondsPerBeat,
+  secondsPerQuarter,
+  type Tempo,
+} from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;

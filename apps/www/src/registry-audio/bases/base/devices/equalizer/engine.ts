@@ -1,5 +1,5 @@
-import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/engine/analysis";
-import type { EffectEngine } from "@audio-ui/engine/device";
+import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@/engine/analysis";
+import type { EffectEngine } from "@/engine/device";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,

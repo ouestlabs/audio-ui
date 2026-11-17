@@ -1,4 +1,3 @@
-import type { Tempo } from "@audio-ui/engine/time";
 import { useCallback, useRef, useState } from "react";
 import {
   type Arranged,
@@ -18,6 +17,7 @@ import {
   trackOf,
   unfoldedTracks,
 } from "@/lib/arrangement-state";
+import type { Tempo } from "@/lib/engine/time";
 import { canRedo, canUndo } from "@/lib/undo-history";
 
 /** What a clip's menu can do: renaming is the clip's own, in place, and editing opens the app's clip panel. */

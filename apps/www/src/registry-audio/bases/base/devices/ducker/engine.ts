@@ -2,9 +2,9 @@ import type {
   DeviceReadings,
   EffectEngine,
   SidechainBinding,
-} from "@audio-ui/engine/device";
-import { createFeed, type Feed } from "@audio-ui/engine/device";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+} from "@/engine/device";
+import { createFeed, type Feed } from "@/engine/device";
+import { loadWorklet } from "@/engine/worklet";
 import {
   DUCKER_WORKLET,
   type DuckerState,

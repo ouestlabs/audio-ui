@@ -1,4 +1,4 @@
-import { createMidiInput, pitchBendToSemitones } from "@audio-ui/engine/midi";
+import { createMidiInput, pitchBendToSemitones } from "@/engine/midi";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 /** The page's one MIDI input: every component that calls the hook shares it. */

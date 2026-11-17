@@ -1,5 +1,3 @@
-import { bandGainForHandle, bandHandleDb } from "@audio-ui/engine/analysis";
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   DeviceFrame,
@@ -27,6 +25,8 @@ import {
 } from "@/components/audio-ui/plot";
 import { Toggle } from "@/components/ui/toggle";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { bandGainForHandle, bandHandleDb } from "@/lib/engine/analysis";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

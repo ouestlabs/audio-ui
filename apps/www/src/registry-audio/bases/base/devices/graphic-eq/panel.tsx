@@ -1,4 +1,4 @@
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";

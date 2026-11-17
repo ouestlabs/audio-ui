@@ -1,11 +1,11 @@
-import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
-import { createWorkletStage } from "@audio-ui/engine/device";
-import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
 import {
   STUTTER_WORKLET,
   type StutterState,
   stutterSettings,
 } from "@/components/audio-ui/devices/stutter/device";
+import type { DeviceContext, EffectEngine } from "@/lib/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
+import { DEFAULT_TEMPO } from "@/lib/engine/time";
 
 const RAMP_SECONDS = 0.01;
 

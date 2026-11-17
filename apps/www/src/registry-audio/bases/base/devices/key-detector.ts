@@ -1,4 +1,4 @@
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import { loadWorklet } from "@/engine/worklet";
 /**
  * The processor of the key, as the source of an `AudioWorklet`. It reads the
  * key and writes the gain to apply, one value per sample: the level of the key

@@ -1,6 +1,6 @@
-import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
-import { createWorkletStage } from "@audio-ui/engine/device";
-import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import type { DeviceContext, EffectEngine } from "@/engine/device";
+import { createWorkletStage } from "@/engine/device";
+import { DEFAULT_TEMPO } from "@/engine/time";
 import {
   STUTTER_WORKLET,
   type StutterState,

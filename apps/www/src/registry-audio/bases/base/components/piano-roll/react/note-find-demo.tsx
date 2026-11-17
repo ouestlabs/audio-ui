@@ -1,4 +1,4 @@
-import { rollScale, type Scale } from "@audio-ui/engine/pitch";
+import { rollScale, type Scale } from "@/engine/pitch";
 import { useCallback, useState } from "react";
 import { NoteFind } from "@/registry-audio/bases/base/audio/elements/note-find";
 import {

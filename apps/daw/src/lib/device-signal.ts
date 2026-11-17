@@ -1,3 +1,6 @@
+import { createFrameTask, type FrameTask } from "@/components/audio-ui/frame";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
+import { createSource, type Source } from "@/components/audio-ui/primitive";
 import {
   type LogSpectrumOptions,
   logSpectrum,
@@ -5,16 +8,13 @@ import {
   rmsDb,
   SPECTRUM_FLOOR_DB,
   stereoCorrelation,
-} from "@audio-ui/engine/analysis";
+} from "@/lib/engine/analysis";
 import type {
   Device,
   DeviceReadings,
   DeviceTaps,
   ParameterDescriptor,
-} from "@audio-ui/engine/device";
-import { createFrameTask, type FrameTask } from "@/components/audio-ui/frame";
-import type { MeterFrame } from "@/components/audio-ui/meter/levels";
-import { createSource, type Source } from "@/components/audio-ui/primitive";
+} from "@/lib/engine/device";
 
 /** The level a meter of silence reads, in dB. */
 const SILENCE_DB = -100;

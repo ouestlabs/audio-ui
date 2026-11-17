@@ -1,4 +1,4 @@
-import { formatTime } from "@audio-ui/engine/format";
+import { formatTime } from "@/engine/format";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

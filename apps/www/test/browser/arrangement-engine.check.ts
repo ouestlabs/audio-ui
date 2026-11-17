@@ -1,4 +1,4 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
+import type { ParameterValue } from "@/engine/device";
 import {
   type Arranged,
   type ArrangementTrack,

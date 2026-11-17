@@ -9,7 +9,7 @@ import {
   secondsPerBeat,
   secondsPerQuarter,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import {
   LoopIcon,
   PauseIcon,

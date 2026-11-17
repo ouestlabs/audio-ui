@@ -1,9 +1,3 @@
-import type {
-  Device,
-  ParameterDescriptor,
-  ParameterValue,
-} from "@audio-ui/engine/device";
-import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import {
   type ReactNode,
@@ -67,6 +61,12 @@ import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { DRUM_KIT_PADS, drumKit } from "@/lib/drum-kit";
+import type {
+  Device,
+  ParameterDescriptor,
+  ParameterValue,
+} from "@/lib/engine/device";
+import { secondsPerBeat, type Tempo } from "@/lib/engine/time";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

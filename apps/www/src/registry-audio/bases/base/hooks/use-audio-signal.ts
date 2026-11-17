@@ -1,7 +1,7 @@
 import {
   type SpectrumBandsOptions,
   spectrumBands,
-} from "@audio-ui/engine/analysis";
+} from "@/engine/analysis";
 import { useEffect, useState } from "react";
 
 /**

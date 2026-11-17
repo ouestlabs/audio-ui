@@ -5,7 +5,7 @@ import {
   type SignatureChange,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import {
   type KeyboardEvent,
   type PointerEvent,

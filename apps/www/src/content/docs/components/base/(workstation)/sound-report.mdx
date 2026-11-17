@@ -5,11 +5,11 @@ description: "What a sound was read as, in a dialog: its loudness and true peak,
 
 ## Installation
 
-<Install name="sound-report" packages="@audio-ui/engine" />
+<Install name="sound-report" packages="" />
 
 ## Usage
 
-`SoundReport` is controlled: it is open while `report` is set, and `onOpenChange(false)` is where you clear it. The report is the one `reportSound` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) gives, held by [`useSoundReport`](/docs/hooks/use-sound-report).
+`SoundReport` is controlled: it is open while `report` is set, and `onOpenChange(false)` is where you clear it. The report is the one `reportSound` of [`@/lib/engine/analysis`](/docs/engine/analysis) gives, held by [`useSoundReport`](/docs/hooks/use-sound-report).
 
 ```tsx
 import { SoundReport } from "@/components/audio-ui/sound-report";

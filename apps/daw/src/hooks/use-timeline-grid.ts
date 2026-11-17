@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import {
   adjacentDivision,
   divisionAt,
@@ -7,8 +8,7 @@ import {
   gridLabel,
   type Tempo,
   TRIPLET_FACTOR,
-} from "@audio-ui/engine/time";
-import { useCallback, useState } from "react";
+} from "@/lib/engine/time";
 
 /** How close an adaptive grid's lines may be, in px: a finer grid halves it, a wider one doubles it. */
 const DENSITIES = [6, 12, 24, 48, 96] as const;

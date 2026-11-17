@@ -1,6 +1,6 @@
 # audio/ui DAW
 
-A digital audio workstation in the browser, built on audio/ui only: the published packages (`@audio-ui/core`, `@audio-ui/engine`) and the registry, installed with the shadcn CLI as any project would. It exists to put audio/ui under the load of a real product; what it needs and does not find is fixed where it lives, never worked around here. [docs/daw-spec](../../docs/daw-spec) holds the behavior it must keep, rule by rule, and the gaps it found.
+A digital audio workstation in the browser, built on audio/ui only: the registry, installed with the shadcn CLI as any project would. It exists to put audio/ui under the load of a real product; what it needs and does not find is fixed where it lives, never worked around here. [docs/daw-spec](../../docs/daw-spec) holds the behavior it must keep, rule by rule, and the gaps it found.
 
 TanStack Start on Cloudflare, at https://daw.audio-ui.dev (the Worker `audio-ui-daw`).
 

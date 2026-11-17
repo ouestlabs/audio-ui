@@ -483,7 +483,7 @@ function zoomOnWheel(
  *
  * A recording streamed from a file gives its `spectra`
  * (`LaneSamples.spectra`, made by `spectrogramSpectra` of
- * `@audio-ui/engine/analysis`) and is never read
+ * `@/lib/engine/analysis`) and is never read
  * whole: zoomed out it is drawn from them, and once a column of the view is
  * narrower than one of theirs the lane reads the frames it shows, a chunk of
  * `CHUNK_FRAMES` at a time.

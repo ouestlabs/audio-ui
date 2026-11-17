@@ -34,7 +34,7 @@ export const hooks: RegistryItem[] = [
   }),
   {
     categories: ["audio", "timeline"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips",
     files: [
@@ -110,20 +110,20 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-timeline-grid", {
     categories: ["timeline"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
   }),
   hookItem("use-transport-clock", {
     categories: ["audio", "sequencer", "piano"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "A look-ahead transport clock on the audio clock: it calls back with the audio time of each step so notes are scheduled sample-accurately, with a loop region, seek and tempo changes.",
     registryDependencies: ["@audio-ui/web-audio"],
   }),
   hookItem("use-piano-roll-playback", {
     categories: ["audio", "piano", "sequencer"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport.",
     registryDependencies: [
@@ -165,7 +165,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-sound-report", {
     categories: ["audio", "timeline"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "Reads the sound of a track as edited, to tell what it is: its loudness, key and tempo, and whether it meets ACX's audiobook requirements, held as a report until it is cleared",
     registryDependencies: [
@@ -198,21 +198,21 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-device-engines", {
     categories: ["hooks", "audio", "device"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument.",
     registryDependencies: [],
   }),
   hookItem("use-device-signal", {
     categories: ["hooks", "audio", "device"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The live signal of a device's engine, for its panel's signal prop: the same object for the life of the component, following the engine as it changes and silent while there is none, listening only while the panel watches it.",
     registryDependencies: ["@audio-ui/device-signal"],
   }),
   hookItem("use-polyphony", {
     categories: ["audio", "synth"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
     registryDependencies: [
@@ -222,14 +222,14 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-synth-voices", {
     categories: ["audio", "synth", "piano", "envelope"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",
     registryDependencies: ["@audio-ui/envelope-ramp"],
   }),
   hookItem("use-midi-input", {
     categories: ["audio", "piano", "synth"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The notes of the page's MIDI input, with velocity and pitch bend: every component that calls it hears the same devices.",
   }),
@@ -253,7 +253,7 @@ export const hooks: RegistryItem[] = [
   },
   hookItem("use-audio-signal", {
     categories: ["audio", "waveform"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "An AnalyserNode as live signals for a waveform: the loudest sample of the moment, frequency bands and the raw samples, read every frame without re-rendering",
   }),
@@ -289,19 +289,19 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-pitch", {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
   }),
   hookItem("use-audio-levels", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
   }),
   hookItem("use-loudness", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
     registryDependencies: [],
@@ -314,20 +314,20 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-spectrum", {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
   }),
   hookItem("use-noise-through-eq", {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
     registryDependencies: ["@audio-ui/use-play-switch", "@audio-ui/web-audio"],
   }),
   hookItem("use-device-loop", {
     categories: ["hooks", "audio", "device"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: [],
     description:
       "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     registryDependencies: [

@@ -1,4 +1,5 @@
-import { dbToGain } from "@audio-ui/engine/analysis";
+import { type FadeShape, fadeGain } from "@/components/audio-ui/timeline/clip";
+import { dbToGain } from "@/lib/engine/analysis";
 import {
   type DitherMethod,
   ditherChannels,
@@ -16,14 +17,9 @@ import {
   shiftChannels,
   speedChannels,
   stretchChannels,
-} from "@audio-ui/engine/files";
-import {
-  formatFrequency,
-  formatLevel,
-  formatPan,
-} from "@audio-ui/engine/format";
-import { type Repair, repairChannels } from "@audio-ui/engine/repair";
-import { type FadeShape, fadeGain } from "@/components/audio-ui/timeline/clip";
+} from "@/lib/engine/files";
+import { formatFrequency, formatLevel, formatPan } from "@/lib/engine/format";
+import { type Repair, repairChannels } from "@/lib/engine/repair";
 
 /** A sound as plain samples: what an operation reads and writes. */
 export interface SoundSamples {

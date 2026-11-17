@@ -1,4 +1,4 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
+import type { ParameterValue } from "@/engine/device";
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { AUTOMATED_PARAMETERS } from "@/registry-audio/bases/base/audio/elements/track-automation";
 import {

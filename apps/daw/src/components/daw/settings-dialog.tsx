@@ -1,11 +1,4 @@
 import {
-  gridLabel,
-  METRONOME_RHYTHMS,
-  type MetronomeRhythm,
-  metronomeRhythmSeconds,
-  type Tempo,
-} from "@audio-ui/engine/time";
-import {
   type Hotkey,
   matchesKeyboardEvent,
   useAppHotkeyList,
@@ -46,6 +39,13 @@ import {
   readSettings,
 } from "@/lib/daw/settings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
+import {
+  gridLabel,
+  METRONOME_RHYTHMS,
+  type MetronomeRhythm,
+  metronomeRhythmSeconds,
+  type Tempo,
+} from "@/lib/engine/time";
 import { RECORD_QUANTIZE } from "@/lib/recording";
 import { HotkeyKeys, OtherShortcuts } from "./shortcut-list";
 import type { AudioInput } from "./use-take";

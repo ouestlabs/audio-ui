@@ -1,10 +1,10 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
-import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   BASS_ENHANCER_WORKLET,
   type BassEnhancerState,
   bassEnhancerSettings,
 } from "@/components/audio-ui/devices/bass-enhancer/device";
+import type { EffectEngine } from "@/lib/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.02;
 

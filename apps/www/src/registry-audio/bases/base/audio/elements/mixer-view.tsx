@@ -1,5 +1,5 @@
-import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
-import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
+import { dbToGain, gainToDb, peakDb } from "@/engine/analysis";
+import { formatLevel, formatPan as formatPanOf } from "@/engine/format";
 import {
   type KeyboardEvent,
   type MouseEvent,

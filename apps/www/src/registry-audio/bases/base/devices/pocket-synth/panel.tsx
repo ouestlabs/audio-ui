@@ -1,4 +1,4 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
+import { midiToHz } from "@/engine/pitch";
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

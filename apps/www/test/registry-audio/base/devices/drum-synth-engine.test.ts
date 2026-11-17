@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { deviceTools } from "@audio-ui/engine/device";
+import { deviceTools } from "@/engine/device";
 import {
   DRUM_SYNTH_VOICES,
   decaySeconds,

@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
 
 /**
  * A utility as a device: gain, pan, stereo width, mono and a phase invert,

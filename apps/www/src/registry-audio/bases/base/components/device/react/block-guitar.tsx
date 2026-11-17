@@ -1,5 +1,5 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
 import { useCallback, useState } from "react";
+import { midiToHz } from "@/engine/pitch";
 import {
   type GuitarNote,
   type GuitarState,

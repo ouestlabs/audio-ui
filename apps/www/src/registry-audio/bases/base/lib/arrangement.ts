@@ -1,12 +1,12 @@
-import { autoWarp, type BeatAnalysis } from "@audio-ui/engine/analysis";
-import type { ParameterValue } from "@audio-ui/engine/device";
-import type { Scale } from "@audio-ui/engine/pitch";
-import type { PlayedClip, WarpMode } from "@audio-ui/engine/playback";
+import { autoWarp, type BeatAnalysis } from "@/engine/analysis";
+import type { ParameterValue } from "@/engine/device";
+import type { Scale } from "@/engine/pitch";
+import type { PlayedClip, WarpMode } from "@/engine/playback";
 import {
   unwarpedTime,
   type WarpMarker,
   warpedTime,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import {
   type Breakpoint,
   levelAt,

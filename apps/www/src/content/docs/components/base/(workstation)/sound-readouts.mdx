@@ -28,7 +28,7 @@ import {
 </SoundReadouts>;
 ```
 
-The parts show; they convert nothing. `SoundRate` calls `onResample` with the rate picked, from 8 kHz to 384 kHz, and `SoundChannels` calls `onMix` with `mono`, `stereo`, `5.1` or `7.1`: convert the sound your own way, or with `resampleChannels` and `mixChannels` from `@audio-ui/engine/files`. `SoundLevel` keeps the measure it shows (Peak, RMS or Loudness) itself, or take it over with `measure` and `onMeasureChange`.
+The parts show; they convert nothing. `SoundRate` calls `onResample` with the rate picked, from 8 kHz to 384 kHz, and `SoundChannels` calls `onMix` with `mono`, `stereo`, `5.1` or `7.1`: convert the sound your own way, or with `resampleChannels` and `mixChannels` from `@/lib/engine/files`. `SoundLevel` keeps the measure it shows (Peak, RMS or Loudness) itself, or take it over with `measure` and `onMeasureChange`.
 
 The [audio editor](/docs/components/base/audio-editor) puts these parts under its waveform and replaces the sound with the converted one, as a step of undo.
 

@@ -1,4 +1,3 @@
-import { formatFrequency } from "@audio-ui/engine/format";
 import type { ComponentProps } from "react";
 import {
   Plot,
@@ -10,6 +9,7 @@ import {
 } from "@/components/audio-ui/plot";
 import type { Source } from "@/components/audio-ui/primitive";
 import { useSpectrumPeaks } from "@/hooks/use-spectrum";
+import { formatFrequency } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */

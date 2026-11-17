@@ -1,4 +1,4 @@
-import { defineDevice } from "@audio-ui/engine/device";
+import { defineDevice } from "@/engine/device";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
 import { createCompressorEngine } from "@/registry-audio/bases/base/devices/compressor/engine";
 import {

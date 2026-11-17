@@ -1,4 +1,3 @@
-import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -7,6 +6,7 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { rollScale, type Scale } from "@/engine/pitch";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Input } from "@/registry/bases/base/ui/input";

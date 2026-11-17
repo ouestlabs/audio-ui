@@ -3,7 +3,7 @@ import {
   formatLevel,
   formatPan,
   formatTime,
-} from "@audio-ui/engine/format";
+} from "@/engine/format";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 

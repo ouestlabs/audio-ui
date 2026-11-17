@@ -1,4 +1,4 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
+import { midiToHz } from "@/engine/pitch";
 import { type DragEvent, useCallback, useEffect, useState } from "react";
 import {
   type SamplerNote,

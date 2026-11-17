@@ -1,1 +1,1 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":["@audio-ui/engine"],"description":"Moved: loudness is part of @audio-ui/engine now, imported from @audio-ui/engine/analysis.","files":[],"name":"loudness","registryDependencies":[],"type":"registry:lib"}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: loudness is part of the engine now, imported from @/lib/engine/analysis.","files":[],"name":"loudness","registryDependencies":["@audio-ui/engine-analysis"],"type":"registry:lib"}

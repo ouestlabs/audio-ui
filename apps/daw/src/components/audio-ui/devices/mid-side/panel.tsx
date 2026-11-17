@@ -1,4 +1,3 @@
-import { formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback } from "react";
 import {
   DeviceFrame,
@@ -26,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -24;

@@ -1,9 +1,10 @@
 import {
-  barsBeatsWith,
-  secondsPerBar,
-  secondsPerBeat,
-  type Tempo,
-} from "@audio-ui/engine/time";
+  CaretLeftIcon,
+  CaretRightIcon,
+  MapPinPlusIcon,
+  MusicNotesPlusIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import {
   type ComponentProps,
   type DragEvent,
@@ -19,21 +20,6 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   ArrangedClip,
   ArrangedClipGhost,
@@ -72,11 +58,22 @@ import {
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
-import {
-  TrackGrip,
-  TrackReorderGhost,
-} from "@/components/audio-ui/track-grip";
+import { TrackGrip, TrackReorderGhost } from "@/components/audio-ui/track-grip";
 import { TrackLevel } from "@/components/audio-ui/track-level";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useArrangedClips } from "@/hooks/use-arranged-clips";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
@@ -111,7 +108,13 @@ import {
   trackDepth,
 } from "@/lib/arrangement-state";
 import { drumKit } from "@/lib/drum-kit";
-import { CaretLeftIcon, CaretRightIcon, PlusIcon, MapPinPlusIcon, MusicNotesPlusIcon } from "@phosphor-icons/react";
+import {
+  barsBeatsWith,
+  secondsPerBar,
+  secondsPerBeat,
+  type Tempo,
+} from "@/lib/engine/time";
+import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

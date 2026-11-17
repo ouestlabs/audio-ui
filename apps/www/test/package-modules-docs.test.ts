@@ -3,25 +3,29 @@ import packageModules from "@/lib/docs/content/package-modules.generated.json";
 
 const DOCS = `${import.meta.dir}/../src/content/docs`;
 
-/** Each package's docs folder, and the guides that live there beside its modules. */
+/** Each docs folder, the guides that live there beside its modules, and what its modules are imported from. */
 const SECTIONS = [
-  { folder: "engine", guides: [], package: "@audio-ui/engine" },
-  { folder: "gl", guides: [], package: "@audio-ui/gl" },
+  { folder: "engine", from: "@/lib/engine", guides: [] },
+  { folder: "gl", from: "@audio-ui/gl", guides: [] },
 ] as const;
 
+/** The section a module is in, by what it is imported from. */
+const sectionOf = (from: string) =>
+  SECTIONS.find((one) => from === one.from || from.startsWith(`${one.from}/`));
+
 /** A module's page in its folder: a package's root is the folder's overview. */
-const pageOf = (from: string, pkg: string) =>
-  from === pkg ? "index" : from.slice(pkg.length + 1);
+const pageOf = (from: string, root: string) =>
+  from === root ? "index" : from.slice(root.length + 1);
 
 test("every module of the packages has its own page, headed by its entry", async () => {
   const wrong = await Promise.all(
     packageModules.map(async (each) => {
-      const section = SECTIONS.find((one) => one.package === each.package);
+      const section = sectionOf(each.from);
       if (!section) {
-        return `${each.from}: no docs section for ${each.package}`;
+        return `${each.from}: no docs section`;
       }
       const file = Bun.file(
-        `${DOCS}/${section.folder}/${pageOf(each.from, each.package)}.mdx`
+        `${DOCS}/${section.folder}/${pageOf(each.from, section.from)}.mdx`
       );
       if (!(await file.exists())) {
         return `${each.from}: no page`;
@@ -47,8 +51,8 @@ test("each package's sidebar lists every module once, beside its guides and over
       const expected = [
         "index",
         ...packageModules
-          .filter((each) => each.package === section.package)
-          .map((each) => pageOf(each.from, each.package))
+          .filter((each) => sectionOf(each.from) === section)
+          .map((each) => pageOf(each.from, section.from))
           .filter((page) => page !== "index"),
         ...section.guides,
       ];

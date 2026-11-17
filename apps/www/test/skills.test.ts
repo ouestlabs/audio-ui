@@ -5,6 +5,7 @@ import { devices } from "@/registry-audio/bases/base/devices/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
 import { primitives } from "@/registry-audio/bases/base/primitives/_registry";
+import { ENGINE_MODULES } from "@/registry-audio/bases/engine";
 import {
   compileSkill,
   readRules,
@@ -41,7 +42,8 @@ const RULE_ID =
 const INSTALLED_PRIMITIVE = /"@\/components\/audio-ui\/([a-z-]+)\/react"/g;
 // What every primitive shares, as a project imports it.
 const INSTALLED_SHARED = /"@\/components\/audio-ui\/primitive"/g;
-const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
+// A module of the engine, where it installs: `@/lib/engine/time`.
+const ENGINE_ENTRY = /@\/lib\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
 
@@ -51,7 +53,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["engine", "gl"]);
+const PACKAGES = new Set(["gl"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -78,9 +80,7 @@ const registryNames = new Set(
     (item) => item.name
   )
 );
-const engineExports = Object.keys(
-  (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
-);
+const engineModules = Object.keys(ENGINE_MODULES);
 const uiSource = (
   await Promise.all(
     [`${ROOT}/apps/www/src/registry-audio/bases/base/primitives`].map(
@@ -150,9 +150,9 @@ describe.each(markdown)("$path", ({ path, text }) => {
     expect(missing).toEqual([]);
   });
 
-  test("every @audio-ui/engine/<entry> is exported", () => {
+  test("every @/lib/engine/<module> is a module of the engine", () => {
     const missing = matches(text, ENGINE_ENTRY).filter(
-      (entry) => !engineExports.includes(`./${entry}`)
+      (entry) => !engineModules.includes(entry)
     );
     expect(missing).toEqual([]);
   });

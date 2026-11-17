@@ -1,5 +1,3 @@
-import { downloadFile } from "@audio-ui/engine/files";
-import { secondsPerBar, type Tempo } from "@audio-ui/engine/time";
 import { useAppHotkeys, useHotkeys } from "@tanstack/react-hotkeys";
 import {
   type ChangeEvent,
@@ -108,6 +106,8 @@ import {
   saveRecording,
 } from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
+import { downloadFile } from "@/lib/engine/files";
+import { secondsPerBar, type Tempo } from "@/lib/engine/time";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
 import { SettingsDialog, type SettingsSection } from "./settings-dialog";

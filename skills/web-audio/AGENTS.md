@@ -203,7 +203,7 @@ npx shadcn@latest add @audio-ui/use-polyphony @audio-ui/poly-synth
 ```
 
 ```tsx
-import { midiToHz } from "@audio-ui/engine/pitch";
+import { midiToHz } from "@/lib/engine/pitch";
 import { createPolySynthEngine } from "@/components/audio-ui/devices/poly-synth/engine";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";
@@ -442,13 +442,13 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 <TunerDisplay source={pitch} />;
 ```
 
-For a frequency from samples you already have, `detectPitch` from `@audio-ui/engine/analysis` and `cents(frequency)` from `@audio-ui/engine/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+For a frequency from samples you already have, `detectPitch` from `@/lib/engine/analysis` and `cents(frequency)` from `@/lib/engine/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
 
 Without the registry, `detectPitch(samples, sampleRate, { minHz, maxHz, minLevel, threshold })` returns `{ frequency, confidence }`, or `null` when the signal is quieter than `minLevel` (an RMS level) or has no clear pitch (noise, a chord); it is YIN, from `@audio/pitch-yin`. `cents(frequency)` returns `{ midi, name, hz, cents }` (`name` carries the octave, `"A#4"`, and positive `cents` means sharp), so guard a frequency that is not positive and finite. Feed an `AnalyserNode` that is never connected to the speakers, read it in a `requestAnimationFrame` loop, and publish the reading through a source:
 
 ```ts
-import { detectPitch } from "@audio-ui/engine/analysis";
-import { cents } from "@audio-ui/engine/pitch";
+import { detectPitch } from "@/lib/engine/analysis";
+import { cents } from "@/lib/engine/pitch";
 import { createSource } from "@/components/audio-ui/primitive";
 
 const reading = createSource<{ name: string; cents: number } | null>(null);
@@ -561,7 +561,7 @@ A mono source through a `ChannelSplitterNode` leaves the second analyser at zero
 Without the registry, the same loop is a few lines per channel:
 
 ```ts
-import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
+import { peakDb, rmsDb } from "@/lib/engine/analysis";
 import { createSource } from "@/components/audio-ui/primitive";
 
 const buffer = new Float32Array(analyser.fftSize);
@@ -642,7 +642,7 @@ const midi = useMidiInput({
 <Piano activeNotes={midi.activeNotes} aria-label="Piano" />
 ```
 
-Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away. Without React, `createMidiInput()` from `@audio-ui/engine/midi` is the same input as a source, and `parseMidiMessage` reads a raw message (channel, velocity from 0 to 1, pitch bend from -1 to 1).
+Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away. Without React, `createMidiInput()` from `@/lib/engine/midi` is the same input as a source, and `parseMidiMessage` reads a raw message (channel, velocity from 0 to 1, pitch bend from -1 to 1).
 
 ### 2.6 Playheads and playback position
 
@@ -693,7 +693,7 @@ function Track({ file }: { file: ArrayBuffer }) {
 **Correct:**
 
 ```ts
-// npx shadcn@latest add @audio-ui/audio-decode, then: import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis"
+// npx shadcn@latest add @audio-ui/audio-decode, then: import { computePeaks, normalizePeaks } from "@/lib/engine/analysis"
 const channels = await decodeAudioChannels(ctx, file);
 const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```
@@ -791,11 +791,11 @@ const spectrum = useSpectrum(analyser); // Source<Float32Array>, dB per point on
 <PlotTraceArea fillTo={-100} max={-10} min={-100} source={spectrum} />
 ```
 
-Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/engine/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
+Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@/lib/engine/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
 
 ```ts
 import { createSource } from "@/components/audio-ui/primitive";
-import { holdPeaks, logSpectrum } from "@audio-ui/engine/analysis";
+import { holdPeaks, logSpectrum } from "@/lib/engine/analysis";
 
 analyser.fftSize = 4096;
 analyser.minDecibels = -96;

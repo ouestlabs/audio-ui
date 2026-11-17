@@ -1,4 +1,4 @@
-import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
+import type { Device, ParameterDescriptor } from "@/engine/device";
 import { useCallback, useMemo } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";

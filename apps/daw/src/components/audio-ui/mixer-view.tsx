@@ -1,5 +1,3 @@
-import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
-import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -33,6 +31,8 @@ import {
   type Mix,
 } from "@/lib/arrangement";
 import { trackBlock, trackOf } from "@/lib/arrangement-state";
+import { dbToGain, gainToDb, peakDb } from "@/lib/engine/analysis";
+import { formatLevel, formatPan as formatPanOf } from "@/lib/engine/format";
 import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
 

@@ -1,5 +1,5 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
-import type { Tempo } from "@audio-ui/engine/time";
+import type { ParameterValue } from "@/engine/device";
+import type { Tempo } from "@/engine/time";
 import { type ComponentType, lazy, type ReactNode } from "react";
 import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 

@@ -1,4 +1,4 @@
-import { reportSound, type SoundReport } from "@audio-ui/engine/analysis";
+import { reportSound, type SoundReport } from "@/engine/analysis";
 import { useCallback, useState } from "react";
 import { renderEdited } from "@/registry-audio/bases/base/hooks/use-bake";
 import type { ArrangementDoc } from "@/registry-audio/bases/base/lib/arrangement-state";

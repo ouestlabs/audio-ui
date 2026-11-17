@@ -26,10 +26,10 @@ lane.destroy();
 
 ## Streamed recordings
 
-A recording streamed from a file is never read whole. Its `samples` give `spectra`: a column every `hop` frames, each bin's level to Nyquist over Hann windows of `size` frames, a byte each, as `spectrogramSpectra` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) makes them from its samples, once, and kept beside it (`SPECTRA_SIZE`, 2048 frames, for both by default). Zoomed out the lane draws from them; once a column of the view is narrower than one of theirs it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and the renderer computes those columns from the samples.
+A recording streamed from a file is never read whole. Its `samples` give `spectra`: a column every `hop` frames, each bin's level to Nyquist over Hann windows of `size` frames, a byte each, as `spectrogramSpectra` of [`@/lib/engine/analysis`](/docs/engine/analysis) makes them from its samples, once, and kept beside it (`SPECTRA_SIZE`, 2048 frames, for both by default). Zoomed out the lane draws from them; once a column of the view is narrower than one of theirs it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and the renderer computes those columns from the samples.
 
 ```ts
-import { spectrogramSpectra } from "@audio-ui/engine/analysis";
+import { spectrogramSpectra } from "@/lib/engine/analysis";
 
 // Once: read a stretch at a time from any reader, at once or as a promise.
 const spectra = await spectrogramSpectra({ frames, read: readFrames });

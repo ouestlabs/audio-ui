@@ -1,5 +1,5 @@
-import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import type { DeviceReadings, EffectEngine } from "@/engine/device";
+import { loadWorklet } from "@/engine/worklet";
 import {
   LIMITER_WORKLET,
   type LimiterState,

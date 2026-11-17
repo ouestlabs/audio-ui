@@ -1,6 +1,3 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
-import type { WarpMode } from "@audio-ui/engine/playback";
-import type { Tempo } from "@audio-ui/engine/time";
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 import {
   EQUALIZER_BANDS,
@@ -26,6 +23,9 @@ import {
   type ArrangementSignature,
   createArrangementState,
 } from "@/lib/arrangement-state";
+import type { ParameterValue } from "@/lib/engine/device";
+import type { WarpMode } from "@/lib/engine/playback";
+import type { Tempo } from "@/lib/engine/time";
 import { createZip, readZip } from "@/lib/zip";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */

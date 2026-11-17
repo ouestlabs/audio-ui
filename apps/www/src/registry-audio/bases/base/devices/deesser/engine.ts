@@ -1,5 +1,5 @@
-import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
-import { createWorkletStage } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@/engine/device";
+import { createWorkletStage } from "@/engine/device";
 import {
   DEESSER_WORKLET,
   type DeesserState,

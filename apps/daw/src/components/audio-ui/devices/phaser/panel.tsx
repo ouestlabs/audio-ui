@@ -1,4 +1,3 @@
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -26,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */

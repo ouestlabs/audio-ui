@@ -10,6 +10,7 @@
  */
 
 import type { RegistryItem } from "shadcn/schema";
+import { ENGINE_MODULES } from "../src/registry-audio/bases/engine.ts";
 
 const WEB = `${import.meta.dir}/..`;
 const BASE = `${WEB}/src/registry-audio/bases/base`;
@@ -95,8 +96,9 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
 
 export async function buildEntries(): Promise<Entry[]> {
   const all = await loadItems(FOLDERS);
+  // An engine module has its page under Engine, headed by its module.
   const own = (await loadItems(["hooks", "lib"])).filter(
-    (item) => (item.files?.length ?? 0) > 0
+    (item) => (item.files?.length ?? 0) > 0 && !item.name.startsWith("engine-")
   );
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
@@ -136,23 +138,24 @@ const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
 // `export default function name`, with its JSDoc, in a module or its declarations.
 const DEFAULT_EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
-const OUR_MODULE = /^@audio-ui\/(engine)(?:\/([a-z-]+))?$/;
+// A module of the engine, as the registry's files import it: `@/engine/time`.
+const ENGINE_MODULE = /^@\/engine\/([a-z-]+)$/;
 const SCRIPT_EXTENSION = /\.[cm]?js$/;
+const SOURCE_FILE = /\.tsx?$/;
 
 /** The published packages whose modules have a page of their own: the folder of each under `packages/`. */
-const MODULE_PACKAGES = [
-  { folder: "engine", name: "@audio-ui/engine" },
-  { folder: "gl", name: "@audio-ui/gl" },
-] as const;
+const MODULE_PACKAGES = [{ folder: "gl", name: "@audio-ui/gl" }] as const;
+/** Where the engine's modules are, in the registry. */
+const ENGINE = `${BASE}/lib/engine`;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
   /** The audio.js packages it builds on, such as `@audio/note`: those its files import, and those whose code its kernels carry. */
   audiojs: string[];
   exports: EntryExport[];
-  /** What a project imports it from, such as `@audio-ui/engine/time`: the module's key. */
+  /** What a project imports it from, such as `@/lib/engine/time` or `@audio-ui/gl/lane`: the module's key. */
   from: string;
-  /** The package it is in, what a project installs. */
+  /** What a project installs: the registry item of an engine module (`@audio-ui/engine-time`), or the npm package. */
   package: string;
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
@@ -191,12 +194,23 @@ interface Resolved {
 /** The file a specifier names from the file at `from`: a relative path, a module of ours by its source, another package by its declarations, or nothing. */
 async function fileOf(from: string, specifier: string): Promise<string | null> {
   if (specifier.startsWith(".")) {
-    return resolvePath(from, specifier);
+    const path = resolvePath(from, specifier);
+    // An import names a file with or without its extension, or a folder by its index.
+    for (const file of [
+      path,
+      `${path}.ts`,
+      `${path}.tsx`,
+      `${path}/index.ts`,
+    ]) {
+      if (SOURCE_FILE.test(file) && (await Bun.file(file).exists())) {
+        return file;
+      }
+    }
+    return null;
   }
-  const ours = OUR_MODULE.exec(specifier);
-  if (ours) {
-    const [, , sub] = ours;
-    return `${PACKAGES}/engine/src/${sub}/index.ts`;
+  const engine = ENGINE_MODULE.exec(specifier);
+  if (engine) {
+    return `${ENGINE}/${engine[1]}/index.ts`;
   }
   try {
     const entry = Bun.resolveSync(
@@ -384,7 +398,28 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
       );
     })
   );
-  return modules.flat();
+  // The engine's modules: registry items, installed to `lib/engine/<module>`.
+  const engine = await Promise.all(
+    Object.keys(ENGINE_MODULES).map(async (module): Promise<PackageModule> => {
+      const entry = `${ENGINE}/${module}/index.ts`;
+      const resolved = await moduleExports(entry);
+      return {
+        audiojs: await audioJsOf(entry),
+        exports: resolved.map((each) => each.declared),
+        from: `@/lib/engine/${module}`,
+        package: `@audio-ui/engine-${module}`,
+        usedBy: itemFiles
+          .filter((item) =>
+            item.sources.some((text) =>
+              text.includes(`from "@/engine/${module}"`)
+            )
+          )
+          .map((item) => item.name)
+          .sort(),
+      };
+    })
+  );
+  return [...modules.flat(), ...engine];
 }
 
 const MANIFESTS = [

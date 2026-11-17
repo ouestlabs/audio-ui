@@ -1,4 +1,3 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { DeviceFrame, DeviceHeader } from "@/components/audio-ui/device-panel";
 import {
@@ -13,6 +12,7 @@ import { Fader } from "@/components/audio-ui/fader";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
 import { XYPad } from "@/components/audio-ui/xypad";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */

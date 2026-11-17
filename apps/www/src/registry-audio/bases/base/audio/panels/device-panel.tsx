@@ -6,7 +6,7 @@ import type {
   ParameterDescriptor,
   ParameterValue,
   ToggleParameter,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

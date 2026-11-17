@@ -6,7 +6,7 @@ import type {
   InstrumentEngine,
   ParameterDescriptor,
   ParameterValue,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
 import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";

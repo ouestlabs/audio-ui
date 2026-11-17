@@ -1,7 +1,7 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
-import type { Tempo } from "@audio-ui/engine/time";
 import { type ComponentType, lazy, type ReactNode } from "react";
 import type { DeviceSignal } from "@/lib/device-signal";
+import type { ParameterValue } from "@/lib/engine/device";
+import type { Tempo } from "@/lib/engine/time";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {

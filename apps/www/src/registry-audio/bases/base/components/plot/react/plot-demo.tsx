@@ -5,8 +5,8 @@ import {
   biquadResponse,
   type EqBand,
   eqResponse,
-} from "@audio-ui/engine/analysis";
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
+} from "@/engine/analysis";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,

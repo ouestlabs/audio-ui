@@ -3,14 +3,14 @@ title: repair
 description: "Defects taken out of a recording, each by the method made for it: clicks, crackle, mains hum, steady and changing noise, clipping, wind, plosives, breaths and reverb, or one that finds the defect itself, on audio.js's denoise family."
 ---
 
-<Module from="@audio-ui/engine/repair" />
+<Module from="@/lib/engine/repair" />
 
 ## Usage
 
 `repairChannels` takes channels, their sample rate and one repair of `REPAIRS`, and gives back channels of the same length with that defect taken out. Each channel is processed on its own, the source is left as it is, and a sound with no such defect comes back as it was.
 
 ```ts
-import { REPAIRS, repairChannels } from "@audio-ui/engine/repair";
+import { REPAIRS, repairChannels } from "@/lib/engine/repair";
 
 repairChannels(channels, 48_000, "hum60"); // mains hum and its harmonics at 60 Hz
 repairChannels(channels, 48_000, "clean"); // finds what the sound carries and picks the method

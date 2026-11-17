@@ -1,4 +1,4 @@
-import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@/engine/device";
 import type {
   PocketSynthNote,
   PocketSynthState,

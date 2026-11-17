@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import { DEFAULT_TEMPO } from "@/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,

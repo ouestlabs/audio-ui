@@ -1,16 +1,16 @@
 ---
 title: pitch
-description: "Named scales from @audio-ui/engine: the steps of each scale, the pitch classes a scale on a root keeps, whether a pitch is in it and the nearest one that is, and the scale as a piano roll reads it."
+description: "Named scales: the steps of each scale, the pitch classes a scale on a root keeps, whether a pitch is in it and the nearest one that is, and the scale as a piano roll reads it."
 ---
 
-<Module from="@audio-ui/engine/pitch" />
+<Module from="@/lib/engine/pitch" />
 
 ## Usage
 
 Pitches are MIDI note numbers, 60 being middle C. A `Scale` is a name of `SCALES` on a root pitch class, 0 being C:
 
 ```ts
-import { inScale, nearestInScale, rollScale, scalePitchClasses } from "@audio-ui/engine/pitch";
+import { inScale, nearestInScale, rollScale, scalePitchClasses } from "@/lib/engine/pitch";
 
 const aMinor = { name: "minor", root: 9 };
 
@@ -37,7 +37,7 @@ const scale = useMemo(() => rollScale({ name: "dorian", root: 2 }), []);
 `detectKeys(notes, count, audio)` gives the keys a set of notes is likeliest in, likeliest first, at most `count` (3 unless told): each pitch class weighed by how long it sounds against the major and minor key profiles of `@audio/mir-key`. `audio` adds the sound of recordings, a weight per pitch class such as an [`audioChroma`](/docs/engine/analysis#a-recording-as-it-comes-in) times the seconds it plays. One part alone is often ambiguous, as a bass line is: pass every part of the song.
 
 ```ts
-import { detectKeys } from "@audio-ui/engine/pitch";
+import { detectKeys } from "@/lib/engine/pitch";
 
 detectKeys(notes.map(({ pitch, length, muted }) => ({ pitch, length, muted })));
 // [{ name: "minor", root: 9 }, { name: "major", root: 0 }, …]

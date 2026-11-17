@@ -1,5 +1,5 @@
-import { detectPitch, type PitchEstimate } from "@audio-ui/engine/analysis";
-import { cents } from "@audio-ui/engine/pitch";
+import { detectPitch, type PitchEstimate } from "@/engine/analysis";
+import { cents } from "@/engine/pitch";
 import { useEffect, useState } from "react";
 import {
   createSource,

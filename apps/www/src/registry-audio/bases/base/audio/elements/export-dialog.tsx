@@ -1,5 +1,5 @@
-import { LOUDNESS_TARGETS } from "@audio-ui/engine/analysis";
-import type { AudioFileFormat } from "@audio-ui/engine/files";
+import { LOUDNESS_TARGETS } from "@/engine/analysis";
+import type { AudioFileFormat } from "@/engine/files";
 import {
   type ComponentProps,
   type ReactNode,

@@ -1,0 +1,117 @@
+import { describe, expect, test } from "bun:test";
+import { warpedTime } from "../time/warp";
+import { autoWarp, detectTransients } from "./beat";
+
+const RATE = 48_000;
+
+/** A drum-like hit: a short decaying tone, loud on the beat and softer off it. */
+function hit(data: Float32Array, at: number, gain: number, hz: number) {
+  const from = Math.round(at * RATE);
+  const length = Math.round(0.12 * RATE);
+  for (
+    let index = 0;
+    index < length && from + index < data.length;
+    index += 1
+  ) {
+    const time = index / RATE;
+    data[from + index] =
+      (data[from + index] as number) +
+      gain * Math.exp(-time * 40) * Math.sin(2 * Math.PI * hz * time);
+  }
+}
+
+/** `seconds` of a beat at `bpm` from `start`: a kick on each bar's first beat, a snare on the others, a hat between. */
+function groove(bpm: number, seconds: number, start = 0) {
+  const data = new Float32Array(Math.round(seconds * RATE));
+  const beat = 60 / bpm;
+  for (let index = 0; start + index * beat < seconds; index += 1) {
+    const at = start + index * beat;
+    hit(data, at, index % 4 === 0 ? 0.9 : 0.6, index % 4 === 0 ? 60 : 180);
+    if (at + beat / 2 < seconds) {
+      hit(data, at + beat / 2, 0.25, 3000);
+    }
+  }
+  return [data, data];
+}
+
+describe("CLP-018: transients and tempo", () => {
+  test("finds each hit to within a millisecond of where it starts", () => {
+    const data = new Float32Array(RATE * 2);
+    const times = [0.1, 0.45, 0.8123, 1.5];
+    for (const time of times) {
+      hit(data, time, 0.8, 200);
+    }
+    const found = detectTransients([data], RATE);
+    expect(found).toHaveLength(times.length);
+    for (const [index, time] of times.entries()) {
+      expect(Math.abs((found[index] as number) - time)).toBeLessThan(0.001);
+    }
+  });
+
+  test("the silence after a loud passage holds no transient", () => {
+    // A long loud groove, then silence: the level read over it must fall to nothing, not carry what came before.
+    const loud = groove(120, 60)[0] as Float32Array;
+    const data = new Float32Array(loud.length + RATE * 5);
+    data.set(loud);
+    const transients = detectTransients([data, data], RATE);
+    expect(transients.length).toBeGreaterThan(0);
+    expect(transients.every((at) => at < 60)).toBe(true);
+  });
+
+  test("at 44.1 kHz too, where a window is not a whole number of hops", () => {
+    const rate = 44_100;
+    const data = new Float32Array(rate * 2);
+    for (const at of [0.25, 1.1]) {
+      const from = Math.round(at * rate);
+      for (let index = 0; index < 0.1 * rate; index += 1) {
+        data[from + index] =
+          0.8 *
+          Math.exp((-index / rate) * 40) *
+          Math.sin((2 * Math.PI * 60 * index) / rate);
+      }
+    }
+    const found = detectTransients([data], rate);
+    expect(found).toHaveLength(2);
+    expect(found[0]).toBeCloseTo(0.25, 2);
+    expect(found[1]).toBeCloseTo(1.1, 2);
+  });
+});
+
+describe("CLP-019: warp on import", () => {
+  test("a short loop takes the tempo its length gives, marked at its start and end", () => {
+    // Two bars at 95 BPM, cut exactly.
+    const duration = (2 * 4 * 60) / 95;
+    const estimate = { bpm: 95, confidence: 1, firstBeat: 0 };
+    const warped = autoWarp({ duration, estimate, tempo: 120 });
+    expect(warped?.bpm).toBeCloseTo(95, 9);
+    expect(warped?.offset).toBe(0);
+    expect(warped?.warp).toEqual([
+      { source: 0, target: 0 },
+      { source: duration, target: (2 * 4 * 60) / 120 },
+    ]);
+  });
+
+  test("a longer file gets a marker on each bar's first beat, and starts on the first", () => {
+    const channels = groove(128, 40, 0.5);
+    const estimate = { bpm: 128, confidence: 1, firstBeat: 0.5 };
+    const transients = detectTransients(channels, RATE);
+    const warped = autoWarp({ duration: 40, estimate, tempo: 120, transients });
+    const bar = (4 * 60) / 128;
+    expect(warped).not.toBeNull();
+    const markers = warped?.warp ?? [];
+    expect(markers.length).toBe(Math.floor((40 - 0.5) / bar) + 1);
+    for (const [index, marker] of markers.entries()) {
+      expect(Math.abs(marker.source - (0.5 + index * bar))).toBeLessThan(0.003);
+    }
+    // At 120 BPM each bar lasts 2 s on the clip, and the clip starts on the first beat.
+    expect(warpedTime(markers, markers[1]?.source ?? 0)).toBeCloseTo(
+      (warped?.offset ?? 0) + 2,
+      9
+    );
+    expect(warpedTime(markers, 0.5)).toBeCloseTo(warped?.offset ?? 0, 2);
+  });
+
+  test("a file with no tempo is not warped", () => {
+    expect(autoWarp({ duration: 6, estimate: null, tempo: 120 })).toBeNull();
+  });
+});

@@ -13,7 +13,7 @@
  * the engine's `encodeAudio` itself: a worker is never in the server's build,
  * which `audio-files` keeps the encoders out of.
  */
-import { encodeAudio } from "@audio-ui/engine/files";
+
 import { LEAF_FRAMES } from "@audio-ui/gl/waveform";
 import type { StreamedSource } from "@/lib/clip-player";
 import {
@@ -38,6 +38,7 @@ import {
   setsOf,
   transferable,
 } from "@/lib/daw/samples";
+import { encodeAudio } from "@/lib/engine/files";
 import {
   applySoundOperation,
   SEAM,

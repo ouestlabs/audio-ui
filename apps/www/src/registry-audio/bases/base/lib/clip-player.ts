@@ -14,8 +14,8 @@ import {
   type RecordingLoaderMessage,
   type RecordingLoaderReply,
   type RecordingStream,
-} from "@audio-ui/engine/playback";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+} from "@/engine/playback";
+import { loadWorklet } from "@/engine/worklet";
 
 /**
  * A recording kept in a file of the origin private file system and streamed

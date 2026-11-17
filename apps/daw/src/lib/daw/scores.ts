@@ -1,11 +1,3 @@
-import {
-  MIDI_FILE_ACCEPT,
-  MUSICXML_FILE_ACCEPT,
-  readMidiFileParts,
-  readMusicXmlFileParts,
-  type ScorePart,
-} from "@audio-ui/engine/files";
-import { secondsPerBar, secondsPerQuarter } from "@audio-ui/engine/time";
 import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import {
@@ -16,6 +8,14 @@ import {
 import { freshMidiClipId, nameOf } from "@/lib/daw/recordings";
 import { libraryDevice } from "@/lib/device-library";
 import { drumKit } from "@/lib/drum-kit";
+import {
+  MIDI_FILE_ACCEPT,
+  MUSICXML_FILE_ACCEPT,
+  readMidiFileParts,
+  readMusicXmlFileParts,
+  type ScorePart,
+} from "@/lib/engine/files";
+import { secondsPerBar, secondsPerQuarter } from "@/lib/engine/time";
 
 /** What the import and a drop take as a score: a MIDI file, or a MusicXML score. */
 export const SCORE_ACCEPT = `${MIDI_FILE_ACCEPT},${MUSICXML_FILE_ACCEPT}`;

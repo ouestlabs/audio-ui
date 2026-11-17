@@ -1,4 +1,3 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
 import {
   type ChainZone,
   inZone,
@@ -6,6 +5,7 @@ import {
   type TrackDevice,
 } from "@/lib/arrangement";
 import type { LibraryDevice } from "@/lib/device-library";
+import type { DeviceContext } from "@/lib/engine/device";
 import {
   createRackEngine,
   type FindDevice,

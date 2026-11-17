@@ -1,4 +1,4 @@
-import { dbToGain } from "@audio-ui/engine/analysis";
+import { dbToGain } from "@/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
   type FocusEvent,

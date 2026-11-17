@@ -3,13 +3,14 @@
  * a file or made by the Process menu: the peaks of its loudest channel and its
  * chroma. Nothing here touches the page, so a worker reads it too.
  */
+
+import { LEAF_FRAMES } from "@audio-ui/gl/waveform";
+import type { RecordingPeaks } from "@/lib/daw/recordings";
 import {
   audioChroma,
   computePeaks,
   normalizePeaks,
-} from "@audio-ui/engine/analysis";
-import { LEAF_FRAMES } from "@audio-ui/gl/waveform";
-import type { RecordingPeaks } from "@/lib/daw/recordings";
+} from "@/lib/engine/analysis";
 
 /** How many peaks a recording keeps per second: one per pixel at the closest zoom. */
 const PEAKS_PER_SECOND = 256;

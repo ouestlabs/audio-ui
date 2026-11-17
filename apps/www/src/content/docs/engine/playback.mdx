@@ -1,9 +1,9 @@
 ---
 title: playback
-description: "What plays when, from @audio-ui/engine: audio clips placed in frames, the transport's state on the audio clock, the clip player's processor and its renderer, recordings streamed in pages, and the mixer's pan law, solo and delay compensation."
+description: "What plays when: audio clips placed in frames, the transport's state on the audio clock, the clip player's processor and its renderer, recordings streamed in pages, and the mixer's pan law, solo and delay compensation."
 ---
 
-<Module from="@audio-ui/engine/playback" />
+<Module from="@/lib/engine/playback" />
 
 ## Usage
 
@@ -20,7 +20,7 @@ The registry's [`clip-player`](/docs/lib/clip-player) runs it in an `AudioWorkle
 `CLIP_PLAYER_WORKLET` is the player's processor as the source of a module. Load it once into a context, then make a player per track:
 
 ```ts
-import { CLIP_PLAYER_PROCESSOR, CLIP_PLAYER_WORKLET, playedClips } from "@audio-ui/engine/playback";
+import { CLIP_PLAYER_PROCESSOR, CLIP_PLAYER_WORKLET, playedClips } from "@/lib/engine/playback";
 
 const url = URL.createObjectURL(new Blob([CLIP_PLAYER_WORKLET], { type: "text/javascript" }));
 await ctx.audioWorklet.addModule(url);
@@ -54,7 +54,7 @@ A recording too long to hold decoded is read from pages in shared memory. `creat
 A note of a clip has a velocity, a chance and a deviation. `playedVelocity(note)` is how hard it plays this time round, or `null` when it does not: a deactivated note never plays, one with a `chance` of 0.5 plays every other time on average, and a `deviation` strays its velocity by up to that much, a new roll each time. The arrangement engine and the piano roll's playback both play notes through it, so a note sounds the same in either.
 
 ```ts
-import { playedVelocity } from "@audio-ui/engine/playback";
+import { playedVelocity } from "@/lib/engine/playback";
 
 const velocity = playedVelocity(note);
 if (velocity !== null) {
@@ -65,7 +65,7 @@ if (velocity !== null) {
 ## The mixer
 
 ```ts
-import { delayCompensation, panGains, soloState } from "@audio-ui/engine/playback";
+import { delayCompensation, panGains, soloState } from "@/lib/engine/playback";
 
 panGains(0); // [1, 1]: both channels at unity in the centre
 panGains(-1); // [1.414, 0]: the side it is turned to at +3 dB

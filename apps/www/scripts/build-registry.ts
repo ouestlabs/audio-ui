@@ -22,6 +22,10 @@ import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
+  engineDependencies,
+  rewriteEngineImports,
+} from "../src/registry-audio/bases/engine.ts";
+import {
   relativizeRepeatedImports,
   rewriteAdapter,
   rewritePrimitiveImports,
@@ -97,6 +101,8 @@ const DEMO_METADATA =
 // Checks of the verification pass.
 const MAX_LINE_LENGTH = 2000;
 const SVG_PATH_DATA = /^\s*d ?=/;
+// A bundle the engine ships as a string (`bun run engine:worklet` writes it): one long line by design.
+const BUNDLED_SOURCE = /-source\.ts$/;
 const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
 const REGISTRY_IMPORT = /@\/registry-audio\/|@\/registry\/bases\//;
 
@@ -372,9 +378,12 @@ async function buildFile(
     );
   }
 
+  // 7. A module of the engine is imported where it installs, `@/lib/engine/<module>`
+  content = rewriteEngineImports(content);
+
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
   const target = file.target || defaultTarget(item, file, fileName);
-  // 7. A path the CLI would shorten to the file itself is relative to where the file lands
+  // 8. A path the CLI would shorten to the file itself is relative to where the file lands
   if (!target.startsWith("~/")) {
     content = relativizeRepeatedImports(content, target);
   }
@@ -395,11 +404,17 @@ async function buildFile(
 function withSharedItems(item: SourceItem, files: BuiltFile[]) {
   const own = new Set(files.map((file) => file.target));
   const needed = files
-    .flatMap((file) => [...sharedDependencies(file.content)])
+    .flatMap((file) => [
+      ...sharedDependencies(file.content),
+      ...engineDependencies(file.content),
+    ])
     .filter((name) => {
-      const targets = (SHARED_ITEMS[name]?.files ?? []).map(
-        (file) => `components/audio-ui/${file}`
-      );
+      const shared = SHARED_ITEMS[name];
+      // A module of the engine is installed by its own item, never shipped by another.
+      if (!shared) {
+        return name !== item.name;
+      }
+      const targets = shared.files.map((file) => `components/audio-ui/${file}`);
       return !targets.every((target) => own.has(target)) && name !== item.name;
     });
   if (needed.length === 0) {
@@ -521,9 +536,11 @@ function contentProblems({ content, path }: BuiltFile): Problem[] {
   // Collapsed code: a line this long is a minified or unformatted file. SVG
   // path data is legitimately long.
   const lines = content.split("\n");
-  const collapsed = lines.findIndex(
-    (line) => line.length > MAX_LINE_LENGTH && !SVG_PATH_DATA.test(line)
-  );
+  const collapsed = BUNDLED_SOURCE.test(path)
+    ? -1
+    : lines.findIndex(
+        (line) => line.length > MAX_LINE_LENGTH && !SVG_PATH_DATA.test(line)
+      );
   if (collapsed !== -1) {
     problems.push({
       detail: `line ${collapsed + 1} is ${lines[collapsed]?.length} chars (file "${path}")`,

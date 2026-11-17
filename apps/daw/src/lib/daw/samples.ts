@@ -9,14 +9,7 @@
  * spectrogram is drawn from zoomed out: kept beside it the same way, made once
  * in a worker.
  */
-import {
-  type Bands,
-  createBandSplit,
-  SPECTRA_SIZE,
-  type Spectra,
-  spectrogramSpectra,
-  splitBands,
-} from "@audio-ui/engine/analysis";
+
 import {
   LEAF_FRAMES,
   type WaveformBands,
@@ -24,6 +17,14 @@ import {
 } from "@audio-ui/gl/waveform";
 import type { ClipSamples } from "@/components/audio-ui/clip-waveform";
 import type { RecordingSource, StreamedSource } from "@/lib/clip-player";
+import {
+  type Bands,
+  createBandSplit,
+  SPECTRA_SIZE,
+  type Spectra,
+  spectrogramSpectra,
+  splitBands,
+} from "@/lib/engine/analysis";
 
 const BYTES = Float32Array.BYTES_PER_ELEMENT;
 

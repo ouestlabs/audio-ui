@@ -1,4 +1,4 @@
-import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
+import type { Device, ParameterDescriptor } from "@/engine/device";
 import { useMemo, useRef } from "react";
 import {
   createDeviceSignal,

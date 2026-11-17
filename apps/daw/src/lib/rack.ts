@@ -1,15 +1,11 @@
-import type { DeviceContext, ParameterValue } from "@audio-ui/engine/device";
-import { panGains } from "@audio-ui/engine/playback";
-import type {
-  Rack,
-  RackChain,
-  TrackDevice,
-} from "@/lib/arrangement";
+import type { Rack, RackChain, TrackDevice } from "@/lib/arrangement";
 import type {
   AnyDeviceState,
   LibraryDevice,
   LibraryEngine,
 } from "@/lib/device-library";
+import type { DeviceContext, ParameterValue } from "@/lib/engine/device";
+import { panGains } from "@/lib/engine/playback";
 
 /** The longest a chain can wait for the others, in seconds. */
 const MAX_WAIT_SECONDS = 2;

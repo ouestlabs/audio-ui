@@ -1,16 +1,16 @@
 ---
 title: dsp
-description: "The audio.js processors the registry's devices are built on, from @audio-ui/engine: compressor and expander models, the gain curves of dynamics, filter circuits, reverbs and biquad shelves, under one dependency."
+description: "The audio.js processors the registry's devices are built on: compressor and expander models, the gain curves of dynamics, filter circuits, reverbs and biquad shelves, under one dependency."
 ---
 
-<Module from="@audio-ui/engine/dsp" />
+<Module from="@/lib/engine/dsp" />
 
 ## Usage
 
-A device describes its parameters itself, and takes the processors it is made of from here: the models a compressor offers, the gain curve a panel draws, the circuits of a filter, the reverbs a room is rendered with. They are the audio.js atoms' own, under the names the devices use, so a project depends on `@audio-ui/engine` and not on each atom:
+A device describes its parameters itself, and takes the processors it is made of from here: the models a compressor offers, the gain curve a panel draws, the circuits of a filter, the reverbs a room is rendered with. They are the audio.js atoms' own, under the names the devices use, so a device imports this module and not each atom:
 
 ```ts
-import { compressorGain, moogLadder } from "@audio-ui/engine/dsp";
+import { compressorGain, moogLadder } from "@/lib/engine/dsp";
 
 // At -10 dB in, a -20 dB threshold, 4:1 and a 6 dB knee: -7.5 dB of gain.
 compressorGain(-10, -20, 4, 6);

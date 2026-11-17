@@ -1,4 +1,3 @@
-import type { Tempo } from "@audio-ui/engine/time";
 import type { ArrangementTrack, TrackDevice } from "@/lib/arrangement";
 import {
   type ArrangementDoc,
@@ -6,6 +5,7 @@ import {
   MAIN_TRACK,
 } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
+import type { Tempo } from "@/lib/engine/time";
 
 /** How many colors a track can take: the timeline's palette. */
 export const TRACK_COLOR_COUNT = 5;

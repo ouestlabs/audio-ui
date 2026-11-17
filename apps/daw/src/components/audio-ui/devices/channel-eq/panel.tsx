@@ -1,4 +1,3 @@
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -21,6 +20,7 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

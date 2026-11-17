@@ -1,4 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
+import { ENGINE_MODULES } from "./engine.ts";
 import { primitiveFiles, SHARED_ITEMS } from "./primitives.ts";
 
 /**
@@ -82,10 +83,10 @@ const deviceFile = (name: string, file: string, type: FileType) =>
  * A device as the registry ships it: four items from one description.
  *
  * - `<name>-device`: its state, `devices/<name>/device.ts` (and the source of
- *   its worklet, over `@audio-ui/engine/kernels`, when it runs one), no panel
+ *   its worklet, over `@/engine/kernels`, when it runs one), no panel
  *   and no audio
  * - `<name>-engine`: its Web Audio engine, `engine.ts`, over the state and
- *   `@audio-ui/engine/device` (the contract it returns)
+ *   `@/engine/device` (the contract it returns)
  * - `<name>-panel`: its face, `panel.tsx`, over `device-panel` and the state
  * - `<name>`: all three in one install
  *
@@ -156,19 +157,39 @@ export function deviceItems(
 }
 
 /**
- * A lib that moved into `@audio-ui/engine`: its old install name still
- * answers, with the package in place of the file, so a project that adds it
- * gets the code it was after.
+ * A lib that moved into the engine: its old install name still answers, with
+ * the engine's module in place of the file, so a project that adds it gets
+ * the code it was after.
  */
 export function movedItem(name: string, module: string): RegistryItem {
   return {
-    dependencies: ["@audio-ui/engine"],
-    description: `Moved: ${name} is part of @audio-ui/engine now, imported from @audio-ui/engine/${module}.`,
+    dependencies: [],
+    description: `Moved: ${name} is part of the engine now, imported from @/lib/engine/${module}.`,
     files: [],
     name,
-    registryDependencies: [],
+    registryDependencies: [`@audio-ui/engine-${module}`],
     type: "registry:lib",
   };
+}
+
+/** The engine, one item per module, installed to `lib/engine/<module>/`. */
+export function engineItems(): RegistryItem[] {
+  return Object.entries(ENGINE_MODULES).map(([module, spec]) => ({
+    dependencies: spec.dependencies,
+    description: spec.description,
+    files: spec.files.map((file) =>
+      fileOf(
+        `lib/engine/${module}/${file}`,
+        "registry:lib",
+        `lib/engine/${module}/${file}`
+      )
+    ),
+    name: `engine-${module}`,
+    registryDependencies: spec.modules.map(
+      (name) => `@audio-ui/engine-${name}`
+    ),
+    type: "registry:lib",
+  }));
 }
 
 /**

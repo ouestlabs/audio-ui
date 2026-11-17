@@ -1,30 +1,3 @@
-import type {
-  Device,
-  DeviceContext,
-  ParameterDescriptor,
-} from "@audio-ui/engine/device";
-import {
-  arrangementFrame,
-  heardFrame,
-  PAGE_FRAMES,
-  type PageRequest,
-  type PlaybackState,
-  type PlayedClip,
-  pagesAhead,
-  playbackRuns,
-  playedClips,
-  playedVelocity,
-  rescaled,
-  STOPPED,
-  startsInWindow,
-  toFrames,
-} from "@audio-ui/engine/playback";
-import {
-  type MetronomeRhythm,
-  metronomeClicks,
-  secondsPerBar,
-  secondsPerBeat,
-} from "@audio-ui/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -40,10 +13,7 @@ import {
   type TrackDevice,
   withCrossfades,
 } from "@/lib/arrangement";
-import {
-  type ArrangementDoc,
-  allTracks,
-} from "@/lib/arrangement-state";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import {
   type ClipPlayer,
   createClipPlayer,
@@ -69,6 +39,33 @@ import {
   type PadRecording,
 } from "@/lib/drum-rack";
 import { triggerClick } from "@/lib/drum-synthesis";
+import type {
+  Device,
+  DeviceContext,
+  ParameterDescriptor,
+} from "@/lib/engine/device";
+import {
+  arrangementFrame,
+  heardFrame,
+  PAGE_FRAMES,
+  type PageRequest,
+  type PlaybackState,
+  type PlayedClip,
+  pagesAhead,
+  playbackRuns,
+  playedClips,
+  playedVelocity,
+  rescaled,
+  STOPPED,
+  startsInWindow,
+  toFrames,
+} from "@/lib/engine/playback";
+import {
+  type MetronomeRhythm,
+  metronomeClicks,
+  secondsPerBar,
+  secondsPerBeat,
+} from "@/lib/engine/time";
 import {
   createInstrumentRackEngine,
   type InstrumentRackEngine,
@@ -86,10 +83,7 @@ import {
   playedState,
   type RackEngine,
 } from "@/lib/rack";
-import {
-  createVoicePool,
-  type VoicePool,
-} from "@/lib/voice-pool";
+import { createVoicePool, type VoicePool } from "@/lib/voice-pool";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of

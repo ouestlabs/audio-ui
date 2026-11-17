@@ -1,4 +1,3 @@
-import { formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -19,6 +18,7 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const LIMIT_DB = 12;

@@ -15,7 +15,6 @@
 
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   type Browser,
   type BrowserContext,
@@ -23,6 +22,7 @@ import {
   type Page,
 } from "playwright-core";
 import { START_SECONDS } from "@/lib/arrangement-engine";
+import type { WarpMode } from "@/lib/engine/playback";
 import {
   type LoadSetOptions,
   loadSet,

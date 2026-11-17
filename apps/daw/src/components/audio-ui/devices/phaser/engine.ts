@@ -1,13 +1,13 @@
-import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
-import { createFeed, type Feed } from "@audio-ui/engine/device";
-import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
-import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   PHASER_STAGES,
   PHASER_WORKLET,
   type PhaserState,
   phaserSettings,
 } from "@/components/audio-ui/devices/phaser/device";
+import type { DeviceContext, EffectEngine } from "@/lib/engine/device";
+import { createFeed, type Feed } from "@/lib/engine/device";
+import { DEFAULT_TEMPO } from "@/lib/engine/time";
+import { loadWorklet } from "@/lib/engine/worklet";
 
 const RAMP_SECONDS = 0.03;
 

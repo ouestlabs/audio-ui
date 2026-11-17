@@ -303,7 +303,8 @@ test("an item's own imports come with it when it is installed", () => {
         const target = folder
           ? INSTALL_FOLDERS[folder] + specifier.slice(folder.length)
           : "";
-        const needed = owners.get(target);
+        // A folder is imported by its index: `@/lib/engine/time`.
+        const needed = owners.get(target) ?? owners.get(`${target}/index`);
         if (!needed) {
           problems.push(`${item.name}: ${specifier} is installed by no item`);
         } else if (!needed.some((owner) => brought.has(owner))) {

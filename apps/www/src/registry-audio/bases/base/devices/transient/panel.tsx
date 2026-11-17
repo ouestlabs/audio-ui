@@ -1,4 +1,4 @@
-import { formatLevel } from "@audio-ui/engine/format";
+import { formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

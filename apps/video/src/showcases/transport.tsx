@@ -1,5 +1,5 @@
-import { DEFAULT_TEMPO, secondsPerBar } from "@audio-ui/engine/time";
 import { useLayoutEffect, useState } from "react";
+import { DEFAULT_TEMPO, secondsPerBar } from "@/engine/time";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 

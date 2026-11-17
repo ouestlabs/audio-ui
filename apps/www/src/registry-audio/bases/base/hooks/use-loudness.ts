@@ -2,7 +2,7 @@ import {
   createLoudnessMeter,
   type LiveLoudness,
   type LoudnessMeter,
-} from "@audio-ui/engine/analysis";
+} from "@/engine/analysis";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 

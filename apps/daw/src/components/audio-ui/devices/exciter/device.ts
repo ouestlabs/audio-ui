@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { EXCITER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { formatFrequency } from "@/lib/engine/format";
+import { EXCITER_KERNELS } from "@/lib/engine/kernels";
 
 /** The damping of the kernel's high-pass, a Q of 2. */
 const DAMPING = 0.5;

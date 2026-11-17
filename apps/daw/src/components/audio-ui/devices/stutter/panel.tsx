@@ -1,4 +1,3 @@
-import { DEFAULT_TEMPO, secondsPerBeat } from "@audio-ui/engine/time";
 import { type ReactNode, useMemo } from "react";
 import {
   DeviceFrame,
@@ -19,6 +18,7 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { DEFAULT_TEMPO, secondsPerBeat } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;

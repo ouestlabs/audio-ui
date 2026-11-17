@@ -4,6 +4,10 @@
 
 `@audio-ui` is in shadcn's registry directory: there is no namespace to add to `components.json`. Run `npx shadcn@latest add @audio-ui/knob`. Requires React 19 and Tailwind CSS v4.
 
+## The engine
+
+The audio logic (devices, musical time, analysis, pitch, MIDI, files, playback) is the engine, one registry item per module, installed to `lib/engine/<module>/` and imported from there: `npx shadcn@latest add @audio-ui/engine-time`, then `import { syncedSeconds } from "@/lib/engine/time"`. A component that needs a module installs it with itself.
+
 ## Headless primitives only
 
 The same registry installs the primitive of your framework alone, with no styles, one item per primitive and framework:

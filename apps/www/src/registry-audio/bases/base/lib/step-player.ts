@@ -2,7 +2,7 @@
  * A clock that counts steps at a tempo, for a pattern played in a preview. It
  * ticks with a timer rather than on the audio clock, so it is not sample
  * accurate: for a transport that keeps time under load, use
- * `use-transport-clock` over `@audio-ui/engine/time`.
+ * `use-transport-clock` over `@/engine/time`.
  */
 export function createStepPlayer({
   bpm = 120,

@@ -1,9 +1,9 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type ReverbState,
   reverbImpulse,
   reverbSettings,
 } from "@/components/audio-ui/devices/reverb/device";
+import type { EffectEngine } from "@/lib/engine/device";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;

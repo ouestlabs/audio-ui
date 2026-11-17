@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
 import { oversamplingSeconds } from "@/lib/oversampling";
 
 const TABLE_SAMPLES = 4096;

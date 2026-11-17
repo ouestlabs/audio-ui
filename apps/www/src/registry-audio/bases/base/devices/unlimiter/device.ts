@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { unlimit, unlimitDeficitGain, unlimitGain } from "@audio-ui/engine/dsp";
-import { UNLIMITER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { unlimit, unlimitDeficitGain, unlimitGain } from "@/engine/dsp";
+import { UNLIMITER_KERNELS } from "@/engine/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 
 /**

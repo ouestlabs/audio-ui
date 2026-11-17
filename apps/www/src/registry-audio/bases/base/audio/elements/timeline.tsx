@@ -1,4 +1,4 @@
-import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
+import { dbToGain, gainToDb } from "@/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,

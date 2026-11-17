@@ -2,8 +2,8 @@ import {
   ACX,
   type AcxCheck,
   type SoundReport as Report,
-} from "@audio-ui/engine/analysis";
-import { formatLevel, formatTempo } from "@audio-ui/engine/format";
+} from "@/engine/analysis";
+import { formatLevel, formatTempo } from "@/engine/format";
 import {
   Dialog,
   DialogContent,

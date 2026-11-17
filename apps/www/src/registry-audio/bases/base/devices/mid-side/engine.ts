@@ -1,7 +1,7 @@
-import { toWebAudioQ } from "@audio-ui/engine/analysis";
-import type { EffectEngine } from "@audio-ui/engine/device";
-import { createFeed, type Feed } from "@audio-ui/engine/device";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import { toWebAudioQ } from "@/engine/analysis";
+import type { EffectEngine } from "@/engine/device";
+import { createFeed, type Feed } from "@/engine/device";
+import { loadWorklet } from "@/engine/worklet";
 import {
   DETUNE_WORKLET,
   type MidSideState,
