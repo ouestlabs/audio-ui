@@ -1,5 +1,6 @@
 import type * as React from "react";
 import { CopyRegistry } from "@/components/code/copy/copy-registry";
+import { FrameworkPreviewSelect } from "@/components/preview/controls/framework-preview-select";
 import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
 import { MidiConnect } from "@/components/preview/controls/midi-connect";
 import { PlaySwitch } from "@/components/preview/controls/play-switch";
@@ -114,9 +115,15 @@ export function PreviewBar({
           <PreviewName name={name} />
         </div>
       ) : (
-        <p className="flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs">
-          <BuiltOn />
-        </p>
+        <div className="flex flex-1 items-center">
+          <FrameworkPreviewSelect
+            fallback={
+              <p className="flex flex-1 items-center gap-1.5 truncate ps-1 text-site-muted-foreground text-xs">
+                <BuiltOn />
+              </p>
+            }
+          />
+        </div>
       )}
       <div className="flex items-center gap-1.5">
         {takesPlay(name) ? (
