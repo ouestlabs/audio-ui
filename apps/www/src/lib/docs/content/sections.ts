@@ -18,7 +18,7 @@ export const DOCS_SECTIONS = [
   {
     description: "Elements, workstation and devices",
     folders: ["components", "(overview)"],
-    href: "/docs/components/base/knob",
+    href: "/docs/components",
     id: "registry",
     label: "Components",
   },

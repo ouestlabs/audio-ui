@@ -53,7 +53,16 @@ export const PRIMITIVE_PAGES = {
   xypad: "/docs/components/base/xypad",
 } as const;
 
-const PRIMITIVE_PATHS: readonly string[] = Object.values(PRIMITIVE_PAGES);
+/** The list of every component, which a framework reads with only its primitives in it. */
+export const COMPONENTS_INDEX = "/docs/components";
+
+/** The pages of the React-only catalog every framework reads anyway: the primitives' pages and the list of components. */
+export const EVERY_FRAMEWORK_PATHS: readonly string[] = [
+  ...Object.values(PRIMITIVE_PAGES),
+  COMPONENTS_INDEX,
+];
+
+const PRIMITIVE_PATHS = EVERY_FRAMEWORK_PATHS;
 
 const PREFIXED = /^\/docs\/(react|svelte|vue|web-components)(?:\/(.*))?$/;
 const TRAILING_SLASH = /\/$/;
