@@ -455,8 +455,8 @@
 
     &[data-orientation="vertical"] {
       left: 0;
-      justify-content: flex-end;
       align-items: center;
+      justify-content: flex-end;
       width: 100%;
       padding: 0 0.25rem 0 0;
     }
@@ -605,12 +605,9 @@
     background: var(--audio-ui-background);
     border: 1px solid var(--audio-ui-foreground);
 
-    /* Every part says a drag is on; the point dragged is the one with the focus. */
+    /* The point being dragged. */
     &[data-dragging] {
       cursor: grabbing;
-    }
-
-    &[data-dragging]:focus {
       background: var(--audio-ui-foreground);
     }
 
@@ -633,7 +630,7 @@
     border: 1px solid var(--audio-ui-muted-foreground);
     border-radius: 50%;
 
-    &[data-dragging]:focus {
+    &[data-dragging] {
       background: var(--audio-ui-foreground);
     }
 
@@ -920,11 +917,11 @@
   /* Waveform */
 
   [data-slot="waveform"] {
+    --waveform-color: var(--audio-ui-muted-foreground);
+    --waveform-progress-color: var(--audio-ui-foreground);
     display: block;
     width: 24rem;
     height: 4rem;
-    --waveform-color: var(--audio-ui-muted-foreground);
-    --waveform-progress-color: var(--audio-ui-foreground);
 
     &[data-disabled] {
       opacity: 0.5;
@@ -1133,12 +1130,12 @@
   [data-slot="timeline-range"] {
     top: 0;
     bottom: 0;
+    cursor: grab;
     background: color-mix(
       in oklch,
       var(--audio-ui-foreground) 12%,
       transparent
     );
-    cursor: grab;
   }
 
   :is([data-slot="timeline-range-start"], [data-slot="timeline-range-end"]) {
@@ -1177,8 +1174,8 @@
   [data-slot="timeline-clip-header"] {
     padding: 0 0.25rem;
     font-size: 0.625rem;
-    cursor: grab;
     color: var(--audio-ui-background);
+    cursor: grab;
     background: var(--audio-ui-foreground);
   }
 
@@ -1209,8 +1206,8 @@
   }
 
   [data-slot="timeline-navigator-window"] {
-    background: var(--audio-ui-muted-foreground);
     cursor: grab;
+    background: var(--audio-ui-muted-foreground);
   }
 
   :is(

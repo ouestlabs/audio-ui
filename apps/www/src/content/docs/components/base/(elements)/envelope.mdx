@@ -545,7 +545,7 @@ In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a
 
 ### States to style from
 
-- `data-disabled` and `data-dragging` on every part.
+- `data-disabled` on every part. `data-dragging` on the Root, the Graph, the Line and the Fill while a point or a segment is dragged, and on a Point or a Segment only while it is the one dragged.
 - `data-blocked` on the Graph, briefly, when an addition was refused, and on a Point when its removal was refused: a feedback to animate. It is raised a frame after the change, so that an animation can play again.
 - `data-removable` on a Point while there are more than `minPoints`, and `data-index` on a Point and a Segment.
 - `data-flat` and `data-curve` on a Segment.

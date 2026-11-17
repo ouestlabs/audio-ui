@@ -880,6 +880,8 @@ export const envelope: EnvelopePrimitive = definePrimitive({
               ))
             : undefined,
           "data-blocked": flag(current.blocked),
+          // The point says it is dragged when it is the one, as its state does: the others stay as they are.
+          "data-dragging": flag(current.dragging),
           "data-index": String(index),
           "data-removable": flag(current.removable),
           role: "slider",
@@ -990,6 +992,8 @@ export const envelope: EnvelopePrimitive = definePrimitive({
             ? props.getAriaValueText(current.curve, index)
             : String(Math.round(current.curve * 100) / 100),
           "data-curve": String(current.curve),
+          // The segment says it is dragged when it is the one, as its state does.
+          "data-dragging": flag(current.dragging),
           "data-flat": flag(current.flat),
           "data-index": String(index),
           role: "slider",
