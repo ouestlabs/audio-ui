@@ -121,7 +121,7 @@ export function HomeHero() {
         <Button
           nativeButton={false}
           render={
-            <Link params={{ _splat: "components/base/knob" }} to="/docs/$">
+            <Link params={{ _splat: "components" }} to="/docs/$">
               Browse components
             </Link>
           }

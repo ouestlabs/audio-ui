@@ -95,7 +95,11 @@ export function HomeGuide({
   return (
     <div className="flex flex-col gap-16 px-4 pb-12 font-site-sans sm:px-6 lg:pb-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
-      <section aria-labelledby="home-components">
+      <section
+        aria-labelledby="home-components"
+        className="scroll-mt-4"
+        id="components"
+      >
         {/* Named for screen readers and search engines: the figures and the columns say what it holds. */}
         <h2 className="sr-only" id="home-components">
           Components
