@@ -68,9 +68,9 @@ export function sourceOf(event?: Event): ChangeSource | undefined {
 }
 
 /** A change or a commit's details: the reason, the event, and who caused it when the event says. */
-function detailsOf(reason: string, event?: Event) {
+function detailsOf(reason: string, event?: Event, extra?: object) {
   const source = sourceOf(event);
-  return { event, reason, ...(source ? { source } : {}) };
+  return { event, reason, ...(source ? { source } : {}), ...extra };
 }
 
 /**
@@ -79,7 +79,8 @@ function detailsOf(reason: string, event?: Event) {
  * fires `onValueCommitted`, and `setAtOnce` does both, for a change that is
  * over as soon as it is made (a key, a typed value, the wheel, a reset). It
  * skips a value `same` finds equal to the one `displayed` shows; with no
- * `same`, every value is reported, even an unchanged one.
+ * `same`, every value is reported, even an unchanged one. `extra` goes into
+ * the details, such as the `index` of the point that moved.
  */
 export function createReporter<State extends { value: Value }, Value>(
   context: PrimitiveContext<any, State, any>,
@@ -88,20 +89,48 @@ export function createReporter<State extends { value: Value }, Value>(
 ) {
   const change = createChange(context);
   const state = () => context.store.get() as State;
-  const commit = (value: Value, reason: string, event?: Event) => {
-    dispatch(context, "onValueCommitted", value, detailsOf(reason, event));
+  const commit = (
+    value: Value,
+    reason: string,
+    event?: Event,
+    extra?: object
+  ) => {
+    dispatch(
+      context,
+      "onValueCommitted",
+      value,
+      detailsOf(reason, event, extra)
+    );
   };
-  const report = (value: Value, reason: string, event?: Event) =>
-    change("value", value as never, detailsOf(reason, event) as never);
-  const setAtOnce = (value: Value, reason: string, event?: Event) => {
+  const report = (
+    value: Value,
+    reason: string,
+    event?: Event,
+    extra?: object
+  ) =>
+    change("value", value as never, detailsOf(reason, event, extra) as never);
+  const setAtOnce = (
+    value: Value,
+    reason: string,
+    event?: Event,
+    extra?: object
+  ) => {
     if (same?.(value, displayed(state()))) {
       return;
     }
-    if (report(value, reason, event)) {
-      commit(value, reason, event);
+    if (report(value, reason, event, extra)) {
+      commit(value, reason, event, extra);
     }
   };
   return { commit, report, setAtOnce, state };
+}
+
+/** Two numbers as one text: a comma between them, or a semicolon where the comma is the decimal mark. */
+export function formatPair(formatter: Intl.NumberFormat, a: number, b: number) {
+  const decimalComma = formatter
+    .formatToParts(1.5)
+    .some((part) => part.type === "decimal" && part.value === ",");
+  return `${formatter.format(a)}${decimalComma ? "; " : ", "}${formatter.format(b)}`;
 }
 
 /** What a gesture hears, from the press that started it to its release. */

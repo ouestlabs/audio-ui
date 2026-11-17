@@ -551,4 +551,82 @@
       outline: 4px solid var(--audio-ui-ring);
     }
   }
+
+  /* Envelope */
+
+  [data-slot="envelope"][data-disabled] {
+    opacity: 0.5;
+  }
+
+  [data-slot="envelope-graph"] {
+    position: relative;
+    width: 16rem;
+    height: 8rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    /* An addition refused at the most points. */
+    &[data-blocked] {
+      border-color: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="envelope-line"] {
+    color: var(--audio-ui-foreground);
+    pointer-events: none;
+  }
+
+  [data-slot="envelope-fill"] {
+    color: color-mix(in oklch, var(--audio-ui-foreground) 12%, transparent);
+    pointer-events: none;
+  }
+
+  [data-slot="envelope-point"] {
+    width: 0.75rem;
+    height: 0.75rem;
+    cursor: grab;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    /* Every part says a drag is on; the point dragged is the one with the focus. */
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+
+    &[data-dragging]:focus {
+      background: var(--audio-ui-foreground);
+    }
+
+    /* A removal refused at the least points. */
+    &[data-blocked] {
+      border-color: var(--audio-ui-destructive);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The handle that bends a segment, at its middle. */
+  [data-slot="envelope-segment"] {
+    width: 0.5rem;
+    height: 0.5rem;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-muted-foreground);
+    border-radius: 50%;
+
+    &[data-dragging]:focus {
+      background: var(--audio-ui-foreground);
+    }
+
+    /* Nothing to bend between two points of the same level. */
+    &[data-flat] {
+      visibility: hidden;
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
 }

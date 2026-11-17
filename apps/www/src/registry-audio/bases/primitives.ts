@@ -14,6 +14,7 @@ const OUR_PACKAGES = /["']@audio-ui\/(?:core|primitives)\/[^"']*["']/g;
 
 /** The primitives written in the registry. A primitive listed here needs no package of ours. */
 export const SHIPPED_PRIMITIVES = new Set([
+  "envelope",
   "fader",
   "knob",
   "meter",

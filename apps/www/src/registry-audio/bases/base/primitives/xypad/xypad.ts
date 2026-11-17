@@ -17,6 +17,7 @@ import {
   createReporter,
   definePrimitive,
   flag,
+  formatPair,
   VISUALLY_HIDDEN,
 } from "../primitive";
 
@@ -136,14 +137,6 @@ const displayed = (state: XYPadState): XYPadPoint =>
   };
 
 const samePoint = (a: XYPadPoint, b: XYPadPoint) => a.x === b.x && a.y === b.y;
-
-/** Two numbers as one text: a comma between them, or a semicolon where the comma is the decimal mark. */
-function formatPair(formatter: Intl.NumberFormat, a: number, b: number) {
-  const decimalComma = formatter
-    .formatToParts(1.5)
-    .some((part) => part.type === "decimal" && part.value === ",");
-  return `${formatter.format(a)}${decimalComma ? "; " : ", "}${formatter.format(b)}`;
-}
 
 const views = new WeakMap<XYPadState, XYPadSnapshot>();
 

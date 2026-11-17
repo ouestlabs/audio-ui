@@ -114,6 +114,9 @@ const styleOf = (element: HTMLElement | undefined) =>
 const nowOf = (element: HTMLElement | undefined) =>
   Number(element?.getAttribute("aria-valuenow"));
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function envelopeSuite(framework: string, mount: MountEnvelope) {
   describe(`the envelope in ${framework}`, () => {
     test("a slider for each point, with its level and its coordinates", async () => {
@@ -289,6 +292,8 @@ export function envelopeSuite(framework: string, mount: MountEnvelope) {
           pointerId: 1,
         });
       });
+      await frame();
+      await e.act(() => undefined);
       const [value, reason, index] = e.changes.at(-1) ?? [];
       expect(reason).toBe("drag");
       expect(index).toBe(1);
@@ -315,6 +320,8 @@ export function envelopeSuite(framework: string, mount: MountEnvelope) {
           pointerId: 1,
         });
       });
+      await frame();
+      await e.act(() => undefined);
       expect(e.changes.at(-1)?.[0][1]?.x).toBeLessThanOrEqual(1);
       e.unmount();
     });
@@ -330,6 +337,8 @@ export function envelopeSuite(framework: string, mount: MountEnvelope) {
           pointerId: 1,
         });
       });
+      await frame();
+      await e.act(() => undefined);
       expect(e.changes.at(-1)?.[0][1]).toMatchObject({ x: 0.25, y: 0.5 });
       e.unmount();
     });
@@ -369,6 +378,8 @@ export function envelopeSuite(framework: string, mount: MountEnvelope) {
           pointerId: 1,
         });
       });
+      await frame();
+      await e.act(() => undefined);
       expect(e.changes.at(-1)?.[1]).toBe("curve");
       e.unmount();
     });
