@@ -4,10 +4,10 @@
     {
       "id": 7,
       "prompt": "My app is in Vue 3 (no React). I want a rotary knob for filter cutoff, keyboard accessible, with our own CSS.",
-      "expected_output": "The registry's Vue primitive for the knob (knob-vue), installed with the shadcn CLI and assembled from its parts, styled by data attributes and classes, with an accessible name and a log scale for the cutoff.",
+      "expected_output": "The registry's Vue primitive for the knob (knob-vue), copied from its registry item by hand and assembled from its parts, styled by data attributes and classes, with an accessible name and a log scale for the cutoff.",
       "files": [],
       "expectations": [
-        "Installs the knob-vue item of the audio/ui registry (npx shadcn@latest add .../knob-vue.json), not @audio-ui/react or a hand-written slider",
+        "Copies the knob-vue item of the audio/ui registry (its files, from .../knob-vue.json), not @audio-ui/react or a hand-written slider",
         "Imports Knob from the installed file (components/audio-ui/knob/vue) and assembles the documented parts (Root, Control, Track, Indicator, Thumb, Value)",
         "Binds the value with :value and @value-change on Knob.Root",
         "Uses scale=\"log\" with a positive min for the cutoff",

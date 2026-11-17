@@ -14,13 +14,9 @@ npm install @audio-ui/engine
 
 ## The primitives for Vue, Svelte and the web
 
-Before writing a binding, install the primitive: every one is unstyled and accessible, written once over these controllers (`@audio-ui/primitives`, on the UI SDK) and rendered in each framework by a thin adapter that the CLI copies into your project (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes). The item is named `<primitive>-<framework>`.
+Before writing a binding, install the primitive: every one is unstyled and accessible, written once over these controllers (`@audio-ui/primitives`, on the UI SDK) and rendered in each framework by a thin adapter that you copy into your project (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes). The item is named `<primitive>-<framework>`.
 
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
-```
+The shadcn CLI is for React, so copy the files by hand: open the item's address (`https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, and `knob-svelte.json` or `knob-web.json` beside it), write each entry of `files` to its path under `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte) with its `content`, and install the packages its `dependencies` lists.
 
 The web adapter is one file, which registers the elements once it is imported:
 
