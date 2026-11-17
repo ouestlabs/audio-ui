@@ -1,5 +1,5 @@
-import type { NoteTiming } from "@audio-ui/engine/device";
-import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
+import type { NoteTiming } from "@/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@/engine/device";
 import {
   speedCents,
   TAPE_KEYS_HIGHEST,

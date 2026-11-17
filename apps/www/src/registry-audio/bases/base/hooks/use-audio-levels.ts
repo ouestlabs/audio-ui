@@ -1,4 +1,4 @@
-import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
+import { peakDb, rmsDb } from "@/engine/analysis";
 import { useEffect, useState } from "react";
 import type { MeterFrame } from "@/registry-audio/bases/base/primitives/meter/levels";
 import { createSource } from "@/registry-audio/bases/base/primitives/primitive";

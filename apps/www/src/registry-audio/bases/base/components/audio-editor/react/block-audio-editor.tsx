@@ -9,7 +9,7 @@ import {
   rmsDb,
   type SplitBands,
   splitBands,
-} from "@audio-ui/engine/analysis";
+} from "@/engine/analysis";
 import {
   type ChannelLayout,
   decodeAudioChannels,
@@ -17,13 +17,13 @@ import {
   LAYOUT_CHANNELS,
   mixChannels,
   resampleChannels,
-} from "@audio-ui/engine/files";
+} from "@/engine/files";
 import {
   formatLevel,
   formatSampleRate,
   formatTime,
-} from "@audio-ui/engine/format";
-import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
+} from "@/engine/format";
+import { secondsPerBeat, type Tempo } from "@/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {

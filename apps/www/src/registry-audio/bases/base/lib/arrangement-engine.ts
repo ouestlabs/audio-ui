@@ -2,7 +2,7 @@ import type {
   Device,
   DeviceContext,
   ParameterDescriptor,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import {
   arrangementFrame,
   heardFrame,
@@ -18,13 +18,13 @@ import {
   STOPPED,
   startsInWindow,
   toFrames,
-} from "@audio-ui/engine/playback";
+} from "@/engine/playback";
 import {
   type MetronomeRhythm,
   metronomeClicks,
   secondsPerBar,
   secondsPerBeat,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,

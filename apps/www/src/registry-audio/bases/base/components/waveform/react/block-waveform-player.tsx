@@ -2,9 +2,9 @@ import {
   type AudioPeaks,
   computePeaks,
   normalizePeaks,
-} from "@audio-ui/engine/analysis";
-import { decodeAudioChannels } from "@audio-ui/engine/files";
-import { formatTime } from "@audio-ui/engine/format";
+} from "@/engine/analysis";
+import { decodeAudioChannels } from "@/engine/files";
+import { formatTime } from "@/engine/format";
 import { LoopIcon } from "@audio-ui/icons/react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";

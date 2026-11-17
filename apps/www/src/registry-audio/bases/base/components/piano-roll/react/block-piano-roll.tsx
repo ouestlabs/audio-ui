@@ -5,9 +5,9 @@ import {
   MUSICXML_FILE_ACCEPT,
   readMidiFile,
   readMusicXmlFile,
-} from "@audio-ui/engine/files";
-import { rollScale, type Scale } from "@audio-ui/engine/pitch";
-import type { Tempo } from "@audio-ui/engine/time";
+} from "@/engine/files";
+import { rollScale, type Scale } from "@/engine/pitch";
+import type { Tempo } from "@/engine/time";
 import {
   type ChangeEvent,
   type DragEvent,

@@ -2,8 +2,8 @@ import type {
   Device,
   ParameterDescriptor,
   ParameterValue,
-} from "@audio-ui/engine/device";
-import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
+} from "@/engine/device";
+import { secondsPerBeat, type Tempo } from "@/engine/time";
 import {
   type ReactNode,
   Suspense,

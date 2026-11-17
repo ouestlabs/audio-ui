@@ -2,7 +2,7 @@ import type {
   DeviceContext,
   EffectEngine,
   EngineFactory,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import { useEffect, useMemo } from "react";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";

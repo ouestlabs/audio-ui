@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { distortion } from "@audio-ui/engine/dsp";
-import { formatFrequency } from "@audio-ui/engine/format";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { distortion } from "@/engine/dsp";
+import { formatFrequency } from "@/engine/format";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const TABLE_SAMPLES = 16_384;

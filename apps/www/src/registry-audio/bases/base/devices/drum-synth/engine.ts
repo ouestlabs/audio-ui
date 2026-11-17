@@ -1,4 +1,4 @@
-import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@/engine/device";
 import {
   type DrumSynthNote,
   type DrumSynthState,

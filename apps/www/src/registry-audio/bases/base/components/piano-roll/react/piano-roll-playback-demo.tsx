@@ -1,4 +1,4 @@
-import type { Tempo } from "@audio-ui/engine/time";
+import type { Tempo } from "@/engine/time";
 import { useEffect, useRef, useState } from "react";
 import {
   PianoRoll,

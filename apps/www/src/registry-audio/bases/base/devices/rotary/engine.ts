@@ -1,5 +1,5 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
-import { createWorkletStage } from "@audio-ui/engine/device";
+import type { EffectEngine } from "@/engine/device";
+import { createWorkletStage } from "@/engine/device";
 import {
   ROTARY_WORKLET,
   type RotaryState,

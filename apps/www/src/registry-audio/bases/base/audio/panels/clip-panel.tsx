@@ -1,4 +1,4 @@
-import type { WarpMode } from "@audio-ui/engine/playback";
+import type { WarpMode } from "@/engine/playback";
 import {
   addWarpMarker,
   moveWarpMarker,
@@ -8,7 +8,7 @@ import {
   type WarpMarker,
   warpedTime,
   warpRate,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type { WaveformBands } from "@audio-ui/gl/waveform";
 import {
@@ -300,7 +300,7 @@ export function processedSettings(
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
-  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@audio-ui/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
+  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
   bands?: () => WaveformBands;
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;

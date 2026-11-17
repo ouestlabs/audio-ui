@@ -1,5 +1,5 @@
-import { type EqBand, eqResponse } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { type EqBand, eqResponse } from "@/engine/analysis";
+import { type DeviceState, defineDevice } from "@/engine/device";
 
 /** How far a band boosts or cuts, in dB. */
 const BAND_DB = 15;

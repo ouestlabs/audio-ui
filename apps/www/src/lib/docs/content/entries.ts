@@ -48,7 +48,7 @@ export type PackageModule = (typeof packageModules)[number];
 
 const moduleByImport = new Map(packageModules.map((each) => [each.from, each]));
 
-/** A module by what a project imports it from, such as `@audio-ui/engine/time`; one the packages do not export throws. */
+/** A module by what a project imports it from, such as `@/engine/time`; one the packages do not export throws. */
 export function moduleOf(from: string): PackageModule {
   const found = moduleByImport.get(from);
   if (!found) {

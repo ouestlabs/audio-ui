@@ -1,4 +1,4 @@
-import type { EngineFactory, InstrumentEngine } from "@audio-ui/engine/device";
+import type { EngineFactory, InstrumentEngine } from "@/engine/device";
 import { useCallback, useMemo } from "react";
 import {
   type DeviceEngineLike,

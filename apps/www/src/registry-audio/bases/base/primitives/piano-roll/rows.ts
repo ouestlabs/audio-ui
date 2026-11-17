@@ -2,7 +2,7 @@
  * A scale as a piano roll reads it: the pitch classes it keeps and the one it
  * starts on, each from 0 (C) to 11 (B). C major is
  * `{ pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 }`; a scale by name, such
- * as `@audio-ui/engine/pitch`'s, gives its pitch classes.
+ * as `@/engine/pitch`'s, gives its pitch classes.
  */
 export interface RollScale {
   pitchClasses: readonly number[];

@@ -1,4 +1,4 @@
-import { DEFAULT_TEMPO, secondsPerBeat } from "@audio-ui/engine/time";
+import { DEFAULT_TEMPO, secondsPerBeat } from "@/engine/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

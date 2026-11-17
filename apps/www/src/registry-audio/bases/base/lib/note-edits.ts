@@ -2,7 +2,7 @@ import {
   rollScale,
   type Scale,
   scalePitchClasses,
-} from "@audio-ui/engine/pitch";
+} from "@/engine/pitch";
 import {
   chopNotes,
   deleteTime,

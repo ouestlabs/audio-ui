@@ -1,4 +1,4 @@
-import { measureLatency, measureResponse } from "@audio-ui/engine/device";
+import { measureLatency, measureResponse } from "@/engine/device";
 import {
   equalizerCurve,
   equalizerDevice,

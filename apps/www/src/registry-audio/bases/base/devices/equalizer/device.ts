@@ -2,9 +2,9 @@ import {
   type BiquadType,
   type EqBand,
   eqResponse,
-} from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
+} from "@/engine/analysis";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { formatFrequency } from "@/engine/format";
 
 const MAX_DB = 18;
 

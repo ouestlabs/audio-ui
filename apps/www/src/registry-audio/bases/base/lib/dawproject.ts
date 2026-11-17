@@ -9,9 +9,9 @@
  * rest is left out, and a report says what, one line each.
  */
 
-import type { ParameterValue } from "@audio-ui/engine/device";
-import type { WarpMode } from "@audio-ui/engine/playback";
-import type { Tempo } from "@audio-ui/engine/time";
+import type { ParameterValue } from "@/engine/device";
+import type { WarpMode } from "@/engine/playback";
+import type { Tempo } from "@/engine/time";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
 import {
   EQUALIZER_BANDS,

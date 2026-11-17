@@ -1,4 +1,4 @@
-import { formatLevel, formatSampleRate } from "@audio-ui/engine/format";
+import { formatLevel, formatSampleRate } from "@/engine/format";
 import { type ComponentProps, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

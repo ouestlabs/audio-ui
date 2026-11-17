@@ -1,4 +1,4 @@
-import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
+import { type KeyNote, rollScale, type Scale } from "@/engine/pitch";
 import {
   type KeyboardEvent,
   type MouseEvent,

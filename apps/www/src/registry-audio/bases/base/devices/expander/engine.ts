@@ -1,6 +1,6 @@
-import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
-import { createFeed, type Feed } from "@audio-ui/engine/device";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import type { DeviceReadings, EffectEngine } from "@/engine/device";
+import { createFeed, type Feed } from "@/engine/device";
+import { loadWorklet } from "@/engine/worklet";
 import {
   EXPANDER_WORKLET,
   type ExpanderState,

@@ -1,5 +1,5 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { REDUX_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { REDUX_KERNELS } from "@/engine/kernels";
 
 /** The table of the quantizer has this many steps: finer than 16 bits can tell apart on a plot. */
 const TABLE_STEPS = 2 ** 16;

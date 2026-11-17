@@ -2,14 +2,14 @@ import {
   analyzeBeat,
   computePeaks,
   normalizePeaks,
-} from "@audio-ui/engine/analysis";
-import { decodeAudioChannels } from "@audio-ui/engine/files";
+} from "@/engine/analysis";
+import { decodeAudioChannels } from "@/engine/files";
 import {
   barsBeatsWith,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,

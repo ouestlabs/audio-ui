@@ -1,4 +1,4 @@
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
+import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

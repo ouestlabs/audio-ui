@@ -1,5 +1,5 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import type { EffectEngine } from "@/engine/device";
+import { loadWorklet } from "@/engine/worklet";
 import {
   FREQUENCY_SHIFTER_MODES,
   FREQUENCY_SHIFTER_WORKLET,

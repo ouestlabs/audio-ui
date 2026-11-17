@@ -1,4 +1,4 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
+import type { EffectEngine } from "@/engine/device";
 import {
   type OverdriveState,
   overdriveSettings,

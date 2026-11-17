@@ -2,7 +2,7 @@ import type {
   DeviceContext,
   EffectEngine,
   EngineFactory,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import { useEffect, useRef, useState } from "react";
 
 /** What the hook needs of an engine, effect or instrument: an output, a state to follow, a way to let go. */

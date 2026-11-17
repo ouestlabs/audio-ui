@@ -5,13 +5,13 @@ import {
   rmsDb,
   SPECTRUM_FLOOR_DB,
   stereoCorrelation,
-} from "@audio-ui/engine/analysis";
+} from "@/engine/analysis";
 import type {
   Device,
   DeviceReadings,
   DeviceTaps,
   ParameterDescriptor,
-} from "@audio-ui/engine/device";
+} from "@/engine/device";
 import {
   createFrameTask,
   type FrameTask,

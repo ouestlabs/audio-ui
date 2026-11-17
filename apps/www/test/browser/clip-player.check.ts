@@ -1,4 +1,4 @@
-import { type PlaybackState, playedClip } from "@audio-ui/engine/playback";
+import { type PlaybackState, playedClip } from "@/engine/playback";
 import {
   createClipPlayer,
   loadClipPlayer,

@@ -1,5 +1,5 @@
-import { bandGainForHandle, bandHandleDb } from "@audio-ui/engine/analysis";
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
+import { bandGainForHandle, bandHandleDb } from "@/engine/analysis";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Toggle } from "@/registry/bases/base/ui/toggle";

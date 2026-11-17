@@ -1,5 +1,5 @@
-import { playedVelocity } from "@audio-ui/engine/playback";
-import type { Tempo } from "@audio-ui/engine/time";
+import { playedVelocity } from "@/engine/playback";
+import type { Tempo } from "@/engine/time";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { UseSynthVoicesReturn } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import {

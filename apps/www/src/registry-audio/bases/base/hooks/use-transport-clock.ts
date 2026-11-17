@@ -7,7 +7,7 @@ import {
   type SchedulerAnchor,
   type SchedulerConfig,
   type SchedulerCursor,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 

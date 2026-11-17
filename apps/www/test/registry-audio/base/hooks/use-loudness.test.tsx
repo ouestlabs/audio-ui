@@ -11,8 +11,8 @@ const meter = {
   input: {},
 };
 
-const analysis = await import("@audio-ui/engine/analysis");
-mock.module("@audio-ui/engine/analysis", () => ({
+const analysis = await import("@/engine/analysis");
+mock.module("@/engine/analysis", () => ({
   ...analysis,
   createLoudnessMeter: () => Promise.resolve(meter),
 }));

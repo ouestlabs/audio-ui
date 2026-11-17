@@ -1,1 +1,1 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":["@audio-ui/engine"],"description":"Moved: audio-encode is part of @audio-ui/engine now, imported from @audio-ui/engine/files.","files":[],"name":"audio-encode","registryDependencies":[],"type":"registry:lib"}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: audio-encode is part of the engine now, imported from @/lib/engine/files.","files":[],"name":"audio-encode","registryDependencies":["@audio-ui/engine-files"],"type":"registry:lib"}

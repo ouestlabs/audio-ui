@@ -1,4 +1,4 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
+import { midiToHz } from "@/engine/pitch";
 import { useCallback, useEffect, useRef } from "react";
 import {
   type EnvelopePoint,

@@ -1,6 +1,6 @@
-import { type BiquadType, biquadResponse } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
+import { type BiquadType, biquadResponse } from "@/engine/analysis";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { formatFrequency } from "@/engine/format";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const TABLE_SAMPLES = 4096;

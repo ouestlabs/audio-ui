@@ -1,5 +1,5 @@
-import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
-import { formatTime } from "@audio-ui/engine/format";
+import { dbToGain, gainToDb } from "@/engine/analysis";
+import { formatTime } from "@/engine/format";
 import {
   type KeyboardEvent,
   type PointerEvent,

@@ -52,7 +52,7 @@
       "@/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],
-      "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
+      "@/engine/*": ["./src/registry-audio/bases/base/lib/engine/*/index.ts"],
       "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [

@@ -1,12 +1,12 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { DELAY_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { formatFrequency } from "@/engine/format";
+import { DELAY_KERNELS } from "@/engine/kernels";
 import {
   DEFAULT_TEMPO,
   SYNCED_DIVISIONS,
   syncedSeconds,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 
 /** The longest echo time, in seconds: the node that holds it is made this long. */
 export const MAX_DELAY_SECONDS = 2;

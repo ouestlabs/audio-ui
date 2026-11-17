@@ -3,10 +3,10 @@
  * menu and an audio editor's edits offer, what `applySoundOperation` runs on
  * plain channels, the whole sound or a stretch of it, and what
  * `soundOperationName` writes as a step of the history. Each process is an
- * operation of `@audio-ui/engine/files` or `@audio-ui/engine/repair`.
+ * operation of `@/engine/files` or `@/engine/repair`.
  */
 
-import { dbToGain } from "@audio-ui/engine/analysis";
+import { dbToGain } from "@/engine/analysis";
 import {
   type DitherMethod,
   ditherChannels,
@@ -24,13 +24,13 @@ import {
   shiftChannels,
   speedChannels,
   stretchChannels,
-} from "@audio-ui/engine/files";
+} from "@/engine/files";
 import {
   formatFrequency,
   formatLevel,
   formatPan,
-} from "@audio-ui/engine/format";
-import { type Repair, repairChannels } from "@audio-ui/engine/repair";
+} from "@/engine/format";
+import { type Repair, repairChannels } from "@/engine/repair";
 import {
   type FadeShape,
   fadeGain,

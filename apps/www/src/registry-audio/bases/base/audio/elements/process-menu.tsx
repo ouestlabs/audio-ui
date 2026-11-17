@@ -2,8 +2,8 @@ import type {
   DitherMethod,
   ShiftMethod,
   StretchMethod,
-} from "@audio-ui/engine/files";
-import type { Repair } from "@audio-ui/engine/repair";
+} from "@/engine/files";
+import type { Repair } from "@/engine/repair";
 import { type ReactNode, useCallback } from "react";
 import {
   DropdownMenuGroup,

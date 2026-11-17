@@ -1,5 +1,5 @@
-import { toWebAudioQ } from "@audio-ui/engine/analysis";
-import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { toWebAudioQ } from "@/engine/analysis";
+import type { DeviceReadings, EffectEngine } from "@/engine/device";
 import {
   KEY_DETECTOR_PARAMETERS,
   loadKeyDetector,

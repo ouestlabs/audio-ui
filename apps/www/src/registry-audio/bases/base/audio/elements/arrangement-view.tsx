@@ -3,7 +3,7 @@ import {
   secondsPerBar,
   secondsPerBeat,
   type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/engine/time";
 import {
   type ComponentProps,
   type DragEvent,

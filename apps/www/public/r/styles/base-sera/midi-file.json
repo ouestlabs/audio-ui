@@ -1,1 +1,1 @@
-{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":["@audio-ui/engine"],"description":"Moved: midi-file is part of @audio-ui/engine now, imported from @audio-ui/engine/files.","files":[],"name":"midi-file","registryDependencies":[],"type":"registry:lib"}
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: midi-file is part of the engine now, imported from @/lib/engine/files.","files":[],"name":"midi-file","registryDependencies":["@audio-ui/engine-files"],"type":"registry:lib"}

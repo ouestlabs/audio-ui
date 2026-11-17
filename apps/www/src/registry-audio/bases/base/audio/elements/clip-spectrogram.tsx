@@ -1,4 +1,4 @@
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import {
   createSpectrogramLane,
   hertzLabel,

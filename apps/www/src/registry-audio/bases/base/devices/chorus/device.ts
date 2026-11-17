@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { CHORUS_KERNELS } from "@audio-ui/engine/kernels";
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
+import { type DeviceState, defineDevice } from "@/engine/device";
+import { CHORUS_KERNELS } from "@/engine/kernels";
+import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import {
   lfoRate,
   SYNCED_RATE_PARAMETERS,

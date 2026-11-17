@@ -4,7 +4,7 @@ import {
   SCALES,
   type Scale,
   type ScaleName,
-} from "@audio-ui/engine/pitch";
+} from "@/engine/pitch";
 import {
   type ComponentProps,
   createContext,
