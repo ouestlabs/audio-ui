@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - main
+  # The Release workflow runs it on its pull request: a push made with the
+  # workflow's own token starts no workflow, and main requires these checks.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
