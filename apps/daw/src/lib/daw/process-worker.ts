@@ -14,7 +14,6 @@
  * which `audio-files` keeps the encoders out of.
  */
 
-import { LEAF_FRAMES } from "@/lib/gl/waveform";
 import type { StreamedSource } from "@/lib/clip-player";
 import {
   CACHE,
@@ -39,6 +38,7 @@ import {
   transferable,
 } from "@/lib/daw/samples";
 import { encodeAudio } from "@/lib/engine/files";
+import { LEAF_FRAMES } from "@/lib/gl/waveform";
 import {
   applySoundOperation,
   SEAM,
