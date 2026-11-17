@@ -1,4 +1,3 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -23,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** What the title bar holds: the sample, a list. */

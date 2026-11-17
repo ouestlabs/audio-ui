@@ -1,4 +1,3 @@
-import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
 import {
   CaretDownIcon,
   PencilSimpleIcon,
@@ -95,6 +94,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { ClipScale, ClipSwing } from "@/lib/arrangement";
+import { type KeyNote, rollScale, type Scale } from "@/lib/engine/pitch";
 import {
   applyNoteEdit,
   canApplyNoteEdit,

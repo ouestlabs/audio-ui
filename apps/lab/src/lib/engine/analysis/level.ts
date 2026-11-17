@@ -1,0 +1,42 @@
+export function dbToGain(db: number): number {
+  return 10 ** (db / 20);
+}
+
+/** The level in dB of an amplitude ratio: 1 is 0 dB, 0.5 is -6.02 dB. `-Infinity` for 0 or less, never `NaN`. */
+export function gainToDb(gain: number): number {
+  return gain > 0 ? 20 * Math.log10(gain) : Number.NEGATIVE_INFINITY;
+}
+
+/**
+ * The RMS level of `samples` in dBFS: 0 dB for a square wave at full scale, -3
+ * dB for a sine at full scale. `-Infinity` for silence, an empty array, or
+ * one with a sample that is not a number.
+ */
+export function rmsDb(samples: Float32Array | readonly number[]): number {
+  if (samples.length === 0) {
+    return Number.NEGATIVE_INFINITY;
+  }
+  let sum = 0;
+  for (const sample of samples) {
+    sum += sample * sample;
+  }
+  return Number.isFinite(sum)
+    ? gainToDb(Math.sqrt(sum / samples.length))
+    : Number.NEGATIVE_INFINITY;
+}
+
+/**
+ * The level in dBFS of the loudest sample of `samples`, either way: how near
+ * the signal comes to clipping, where `rmsDb` says how loud it sounds. 0 dB
+ * for a sample at full scale, `-Infinity` for silence, an empty array, or one
+ * with a sample that is not a number.
+ */
+export function peakDb(samples: Float32Array | readonly number[]): number {
+  let loudest = 0;
+  for (const sample of samples) {
+    loudest = Math.max(loudest, Math.abs(sample));
+  }
+  return Number.isFinite(loudest)
+    ? gainToDb(loudest)
+    : Number.NEGATIVE_INFINITY;
+}

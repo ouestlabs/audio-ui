@@ -1,6 +1,6 @@
 ---
 title: worklet
-description: "Loading an AudioWorklet processor from @audio-ui/engine: its source into a context from a blob, once per context, false where worklets cannot run."
+description: "Loading an AudioWorklet processor: its source into a context from a blob, once per context, false where worklets cannot run."
 ---
 
 <Module from="@/lib/engine/worklet" />
@@ -10,7 +10,7 @@ description: "Loading an AudioWorklet processor from @audio-ui/engine: its sourc
 Loads the source of an `AudioWorklet` processor into a context, from a blob, so there is no file to serve. A source loads once per context: every later call gets the same promise.
 
 ```ts
-import { loadWorklet } from "@audio-ui/engine/worklet";
+import { loadWorklet } from "@/lib/engine/worklet";
 
 if (await loadWorklet(ctx, MY_PROCESSOR_SOURCE)) {
   const node = new AudioWorkletNode(ctx, "my-processor");

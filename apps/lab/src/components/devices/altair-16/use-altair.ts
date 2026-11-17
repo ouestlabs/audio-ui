@@ -1,8 +1,8 @@
-import { computePeaks } from "@audio-ui/engine/analysis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createSource } from "@/components/audio-ui/primitive";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";
+import { computePeaks } from "@/lib/engine/analysis";
 import { usePublishInspector } from "@/lib/inspector";
 import {
   createAltairEngine,

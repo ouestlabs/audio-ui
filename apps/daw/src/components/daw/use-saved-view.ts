@@ -1,11 +1,10 @@
-import type { GridDivision, MetronomeRhythm } from "@audio-ui/engine/time";
 import { type RefObject, useCallback, useEffect, useState } from "react";
 import type { NoteLevel } from "@/components/audio-ui/piano-roll/edits";
-
 import type { SoundView } from "@/components/audio-ui/sound-lane";
 import { rackDevices } from "@/lib/arrangement";
 import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import type { ExportSettings } from "@/lib/audio-export";
+import type { GridDivision, MetronomeRhythm } from "@/lib/engine/time";
 
 /**
  * How the workstation is laid out, kept in this browser beside the project

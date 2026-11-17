@@ -1,4 +1,3 @@
-import { secondsPerBar, secondsPerBeat } from "@audio-ui/engine/time";
 import {
   type ReactNode,
   useCallback,
@@ -39,6 +38,7 @@ import {
   recordingChannels,
   recordingSamples,
 } from "@/lib/daw/samples";
+import { secondsPerBar, secondsPerBeat } from "@/lib/engine/time";
 import {
   type SoundOperation,
   type SoundRange,

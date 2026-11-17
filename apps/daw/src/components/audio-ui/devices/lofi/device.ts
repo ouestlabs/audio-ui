@@ -1,7 +1,7 @@
-import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { LOFI_KERNELS } from "@audio-ui/engine/kernels";
+import { SAMPLE_RATE } from "@/lib/engine/analysis";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { formatFrequency } from "@/lib/engine/format";
+import { LOFI_KERNELS } from "@/lib/engine/kernels";
 
 /**
  * A lo-fi as a device: how much the pitch drifts and wobbles, a hiss and the

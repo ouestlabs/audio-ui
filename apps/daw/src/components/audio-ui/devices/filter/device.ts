@@ -1,13 +1,8 @@
-import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import {
-  diodeLadder,
-  korg35,
-  moogLadder,
-  oberheim,
-} from "@audio-ui/engine/dsp";
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import { FILTER_KERNELS } from "@audio-ui/engine/kernels";
+import { SAMPLE_RATE } from "@/lib/engine/analysis";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { diodeLadder, korg35, moogLadder, oberheim } from "@/lib/engine/dsp";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import { FILTER_KERNELS } from "@/lib/engine/kernels";
 
 /** The width a filter has when the resonance is at its lowest: flat, a Butterworth. */
 export const FLAT_Q = Math.SQRT1_2;

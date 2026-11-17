@@ -1,4 +1,3 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   DeviceFrame,
@@ -15,6 +14,7 @@ import {
 } from "@/components/audio-ui/devices/wave-shaper/device";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
 import { XYPad } from "@/components/audio-ui/xypad";
+import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 const PAD_MAX = 100;

@@ -1,11 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { type ArrangedAudio, playedClip } from "./clip";
 import { pagesAhead } from "./plan";
-import {
-  type DecodedRecording,
-  type Recording,
-  renderClips,
-} from "./render";
+import { type DecodedRecording, type Recording, renderClips } from "./render";
 import {
   createPagePool,
   createRecordingStream,

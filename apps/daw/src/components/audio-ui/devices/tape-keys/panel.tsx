@@ -1,4 +1,3 @@
-import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback } from "react";
 import {
   DeviceFrame,
@@ -14,6 +13,7 @@ import {
 } from "@/components/audio-ui/devices/tape-keys/device";
 import { Piano } from "@/components/audio-ui/piano";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */

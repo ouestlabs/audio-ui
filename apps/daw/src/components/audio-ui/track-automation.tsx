@@ -1,4 +1,3 @@
-import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
 import { TrashIcon } from "@phosphor-icons/react";
 import { useCallback, useMemo } from "react";
 import { AutomationEnvelope } from "@/components/audio-ui/automation-envelope";
@@ -26,6 +25,7 @@ import {
   volumeGain,
   volumeValue,
 } from "@/lib/arrangement";
+import type { Device, ParameterDescriptor } from "@/lib/engine/device";
 import { cn } from "@/lib/utils";
 
 /** A gain as the decibels it plays at. */

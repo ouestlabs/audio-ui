@@ -1,11 +1,4 @@
 import {
-  detectKeys,
-  type KeyNote,
-  SCALES,
-  type Scale,
-  type ScaleName,
-} from "@audio-ui/engine/pitch";
-import {
   type ComponentProps,
   createContext,
   type ReactNode,
@@ -29,6 +22,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  detectKeys,
+  type KeyNote,
+  SCALES,
+  type Scale,
+  type ScaleName,
+} from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** Each scale's name, as the menu writes it. */

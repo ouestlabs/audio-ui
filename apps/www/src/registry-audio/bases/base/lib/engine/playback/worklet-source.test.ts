@@ -1,5 +1,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { BUNDLES, inputsHash } from "../../../../../../../scripts/engine/worklet.ts";
+import {
+  BUNDLES,
+  inputsHash,
+} from "../../../../../../../scripts/engine/worklet.ts";
 import { playedClip } from "./clip";
 import { RECORDING_LOADER_WORKER_INPUTS } from "./loader-worker-source";
 import { CLIP_PLAYER_PROCESSOR, type ClipPlayerMessage } from "./protocol";

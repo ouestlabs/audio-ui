@@ -1,12 +1,4 @@
 import {
-  barLabelInterval,
-  barsOf,
-  isSignature,
-  type SignatureChange,
-  secondsPerBar,
-  type Tempo,
-} from "@audio-ui/engine/time";
-import {
   type KeyboardEvent,
   type PointerEvent,
   useCallback,
@@ -14,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { TimelineMark } from "@/components/audio-ui/timeline";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -21,7 +14,14 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { TimelineMark } from "@/components/audio-ui/timeline";
+import {
+  barLabelInterval,
+  barsOf,
+  isSignature,
+  type SignatureChange,
+  secondsPerBar,
+  type Tempo,
+} from "@/lib/engine/time";
 
 /** A named point of the arrangement, in its time. */
 export interface Locator {

@@ -15,7 +15,7 @@ test("every device's kernels are the packages' own, as installed", async () => {
         : set.file
     )
   );
-  // When it fails: bun run kernels:build, from packages/engine.
+  // When it fails: bun run engine:kernels, from apps/www.
   expect(stale.filter(Boolean)).toEqual([]);
 });
 

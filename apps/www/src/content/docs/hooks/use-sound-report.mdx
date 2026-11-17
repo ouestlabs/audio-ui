@@ -7,7 +7,7 @@ description: "Reads the sound of a track as edited, to tell what it is: its loud
 
 ## Usage
 
-`useSoundReport` renders what a track's clips play, as [`useBake`](/docs/hooks/use-bake) does, and reads it with `reportSound` of [`@audio-ui/engine/analysis`](/docs/engine/analysis): the loudness and true peak, the likeliest key, the tempo when the sound has a beat, and `checkAcx`'s verdict on each of ACX's audiobook requirements (RMS between -23 and -18 dBFS, peak at most -3 dBFS, noise floor at most -60 dBFS on the quietest pause).
+`useSoundReport` renders what a track's clips play, as [`useBake`](/docs/hooks/use-bake) does, and reads it with `reportSound` of [`@/lib/engine/analysis`](/docs/engine/analysis): the loudness and true peak, the likeliest key, the tempo when the sound has a beat, and `checkAcx`'s verdict on each of ACX's audiobook requirements (RMS between -23 and -18 dBFS, peak at most -3 dBFS, noise floor at most -60 dBFS on the quietest pause).
 
 ```tsx
 import { useSoundReport } from "@/hooks/use-sound-report";

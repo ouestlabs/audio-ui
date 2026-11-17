@@ -1,6 +1,6 @@
 ---
 title: device
-description: "A device as a description, from @audio-ui/engine: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with."
+description: "A device as a description: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with."
 ---
 
 <Module from="@/lib/engine/device" />
@@ -10,7 +10,7 @@ description: "A device as a description, from @audio-ui/engine: defineDevice and
 `defineDevice` describes an effect or an instrument by its parameters, with no sound and no view in it. What comes back holds everything that reads or changes a state of it:
 
 ```ts
-import { defineDevice } from "@audio-ui/engine/device";
+import { defineDevice } from "@/lib/engine/device";
 
 export const driveDevice = defineDevice({
   id: "drive",
@@ -55,7 +55,7 @@ A device makes no sound. An engine does, and it implements a binding: `update(st
 `deviceTools(device)` derives the tools a model calls to drive it: `<id>_set` takes any parameters by id, `<id>_reset` puts some or all back, and an instrument played by notes also gets `<id>_play`. Each has a JSON Schema input and a `run(state, input)` that never throws on a model's input:
 
 ```ts
-import { deviceTools } from "@audio-ui/engine/device";
+import { deviceTools } from "@/lib/engine/device";
 
 const [set] = deviceTools(driveDevice);
 set.run(state, { amount: 60 });
@@ -77,7 +77,7 @@ Every `create<Name>Engine` is an `EngineFactory`: a context, the state to start 
 A worklet that takes over from the clean sound once it loads, with a fade, and builds nothing once the engine is disposed.
 
 ```ts
-import { createWorkletStage } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
 
 const input = ctx.createGain();
 const output = ctx.createGain();
@@ -97,7 +97,7 @@ stage.connect(output);
 Keeps a worklet fed only while the path it plays is heard: connected at once on `set(true)`, taken away 120 ms after `set(false)`, once the path has faded, unless wanted again before.
 
 ```ts
-import { createFeed } from "@audio-ui/engine/device";
+import { createFeed } from "@/lib/engine/device";
 
 const feed = createFeed([
   [input, model, 0, 0],
@@ -117,7 +117,7 @@ A host that brings its own engine can check it against what the panel draws. `de
 
 ```ts
 import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
-import { measureLatency, measureResponse } from "@audio-ui/engine/device";
+import { measureLatency, measureResponse } from "@/lib/engine/device";
 
 const state = equalizerDevice.defaults();
 // Your factory: (ctx, state) => { input, output, dispose }.

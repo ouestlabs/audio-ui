@@ -1,8 +1,3 @@
-import type {
-  MetronomeRhythm,
-  SignatureChange,
-  Tempo,
-} from "@audio-ui/engine/time";
 import { AutomationIcon } from "@audio-ui/icons/react";
 import {
   ArrowArcLeftIcon,
@@ -38,6 +33,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { ShortcutCommand } from "@/lib/daw/shortcuts";
+import type {
+  MetronomeRhythm,
+  SignatureChange,
+  Tempo,
+} from "@/lib/engine/time";
 import { CommandKeys } from "./shortcut-list";
 
 /** The zoom presets, as shares of the fitted view: Fit shows everything. */

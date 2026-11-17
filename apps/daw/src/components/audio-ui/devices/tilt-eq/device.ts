@@ -1,8 +1,8 @@
-import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { highshelf, lowshelf, magnitude } from "@audio-ui/engine/dsp";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { TILT_EQ_KERNELS } from "@audio-ui/engine/kernels";
+import { SAMPLE_RATE } from "@/lib/engine/analysis";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { highshelf, lowshelf, magnitude } from "@/lib/engine/dsp";
+import { formatFrequency } from "@/lib/engine/format";
+import { TILT_EQ_KERNELS } from "@/lib/engine/kernels";
 
 /** The width of the tilt's two shelves, as `@audio/eq-tilt` has them: gentler than a shelf's usual slope. */
 const SHELF_Q = 0.5;

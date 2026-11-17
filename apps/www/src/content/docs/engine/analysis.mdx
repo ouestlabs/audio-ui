@@ -1,6 +1,6 @@
 ---
 title: analysis
-description: "Reading a signal, from @audio-ui/engine: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients, pauses and auto-warp. Plain functions, for the main thread, a worker or a worklet."
+description: "Reading a signal: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients, pauses and auto-warp. Plain functions, for the main thread, a worker or a worklet."
 ---
 
 <Module from="@/lib/engine/analysis" />
@@ -12,7 +12,7 @@ The functions take samples, bins or settings and return numbers, with no Web Aud
 ## Levels
 
 ```ts
-import { dbToGain, gainToDb, peakDb, rmsDb } from "@audio-ui/engine/analysis";
+import { dbToGain, gainToDb, peakDb, rmsDb } from "@/lib/engine/analysis";
 
 rmsDb(samples); // how loud they sound: -3 dB for a sine at full scale
 peakDb(samples); // how near they come to clipping: 0 dB for the same sine
@@ -32,7 +32,7 @@ The registry's [`useAudioLevels`](/docs/hooks/use-audio-levels) reads an analyse
 `spectrogramSpectra(source, { size, hop })` sums up a whole recording for a spectrogram drawn on the GPU that does not hold it: a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in it (the short-time transform of `@audio/stft`), as a byte, (dB + 150) · 1.6, 0 dB a full-scale sine on its bin. It reads `source` (`{ frames, read }`) a stretch at a time, at once or as a promise, so it runs on the page or in a worker over a file; made once and kept beside the recording, it is what a streamed recording's `samples.spectra` gives [`@audio-ui/gl/spectrogram`](/docs/gl/spectrogram#streamed-recordings). `SPECTRA_SIZE`, 2048, is the default for both.
 
 ```ts
-import { spectrogramSpectra } from "@audio-ui/engine/analysis";
+import { spectrogramSpectra } from "@/lib/engine/analysis";
 
 const spectra = await spectrogramSpectra({ frames, read: readFrames });
 ```
@@ -42,7 +42,7 @@ const spectra = await spectrogramSpectra({ frames, read: readFrames });
 A filter, an equalizer and a compressor each have a curve a panel draws. Each function returns the curve as a function, to be sampled at as many points as the plot has:
 
 ```ts
-import { biquadResponse, compressorOutput, eqResponse } from "@audio-ui/engine/analysis";
+import { biquadResponse, compressorOutput, eqResponse } from "@/lib/engine/analysis";
 
 const cut = biquadResponse({ type: "highcut", frequency: 1000 });
 cut(1000); // -3.01 dB at the cutoff
@@ -72,8 +72,8 @@ The band types are the ones an equalizer shows (`lowcut`, `highcut`, `lowshelf`,
 `loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
 
 ```ts
-import { dbToGain } from "@audio-ui/engine/analysis";
-import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@audio-ui/engine/analysis";
+import { dbToGain } from "@/lib/engine/analysis";
+import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@/lib/engine/analysis";
 
 const loudness = measureLoudness(channels, sampleRate); // { lufs: -19.2, peak: -3.1, truePeak: -2.8 }
 const gain = dbToGain(loudnessGain(loudness, LOUDNESS_TARGETS.streaming));
@@ -106,7 +106,7 @@ Two readings are taken once, as a recording is decoded:
 ## Reading a sound
 
 ```ts
-import { checkAcx, reportSound } from "@audio-ui/engine/analysis";
+import { checkAcx, reportSound } from "@/lib/engine/analysis";
 
 const report = reportSound(channels, sampleRate);
 report.loudness.lufs; // -19.5
@@ -122,7 +122,7 @@ checkAcx(channels, sampleRate).noiseFloor.value; // the quietest pause of half a
 ## Colouring a waveform
 
 ```ts
-import { splitBands } from "@audio-ui/engine/analysis";
+import { splitBands } from "@/lib/engine/analysis";
 
 const { low, mid, high } = splitBands(channels, sampleRate);
 ```

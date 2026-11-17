@@ -1,6 +1,6 @@
 ---
 title: format
-description: "Audio quantities as text from @audio-ui/engine, the way the standards and the tools write them: levels in dBFS, dBTP and LUFS, frequencies and sample rates, times, notes, pans, ratios, tempos, channel layouts, each a function of the value and options, and createFormatter to bind a locale, a true minus or a spacing once."
+description: "Audio quantities as text, the way the standards and the tools write them: levels in dBFS, dBTP and LUFS, frequencies and sample rates, times, notes, pans, ratios, tempos, channel layouts, each a function of the value and options, and createFormatter to bind a locale, a true minus or a spacing once."
 ---
 
 <Module from="@/lib/engine/format" />
@@ -18,7 +18,7 @@ import {
   formatPan,
   formatSampleRate,
   formatTime,
-} from "@audio-ui/engine/format";
+} from "@/lib/engine/format";
 
 formatLevel(-23, "LUFS"); // "-23.0 LUFS"
 formatLevel(-1.04, "dBTP"); // "-1.0 dBTP"
@@ -50,7 +50,7 @@ Every function takes the same options last, over its own defaults:
 `createFormatter` binds the options you always want, so a product writes its quantities one way everywhere:
 
 ```ts
-import { createFormatter } from "@audio-ui/engine/format";
+import { createFormatter } from "@/lib/engine/format";
 
 const format = createFormatter({ locale: "fr", minus: "unicode" });
 

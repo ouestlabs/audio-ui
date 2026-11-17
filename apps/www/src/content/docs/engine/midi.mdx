@@ -1,6 +1,6 @@
 ---
 title: midi
-description: "MIDI input from @audio-ui/engine: every connected keyboard and controller as one source through the Web MIDI API, raw messages read into notes, controllers and pitch bend, and pitch bend in semitones."
+description: "MIDI input: every connected keyboard and controller as one source through the Web MIDI API, raw messages read into notes, controllers and pitch bend, and pitch bend in semitones."
 ---
 
 <Module from="@/lib/engine/midi" />
@@ -10,7 +10,7 @@ description: "MIDI input from @audio-ui/engine: every connected keyboard and con
 `createMidiInput` listens to every MIDI input of the page as one source. Make one and share it, so the browser asks for access once, and connect it from a user gesture, since the browser may prompt:
 
 ```ts
-import { createMidiInput } from "@audio-ui/engine/midi";
+import { createMidiInput } from "@/lib/engine/midi";
 
 const midi = createMidiInput();
 button.addEventListener("click", () => midi.connect());

@@ -1,4 +1,3 @@
-import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import {
   createSpectrogramLane,
   hertzLabel,
@@ -22,6 +21,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 /** A frequency held where the lane and the axis both reach it: the lane says it, the axis reads it. */

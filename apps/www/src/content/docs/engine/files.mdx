@@ -1,6 +1,6 @@
 ---
 title: files
-description: "Files from @audio-ui/engine: an audio file decoded into samples at a context's rate, sound written to WAV, FLAC or MP3, notes read from and written to a MIDI file, and a score read from and written to MusicXML."
+description: "Files: an audio file decoded into samples at a context's rate, sound written to WAV, FLAC or MP3, notes read from and written to a MIDI file, and a score read from and written to MusicXML."
 ---
 
 <Module from="@/lib/engine/files" />
@@ -10,19 +10,19 @@ description: "Files from @audio-ui/engine: an audio file decoded into samples at
 A file's audio as samples at the context's rate, one array per channel: what the browser decodes, and AIFF, CAF or Apple Lossless where it cannot (Chrome does not), with audio.js decoders.
 
 ```ts
-import { decodeAudioChannels } from "@audio-ui/engine/files";
+import { decodeAudioChannels } from "@/lib/engine/files";
 
 const channels = await decodeAudioChannels(ctx, await file.arrayBuffer());
 ```
 
-The samples are at the context's sample rate, so they play as they are and `computePeaks` (from `@audio-ui/engine/analysis`) draws them. The waveform player and the arrangement decode dropped files this way.
+The samples are at the context's sample rate, so they play as they are and `computePeaks` (from `@/lib/engine/analysis`) draws them. The waveform player and the arrangement decode dropped files this way.
 
 ## Writing a file
 
 Sound saved as a file: WAV (16 or 24-bit, or 32-bit float), FLAC or MP3 at a bitrate, encoded in chunks with its progress, from what an `OfflineAudioContext` rendered or a recording kept.
 
 ```ts
-import { downloadFile, encodeAudio } from "@audio-ui/engine/files";
+import { downloadFile, encodeAudio } from "@/lib/engine/files";
 
 const file = await encodeAudio(channels, { bitDepth: 24, format: "wav", sampleRate, onProgress: (done) => setProgress(done) });
 downloadFile(file, "mix.wav");
@@ -41,7 +41,7 @@ downloadFile(file, "mix.wav");
 The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back.
 
 ```tsx
-import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@audio-ui/engine/files";
+import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/engine/files";
 
 <input
   accept={MIDI_FILE_ACCEPT}
@@ -73,7 +73,7 @@ For a host that lays each part on a track of its own, such as a DAW, `readMidiFi
 A MusicXML score onto a roll's steps, a part at a time, and notes back out as a score: what notation software reads and writes.
 
 ```ts
-import { downloadMusicXmlFile, readMusicXmlFile } from "@audio-ui/engine/files";
+import { downloadMusicXmlFile, readMusicXmlFile } from "@/lib/engine/files";
 
 const { bpm, notes } = await readMusicXmlFile(file, { duration: 64, maxPitch: 84, minPitch: 36 });
 downloadMusicXmlFile(notes, { bpm, filename: "clip.musicxml" });

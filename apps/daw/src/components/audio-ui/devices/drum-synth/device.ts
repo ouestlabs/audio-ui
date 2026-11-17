@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
 
 /** The drums it synthesizes, each from oscillators and noise. */
 export const DRUM_SYNTH_VOICES = [

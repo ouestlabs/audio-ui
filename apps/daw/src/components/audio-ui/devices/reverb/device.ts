@@ -1,12 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import {
-  dattorro,
-  fdn,
-  freeverb,
-  schroeder,
-  spring,
-} from "@audio-ui/engine/dsp";
-import { formatFrequency } from "@audio-ui/engine/format";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { dattorro, fdn, freeverb, schroeder, spring } from "@/lib/engine/dsp";
+import { formatFrequency } from "@/lib/engine/format";
 
 /** The level a tail has fallen to when its decay time is over, in dB: what "decay time" means in a room. */
 export const DECAY_DB = -60;

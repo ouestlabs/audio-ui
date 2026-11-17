@@ -3,10 +3,10 @@ title: Playback
 description: "Playing an arrangement's audio clips on the audio clock, to the frame: a transport in frames, a player per track in an AudioWorklet, and the mixer's arithmetic."
 ---
 
-An arrangement plays when each of its tracks reads its clips on the audio clock: its recordings, at their places, through their gains and fades, round the loop. `@audio-ui/engine/playback` is that reading, with no React and no audio node in it, so it runs the same in an AudioWorklet, in an offline render and in a test.
+An arrangement plays when each of its tracks reads its clips on the audio clock: its recordings, at their places, through their gains and fades, round the loop. `@/lib/engine/playback` is that reading, with no React and no audio node in it, so it runs the same in an AudioWorklet, in an offline render and in a test.
 
 ```bash
-npm install @audio-ui/engine
+npx shadcn@latest add @audio-ui/engine-playback
 ```
 
 ## Frames, on both sides
@@ -14,7 +14,7 @@ npm install @audio-ui/engine
 Every time is counted in whole frames: frames of the audio clock (a context's `currentFrame`) on one side, frames of the arrangement on the other. A `PlaybackState` joins them: from the clock's frame `at`, the arrangement's frame `position` plays, round its `loop` while it is on. Whole frames are what keep a loop of any length from drifting, and a recording played at speed 1 from being changed by a single bit.
 
 ```ts
-import { playbackRuns, toFrames } from "@audio-ui/engine/playback";
+import { playbackRuns, toFrames } from "@/lib/engine/playback";
 
 const rate = context.sampleRate;
 const state = {

@@ -1,4 +1,3 @@
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -34,6 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { type DeviceSignal, deriveSource } from "@/lib/device-signal";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */

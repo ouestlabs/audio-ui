@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
-import { MID_SIDE_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { formatFrequency } from "@/lib/engine/format";
+import { MID_SIDE_KERNELS } from "@/lib/engine/kernels";
 
 /** The high-pass that stands for "no bass mono": under the range of hearing, so it passes the whole spectrum. */
 const PASS_HZ = 10;

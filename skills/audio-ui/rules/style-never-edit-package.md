@@ -7,13 +7,13 @@ tags: headless, upgrade, registry
 
 ## Edit your copy, never the package
 
-Changes made inside `node_modules/@audio-ui/engine` (or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: the primitive, its adapter and the registry component are copied into the project, and they are yours to edit.
+Changes made inside `node_modules` (the UI SDK kernel, `@ui-sdk/*`, or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: the primitive, its adapter and the registry component are copied into the project, and they are yours to edit.
 
 **Incorrect (patching the installed package):**
 
 ```bash
 # lost on the next install, conflicts with every upgrade
-sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/engine/dist/device.js
+sed -i 's/pointerType/button/' node_modules/@ui-sdk/core/dist/index.js
 ```
 
 **Correct (style the parts, or own a copy):**

@@ -1,12 +1,3 @@
-import type {
-  Device,
-  DeviceState,
-  EffectEngine,
-  EngineFactory,
-  InstrumentEngine,
-  ParameterDescriptor,
-  ParameterValue,
-} from "@audio-ui/engine/device";
 import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/components/audio-ui/devices/auto-pan/engine";
 import { bassEnhancerDevice } from "@/components/audio-ui/devices/bass-enhancer/device";
@@ -101,6 +92,15 @@ import { wahDevice } from "@/components/audio-ui/devices/wah/device";
 import { createWahEngine } from "@/components/audio-ui/devices/wah/engine";
 import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
+import type {
+  Device,
+  DeviceState,
+  EffectEngine,
+  EngineFactory,
+  InstrumentEngine,
+  ParameterDescriptor,
+  ParameterValue,
+} from "@/lib/engine/device";
 
 /** A device's state as a host keeps it: a value for each parameter id. */
 export type AnyDeviceState = Readonly<Record<string, ParameterValue>>;

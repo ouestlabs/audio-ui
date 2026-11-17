@@ -1,4 +1,3 @@
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useMemo } from "react";
 import {
   DeviceFrame,
@@ -18,6 +17,7 @@ import {
 } from "@/components/audio-ui/plot";
 import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import type { DeviceSignal } from "@/lib/device-signal";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */

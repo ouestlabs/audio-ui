@@ -1,10 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import {
-  expander,
-  expanderGain,
-  upwardExpanderGain,
-} from "@audio-ui/engine/dsp";
-import { EXPANDER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { expander, expanderGain, upwardExpanderGain } from "@/lib/engine/dsp";
+import { EXPANDER_KERNELS } from "@/lib/engine/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 
 /**

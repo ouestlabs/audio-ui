@@ -1,8 +1,8 @@
-import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type UtilityState,
   utilitySettings,
 } from "@/components/audio-ui/devices/utility/device";
+import type { EffectEngine } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;

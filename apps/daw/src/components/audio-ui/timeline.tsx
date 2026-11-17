@@ -1,4 +1,3 @@
-import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import {
@@ -50,6 +49,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Mix, TrackColor } from "@/lib/arrangement";
+import { dbToGain, gainToDb } from "@/lib/engine/analysis";
 import { cn } from "@/lib/utils";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;

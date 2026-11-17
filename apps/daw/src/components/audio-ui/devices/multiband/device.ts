@@ -1,6 +1,6 @@
-import { biquadResponse } from "@audio-ui/engine/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { formatFrequency } from "@audio-ui/engine/format";
+import { biquadResponse } from "@/lib/engine/analysis";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { formatFrequency } from "@/lib/engine/format";
 
 /** The Q of each biquad of a crossover: two in a row are a Linkwitz-Riley filter, whose halves add back to a flat response. */
 export const CROSSOVER_Q = Math.SQRT1_2;

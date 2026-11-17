@@ -29,7 +29,7 @@ export function engineDependencies(content: string) {
 }
 
 export interface EngineModule {
-  /** The npm packages its files import, with the version the registry pins. */
+  /** The npm packages its files import. */
   dependencies: string[];
   description: string;
   /** Its files, by path from `base/lib/engine/<module>/`. */
@@ -41,15 +41,15 @@ export interface EngineModule {
 export const ENGINE_MODULES: Record<string, EngineModule> = {
   analysis: {
     dependencies: [
-      "@audio/beat-detect@1.1.0",
-      "@audio/biquad@1.2.2",
-      "@audio/eq-crossover@1.0.2",
-      "@audio/loudness-lufs@1.2.0",
-      "@audio/loudness-truepeak@1.1.7",
-      "@audio/mir-chroma@1.1.3",
-      "@audio/pitch-yin@1.0.6",
-      "@audio/stft@2.0.0",
-      "@audio/weighting-k@1.2.1",
+      "@audio/beat-detect",
+      "@audio/biquad",
+      "@audio/eq-crossover",
+      "@audio/loudness-lufs",
+      "@audio/loudness-truepeak",
+      "@audio/mir-chroma",
+      "@audio/pitch-yin",
+      "@audio/stft",
+      "@audio/weighting-k",
     ],
     description:
       "Reading a signal: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients, pauses and auto-warp. Plain functions, for the main thread, a worker or a worklet.",
@@ -74,9 +74,9 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
   },
   device: {
     dependencies: [
-      "@audio/measure-latency@1.0.2",
-      "@audio/measure-response@1.0.2",
-      "@audio/synth-noise@2.0.1",
+      "@audio/measure-latency",
+      "@audio/measure-response",
+      "@audio/synth-noise",
     ],
     description:
       "A device as a description: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with.",
@@ -93,27 +93,27 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
   },
   dsp: {
     dependencies: [
-      "@audio/biquad@1.2.2",
-      "@audio/dynamics-compand@catalog:",
-      "@audio/dynamics-compressor@catalog:",
-      "@audio/dynamics-deesser@catalog:",
-      "@audio/dynamics-expander@catalog:",
-      "@audio/dynamics-fet@0.2.5",
-      "@audio/dynamics-limiter@catalog:",
-      "@audio/dynamics-opto@0.2.5",
-      "@audio/dynamics-unlimit@catalog:",
-      "@audio/dynamics-varimu@0.2.4",
-      "@audio/dynamics-vca@0.2.5",
-      "@audio/effect-distortion@catalog:",
-      "@audio/filter-diode-ladder@catalog:",
-      "@audio/filter-korg35@1.2.1",
-      "@audio/filter-moog-ladder@catalog:",
-      "@audio/filter-oberheim@1.2.1",
-      "@audio/reverb-dattorro@1.1.3",
-      "@audio/reverb-fdn@1.1.3",
-      "@audio/reverb-freeverb@1.0.5",
-      "@audio/reverb-schroeder@1.1.3",
-      "@audio/reverb-spring@1.1.3",
+      "@audio/biquad",
+      "@audio/dynamics-compand",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-deesser",
+      "@audio/dynamics-expander",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-limiter",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-unlimit",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+      "@audio/effect-distortion",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+      "@audio/filter-oberheim",
+      "@audio/reverb-dattorro",
+      "@audio/reverb-fdn",
+      "@audio/reverb-freeverb",
+      "@audio/reverb-schroeder",
+      "@audio/reverb-spring",
     ],
     description:
       "The audio.js processors the registry's devices are built on: compressor and expander models, the gain curves of dynamics, filter circuits, reverbs and biquad shelves, under one dependency.",
@@ -122,15 +122,19 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
   },
   files: {
     dependencies: [
-      "@audio/biquad@1.2.2",
-      "@audio/effect-noiseshaper@catalog:",
-      "@audio/midi-parse@1.0.3",
-      "@audio/midi-write@1.0.3",
-      "@audio/musicxml@0.1.0",
-      "@audio/resample-sinc@1.3.0",
-      "@audio/shift@1.2.0",
-      "@audio/stretch@2.3.0",
-      "fflate@catalog:",
+      "@audio/biquad",
+      "@audio/decode-aiff",
+      "@audio/decode-caf",
+      "@audio/decode-mp4",
+      "@audio/effect-noiseshaper",
+      "@audio/encode",
+      "@audio/midi-parse",
+      "@audio/midi-write",
+      "@audio/musicxml",
+      "@audio/resample-sinc",
+      "@audio/shift",
+      "@audio/stretch",
+      "fflate",
     ],
     description:
       "Files: an audio file decoded into samples at a context's rate, sound written to WAV, FLAC or MP3, notes read from and written to a MIDI file, and a score read from and written to MusicXML.",
@@ -194,7 +198,7 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
     modules: [],
   },
   pitch: {
-    dependencies: ["@audio/mir-key@1.0.2", "@audio/note@1.0.3"],
+    dependencies: ["@audio/mir-key", "@audio/note"],
     description:
       "Named scales: the steps of each scale, the pitch classes a scale on a root keeps, whether a pitch is in it and the nearest one that is, and the scale as a piano roll reads it.",
     files: ["index.ts", "key.ts", "scale.ts"],
@@ -223,7 +227,7 @@ export const ENGINE_MODULES: Record<string, EngineModule> = {
     modules: ["analysis", "time"],
   },
   repair: {
-    dependencies: ["@audio/denoise@0.11.2"],
+    dependencies: ["@audio/denoise"],
     description:
       "Defects taken out of a recording, each by the method made for it: clicks, crackle, mains hum, steady and changing noise, clipping, wind, plosives, breaths and reverb, or one that finds the defect itself, on audio.js's denoise family.",
     files: ["index.ts"],

@@ -1,5 +1,3 @@
-import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
-import { formatTime } from "@audio-ui/engine/format";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -18,6 +16,8 @@ import {
   fadeGain,
 } from "@/components/audio-ui/timeline/clip";
 import type { ClipChangeDetails } from "@/components/audio-ui/timeline/timeline";
+import { dbToGain, gainToDb } from "@/lib/engine/analysis";
+import { formatTime } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */

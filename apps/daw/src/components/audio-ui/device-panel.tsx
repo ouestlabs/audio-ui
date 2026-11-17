@@ -1,12 +1,3 @@
-import type {
-  ChoiceParameter,
-  Device,
-  DeviceState,
-  NumberParameter,
-  ParameterDescriptor,
-  ParameterValue,
-  ToggleParameter,
-} from "@audio-ui/engine/device";
 import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import {
@@ -28,6 +19,15 @@ import {
 } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import type { DeviceSignal } from "@/lib/device-signal";
+import type {
+  ChoiceParameter,
+  Device,
+  DeviceState,
+  NumberParameter,
+  ParameterDescriptor,
+  ParameterValue,
+  ToggleParameter,
+} from "@/lib/engine/device";
 import { cn } from "@/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;

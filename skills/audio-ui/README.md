@@ -46,6 +46,6 @@ Skills refer to each other by name (the `design` skill), never by relative link,
 - a rule's frontmatter, prefix, heading or examples are missing or wrong
 - a rule is missing from the Quick Reference, or the Quick Reference names a rule that doesn't exist
 - `AGENTS.md` is not the output of `bun run skill:build`
-- the skill names a registry item, an `@audio-ui/engine` entry, a data attribute or a CSS variable that doesn't exist in the code
+- the skill names a registry item, an engine module (`@/lib/engine/<module>`), a data attribute or a CSS variable that doesn't exist in the code
 - a relative link, an icon, the evals or the version in `SKILL.md` and `metadata.json` disagree
 - a skill folder is missing from the plugin in `.claude-plugin/marketplace.json`, or the plugin lists one that doesn't exist

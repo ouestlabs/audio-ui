@@ -1,4 +1,3 @@
-import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
   type FocusEvent,
@@ -50,6 +49,7 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/lib/arrangement";
+import { dbToGain } from "@/lib/engine/analysis";
 import { cn } from "@/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */

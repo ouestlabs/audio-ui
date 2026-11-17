@@ -1,7 +1,4 @@
-import type {
-  RecordingLoaderMessage,
-  RecordingLoaderReply,
-} from "./protocol";
+import type { RecordingLoaderMessage, RecordingLoaderReply } from "./protocol";
 import { PageCache } from "./stream";
 
 /** What the loader reads a recording's file through: a synchronous access handle of the origin private file system. */

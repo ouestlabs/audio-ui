@@ -96,8 +96,9 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
 
 export async function buildEntries(): Promise<Entry[]> {
   const all = await loadItems(FOLDERS);
+  // An engine module has its page under Engine, headed by its module.
   const own = (await loadItems(["hooks", "lib"])).filter(
-    (item) => (item.files?.length ?? 0) > 0
+    (item) => (item.files?.length ?? 0) > 0 && !item.name.startsWith("engine-")
   );
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {

@@ -49,4 +49,4 @@ The [piano roll](/docs/components/base/piano-roll#playing-the-notes) plays its n
 <TypeRow name={"secondsPerStep"} type={"number"}>A step's length at the current tempo, to place a note's end.</TypeRow>
 </TypeTable>
 
-The scheduling itself is plain functions in `@audio-ui/engine/time` (`advance`, `anchoredCursor`, `positionAt`, `SCHEDULE_AHEAD_SECONDS`): the hook only connects them to React and the audio context, so an engine outside React uses them directly.
+The scheduling itself is plain functions in `@/lib/engine/time` (`advance`, `anchoredCursor`, `positionAt`, `SCHEDULE_AHEAD_SECONDS`): the hook only connects them to React and the audio context, so an engine outside React uses them directly.

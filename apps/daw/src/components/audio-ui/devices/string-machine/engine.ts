@@ -1,4 +1,3 @@
-import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   cutoffHertz,
@@ -9,6 +8,7 @@ import {
   type StringMachineState,
   volumeGain,
 } from "@/components/audio-ui/devices/string-machine/device";
+import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 
 /** What each oscillator adds before the filter. */
 const SOURCE_GAIN = 0.11;

@@ -1,6 +1,6 @@
-import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { compressorGain } from "@audio-ui/engine/dsp";
-import { DUCKER_KERNELS } from "@audio-ui/engine/kernels";
+import { type DeviceState, defineDevice } from "@/lib/engine/device";
+import { compressorGain } from "@/lib/engine/dsp";
+import { DUCKER_KERNELS } from "@/lib/engine/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 
 /**

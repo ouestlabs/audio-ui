@@ -1,11 +1,11 @@
 ---
 title: Engine
-description: "@audio-ui/engine: the audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales and the clip player."
+description: "The engine: the audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales and the clip player."
 ---
 
-`@audio-ui/engine` holds what makes and times the sound: a device as named parameters and the tools an agent drives it with, musical time and the look-ahead scheduler a transport runs on, levels and the curves a panel draws, the page's MIDI input, named scales, and the clip player that plays an arrangement in an `AudioWorklet`. It runs on the main thread, in a worker or in a worklet, under any framework or none.
+The engine holds what makes and times the sound: a device as named parameters and the tools an agent drives it with, musical time and the look-ahead scheduler a transport runs on, levels and the curves a panel draws, the page's MIDI input, named scales, and the clip player that plays an arrangement in an `AudioWorklet`. It runs on the main thread, in a worker or in a worklet, under any framework or none.
 
-It is one package, `npm install @audio-ui/engine`, and each module is its own entry point, so a page pays only for what it imports. It builds on [audio.js](https://audio.js.org) where an atom does the job.
+Each module is an item of the registry, copied into `lib/engine/<module>/` and owned like any other file: `npx shadcn@latest add @audio-ui/engine-time`, then `import { syncedSeconds } from "@/lib/engine/time"`. A component that needs a module installs it with itself, so a project holds only the modules it uses. It builds on [audio.js](https://audio.js.org) where an atom does the job.
 
 ## Modules
 

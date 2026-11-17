@@ -50,7 +50,9 @@
       "@/primitives/xypad": [
         "../www/src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],
-      "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"]
+      "@/engine/*": [
+        "../www/src/registry-audio/bases/base/lib/engine/*/index.ts"
+      ]
     },
     "types": ["bun", "react", "react-dom"]
   },

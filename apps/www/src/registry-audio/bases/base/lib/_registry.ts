@@ -370,7 +370,7 @@ const renamed: [from: string, to: string][] = [
   ["synth-voice", "envelope-ramp"],
 ];
 
-/** Libs that moved into `@audio-ui/engine`: the module of the package has them. */
+/** Libs that moved into the engine: its module installs in their place. */
 const movedToEngine: [name: string, entry: string][] = [
   ["midi", "midi"],
   ["midi-input", "midi"],
@@ -387,9 +387,10 @@ export const lib: RegistryItem[] = [
   ...movedToEngine.map(
     ([name, entry]): RegistryItem => ({
       dependencies: [],
-      description: `Moved to @audio-ui/engine/${entry}.`,
+      description: `Moved to the engine, @/lib/engine/${entry}: installs it.`,
       files: [],
       name,
+      registryDependencies: [`@audio-ui/engine-${entry}`],
       type: "registry:lib",
     })
   ),

@@ -40,4 +40,4 @@ engine.onPosition((seconds) => position.set(seconds));
 
 A source is `{ getSnapshot, subscribe }`, the shape `useSyncExternalStore` reads, so any store that has those two works too. The hooks on these pages return sources in the same shape, which is why a component cannot tell them from yours.
 
-Without React, `@audio-ui/engine` holds the same logic as plain functions: the scheduler and the musical time in `@audio-ui/engine/time`, the analysis in `@audio-ui/engine/analysis`, MIDI in `@audio-ui/engine/midi` and pitch in `@audio-ui/engine/pitch`.
+Without React, the engine's modules hold the same logic as plain functions: the scheduler and the musical time in `@/lib/engine/time`, the analysis in `@/lib/engine/analysis`, MIDI in `@/lib/engine/midi` and pitch in `@/lib/engine/pitch`.

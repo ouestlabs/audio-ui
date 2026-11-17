@@ -193,7 +193,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `web-audio` | `webAudio` from `@/lib/web-audio` | The page's one `AudioContext`: `webAudio.getContext()`, `null` on the server; `webAudio.resume()` from the gesture that starts sound (a click, a pad, a MIDI note) gives it and resumes it; `webAudio.configure(options)` before the first call sets its latency or output. Engines and libs take the context as a parameter instead; a hook given a node uses that node's |
 | `use-master-bus` | `useMasterBus` from `@/hooks/use-master-bus` | One gain and a safety limiter that every sound of a screen connects into, set by one volume |
 | `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
-| `clip-player` | `loadClipPlayer`, `createClipPlayer` from `@/lib/clip-player` | A track's audio clips played to the frame on the audio clock, in an AudioWorklet: `setClips(playedClips(...), recordings)`, `schedule(state)` with a `PlaybackState` from `@audio-ui/engine/playback`, `synced()` before an offline render |
+| `clip-player` | `loadClipPlayer`, `createClipPlayer` from `@/lib/clip-player` | A track's audio clips played to the frame on the audio clock, in an AudioWorklet: `setClips(playedClips(...), recordings)`, `schedule(state)` with a `PlaybackState` from `@/lib/engine/playback`, `synced()` before an offline render |
 | `arrangement-engine` | `useArrangementEngine` from `@/hooks/use-arrangement-engine`, `renderArrangement` from `@/lib/arrangement-engine` | Play the document of `useArrangement` on the audio clock: audio clips, notes through each MIDI track's instrument, device chains, sends, returns and the main track; `play(from)`, `stop()`, `position` (a live source of seconds), `meter(id)`, `status`, a `metronome` option on the audio clock that an export never has; `renderArrangement` for an offline render |
 | `mixer-engine` | `createMixer` from `@/lib/mixer-engine` | A mixing desk of your own sources: a channel per track and return with a chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters |
 | `device-library` | `libraryDevice`, `DEVICE_LIBRARY`, `DEVICE_SHELVES` from `@/lib/device-library` | Every device with its engine, by its stable id (`audioui.compressor`): turn a project's device ids into engines, list them in a browser |
@@ -211,6 +211,25 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |
 | `use-loudness` | `useLoudness` from `@/hooks/use-loudness` | How loud a signal is while it plays (ITU-R BS.1770): momentary, short-term and integrated LUFS from the node given, as a source every 100 ms, and `clear` |
 | `use-spectrum` | `useSpectrum`, `useSpectrumPeaks` from `@/hooks/use-spectrum` | A live spectrum on a log axis, for a `SpectrumAnalyzer` or a `PlotTrace` |
+
+## The engine's modules
+
+The audio logic under the components and the devices, one item per module, installed to `lib/engine/<module>/`. A component that needs one installs it with itself; add one alone to use it directly.
+
+| Name | Import | Use it for |
+| --- | --- | --- |
+| `engine-analysis` | `@/lib/engine/analysis` | Reading a signal: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients, pauses and auto-warp. Plain functions, for the main thread, a worker or a worklet. |
+| `engine-device` | `@/lib/engine/device` | A device as a description: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with. |
+| `engine-dsp` | `@/lib/engine/dsp` | The audio.js processors the registry's devices are built on: compressor and expander models, the gain curves of dynamics, filter circuits, reverbs and biquad shelves, under one dependency. |
+| `engine-files` | `@/lib/engine/files` | Files: an audio file decoded into samples at a context's rate, sound written to WAV, FLAC or MP3, notes read from and written to a MIDI file, and a score read from and written to MusicXML. |
+| `engine-format` | `@/lib/engine/format` | Audio quantities as text, the way the standards and the tools write them: levels in dBFS, dBTP and LUFS, frequencies and sample rates, times, notes, pans, ratios, tempos, channel layouts, each a function of the value and options, and createFormatter to bind a locale, a true minus or a spacing once. |
+| `engine-kernels` | `@/lib/engine/kernels` | The audio.js kernels each device of the registry runs in an AudioWorklet: every module as published, in a string, since a worklet cannot import. |
+| `engine-midi` | `@/lib/engine/midi` | MIDI input: every connected keyboard and controller as one source through the Web MIDI API, raw messages read into notes, controllers and pitch bend, and pitch bend in semitones. |
+| `engine-pitch` | `@/lib/engine/pitch` | Named scales: the steps of each scale, the pitch classes a scale on a root keeps, whether a pitch is in it and the nearest one that is, and the scale as a piano roll reads it. |
+| `engine-playback` | `@/lib/engine/playback` | What plays when: audio clips placed in frames, the transport's state on the audio clock, the clip player's processor and its renderer, recordings streamed in pages, and the mixer's pan law, solo and delay compensation. |
+| `engine-repair` | `@/lib/engine/repair` | Defects taken out of a recording, each by the method made for it: clicks, crackle, mains hum, steady and changing noise, clipping, wind, plosives, breaths and reverb, or one that finds the defect itself, on audio.js's denoise family. |
+| `engine-time` | `@/lib/engine/time` | Musical time: tempos and signatures, bars and beats, grid divisions and their labels, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on. |
+| `engine-worklet` | `@/lib/engine/worklet` | Loading an AudioWorklet processor: its source into a context from a blob, once per context, false where worklets cannot run. |
 
 ## More pieces
 

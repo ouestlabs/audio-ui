@@ -1,8 +1,3 @@
-import {
-  secondsPerBar,
-  secondsPerBeat,
-  secondsPerQuarter,
-} from "@audio-ui/engine/time";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { ArrangementTake } from "@/components/audio-ui/arrangement-view";
@@ -22,6 +17,11 @@ import {
   type Recording,
 } from "@/lib/daw/recordings";
 import { canStore, saveRecording } from "@/lib/daw/storage";
+import {
+  secondsPerBar,
+  secondsPerBeat,
+  secondsPerQuarter,
+} from "@/lib/engine/time";
 import {
   createInputRecorder,
   type InputRecorder,

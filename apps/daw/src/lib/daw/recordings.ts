@@ -1,7 +1,7 @@
-import { analyzeBeat, type BeatAnalysis } from "@audio-ui/engine/analysis";
 import type { RecordingSource } from "@/lib/clip-player";
 import { decodeAudioChannels } from "@/lib/daw/audio-files";
 import { type Measured, measureSound } from "@/lib/daw/measure";
+import { analyzeBeat, type BeatAnalysis } from "@/lib/engine/analysis";
 
 const EXTENSION = /\.[^.]+$/;
 

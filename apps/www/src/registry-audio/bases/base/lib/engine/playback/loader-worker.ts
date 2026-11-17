@@ -5,10 +5,7 @@
  * source a page starts the worker from.
  */
 import { createRecordingLoader, type RecordingFile } from "./loader";
-import type {
-  RecordingLoaderMessage,
-  RecordingLoaderReply,
-} from "./protocol";
+import type { RecordingLoaderMessage, RecordingLoaderReply } from "./protocol";
 
 /** The file handle a worker can open for synchronous access, which the DOM library leaves out. */
 interface SyncFileHandle extends FileSystemFileHandle {

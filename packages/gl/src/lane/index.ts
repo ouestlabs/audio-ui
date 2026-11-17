@@ -25,7 +25,7 @@ export interface LaneSamples {
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
   /**
    * For a recording streamed from a file: its spectra, as
-   * `spectrogramSpectra` of `@audio-ui/engine/analysis` makes them. A
+   * `spectrogramSpectra` of `@/lib/engine/analysis` makes them. A
    * spectrogram lane draws it from them zoomed out, and zoomed in reads only
    * the frames it shows, `CHUNK_FRAMES` at a time. Left out, a spectrogram lane
    * reads the recording whole, once.

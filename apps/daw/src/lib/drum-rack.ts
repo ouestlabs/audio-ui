@@ -1,15 +1,11 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
 import type {
   DrumSound,
   Rack,
   RackChain,
   TrackDevice,
 } from "@/lib/arrangement";
-import {
-  triggerHihat,
-  triggerKick,
-  triggerSnare,
-} from "@/lib/drum-synthesis";
+import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
+import type { DeviceContext } from "@/lib/engine/device";
 import { chainInstrument } from "@/lib/instrument-rack";
 import {
   createRackEngine,

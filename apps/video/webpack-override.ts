@@ -95,6 +95,7 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       "@/components/icon-placeholder$": path.resolve(
         "src/icon-placeholder.tsx"
       ),
+      "@/engine": path.join(www, "registry-audio/bases/base/lib/engine"),
       "@": www,
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),

@@ -4,11 +4,12 @@
  * back, and the return tracks they send to. Nothing comes from another
  * program's sets.
  */
-import type { WarpMode } from "@audio-ui/engine/playback";
+
 import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 import { createArrangementState } from "@/lib/arrangement-state";
 import { deviceAt, START_TEMPO, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import type { SavedProject } from "@/lib/daw/storage";
+import type { WarpMode } from "@/lib/engine/playback";
 
 /** The one recording every clip plays, and how long it is. */
 export const TAKE = "take";

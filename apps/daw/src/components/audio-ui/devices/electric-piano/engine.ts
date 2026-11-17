@@ -1,4 +1,3 @@
-import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   driveGain,
   type ElectricPianoNote,
@@ -7,6 +6,7 @@ import {
   ringSeconds,
   volumeGain,
 } from "@/components/audio-ui/devices/electric-piano/device";
+import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 
 /** How far up the bell's modulator sits: fourteen times the pitch. */
 const BELL_RATIO = 14;
