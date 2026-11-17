@@ -60,6 +60,7 @@ export function ComponentPreviewTabs({
 
   const hosted = usePreviewHost(expand);
   const expandCode = React.useCallback(() => setIsCodeExpanded(true), []);
+  const collapseCode = React.useCallback(() => setIsCodeExpanded(false), []);
   const shown = expand ? (
     <HostedPreview host={hosted.host} open={hosted.open}>
       {component}
@@ -92,7 +93,21 @@ export function ComponentPreviewTabs({
             data-slot="code"
           >
             {isCodeExpanded ? (
-              source
+              <>
+                {source}
+                {/* Where View Code was: the code folds back to its first lines. */}
+                <div className="flex justify-center pb-3">
+                  <Button
+                    className="bg-site-background text-site-foreground hover:bg-site-muted dark:bg-site-background dark:text-site-foreground dark:hover:bg-site-muted"
+                    onClick={collapseCode}
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                  >
+                    Hide Code
+                  </Button>
+                </div>
+              </>
             ) : (
               <div className="relative">
                 {sourcePreview}
