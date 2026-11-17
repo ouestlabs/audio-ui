@@ -1,0 +1,1780 @@
+{
+  "arranged-clip": [
+    "components/audio-ui/arranged-clip.tsx",
+    "hooks/use-arranged-clips.ts"
+  ],
+  "arrangement-engine": [
+    "lib/arrangement-engine.ts",
+    "hooks/use-arrangement-engine.ts"
+  ],
+  "arrangement-view": [
+    "components/audio-ui/arrangement-view.tsx"
+  ],
+  "arrangement": [
+    "lib/arrangement.ts"
+  ],
+  "audio-export": [
+    "lib/audio-export.ts"
+  ],
+  "auto-pan-device": [
+    "components/audio-ui/devices/auto-pan/device.ts"
+  ],
+  "auto-pan-engine": [
+    "components/audio-ui/devices/auto-pan/engine.ts"
+  ],
+  "auto-pan-panel": [
+    "components/audio-ui/devices/auto-pan/panel.tsx"
+  ],
+  "automation-envelope": [
+    "components/audio-ui/automation-envelope.tsx"
+  ],
+  "bass-enhancer-device": [
+    "components/audio-ui/devices/bass-enhancer/device.ts"
+  ],
+  "bass-enhancer-engine": [
+    "components/audio-ui/devices/bass-enhancer/engine.ts"
+  ],
+  "bass-enhancer-panel": [
+    "components/audio-ui/devices/bass-enhancer/panel.tsx"
+  ],
+  "binaural-panner-device": [
+    "components/audio-ui/devices/binaural-panner/device.ts"
+  ],
+  "binaural-panner-engine": [
+    "components/audio-ui/devices/binaural-panner/engine.ts"
+  ],
+  "binaural-panner-panel": [
+    "components/audio-ui/devices/binaural-panner/panel.tsx"
+  ],
+  "block-audio-editor": [
+    "components/examples/block-audio-editor.tsx"
+  ],
+  "block-auto-pan": [
+    "components/examples/block-auto-pan.tsx"
+  ],
+  "block-bass-enhancer": [
+    "components/examples/block-bass-enhancer.tsx"
+  ],
+  "block-binaural-panner": [
+    "components/examples/block-binaural-panner.tsx"
+  ],
+  "block-channel-eq": [
+    "components/examples/block-channel-eq.tsx"
+  ],
+  "block-chorus": [
+    "components/examples/block-chorus.tsx"
+  ],
+  "block-compander": [
+    "components/examples/block-compander.tsx"
+  ],
+  "block-compressor": [
+    "components/examples/block-compressor.tsx"
+  ],
+  "block-deesser": [
+    "components/examples/block-deesser.tsx"
+  ],
+  "block-delay": [
+    "components/examples/block-delay.tsx"
+  ],
+  "block-device-browser": [
+    "components/examples/block-device-browser.tsx"
+  ],
+  "block-device-chain": [
+    "components/examples/block-device-chain.tsx"
+  ],
+  "block-distortion": [
+    "components/examples/block-distortion.tsx"
+  ],
+  "block-drum-rack": [
+    "components/examples/block-drum-rack.tsx"
+  ],
+  "block-drum-synth": [
+    "components/examples/block-drum-synth.tsx"
+  ],
+  "block-ducker": [
+    "components/examples/block-ducker.tsx"
+  ],
+  "block-electric-piano": [
+    "components/examples/block-electric-piano.tsx"
+  ],
+  "block-equalizer": [
+    "components/examples/block-equalizer.tsx"
+  ],
+  "block-exciter": [
+    "components/examples/block-exciter.tsx"
+  ],
+  "block-expander": [
+    "components/examples/block-expander.tsx"
+  ],
+  "block-filter": [
+    "components/examples/block-filter.tsx"
+  ],
+  "block-fm-synth": [
+    "components/examples/block-fm-synth.tsx"
+  ],
+  "block-frequency-shifter": [
+    "components/examples/block-frequency-shifter.tsx"
+  ],
+  "block-gate": [
+    "components/examples/block-gate.tsx"
+  ],
+  "block-graphic-eq": [
+    "components/examples/block-graphic-eq.tsx"
+  ],
+  "block-guitar": [
+    "components/examples/block-guitar.tsx"
+  ],
+  "block-limiter": [
+    "components/examples/block-limiter.tsx"
+  ],
+  "block-lofi": [
+    "components/examples/block-lofi.tsx"
+  ],
+  "block-mid-side": [
+    "components/examples/block-mid-side.tsx"
+  ],
+  "block-mixer": [
+    "components/examples/block-mixer.tsx"
+  ],
+  "block-mono-synth": [
+    "components/examples/block-mono-synth.tsx"
+  ],
+  "block-multiband": [
+    "components/examples/block-multiband.tsx"
+  ],
+  "block-organ": [
+    "components/examples/block-organ.tsx"
+  ],
+  "block-overdrive": [
+    "components/examples/block-overdrive.tsx"
+  ],
+  "block-phaser": [
+    "components/examples/block-phaser.tsx"
+  ],
+  "block-piano-roll": [
+    "components/examples/block-piano-roll.tsx"
+  ],
+  "block-pocket-synth": [
+    "components/examples/block-pocket-synth.tsx"
+  ],
+  "block-poly-synth": [
+    "components/examples/block-poly-synth.tsx"
+  ],
+  "block-redux": [
+    "components/examples/block-redux.tsx"
+  ],
+  "block-reverb": [
+    "components/examples/block-reverb.tsx"
+  ],
+  "block-rotary": [
+    "components/examples/block-rotary.tsx"
+  ],
+  "block-sampler": [
+    "components/examples/block-sampler.tsx"
+  ],
+  "block-saturator": [
+    "components/examples/block-saturator.tsx"
+  ],
+  "block-string-machine": [
+    "components/examples/block-string-machine.tsx"
+  ],
+  "block-stutter": [
+    "components/examples/block-stutter.tsx"
+  ],
+  "block-synth-panel": [
+    "components/examples/block-synth-panel.tsx"
+  ],
+  "block-tape-keys": [
+    "components/examples/block-tape-keys.tsx"
+  ],
+  "block-tilt-eq": [
+    "components/examples/block-tilt-eq.tsx"
+  ],
+  "block-timeline": [
+    "components/examples/block-timeline.tsx"
+  ],
+  "block-transient": [
+    "components/examples/block-transient.tsx"
+  ],
+  "block-unlimiter": [
+    "components/examples/block-unlimiter.tsx"
+  ],
+  "block-utility": [
+    "components/examples/block-utility.tsx"
+  ],
+  "block-vibe": [
+    "components/examples/block-vibe.tsx"
+  ],
+  "block-wah": [
+    "components/examples/block-wah.tsx"
+  ],
+  "block-wave-shaper": [
+    "components/examples/block-wave-shaper.tsx"
+  ],
+  "block-waveform-player": [
+    "components/examples/block-waveform-player.tsx"
+  ],
+  "bpm-control": [
+    "components/audio-ui/bpm-control.tsx"
+  ],
+  "channel-eq-device": [
+    "components/audio-ui/devices/channel-eq/device.ts"
+  ],
+  "channel-eq-engine": [
+    "components/audio-ui/devices/channel-eq/engine.ts"
+  ],
+  "channel-eq-panel": [
+    "components/audio-ui/devices/channel-eq/panel.tsx"
+  ],
+  "chorus-device": [
+    "components/audio-ui/devices/chorus/device.ts"
+  ],
+  "chorus-engine": [
+    "components/audio-ui/devices/chorus/engine.ts"
+  ],
+  "chorus-panel": [
+    "components/audio-ui/devices/chorus/panel.tsx"
+  ],
+  "clip-edits": [
+    "lib/clip-edits.ts"
+  ],
+  "clip-panel": [
+    "components/audio-ui/clip-panel.tsx"
+  ],
+  "clip-player": [
+    "lib/clip-player.ts"
+  ],
+  "clip-spectrogram": [
+    "components/audio-ui/clip-spectrogram.tsx"
+  ],
+  "clip-view": [
+    "components/audio-ui/clip-view.tsx"
+  ],
+  "clip-waveform": [
+    "components/audio-ui/clip-waveform.tsx"
+  ],
+  "compander-device": [
+    "components/audio-ui/devices/compander/device.ts"
+  ],
+  "compander-engine": [
+    "components/audio-ui/devices/compander/engine.ts"
+  ],
+  "compander-panel": [
+    "components/audio-ui/devices/compander/panel.tsx"
+  ],
+  "compressor-device": [
+    "components/audio-ui/devices/compressor/device.ts"
+  ],
+  "compressor-engine": [
+    "components/audio-ui/devices/compressor/engine.ts"
+  ],
+  "compressor-panel": [
+    "components/audio-ui/devices/compressor/panel.tsx"
+  ],
+  "curve-select": [
+    "components/audio-ui/curve-select.tsx"
+  ],
+  "dawproject": [
+    "lib/dawproject.ts",
+    "lib/zip.ts"
+  ],
+  "deesser-device": [
+    "components/audio-ui/devices/deesser/device.ts"
+  ],
+  "deesser-engine": [
+    "components/audio-ui/devices/deesser/engine.ts"
+  ],
+  "deesser-panel": [
+    "components/audio-ui/devices/deesser/panel.tsx"
+  ],
+  "delay-device": [
+    "components/audio-ui/devices/delay/device.ts"
+  ],
+  "delay-engine": [
+    "components/audio-ui/devices/delay/engine.ts"
+  ],
+  "delay-panel": [
+    "components/audio-ui/devices/delay/panel.tsx"
+  ],
+  "demo-song": [
+    "lib/demo-song.ts"
+  ],
+  "demo-sound": [
+    "lib/demo-sound.ts"
+  ],
+  "device-browser": [
+    "components/audio-ui/device-browser.tsx"
+  ],
+  "device-chain": [
+    "components/audio-ui/device-chain.tsx"
+  ],
+  "device-library": [
+    "lib/device-library.ts"
+  ],
+  "device-panel": [
+    "components/audio-ui/device-panel.tsx"
+  ],
+  "device-panels": [
+    "components/audio-ui/device-panels.tsx"
+  ],
+  "device-signal": [
+    "lib/device-signal.ts"
+  ],
+  "device-view": [
+    "components/audio-ui/device-view.tsx"
+  ],
+  "distortion-device": [
+    "components/audio-ui/devices/distortion/device.ts"
+  ],
+  "distortion-engine": [
+    "components/audio-ui/devices/distortion/engine.ts"
+  ],
+  "distortion-panel": [
+    "components/audio-ui/devices/distortion/panel.tsx"
+  ],
+  "drum-kit": [
+    "lib/drum-kit.ts"
+  ],
+  "drum-rack-panel": [
+    "components/audio-ui/drum-rack-panel.tsx"
+  ],
+  "drum-rack": [
+    "lib/drum-rack.ts"
+  ],
+  "drum-step-editor": [
+    "components/audio-ui/drum-step-editor.tsx"
+  ],
+  "drum-steps": [
+    "lib/drum-steps.ts"
+  ],
+  "drum-synth-device": [
+    "components/audio-ui/devices/drum-synth/device.ts"
+  ],
+  "drum-synth-engine": [
+    "components/audio-ui/devices/drum-synth/engine.ts"
+  ],
+  "drum-synth-panel": [
+    "components/audio-ui/devices/drum-synth/panel.tsx"
+  ],
+  "drum-synthesis": [
+    "lib/drum-synthesis.ts"
+  ],
+  "ducker-device": [
+    "components/audio-ui/devices/ducker/device.ts"
+  ],
+  "ducker-engine": [
+    "components/audio-ui/devices/ducker/engine.ts"
+  ],
+  "ducker-panel": [
+    "components/audio-ui/devices/ducker/panel.tsx"
+  ],
+  "electric-piano-device": [
+    "components/audio-ui/devices/electric-piano/device.ts"
+  ],
+  "electric-piano-engine": [
+    "components/audio-ui/devices/electric-piano/engine.ts"
+  ],
+  "electric-piano-panel": [
+    "components/audio-ui/devices/electric-piano/panel.tsx"
+  ],
+  "engine-analysis": [
+    "lib/engine/analysis/beat.ts",
+    "lib/engine/analysis/compressor.ts",
+    "lib/engine/analysis/filter.ts",
+    "lib/engine/analysis/index.ts",
+    "lib/engine/analysis/level.ts",
+    "lib/engine/analysis/loudness.ts",
+    "lib/engine/analysis/peaks.ts",
+    "lib/engine/analysis/pitch.ts",
+    "lib/engine/analysis/recording.ts",
+    "lib/engine/analysis/report.ts",
+    "lib/engine/analysis/silence.ts",
+    "lib/engine/analysis/spectra.ts",
+    "lib/engine/analysis/spectrum.ts",
+    "lib/engine/analysis/stereo.ts",
+    "lib/engine/analysis/tint.ts"
+  ],
+  "engine-device": [
+    "lib/engine/device/define.ts",
+    "lib/engine/device/engine.ts",
+    "lib/engine/device/index.ts",
+    "lib/engine/device/instrument.ts",
+    "lib/engine/device/measure.ts",
+    "lib/engine/device/scale.ts",
+    "lib/engine/device/tools.ts"
+  ],
+  "engine-dsp": [
+    "lib/engine/dsp/index.ts"
+  ],
+  "engine-files": [
+    "lib/engine/files/audio-decode.ts",
+    "lib/engine/files/audio-encode.ts",
+    "lib/engine/files/channels.ts",
+    "lib/engine/files/index.ts",
+    "lib/engine/files/midi-file.ts",
+    "lib/engine/files/musicxml-file.ts",
+    "lib/engine/files/process.ts",
+    "lib/engine/files/time-pitch.ts"
+  ],
+  "engine-format": [
+    "lib/engine/format/index.ts"
+  ],
+  "engine-kernels": [
+    "lib/engine/kernels/bass-enhancer.ts",
+    "lib/engine/kernels/binaural-panner.ts",
+    "lib/engine/kernels/chorus.ts",
+    "lib/engine/kernels/compander.ts",
+    "lib/engine/kernels/compressor.ts",
+    "lib/engine/kernels/deesser.ts",
+    "lib/engine/kernels/delay.ts",
+    "lib/engine/kernels/ducker.ts",
+    "lib/engine/kernels/exciter.ts",
+    "lib/engine/kernels/expander.ts",
+    "lib/engine/kernels/filter.ts",
+    "lib/engine/kernels/frequency-shifter.ts",
+    "lib/engine/kernels/gate.ts",
+    "lib/engine/kernels/index.ts",
+    "lib/engine/kernels/limiter.ts",
+    "lib/engine/kernels/lofi.ts",
+    "lib/engine/kernels/mid-side.ts",
+    "lib/engine/kernels/phaser.ts",
+    "lib/engine/kernels/redux.ts",
+    "lib/engine/kernels/rotary.ts",
+    "lib/engine/kernels/stutter.ts",
+    "lib/engine/kernels/tilt-eq.ts",
+    "lib/engine/kernels/transient.ts",
+    "lib/engine/kernels/unlimiter.ts",
+    "lib/engine/kernels/wah.ts"
+  ],
+  "engine-midi": [
+    "lib/engine/midi/index.ts",
+    "lib/engine/midi/input.ts",
+    "lib/engine/midi/message.ts"
+  ],
+  "engine-pitch": [
+    "lib/engine/pitch/index.ts",
+    "lib/engine/pitch/key.ts",
+    "lib/engine/pitch/scale.ts"
+  ],
+  "engine-playback": [
+    "lib/engine/playback/clip.ts",
+    "lib/engine/playback/index.ts",
+    "lib/engine/playback/loader-worker-source.ts",
+    "lib/engine/playback/loader-worker.ts",
+    "lib/engine/playback/loader.ts",
+    "lib/engine/playback/mixer.ts",
+    "lib/engine/playback/note.ts",
+    "lib/engine/playback/plan.ts",
+    "lib/engine/playback/protocol.ts",
+    "lib/engine/playback/render.ts",
+    "lib/engine/playback/stream.ts",
+    "lib/engine/playback/transport.ts",
+    "lib/engine/playback/worklet-source.ts",
+    "lib/engine/playback/worklet.ts"
+  ],
+  "engine-repair": [
+    "lib/engine/repair/index.ts"
+  ],
+  "engine-time": [
+    "lib/engine/time/grid.ts",
+    "lib/engine/time/index.ts",
+    "lib/engine/time/meter.ts",
+    "lib/engine/time/scheduler.ts",
+    "lib/engine/time/tempo.ts",
+    "lib/engine/time/warp.ts"
+  ],
+  "engine-worklet": [
+    "lib/engine/worklet/index.ts",
+    "lib/engine/worklet/load.ts"
+  ],
+  "envelope-adsr-demo": [
+    "components/examples/envelope-adsr-demo.tsx"
+  ],
+  "envelope-geometry": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/envelope/geometry.ts"
+  ],
+  "envelope-ramp": [
+    "lib/envelope-ramp.ts"
+  ],
+  "envelope-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/geometry.ts",
+    "components/audio-ui/envelope/react.tsx"
+  ],
+  "envelope-size-default-demo": [
+    "components/examples/envelope-size-default-demo.tsx"
+  ],
+  "envelope-svelte-demo": [
+    "components/examples/envelope-demo.svelte"
+  ],
+  "envelope-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/envelope/envelope.ts",
+    "~/src/lib/components/audio-ui/envelope/geometry.ts",
+    "~/src/lib/components/audio-ui/envelope/svelte/Fill.svelte",
+    "~/src/lib/components/audio-ui/envelope/svelte/Line.svelte",
+    "~/src/lib/components/audio-ui/envelope/svelte/Polyline.svelte",
+    "~/src/lib/components/audio-ui/envelope/svelte/index.ts",
+    "~/src/lib/components/audio-ui/envelope/svelte/parts.ts"
+  ],
+  "envelope-vue-demo": [
+    "components/examples/envelope-demo.vue"
+  ],
+  "envelope-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/geometry.ts",
+    "components/audio-ui/envelope/vue.ts"
+  ],
+  "envelope-web-demo": [
+    "components/examples/envelope-demo.js"
+  ],
+  "envelope-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/geometry.ts",
+    "components/audio-ui/envelope/web.ts"
+  ],
+  "envelope": [
+    "components/audio-ui/envelope.tsx"
+  ],
+  "equalizer-device": [
+    "components/audio-ui/devices/equalizer/device.ts"
+  ],
+  "equalizer-engine": [
+    "components/audio-ui/devices/equalizer/engine.ts"
+  ],
+  "equalizer-panel": [
+    "components/audio-ui/devices/equalizer/panel.tsx"
+  ],
+  "exciter-device": [
+    "components/audio-ui/devices/exciter/device.ts"
+  ],
+  "exciter-engine": [
+    "components/audio-ui/devices/exciter/engine.ts"
+  ],
+  "exciter-panel": [
+    "components/audio-ui/devices/exciter/panel.tsx"
+  ],
+  "expander-device": [
+    "components/audio-ui/devices/expander/device.ts"
+  ],
+  "expander-engine": [
+    "components/audio-ui/devices/expander/engine.ts"
+  ],
+  "expander-panel": [
+    "components/audio-ui/devices/expander/panel.tsx"
+  ],
+  "export-dialog-demo": [
+    "components/examples/export-dialog-demo.tsx"
+  ],
+  "export-dialog": [
+    "components/audio-ui/export-dialog.tsx"
+  ],
+  "fader-pan-demo": [
+    "components/examples/fader-pan-demo.tsx"
+  ],
+  "fader-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/react.tsx"
+  ],
+  "fader-svelte-demo": [
+    "components/examples/fader-demo.svelte"
+  ],
+  "fader-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/fader/fader.ts",
+    "~/src/lib/components/audio-ui/fader/svelte/Thumb.svelte",
+    "~/src/lib/components/audio-ui/fader/svelte/Value.svelte",
+    "~/src/lib/components/audio-ui/fader/svelte/index.ts",
+    "~/src/lib/components/audio-ui/fader/svelte/parts.ts"
+  ],
+  "fader-vertical-demo": [
+    "components/examples/fader-vertical-demo.tsx"
+  ],
+  "fader-vue-demo": [
+    "components/examples/fader-demo.vue"
+  ],
+  "fader-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/vue.ts"
+  ],
+  "fader-web-demo": [
+    "components/examples/fader-demo.js"
+  ],
+  "fader-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/web.ts"
+  ],
+  "fader": [
+    "components/audio-ui/fader.tsx"
+  ],
+  "filter-device": [
+    "components/audio-ui/devices/filter/device.ts"
+  ],
+  "filter-engine": [
+    "components/audio-ui/devices/filter/engine.ts"
+  ],
+  "filter-panel": [
+    "components/audio-ui/devices/filter/panel.tsx"
+  ],
+  "filter-type-select": [
+    "components/audio-ui/filter-type-select.tsx"
+  ],
+  "fm-synth-device": [
+    "components/audio-ui/devices/fm-synth/device.ts"
+  ],
+  "fm-synth-engine": [
+    "components/audio-ui/devices/fm-synth/engine.ts"
+  ],
+  "fm-synth-panel": [
+    "components/audio-ui/devices/fm-synth/panel.tsx"
+  ],
+  "frame": [
+    "components/audio-ui/frame.ts"
+  ],
+  "frequency-shifter-device": [
+    "components/audio-ui/devices/frequency-shifter/device.ts"
+  ],
+  "frequency-shifter-engine": [
+    "components/audio-ui/devices/frequency-shifter/engine.ts"
+  ],
+  "frequency-shifter-panel": [
+    "components/audio-ui/devices/frequency-shifter/panel.tsx"
+  ],
+  "gate-device": [
+    "components/audio-ui/devices/gate/device.ts"
+  ],
+  "gate-engine": [
+    "components/audio-ui/devices/gate/engine.ts"
+  ],
+  "gate-panel": [
+    "components/audio-ui/devices/gate/panel.tsx"
+  ],
+  "gl-lane": [
+    "lib/gl/lane/index.ts"
+  ],
+  "gl-spectrogram": [
+    "lib/gl/spectrogram/index.ts"
+  ],
+  "gl-waveform": [
+    "lib/gl/waveform/index.ts"
+  ],
+  "graphic-eq-device": [
+    "components/audio-ui/devices/graphic-eq/device.ts"
+  ],
+  "graphic-eq-engine": [
+    "components/audio-ui/devices/graphic-eq/engine.ts"
+  ],
+  "graphic-eq-panel": [
+    "components/audio-ui/devices/graphic-eq/panel.tsx"
+  ],
+  "grid": [
+    "components/audio-ui/grid.ts"
+  ],
+  "guitar-device": [
+    "components/audio-ui/devices/guitar/device.ts"
+  ],
+  "guitar-engine": [
+    "components/audio-ui/devices/guitar/engine.ts"
+  ],
+  "guitar-panel": [
+    "components/audio-ui/devices/guitar/panel.tsx"
+  ],
+  "instrument-rack": [
+    "lib/instrument-rack.ts"
+  ],
+  "key-detector": [
+    "components/audio-ui/devices/key-detector.ts"
+  ],
+  "knob-demo": [
+    "components/examples/knob-demo.tsx"
+  ],
+  "knob-filter-control-demo": [
+    "components/examples/knob-filter-control-demo.tsx"
+  ],
+  "knob-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/react.tsx"
+  ],
+  "knob-svelte-demo": [
+    "components/examples/knob-demo.svelte"
+  ],
+  "knob-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/knob/knob.ts",
+    "~/src/lib/components/audio-ui/knob/svelte/Arc.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Indicator.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Provider.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Root.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Thumb.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Track.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/Value.svelte",
+    "~/src/lib/components/audio-ui/knob/svelte/index.ts",
+    "~/src/lib/components/audio-ui/knob/svelte/parts.ts"
+  ],
+  "knob-vue-demo": [
+    "components/examples/knob-demo.vue"
+  ],
+  "knob-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/vue.ts"
+  ],
+  "knob-web-demo": [
+    "components/examples/knob-demo.js"
+  ],
+  "knob-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/web.ts"
+  ],
+  "knob": [
+    "components/audio-ui/knob.tsx"
+  ],
+  "lcd-demo": [
+    "components/examples/lcd-demo.tsx"
+  ],
+  "lcd": [
+    "components/audio-ui/lcd.tsx"
+  ],
+  "led-demo": [
+    "components/examples/led-demo.tsx"
+  ],
+  "led": [
+    "components/audio-ui/led.tsx"
+  ],
+  "limiter-device": [
+    "components/audio-ui/devices/limiter/device.ts"
+  ],
+  "limiter-engine": [
+    "components/audio-ui/devices/limiter/engine.ts"
+  ],
+  "limiter-panel": [
+    "components/audio-ui/devices/limiter/panel.tsx"
+  ],
+  "lofi-device": [
+    "components/audio-ui/devices/lofi/device.ts"
+  ],
+  "lofi-engine": [
+    "components/audio-ui/devices/lofi/engine.ts"
+  ],
+  "lofi-panel": [
+    "components/audio-ui/devices/lofi/panel.tsx"
+  ],
+  "manifest-worklet": [
+    "lib/manifest-worklet.ts"
+  ],
+  "meter-levels": [
+    "components/audio-ui/meter/levels.ts",
+    "components/audio-ui/meter/ballistics.ts"
+  ],
+  "meter-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/levels.ts",
+    "components/audio-ui/meter/react.tsx"
+  ],
+  "meter-size-default-demo": [
+    "components/examples/meter-size-default-demo.tsx"
+  ],
+  "meter-svelte-demo": [
+    "components/examples/meter-demo.svelte"
+  ],
+  "meter-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/meter/meter.ts",
+    "~/src/lib/components/audio-ui/meter/levels.ts",
+    "~/src/lib/components/audio-ui/meter/svelte/Value.svelte",
+    "~/src/lib/components/audio-ui/meter/svelte/index.ts",
+    "~/src/lib/components/audio-ui/meter/svelte/parts.ts"
+  ],
+  "meter-vue-demo": [
+    "components/examples/meter-demo.vue"
+  ],
+  "meter-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/levels.ts",
+    "components/audio-ui/meter/vue.ts"
+  ],
+  "meter-web-demo": [
+    "components/examples/meter-demo.js"
+  ],
+  "meter-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/levels.ts",
+    "components/audio-ui/meter/web.ts"
+  ],
+  "meter": [
+    "components/audio-ui/meter.tsx"
+  ],
+  "mid-side-device": [
+    "components/audio-ui/devices/mid-side/device.ts"
+  ],
+  "mid-side-engine": [
+    "components/audio-ui/devices/mid-side/engine.ts"
+  ],
+  "mid-side-panel": [
+    "components/audio-ui/devices/mid-side/panel.tsx"
+  ],
+  "midi-clip-panel": [
+    "components/audio-ui/midi-clip-panel.tsx"
+  ],
+  "midi-connect-control": [
+    "components/audio-ui/midi-connect-control.tsx"
+  ],
+  "mixer-engine": [
+    "lib/mixer-engine.ts"
+  ],
+  "mixer-view": [
+    "components/audio-ui/mixer-view.tsx"
+  ],
+  "mono-synth-device": [
+    "components/audio-ui/devices/mono-synth/device.ts"
+  ],
+  "mono-synth-engine": [
+    "components/audio-ui/devices/mono-synth/engine.ts"
+  ],
+  "mono-synth-panel": [
+    "components/audio-ui/devices/mono-synth/panel.tsx"
+  ],
+  "multiband-device": [
+    "components/audio-ui/devices/multiband/device.ts"
+  ],
+  "multiband-engine": [
+    "components/audio-ui/devices/multiband/engine.ts"
+  ],
+  "multiband-panel": [
+    "components/audio-ui/devices/multiband/panel.tsx"
+  ],
+  "needle-meter-demo": [
+    "components/examples/needle-meter-demo.tsx"
+  ],
+  "needle-meter": [
+    "components/audio-ui/needle-meter.tsx"
+  ],
+  "note-edit-menu-demo": [
+    "components/examples/note-edit-menu-demo.tsx"
+  ],
+  "note-edit-menu": [
+    "components/audio-ui/note-edit-menu.tsx",
+    "lib/note-edits.ts"
+  ],
+  "note-find-demo": [
+    "components/examples/note-find-demo.tsx"
+  ],
+  "note-find": [
+    "components/audio-ui/note-find.tsx"
+  ],
+  "organ-device": [
+    "components/audio-ui/devices/organ/device.ts"
+  ],
+  "organ-engine": [
+    "components/audio-ui/devices/organ/engine.ts"
+  ],
+  "organ-panel": [
+    "components/audio-ui/devices/organ/panel.tsx"
+  ],
+  "overdrive-device": [
+    "components/audio-ui/devices/overdrive/device.ts"
+  ],
+  "overdrive-engine": [
+    "components/audio-ui/devices/overdrive/engine.ts"
+  ],
+  "overdrive-panel": [
+    "components/audio-ui/devices/overdrive/panel.tsx"
+  ],
+  "oversampling": [
+    "lib/oversampling.ts"
+  ],
+  "pad-demo": [
+    "components/examples/pad-demo.tsx"
+  ],
+  "pad-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/react.tsx"
+  ],
+  "pad-svelte-demo": [
+    "components/examples/pad-demo.svelte"
+  ],
+  "pad-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/pad/pad.ts",
+    "~/src/lib/components/audio-ui/pad/svelte/index.ts",
+    "~/src/lib/components/audio-ui/pad/svelte/parts.ts"
+  ],
+  "pad-vue-demo": [
+    "components/examples/pad-demo.vue"
+  ],
+  "pad-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/vue.ts"
+  ],
+  "pad-web-demo": [
+    "components/examples/pad-demo.js"
+  ],
+  "pad-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/web.ts"
+  ],
+  "pad": [
+    "components/audio-ui/pad.tsx"
+  ],
+  "parameter-field-demo": [
+    "components/examples/parameter-field-demo.tsx"
+  ],
+  "parameter-field": [
+    "components/audio-ui/parameter-field.tsx"
+  ],
+  "phaser-device": [
+    "components/audio-ui/devices/phaser/device.ts"
+  ],
+  "phaser-engine": [
+    "components/audio-ui/devices/phaser/engine.ts"
+  ],
+  "phaser-panel": [
+    "components/audio-ui/devices/phaser/panel.tsx"
+  ],
+  "piano-active-notes-demo": [
+    "components/examples/piano-active-notes-demo.tsx"
+  ],
+  "piano-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/piano/react.tsx"
+  ],
+  "piano-roll-edits": [
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/piano-roll/edits.ts",
+    "components/audio-ui/piano-roll/rows.ts"
+  ],
+  "piano-roll-midi-file-demo": [
+    "components/examples/piano-roll-midi-file-demo.tsx"
+  ],
+  "piano-roll-playback-demo": [
+    "components/examples/piano-roll-playback-demo.tsx"
+  ],
+  "piano-roll-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/piano-roll/controller.ts",
+    "components/audio-ui/piano-roll/edits.ts",
+    "components/audio-ui/piano-roll/rows.ts",
+    "components/audio-ui/piano-roll/react.tsx"
+  ],
+  "piano-roll-svelte-demo": [
+    "components/examples/piano-roll-demo.svelte"
+  ],
+  "piano-roll-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/piano-roll/piano-roll.ts",
+    "~/src/lib/components/audio-ui/pitch.ts",
+    "~/src/lib/components/audio-ui/grid.ts",
+    "~/src/lib/components/audio-ui/piano-roll/controller.ts",
+    "~/src/lib/components/audio-ui/piano-roll/edits.ts",
+    "~/src/lib/components/audio-ui/piano-roll/rows.ts",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/Note.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/NoteHandle.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/Notes.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/Rows.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/StretchHandle.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/Velocity.svelte",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/index.ts",
+    "~/src/lib/components/audio-ui/piano-roll/svelte/parts.ts"
+  ],
+  "piano-roll-tools": [
+    "lib/piano-roll-tools.ts"
+  ],
+  "piano-roll-vue-demo": [
+    "components/examples/piano-roll-demo.vue"
+  ],
+  "piano-roll-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/piano-roll/controller.ts",
+    "components/audio-ui/piano-roll/edits.ts",
+    "components/audio-ui/piano-roll/rows.ts",
+    "components/audio-ui/piano-roll/vue.ts"
+  ],
+  "piano-roll-web-demo": [
+    "components/examples/piano-roll-demo.js"
+  ],
+  "piano-roll-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/piano-roll/controller.ts",
+    "components/audio-ui/piano-roll/edits.ts",
+    "components/audio-ui/piano-roll/rows.ts",
+    "components/audio-ui/piano-roll/web.ts"
+  ],
+  "piano-roll": [
+    "components/audio-ui/piano-roll.tsx"
+  ],
+  "piano-size-default-demo": [
+    "components/examples/piano-size-default-demo.tsx"
+  ],
+  "piano-svelte-demo": [
+    "components/examples/piano-demo.svelte"
+  ],
+  "piano-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/piano/piano.ts",
+    "~/src/lib/components/audio-ui/pitch.ts",
+    "~/src/lib/components/audio-ui/piano/svelte/Label.svelte",
+    "~/src/lib/components/audio-ui/piano/svelte/index.ts",
+    "~/src/lib/components/audio-ui/piano/svelte/parts.ts"
+  ],
+  "piano-vue-demo": [
+    "components/examples/piano-demo.vue"
+  ],
+  "piano-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/piano/vue.ts"
+  ],
+  "piano-web-demo": [
+    "components/examples/piano-demo.js"
+  ],
+  "piano-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/pitch.ts",
+    "components/audio-ui/piano/web.ts"
+  ],
+  "piano": [
+    "components/audio-ui/piano.tsx"
+  ],
+  "pitch": [
+    "components/audio-ui/pitch.ts"
+  ],
+  "play-toggle": [
+    "components/audio-ui/play-toggle.tsx"
+  ],
+  "plot-demo": [
+    "components/examples/plot-demo.tsx"
+  ],
+  "plot-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/react.tsx"
+  ],
+  "plot-svelte-demo": [
+    "components/examples/plot-demo.svelte"
+  ],
+  "plot-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/plot/plot.ts",
+    "~/src/lib/components/audio-ui/plot/svelte/Band.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Curve.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Grid.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/GridLines.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Handle.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Line.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Path.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/Trace.svelte",
+    "~/src/lib/components/audio-ui/plot/svelte/index.ts",
+    "~/src/lib/components/audio-ui/plot/svelte/parts.ts"
+  ],
+  "plot-vue-demo": [
+    "components/examples/plot-demo.vue"
+  ],
+  "plot-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/vue.ts"
+  ],
+  "plot-web-demo": [
+    "components/examples/plot-demo.js"
+  ],
+  "plot-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/web.ts"
+  ],
+  "plot": [
+    "components/audio-ui/plot.tsx"
+  ],
+  "pocket-synth-device": [
+    "components/audio-ui/devices/pocket-synth/device.ts"
+  ],
+  "pocket-synth-engine": [
+    "components/audio-ui/devices/pocket-synth/engine.ts"
+  ],
+  "pocket-synth-panel": [
+    "components/audio-ui/devices/pocket-synth/panel.tsx"
+  ],
+  "poly-synth-device": [
+    "components/audio-ui/devices/poly-synth/device.ts"
+  ],
+  "poly-synth-engine": [
+    "components/audio-ui/devices/poly-synth/engine.ts"
+  ],
+  "poly-synth-panel": [
+    "components/audio-ui/devices/poly-synth/panel.tsx"
+  ],
+  "polyphony": [
+    "lib/polyphony.ts"
+  ],
+  "primitive": [
+    "components/audio-ui/primitive.ts"
+  ],
+  "primitives-css": [
+    "~/src/audio-ui-primitives.css"
+  ],
+  "process-menu": [
+    "components/audio-ui/process-menu.tsx"
+  ],
+  "rack-panel": [
+    "components/audio-ui/rack-panel.tsx"
+  ],
+  "rack": [
+    "lib/rack.ts"
+  ],
+  "recording": [
+    "lib/recording.ts",
+    "lib/input-recorder.ts"
+  ],
+  "redux-device": [
+    "components/audio-ui/devices/redux/device.ts"
+  ],
+  "redux-engine": [
+    "components/audio-ui/devices/redux/engine.ts"
+  ],
+  "redux-panel": [
+    "components/audio-ui/devices/redux/panel.tsx"
+  ],
+  "reverb-device": [
+    "components/audio-ui/devices/reverb/device.ts"
+  ],
+  "reverb-engine": [
+    "components/audio-ui/devices/reverb/engine.ts"
+  ],
+  "reverb-panel": [
+    "components/audio-ui/devices/reverb/panel.tsx"
+  ],
+  "rocker-switch-demo": [
+    "components/examples/rocker-switch-demo.tsx"
+  ],
+  "rocker-switch": [
+    "components/audio-ui/rocker-switch.tsx"
+  ],
+  "rotary-device": [
+    "components/audio-ui/devices/rotary/device.ts"
+  ],
+  "rotary-engine": [
+    "components/audio-ui/devices/rotary/engine.ts"
+  ],
+  "rotary-panel": [
+    "components/audio-ui/devices/rotary/panel.tsx"
+  ],
+  "sampler-device": [
+    "components/audio-ui/devices/sampler/device.ts"
+  ],
+  "sampler-engine": [
+    "components/audio-ui/devices/sampler/engine.ts"
+  ],
+  "sampler-panel": [
+    "components/audio-ui/devices/sampler/panel.tsx"
+  ],
+  "saturator-device": [
+    "components/audio-ui/devices/saturator/device.ts"
+  ],
+  "saturator-engine": [
+    "components/audio-ui/devices/saturator/engine.ts"
+  ],
+  "saturator-panel": [
+    "components/audio-ui/devices/saturator/panel.tsx"
+  ],
+  "scale-menu-demo": [
+    "components/examples/scale-menu-demo.tsx"
+  ],
+  "scale-menu": [
+    "components/audio-ui/scale-menu.tsx"
+  ],
+  "scrubber-demo": [
+    "components/examples/scrubber-demo.tsx"
+  ],
+  "scrubber": [
+    "components/audio-ui/scrubber.tsx",
+    "components/audio-ui/scrubber-default.tsx"
+  ],
+  "selection-frame": [
+    "components/audio-ui/selection-frame.tsx"
+  ],
+  "sequencer-demo": [
+    "components/examples/sequencer-demo.tsx"
+  ],
+  "sequencer-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/react.tsx"
+  ],
+  "sequencer-svelte-demo": [
+    "components/examples/sequencer-demo.svelte"
+  ],
+  "sequencer-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/sequencer/sequencer.ts",
+    "~/src/lib/components/audio-ui/sequencer/svelte/Cell.svelte",
+    "~/src/lib/components/audio-ui/sequencer/svelte/Velocity.svelte",
+    "~/src/lib/components/audio-ui/sequencer/svelte/index.ts",
+    "~/src/lib/components/audio-ui/sequencer/svelte/parts.ts"
+  ],
+  "sequencer-vue-demo": [
+    "components/examples/sequencer-demo.vue"
+  ],
+  "sequencer-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/vue.ts"
+  ],
+  "sequencer-web-demo": [
+    "components/examples/sequencer-demo.js"
+  ],
+  "sequencer-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/web.ts"
+  ],
+  "sequencer": [
+    "components/audio-ui/sequencer.tsx",
+    "components/audio-ui/sequencer-default.tsx"
+  ],
+  "signal-plot": [
+    "components/audio-ui/signal-plot.tsx"
+  ],
+  "simulated-levels": [
+    "lib/simulated-levels.ts"
+  ],
+  "sortable-drag": [
+    "lib/sortable-drag.ts"
+  ],
+  "sound-lane": [
+    "components/audio-ui/sound-lane.tsx"
+  ],
+  "sound-operations": [
+    "lib/sound-operations.ts"
+  ],
+  "sound-readouts-demo": [
+    "components/examples/sound-readouts-readouts-demo.tsx"
+  ],
+  "sound-readouts": [
+    "components/audio-ui/sound-readouts.tsx"
+  ],
+  "sound-report": [
+    "components/audio-ui/sound-report.tsx"
+  ],
+  "spectrum-analyzer-demo": [
+    "components/examples/spectrum-analyzer-demo.tsx"
+  ],
+  "spectrum-analyzer": [
+    "components/audio-ui/spectrum-analyzer.tsx"
+  ],
+  "step-player": [
+    "lib/step-player.ts"
+  ],
+  "stereo-field": [
+    "components/audio-ui/stereo-field.tsx"
+  ],
+  "string-machine-device": [
+    "components/audio-ui/devices/string-machine/device.ts"
+  ],
+  "string-machine-engine": [
+    "components/audio-ui/devices/string-machine/engine.ts"
+  ],
+  "string-machine-panel": [
+    "components/audio-ui/devices/string-machine/panel.tsx"
+  ],
+  "stutter-device": [
+    "components/audio-ui/devices/stutter/device.ts"
+  ],
+  "stutter-engine": [
+    "components/audio-ui/devices/stutter/engine.ts"
+  ],
+  "stutter-panel": [
+    "components/audio-ui/devices/stutter/panel.tsx"
+  ],
+  "synced-rate": [
+    "lib/synced-rate.ts"
+  ],
+  "tape-keys-device": [
+    "components/audio-ui/devices/tape-keys/device.ts"
+  ],
+  "tape-keys-engine": [
+    "components/audio-ui/devices/tape-keys/engine.ts"
+  ],
+  "tape-keys-panel": [
+    "components/audio-ui/devices/tape-keys/panel.tsx"
+  ],
+  "tilt-eq-device": [
+    "components/audio-ui/devices/tilt-eq/device.ts"
+  ],
+  "tilt-eq-engine": [
+    "components/audio-ui/devices/tilt-eq/engine.ts"
+  ],
+  "tilt-eq-panel": [
+    "components/audio-ui/devices/tilt-eq/panel.tsx"
+  ],
+  "time-selection": [
+    "components/audio-ui/time-selection.tsx"
+  ],
+  "timeline-clips": [
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/timeline/clip.ts",
+    "components/audio-ui/timeline/locators.ts"
+  ],
+  "timeline-markers": [
+    "components/audio-ui/timeline-markers.tsx",
+    "hooks/use-timeline-markers.ts"
+  ],
+  "timeline-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/timeline/clip-controller.ts",
+    "components/audio-ui/timeline/clip.ts",
+    "components/audio-ui/timeline/clips.ts",
+    "components/audio-ui/timeline/edge-scroll.ts",
+    "components/audio-ui/timeline/layout.ts",
+    "components/audio-ui/timeline/locators.ts",
+    "components/audio-ui/timeline/navigator-controller.ts",
+    "components/audio-ui/timeline/navigator.ts",
+    "components/audio-ui/timeline/position.ts",
+    "components/audio-ui/timeline/range-controller.ts",
+    "components/audio-ui/timeline/ranges.ts",
+    "components/audio-ui/timeline/scale.ts",
+    "components/audio-ui/timeline/track-controller.ts",
+    "components/audio-ui/timeline/wheel-zoom.ts",
+    "components/audio-ui/timeline/react.tsx"
+  ],
+  "timeline-svelte-demo": [
+    "components/examples/timeline-demo.svelte"
+  ],
+  "timeline-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/timeline/timeline.ts",
+    "~/src/lib/components/audio-ui/frame.ts",
+    "~/src/lib/components/audio-ui/grid.ts",
+    "~/src/lib/components/audio-ui/timeline/clip-controller.ts",
+    "~/src/lib/components/audio-ui/timeline/clip.ts",
+    "~/src/lib/components/audio-ui/timeline/clips.ts",
+    "~/src/lib/components/audio-ui/timeline/edge-scroll.ts",
+    "~/src/lib/components/audio-ui/timeline/layout.ts",
+    "~/src/lib/components/audio-ui/timeline/locators.ts",
+    "~/src/lib/components/audio-ui/timeline/navigator-controller.ts",
+    "~/src/lib/components/audio-ui/timeline/navigator.ts",
+    "~/src/lib/components/audio-ui/timeline/position.ts",
+    "~/src/lib/components/audio-ui/timeline/range-controller.ts",
+    "~/src/lib/components/audio-ui/timeline/ranges.ts",
+    "~/src/lib/components/audio-ui/timeline/scale.ts",
+    "~/src/lib/components/audio-ui/timeline/track-controller.ts",
+    "~/src/lib/components/audio-ui/timeline/wheel-zoom.ts",
+    "~/src/lib/components/audio-ui/timeline/svelte/Clip.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/ClipFade.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/ClipFadeHandle.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/ClipHandle.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/Mark.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/NavigatorHandle.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/NavigatorWindow.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/Range.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/RangeHandle.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/Ruler.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/TrackResizeHandle.svelte",
+    "~/src/lib/components/audio-ui/timeline/svelte/index.ts",
+    "~/src/lib/components/audio-ui/timeline/svelte/parts.ts"
+  ],
+  "timeline-vue-demo": [
+    "components/examples/timeline-demo.vue"
+  ],
+  "timeline-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/timeline/clip-controller.ts",
+    "components/audio-ui/timeline/clip.ts",
+    "components/audio-ui/timeline/clips.ts",
+    "components/audio-ui/timeline/edge-scroll.ts",
+    "components/audio-ui/timeline/layout.ts",
+    "components/audio-ui/timeline/locators.ts",
+    "components/audio-ui/timeline/navigator-controller.ts",
+    "components/audio-ui/timeline/navigator.ts",
+    "components/audio-ui/timeline/position.ts",
+    "components/audio-ui/timeline/range-controller.ts",
+    "components/audio-ui/timeline/ranges.ts",
+    "components/audio-ui/timeline/scale.ts",
+    "components/audio-ui/timeline/track-controller.ts",
+    "components/audio-ui/timeline/wheel-zoom.ts",
+    "components/audio-ui/timeline/vue.ts"
+  ],
+  "timeline-web-demo": [
+    "components/examples/timeline-demo.js"
+  ],
+  "timeline-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/timeline/clip-controller.ts",
+    "components/audio-ui/timeline/clip.ts",
+    "components/audio-ui/timeline/clips.ts",
+    "components/audio-ui/timeline/edge-scroll.ts",
+    "components/audio-ui/timeline/layout.ts",
+    "components/audio-ui/timeline/locators.ts",
+    "components/audio-ui/timeline/navigator-controller.ts",
+    "components/audio-ui/timeline/navigator.ts",
+    "components/audio-ui/timeline/position.ts",
+    "components/audio-ui/timeline/range-controller.ts",
+    "components/audio-ui/timeline/ranges.ts",
+    "components/audio-ui/timeline/scale.ts",
+    "components/audio-ui/timeline/track-controller.ts",
+    "components/audio-ui/timeline/wheel-zoom.ts",
+    "components/audio-ui/timeline/web.ts"
+  ],
+  "timeline": [
+    "components/audio-ui/timeline.tsx"
+  ],
+  "track-automation": [
+    "components/audio-ui/track-automation.tsx",
+    "hooks/use-track-automation.ts"
+  ],
+  "track-level": [
+    "components/audio-ui/track-level.tsx"
+  ],
+  "transient-device": [
+    "components/audio-ui/devices/transient/device.ts"
+  ],
+  "transient-engine": [
+    "components/audio-ui/devices/transient/engine.ts"
+  ],
+  "transient-panel": [
+    "components/audio-ui/devices/transient/panel.tsx"
+  ],
+  "transport-demo": [
+    "components/examples/transport-demo.tsx"
+  ],
+  "transport": [
+    "components/audio-ui/transport.tsx",
+    "components/audio-ui/transport-default.tsx"
+  ],
+  "tuner-demo": [
+    "components/examples/tuner-demo.tsx"
+  ],
+  "tuner": [
+    "components/audio-ui/tuner.tsx"
+  ],
+  "undo-history": [
+    "lib/undo-history.ts"
+  ],
+  "unlimiter-device": [
+    "components/audio-ui/devices/unlimiter/device.ts"
+  ],
+  "unlimiter-engine": [
+    "components/audio-ui/devices/unlimiter/engine.ts"
+  ],
+  "unlimiter-panel": [
+    "components/audio-ui/devices/unlimiter/panel.tsx"
+  ],
+  "use-arrangement": [
+    "hooks/use-arrangement.ts",
+    "lib/arrangement-state.ts"
+  ],
+  "use-audio-levels": [
+    "hooks/use-audio-levels.ts"
+  ],
+  "use-audio-session": [
+    "hooks/use-audio-session.tsx"
+  ],
+  "use-audio-signal": [
+    "hooks/use-audio-signal.ts"
+  ],
+  "use-bake": [
+    "hooks/use-bake.ts"
+  ],
+  "use-clip-edits": [
+    "hooks/use-clip-edits.ts"
+  ],
+  "use-computer-keyboard": [
+    "hooks/use-computer-keyboard.ts",
+    "lib/computer-keyboard.ts"
+  ],
+  "use-demo-source": [
+    "hooks/use-demo-source.ts"
+  ],
+  "use-device-engines": [
+    "hooks/use-device-engines.ts"
+  ],
+  "use-device-loop": [
+    "hooks/use-device-loop.ts"
+  ],
+  "use-device-signal": [
+    "hooks/use-device-signal.ts"
+  ],
+  "use-loudest": [
+    "hooks/use-loudest.ts"
+  ],
+  "use-loudness": [
+    "hooks/use-loudness.ts"
+  ],
+  "use-marquee-selection": [
+    "hooks/use-marquee-selection.ts"
+  ],
+  "use-master-bus": [
+    "hooks/use-master-bus.ts"
+  ],
+  "use-microphone": [
+    "hooks/use-microphone.ts"
+  ],
+  "use-midi-input": [
+    "hooks/use-midi-input.ts"
+  ],
+  "use-noise-through-eq": [
+    "hooks/use-noise-through-eq.ts"
+  ],
+  "use-piano-roll-playback": [
+    "hooks/use-piano-roll-playback.ts"
+  ],
+  "use-pitch": [
+    "hooks/use-pitch.ts"
+  ],
+  "use-play-switch": [
+    "hooks/use-play-switch.ts"
+  ],
+  "use-polyphony": [
+    "hooks/use-polyphony.ts"
+  ],
+  "use-silence-hover": [
+    "hooks/use-silence-hover.ts"
+  ],
+  "use-simulated-levels": [
+    "hooks/use-simulated-levels.ts"
+  ],
+  "use-sound-report": [
+    "hooks/use-sound-report.ts"
+  ],
+  "use-spectrum": [
+    "hooks/use-spectrum.ts"
+  ],
+  "use-status-line": [
+    "hooks/use-status-line.ts"
+  ],
+  "use-synth-voices": [
+    "hooks/use-synth-voices.ts"
+  ],
+  "use-time-selection": [
+    "hooks/use-time-selection.ts"
+  ],
+  "use-timeline-cursor": [
+    "hooks/use-timeline-cursor.ts"
+  ],
+  "use-timeline-grid": [
+    "hooks/use-timeline-grid.ts"
+  ],
+  "use-timeline-zoom": [
+    "hooks/use-timeline-zoom.ts"
+  ],
+  "use-track-reorder": [
+    "hooks/use-track-reorder.ts",
+    "components/audio-ui/track-grip.tsx"
+  ],
+  "use-transport-clock": [
+    "hooks/use-transport-clock.ts"
+  ],
+  "use-undo-history": [
+    "hooks/use-undo-history.ts"
+  ],
+  "utility-device": [
+    "components/audio-ui/devices/utility/device.ts"
+  ],
+  "utility-engine": [
+    "components/audio-ui/devices/utility/engine.ts"
+  ],
+  "utility-panel": [
+    "components/audio-ui/devices/utility/panel.tsx"
+  ],
+  "value-display-demo": [
+    "components/examples/value-display-demo.tsx"
+  ],
+  "value-display": [
+    "components/audio-ui/value-display.tsx"
+  ],
+  "vibe-device": [
+    "components/audio-ui/devices/vibe/device.ts"
+  ],
+  "vibe-engine": [
+    "components/audio-ui/devices/vibe/engine.ts"
+  ],
+  "vibe-panel": [
+    "components/audio-ui/devices/vibe/panel.tsx"
+  ],
+  "voice-pool": [
+    "lib/voice-pool.ts"
+  ],
+  "wah-device": [
+    "components/audio-ui/devices/wah/device.ts"
+  ],
+  "wah-engine": [
+    "components/audio-ui/devices/wah/engine.ts"
+  ],
+  "wah-panel": [
+    "components/audio-ui/devices/wah/panel.tsx"
+  ],
+  "wave-shaper-device": [
+    "components/audio-ui/devices/wave-shaper/device.ts"
+  ],
+  "wave-shaper-engine": [
+    "components/audio-ui/devices/wave-shaper/engine.ts"
+  ],
+  "wave-shaper-panel": [
+    "components/audio-ui/devices/wave-shaper/panel.tsx"
+  ],
+  "waveform-lane": [
+    "components/audio-ui/waveform-lane.tsx"
+  ],
+  "waveform-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/waveform/bar-layout.ts",
+    "components/audio-ui/waveform/level-history.ts",
+    "components/audio-ui/waveform/levels-engine.ts",
+    "components/audio-ui/waveform/levels.ts",
+    "components/audio-ui/waveform/paint-bars.ts",
+    "components/audio-ui/waveform/paint-canvas.ts",
+    "components/audio-ui/waveform/peaks.ts",
+    "components/audio-ui/waveform/scope.ts",
+    "components/audio-ui/waveform/react.tsx"
+  ],
+  "waveform-region-demo": [
+    "components/examples/waveform-region-demo.tsx"
+  ],
+  "waveform-select": [
+    "components/audio-ui/waveform-select.tsx"
+  ],
+  "waveform-svelte-demo": [
+    "components/examples/waveform-demo.svelte"
+  ],
+  "waveform-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/waveform/waveform.ts",
+    "~/src/lib/components/audio-ui/frame.ts",
+    "~/src/lib/components/audio-ui/grid.ts",
+    "~/src/lib/components/audio-ui/waveform/bar-layout.ts",
+    "~/src/lib/components/audio-ui/waveform/level-history.ts",
+    "~/src/lib/components/audio-ui/waveform/levels-engine.ts",
+    "~/src/lib/components/audio-ui/waveform/levels.ts",
+    "~/src/lib/components/audio-ui/waveform/paint-bars.ts",
+    "~/src/lib/components/audio-ui/waveform/paint-canvas.ts",
+    "~/src/lib/components/audio-ui/waveform/peaks.ts",
+    "~/src/lib/components/audio-ui/waveform/scope.ts",
+    "~/src/lib/components/audio-ui/waveform/svelte/Bars.svelte",
+    "~/src/lib/components/audio-ui/waveform/svelte/Control.svelte",
+    "~/src/lib/components/audio-ui/waveform/svelte/RegionHandle.svelte",
+    "~/src/lib/components/audio-ui/waveform/svelte/index.ts",
+    "~/src/lib/components/audio-ui/waveform/svelte/parts.ts"
+  ],
+  "waveform-vue-demo": [
+    "components/examples/waveform-demo.vue"
+  ],
+  "waveform-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/waveform/bar-layout.ts",
+    "components/audio-ui/waveform/level-history.ts",
+    "components/audio-ui/waveform/levels-engine.ts",
+    "components/audio-ui/waveform/levels.ts",
+    "components/audio-ui/waveform/paint-bars.ts",
+    "components/audio-ui/waveform/paint-canvas.ts",
+    "components/audio-ui/waveform/peaks.ts",
+    "components/audio-ui/waveform/scope.ts",
+    "components/audio-ui/waveform/vue.ts"
+  ],
+  "waveform-web-demo": [
+    "components/examples/waveform-demo.js"
+  ],
+  "waveform-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/frame.ts",
+    "components/audio-ui/grid.ts",
+    "components/audio-ui/waveform/bar-layout.ts",
+    "components/audio-ui/waveform/level-history.ts",
+    "components/audio-ui/waveform/levels-engine.ts",
+    "components/audio-ui/waveform/levels.ts",
+    "components/audio-ui/waveform/paint-bars.ts",
+    "components/audio-ui/waveform/paint-canvas.ts",
+    "components/audio-ui/waveform/peaks.ts",
+    "components/audio-ui/waveform/scope.ts",
+    "components/audio-ui/waveform/web.ts"
+  ],
+  "waveform": [
+    "components/audio-ui/waveform.tsx"
+  ],
+  "web-audio": [
+    "lib/web-audio.ts"
+  ],
+  "xypad-bipolar-range-demo": [
+    "components/examples/xypad-bipolar-range-demo.tsx"
+  ],
+  "xypad-live-value-demo": [
+    "components/examples/xypad-live-value-demo.tsx"
+  ],
+  "xypad-react": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/react.tsx"
+  ],
+  "xypad-svelte-demo": [
+    "components/examples/xypad-demo.svelte"
+  ],
+  "xypad-svelte": [
+    "~/src/lib/components/audio-ui/primitive.ts",
+    "~/src/lib/components/audio-ui/xypad/xypad.ts",
+    "~/src/lib/components/audio-ui/xypad/svelte/Thumb.svelte",
+    "~/src/lib/components/audio-ui/xypad/svelte/Value.svelte",
+    "~/src/lib/components/audio-ui/xypad/svelte/index.ts",
+    "~/src/lib/components/audio-ui/xypad/svelte/parts.ts"
+  ],
+  "xypad-vue-demo": [
+    "components/examples/xypad-demo.vue"
+  ],
+  "xypad-vue": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/vue.ts"
+  ],
+  "xypad-web-demo": [
+    "components/examples/xypad-demo.js"
+  ],
+  "xypad-web": [
+    "components/audio-ui/primitive.ts",
+    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/web.ts"
+  ],
+  "xypad": [
+    "components/audio-ui/xypad.tsx"
+  ]
+}
