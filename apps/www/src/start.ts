@@ -72,14 +72,17 @@ const MOVED_PAGES = new Map([
     "/docs/components/base/arrangement",
   ],
   ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
-  // The Core section is gone with @audio-ui/core: its pages open the registry
+  // The Core section is gone with @audio-ui/core: its pages open the installation
   // or the component the controller drove.
-  ["/docs/engine/controllers", "/docs/registry"],
-  ["/docs/engine/controllers.md", "/docs/registry.md"],
-  ["/docs/core", "/docs/registry"],
-  ["/docs/core.md", "/docs/registry.md"],
-  ["/docs/core/controllers", "/docs/registry"],
-  ["/docs/core/controllers.md", "/docs/registry.md"],
+  ["/docs/engine/controllers", "/docs/installation"],
+  ["/docs/engine/controllers.md", "/docs/installation.md"],
+  ["/docs/core", "/docs/installation"],
+  ["/docs/core.md", "/docs/installation.md"],
+  ["/docs/core/controllers", "/docs/installation"],
+  ["/docs/core/controllers.md", "/docs/installation.md"],
+  // The Registry page said how to install, as Installation does.
+  ["/docs/registry", "/docs/installation"],
+  ["/docs/registry.md", "/docs/installation.md"],
   ...CORE_CONTROLS.flatMap((name) => {
     const page = name === "timeline" ? "arrangement" : name;
     return [

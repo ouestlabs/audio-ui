@@ -48,7 +48,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
   const downloads = await monthlyDownloads();
   const figures: HomeFigure[] = [
     {
-      href: "/docs/registry",
+      href: "/docs/components/base/knob",
       label: "Components",
       reactOnly: true,
       value: String(pagesOf("Elements") + pagesOf("Workstation")),
@@ -60,7 +60,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
       value: String(pagesOf("Devices")),
     },
     {
-      href: "/docs/registry",
+      href: "/docs/components/base/knob",
       label: "Primitives",
       value: String(Object.keys(PRIMITIVE_PAGES).length),
     },

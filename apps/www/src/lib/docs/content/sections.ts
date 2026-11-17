@@ -16,8 +16,8 @@ export const DOCS_SECTIONS = [
   },
   {
     description: "Components, devices, hooks and the packages under them",
-    folders: ["(registry)", "components", "hooks", "lib", "engine", "gl"],
-    href: "/docs/registry",
+    folders: ["components", "(overview)", "hooks", "lib", "engine", "gl"],
+    href: "/docs/components/base/knob",
     id: "registry",
     label: "Components",
   },

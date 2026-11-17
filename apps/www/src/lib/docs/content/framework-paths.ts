@@ -5,7 +5,7 @@
  * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`).
  */
 
-/** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
+/** The addresses only a React app uses: the styled catalog, its guides and its API. The pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
 export const REACT_ADDRESSES = [
   "/docs/api",
   "/docs/components",
