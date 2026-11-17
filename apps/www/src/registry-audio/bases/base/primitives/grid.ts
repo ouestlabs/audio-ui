@@ -6,7 +6,7 @@
 import { clamp } from "@ui-sdk/core/number";
 
 /** `value` within `min` and `max`, or `min` when it is not a number. */
-const clampFinite = (value: number, min: number, max: number) =>
+export const clampFinite = (value: number, min: number, max: number) =>
   Number.isFinite(value) ? clamp(value, min, max) : min;
 
 /** A stretch of a timeline, `[start, end]` in its units. */

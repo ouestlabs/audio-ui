@@ -33,7 +33,7 @@ An arrangement is tracks of clips along a song. It comes in two layers that inst
 
 <ForFrameworks only="vue svelte web">
 
-The timeline's behavior is one description, `timeline` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core/timeline`. It is the surface of an arrangement: a playback position and a zoom in units of your own (seconds, beats, steps), lanes the parts are placed on, tracks, marks, ranges such as a loop, and clips that move, trim and fade. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The timeline's behavior is a few files, the primitive, written on the UI SDK kernel and copied into your project. It is the surface of an arrangement: a playback position and a zoom in units of your own (seconds, beats, steps), lanes the parts are placed on, tracks, marks, ranges such as a loop, and clips that move, trim and fade. Each framework renders it with a thin adapter that you also own, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -41,65 +41,23 @@ The timeline's behavior is one description, `timeline` in `@audio-ui/primitives`
 
 <ForFrameworks only="react">
 
-The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen around `@audio-ui/arrangement-view`. The tabs below are the timeline on its own.
-
-<CodeTabs>
-
-<TabsList>
-  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
-  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
-  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
-</TabsList>
-
-<TabsContent value="cli">
-
-```bash component
-npx shadcn@latest add @audio-ui/timeline
-```
-
-</TabsContent>
-
-<TabsContent value="manual">
-
-<Steps>
-
-<Step>Install the following dependencies:</Step>
-
-```bash
-npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
-```
-
-<Step>Copy and paste the following code into your project.</Step>
-
-<ComponentSource
-  styleName="base-nova"
-  name="timeline"
-  title="components/audio-ui/timeline.tsx"
-/>
-
-<Step>Update the import paths to match your project setup.</Step>
-
-</Steps>
-
-</TabsContent>
-
-<TabsContent value="agent">
-
-<InstallAgent name="arrangement-editor" />
-
-</TabsContent>
-
-</CodeTabs>
+The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen around `@audio-ui/arrangement-view`. The steps below are the timeline on its own.
 
 </ForFrameworks>
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation), the [sequencer](/docs/components/base/sequencer#installation), the [plot](/docs/components/base/plot#installation) and the [waveform](/docs/components/base/waveform#installation) are built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with the clips, the tracks and the navigator styled, is one command:
+
+<Install name="timeline" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -113,52 +71,361 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/timeline-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/timeline/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/timeline/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Ten files in `components/audio-ui/timeline/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/timeline/web.ts`. Import it once, and it registers the `audio-ui-timeline` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same files for every framework: `timeline.ts`, the timeline itself, with a controller for each of its gestures beside it (the position and the zoom, the tracks, the ranges, the clips, the navigator); `grid.ts`, the grid they snap to, and `frame.ts`, which scrolls a view while a drag is held at its edge, both shared with the piano roll and the waveform; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="timeline-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="timeline-react"
+  title="components/audio-ui/timeline/timeline.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="timeline-react"
+  title="components/audio-ui/frame.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="timeline-react"
+  title="components/audio-ui/grid.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="timeline-react"
+  title="components/audio-ui/timeline/clip-controller.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={5}
+  name="timeline-react"
+  title="components/audio-ui/timeline/clip.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="timeline-react"
+  title="components/audio-ui/timeline/clips.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={7}
+  name="timeline-react"
+  title="components/audio-ui/timeline/edge-scroll.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={8}
+  name="timeline-react"
+  title="components/audio-ui/timeline/layout.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={9}
+  name="timeline-react"
+  title="components/audio-ui/timeline/locators.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={10}
+  name="timeline-react"
+  title="components/audio-ui/timeline/navigator-controller.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={11}
+  name="timeline-react"
+  title="components/audio-ui/timeline/navigator.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="timeline-react"
+  title="components/audio-ui/timeline/position.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={13}
+  name="timeline-react"
+  title="components/audio-ui/timeline/range-controller.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={14}
+  name="timeline-react"
+  title="components/audio-ui/timeline/ranges.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={15}
+  name="timeline-react"
+  title="components/audio-ui/timeline/scale.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={16}
+  name="timeline-react"
+  title="components/audio-ui/timeline/track-controller.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={17}
+  name="timeline-react"
+  title="components/audio-ui/timeline/wheel-zoom.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={18}
+  name="timeline-react"
+  title="components/audio-ui/timeline/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/timeline-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={18}
+  name="timeline-vue"
+  title="components/audio-ui/timeline/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={18}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/Clip.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={19}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/ClipFade.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={20}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/ClipFadeHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={21}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/ClipHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={22}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/Mark.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={23}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/NavigatorHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={24}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/NavigatorWindow.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={25}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/Range.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={26}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/RangeHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={27}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/Ruler.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={28}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/TrackResizeHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={29}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={30}
+  name="timeline-svelte"
+  title="src/lib/components/audio-ui/timeline/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-timeline` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={18}
+  name="timeline-web"
+  title="components/audio-ui/timeline/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
+
 
 <ForFrameworks only="react">
 
 ## The timeline
 
-The registry component is written on the `Timeline` primitive of `@audio-ui/primitives`, which installs with it. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
+The registry component is written on the timeline primitive, which installs with it. The timeline has no notion of tempo: its units are whatever you count in (seconds, beats, pulses or steps). Musical time comes from the `musical-time` lib.
 
 ### Overview
 
@@ -729,7 +996,7 @@ A Root owns the position, the zoom and the grid. Everything else is a part you p
 <TabsContent value="react">
 
 ```tsx
-import type { ClipValue } from "@audio-ui/core/timeline";
+import type { ClipValue } from "@/components/audio-ui/timeline/timeline";
 import { Timeline } from "@/components/audio-ui/timeline/react";
 
 export function Arrangement({ clip, onClip }: { clip: ClipValue; onClip: (clip: ClipValue) => void }) {

@@ -1049,4 +1049,175 @@
   [data-slot="waveform-region-end"] {
     right: 0;
   }
+
+  /* Timeline */
+
+  [data-slot="timeline"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 40rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="timeline-viewport"] {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  /* The ruler and the lanes are the surfaces that take a press; the parts on them are placed by the timeline's unit. */
+  [data-slot="timeline-ruler"] {
+    height: 1.5rem;
+    cursor: col-resize;
+    background: var(--audio-ui-muted);
+    border-bottom: 1px solid var(--audio-ui-input);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+      outline-offset: -4px;
+    }
+  }
+
+  [data-slot="timeline-lane"] {
+    height: 4rem;
+    border-bottom: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-track"] {
+    position: relative;
+    height: 4rem;
+    border-bottom: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-track-header"] {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  [data-slot="timeline-track-resize-handle"] {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    cursor: ns-resize;
+
+    &:has(:focus-visible) {
+      background: var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="timeline-playhead"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="timeline-mark"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-movable] {
+      cursor: ew-resize;
+    }
+  }
+
+  [data-slot="timeline-range"] {
+    top: 0;
+    bottom: 0;
+    background: color-mix(
+      in oklch,
+      var(--audio-ui-foreground) 12%,
+      transparent
+    );
+    cursor: grab;
+  }
+
+  :is([data-slot="timeline-range-start"], [data-slot="timeline-range-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="timeline-range-start"] {
+    left: 0;
+  }
+
+  [data-slot="timeline-range-end"] {
+    right: 0;
+  }
+
+  [data-slot="timeline-clip"] {
+    top: 0.25rem;
+    bottom: 0.25rem;
+    overflow: hidden;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-selected] {
+      background: var(--audio-ui-muted);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="timeline-clip-header"] {
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    cursor: grab;
+    color: var(--audio-ui-background);
+    background: var(--audio-ui-foreground);
+  }
+
+  :is(
+    [data-slot="timeline-clip-trim-start"],
+    [data-slot="timeline-clip-trim-end"]
+  ) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="timeline-clip-trim-start"] {
+    left: 0;
+  }
+
+  [data-slot="timeline-clip-trim-end"] {
+    right: 0;
+  }
+
+  [data-slot="timeline-navigator"] {
+    position: relative;
+    height: 0.75rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-navigator-window"] {
+    background: var(--audio-ui-muted-foreground);
+    cursor: grab;
+  }
+
+  :is(
+    [data-slot="timeline-navigator-start"],
+    [data-slot="timeline-navigator-end"]
+  ) {
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+  }
 }
