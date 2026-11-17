@@ -1,6 +1,6 @@
-import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useState } from "react";
 import { Scrubber } from "@/registry-audio/bases/base/audio/elements/scrubber";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 const DURATION = 215;
 

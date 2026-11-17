@@ -26,7 +26,7 @@ Every component takes its state as values and reports changes through callbacks,
 `createSource` makes a source you push to from anywhere: an audio callback, a worker, a message from an AudioWorklet.
 
 ```tsx
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/components/audio-ui/primitive";
 
 // Made once, outside a render.
 const position = createSource(0);
@@ -40,4 +40,4 @@ engine.onPosition((seconds) => position.set(seconds));
 
 A source is `{ getSnapshot, subscribe }`, the shape `useSyncExternalStore` reads, so any store that has those two works too. The hooks on these pages return sources in the same shape, which is why a component cannot tell them from yours.
 
-Without React, `@audio-ui/core` holds the same logic as plain functions: the scheduler and the musical time in `@audio-ui/engine/time`, the analysis in `@audio-ui/engine/analysis`, MIDI in `@audio-ui/engine/midi` and pitch in `@audio-ui/engine/pitch`.
+Without React, `@audio-ui/engine` holds the same logic as plain functions: the scheduler and the musical time in `@audio-ui/engine/time`, the analysis in `@audio-ui/engine/analysis`, MIDI in `@audio-ui/engine/midi` and pitch in `@audio-ui/engine/pitch`.

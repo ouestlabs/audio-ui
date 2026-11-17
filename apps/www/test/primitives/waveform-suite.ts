@@ -32,6 +32,7 @@ export interface WaveformTree {
   marker?: { value: number };
   options: WaveformOptions & {
     onRegionChange: (value: number[], details: RegionDetails) => void;
+    onRegionCommitted: (value: number[], details: RegionDetails) => void;
     onSelectionChange: (value: number[], details: ChangeDetails) => void;
     onValueChange: (value: number, details: ChangeDetails) => void;
     onValueCommitted: (value: number, details: { reason: string }) => void;
@@ -63,6 +64,7 @@ async function render(
   const changes: [number, string, string | undefined][] = [];
   const commits: [number, string][] = [];
   const regions: [number[], string, string, string][] = [];
+  const regionCommits: [number[], string, string, string][] = [];
   const selections: number[][] = [];
   const mounted = await mount({
     control: {},
@@ -72,6 +74,14 @@ async function render(
       ...options,
       onRegionChange: (value, details) => {
         regions.push([
+          [...value],
+          details.region,
+          details.edge,
+          details.reason,
+        ]);
+      },
+      onRegionCommitted: (value, details) => {
+        regionCommits.push([
           [...value],
           details.region,
           details.edge,
@@ -121,6 +131,7 @@ async function render(
     marker: one("marker"),
     playhead: one("playhead"),
     region: one("region"),
+    regionCommits,
     regions,
     root,
     selections,
@@ -130,6 +141,9 @@ async function render(
 
 const styleOf = (element: HTMLElement | undefined) =>
   element?.getAttribute("style") ?? "";
+
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
 
 export function waveformSuite(framework: string, mount: MountWaveform) {
   describe(`the waveform in ${framework}`, () => {
@@ -164,6 +178,8 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
       await p.act(() => {
         pointer(p.control, "pointermove", { clientX: 70, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.changes.at(-1)).toEqual([70, "drag", "mouse"]);
       expect(styleOf(p.root)).toContain("--waveform-position: 70%");
       await p.act(() => {
@@ -247,6 +263,8 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
       await p.act(() => {
         pointer(p.control, "pointermove", { clientX: 30, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.hover.hasAttribute("hidden")).toBe(false);
       expect(p.hover.textContent).toBe("30s");
       expect(styleOf(p.hover)).toContain("left: 30%");
@@ -267,6 +285,8 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
         });
         pointer(p.control, "pointermove", { clientX: 60, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.selections.at(-1)).toEqual([20, 60]);
       expect(p.changes).toHaveLength(0);
       await p.act(() => {
@@ -285,6 +305,8 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
         pointer(p.region, "pointerdown", { clientX: 30, pointerId: 1 });
         pointer(p.region, "pointermove", { clientX: 40, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.regions.at(-1)).toEqual([[30, 60], "loop", "both", "drag"]);
       expect(p.changes).toHaveLength(0);
       expect(styleOf(p.region)).toContain("left: 30%");
@@ -317,6 +339,21 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
       await p.act(() => key(input, "ArrowRight"));
       expect(p.regions.at(-1)?.[2]).toBe("start");
       expect(p.regions.at(-1)?.[3]).toBe("keyboard");
+      p.unmount();
+    });
+
+    test("a key on a controlled region commits the region it reported", async () => {
+      // The app has not given the new region back yet when the commit is made.
+      const p = await render(mount, {
+        region: { label: "Loop", region: "loop", value: [20, 50] },
+      });
+      const start = p.root.querySelector(
+        '[data-slot="waveform-region-start"]'
+      ) as HTMLElement;
+      const input = start.querySelector("input") as HTMLInputElement;
+      await p.act(() => key(input, "ArrowRight"));
+      expect(p.regions.at(-1)?.[0]).toEqual([21, 50]);
+      expect(p.regionCommits.at(-1)?.[0]).toEqual([21, 50]);
       p.unmount();
     });
 

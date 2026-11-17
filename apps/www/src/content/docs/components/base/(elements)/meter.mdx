@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
 
-Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component is written on the `Meter` primitive of `@audio-ui/primitives`, which installs with it: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
+Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component is written on the meter primitive, which installs with it: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The meter's behavior is one description, `meter` in `@audio-ui/primitives`, over the view of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. The levels, the clip and warning zones, the scales and the peak marks are the same in all four, and one suite of tests runs against each adapter.
+The meter's behavior is one file, the primitive, written on the UI SDK kernel and copied into your project. Each framework renders it with a thin adapter that you also own. The levels, the clip and warning zones, the scales and the peak marks are the same in all four, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -46,19 +46,19 @@ The meter's behavior is one description, `meter` in `@audio-ui/primitives`, over
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<Install name="meter" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation) and the [XY pad](/docs/components/base/xypad#installation) are built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with sizes, a clip color and peak marks, is one command:
+
+<Install name="meter" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -72,46 +72,172 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/meter-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/meter/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/meter/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Three files in `components/audio-ui/meter/svelte/`: the value, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/meter/web.ts`. Import it once, and it registers the `audio-ui-meter` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, `vue` or `svelte`, and for the web adapter `@audio-ui/core`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same two files for every framework: `meter.ts`, the meter's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="meter-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="meter-react"
+  title="components/audio-ui/meter/meter.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="meter-react"
+  title="components/audio-ui/meter/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/meter-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="meter-vue"
+  title="components/audio-ui/meter/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="meter-svelte"
+  title="src/lib/components/audio-ui/meter/svelte/Value.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="meter-svelte"
+  title="src/lib/components/audio-ui/meter/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="meter-svelte"
+  title="src/lib/components/audio-ui/meter/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-meter` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="meter-web"
+  title="components/audio-ui/meter/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
@@ -274,13 +400,20 @@ The Indicator is scaled from the bottom of a vertical meter and from the start o
 An engine updates levels 60 times a second, which is too often to render. Give the Root a `source` instead of `value`: the meter writes each frame straight to the elements of its channels, from one subscription for all of them, and the framework never renders for it.
 
 ```ts
-import { createSource } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+let frame = { levels: [-30, -30], peaks: [-6, -6] };
+const listeners = new Set<() => void>();
 
-const source = createSource<MeterFrame>({ levels: [-30, -30], peaks: [-6, -6] });
+const source = {
+  getSnapshot: () => frame,
+  subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  },
+};
 
 // From the engine's frame loop:
-source.set({ levels: [-22.4, -19.8], peaks: [-6, -6] });
+frame = { levels: [-22.4, -19.8], peaks: [-6, -6] };
+for (const listener of listeners) listener();
 ```
 
 Any object with `getSnapshot()` returning `{ levels, peaks? }` and `subscribe(listener)` works. The levels, the peak marks, `aria-valuenow`, `aria-valuetext` and the Value's text are written on each frame, and a clip is kept: the channel and its Indicator carry `data-clipped` from the first level at or above the clip threshold until a click on the meter clears it, as in a DAW. A source that changes its number of channels renders the channels again, and only then. In the web adapter, `source` is a property, not an attribute.
@@ -300,7 +433,7 @@ interface MeterSource {
 }
 ```
 
-`createSource` from `@audio-ui/core` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
+`createSource` from the `primitive` item (`npx shadcn@latest add @audio-ui/primitive`) makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
 
 ```bash
 npx shadcn@latest add @audio-ui/use-audio-levels

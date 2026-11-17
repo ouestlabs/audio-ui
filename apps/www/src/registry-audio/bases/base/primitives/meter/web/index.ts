@@ -1,5 +1,8 @@
-import { channelView } from "@audio-ui/core/meter";
-import { type MeterState, meter } from "@audio-ui/primitives/meter";
+import {
+  channelView,
+  type MeterState,
+  meter,
+} from "@audio-ui/primitives/meter";
 import { createParts } from "@ui-sdk/web";
 
 /** Writes the level's text as one text node's data, so a change restyles nothing else. */
@@ -32,7 +35,7 @@ function drawValues(
       const index = Number(channel.getAttribute("index"));
       const value = channel.querySelector("audio-ui-meter-value");
       if (value) {
-        writeText(value, channelView(state.frame, index, state.config).text);
+        writeText(value, channelView(state, index).text);
       }
     }
   };

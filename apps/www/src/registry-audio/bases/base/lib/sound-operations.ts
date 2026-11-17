@@ -6,7 +6,6 @@
  * operation of `@audio-ui/engine/files` or `@audio-ui/engine/repair`.
  */
 
-import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import {
   type DitherMethod,
@@ -32,6 +31,10 @@ import {
   formatPan,
 } from "@audio-ui/engine/format";
 import { type Repair, repairChannels } from "@audio-ui/engine/repair";
+import {
+  type FadeShape,
+  fadeGain,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 
 /** A sound as plain samples: what an operation reads and writes. */
 export interface SoundSamples {

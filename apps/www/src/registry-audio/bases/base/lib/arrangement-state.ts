@@ -1,18 +1,3 @@
-import type { Breakpoint } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
-import {
-  type ClipValue,
-  copyRange,
-  coverClips,
-  duplicateClip,
-  type FadeShape,
-  insertTime,
-  moveClip,
-  removeTime,
-  setClipFadeShape,
-  splitClip,
-  trimClipEnd,
-} from "@audio-ui/core/timeline";
 import {
   type SignatureChange,
   secondsPerBar,
@@ -61,6 +46,21 @@ import {
   settleChange,
   undo,
 } from "@/registry-audio/bases/base/lib/undo-history";
+import type { Breakpoint } from "@/registry-audio/bases/base/primitives/envelope/geometry";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import {
+  type ClipValue,
+  copyRange,
+  coverClips,
+  duplicateClip,
+  type FadeShape,
+  insertTime,
+  moveClip,
+  removeTime,
+  setClipFadeShape,
+  splitClip,
+  trimClipEnd,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 
 /**
  * A new id for a piece of the clip `id`: the first `-n` after it that no clip

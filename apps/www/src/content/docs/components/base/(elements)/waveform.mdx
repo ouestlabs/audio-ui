@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="waveform-region-demo" />
 
-Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three are written on the `Waveform` primitive of `@audio-ui/primitives`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
+Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three are written on the waveform primitive, which installs with them and works with any audio: decoded PCM samples, a microphone or a stream from your server.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The waveform's behavior is one description, `waveform` in `@audio-ui/primitives`, over the seek and region controllers of `@audio-ui/core`. It shows the shape of audio, from `peaks` known upfront or from a live `levels` signal, and follows a playback position that can be seeked. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The waveform's behavior is a few files, the primitive, written on the UI SDK kernel and copied into your project. It shows the shape of audio, from `peaks` known upfront or from a live `levels` signal, and follows a playback position that can be seeked. Each framework renders it with a thin adapter that you also own, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -51,67 +51,19 @@ The waveform's behavior is one description, `waveform` in `@audio-ui/primitives`
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<CodeTabs>
-
-<TabsList>
-  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
-  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
-  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
-</TabsList>
-
-<TabsContent value="cli">
-
-```bash component
-npx shadcn@latest add @audio-ui/waveform
-```
-
-It installs the element alone. For the waveform above, ready to run: `npx shadcn@latest add @audio-ui/waveform-region-demo`.
-
-</TabsContent>
-
-<TabsContent value="manual">
-
-<Steps>
-
-<Step>Install the following dependencies:</Step>
-
-```bash
-npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
-```
-
-<Step>Copy and paste the following code into your project.</Step>
-
-<ComponentSource
-  styleName="base-nova"
-  name="waveform"
-  title="components/audio-ui/waveform.tsx"
-/>
-
-<Step>Update the import paths to match your project setup.</Step>
-
-</Steps>
-
-</TabsContent>
-
-<TabsContent value="agent">
-
-<InstallAgent name="waveform" />
-
-</TabsContent>
-
-</CodeTabs>
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation), the [sequencer](/docs/components/base/sequencer#installation) and the [plot](/docs/components/base/plot#installation) are built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with the seekable waveform, the live waveform and the bar visualizer, is one command:
+
+<Install name="waveform" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -125,46 +77,256 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/waveform-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/waveform/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/waveform/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/waveform/web.ts`. Import it once, and it registers the `audio-ui-waveform` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same files for every framework: `waveform.ts`, the waveform itself, with the painters of the canvas and the bars beside it (`paint-canvas.ts`, `paint-bars.ts`, and what they draw from); `frame.ts`, which runs them on animation frames; `grid.ts`, the ranges a region moves in, shared with the piano roll and the timeline; and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="waveform-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="waveform-react"
+  title="components/audio-ui/waveform/waveform.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="waveform-react"
+  title="components/audio-ui/frame.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="waveform-react"
+  title="components/audio-ui/grid.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="waveform-react"
+  title="components/audio-ui/waveform/bar-layout.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={5}
+  name="waveform-react"
+  title="components/audio-ui/waveform/level-history.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="waveform-react"
+  title="components/audio-ui/waveform/levels-engine.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={7}
+  name="waveform-react"
+  title="components/audio-ui/waveform/levels.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={8}
+  name="waveform-react"
+  title="components/audio-ui/waveform/paint-bars.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={9}
+  name="waveform-react"
+  title="components/audio-ui/waveform/paint-canvas.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={10}
+  name="waveform-react"
+  title="components/audio-ui/waveform/peaks.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={11}
+  name="waveform-react"
+  title="components/audio-ui/waveform/scope.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="waveform-react"
+  title="components/audio-ui/waveform/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/waveform-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="waveform-vue"
+  title="components/audio-ui/waveform/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="waveform-svelte"
+  title="src/lib/components/audio-ui/waveform/svelte/Bars.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={13}
+  name="waveform-svelte"
+  title="src/lib/components/audio-ui/waveform/svelte/Control.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={14}
+  name="waveform-svelte"
+  title="src/lib/components/audio-ui/waveform/svelte/RegionHandle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={15}
+  name="waveform-svelte"
+  title="src/lib/components/audio-ui/waveform/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={16}
+  name="waveform-svelte"
+  title="src/lib/components/audio-ui/waveform/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-waveform` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={12}
+  name="waveform-web"
+  title="components/audio-ui/waveform/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
@@ -329,7 +491,7 @@ In the web adapter, `peaks`, `levels` and `source` are properties, not attribute
 
 ### A live position and a live signal
 
-Give the Root a `source`, a live position in `duration` units in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The `--waveform-position` variable, the Canvas and the input follow it straight in the DOM, with no render. `levels` is the same for a signal, such as a microphone or an analyser: each value is a level from 0 to 1, and while it is audible the Root carries `data-active`. `createSource` from `@audio-ui/core` makes either.
+Give the Root a `source`, a live position in `duration` units in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The `--waveform-position` variable, the Canvas and the input follow it straight in the DOM, with no render. `levels` is the same for a signal, such as a microphone or an analyser: each value is a level from 0 to 1, and while it is audible the Root carries `data-active`. Any object with those two methods works, with nothing to install.
 
 <ForFrameworks only="react">
 
@@ -433,14 +595,24 @@ const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
 - `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
 - `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
 
-Any signal works. `createSource` from `@audio-ui/core` makes a source you push to yourself, from a WebSocket, a worklet or a test:
+Any signal works. A source is an object with `getSnapshot()` and `subscribe(listener)`, which you push to yourself, from a WebSocket, a worklet or a test:
 
 ```tsx
-import { createSource } from "@audio-ui/core";
+let frame = new Float32Array(16);
+const listeners = new Set<() => void>();
 
-const levels = createSource(new Float32Array(16));
+const levels = {
+  getSnapshot: () => frame,
+  subscribe(listener: () => void) {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  },
+};
 
-socket.onmessage = (event) => levels.set(event.data);
+socket.onmessage = (event) => {
+  frame = event.data;
+  for (const listener of listeners) listener();
+};
 ```
 
 While its signal is audible, a live waveform carries `data-active`. `idle` picks what the bars do meanwhile (`"pulse"` breathes, `"wave"` ripples), and `loading` sweeps across them while a connection is on its way.

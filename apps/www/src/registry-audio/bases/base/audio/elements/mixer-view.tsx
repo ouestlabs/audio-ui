@@ -1,5 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
 import {
@@ -44,6 +42,8 @@ import {
   trackOf,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { startSortableDrag } from "@/registry-audio/bases/base/lib/sortable-drag";
+import type { MeterFrame } from "@/registry-audio/bases/base/primitives/meter/levels";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

@@ -34,7 +34,7 @@ export const hooks: RegistryItem[] = [
   }),
   {
     categories: ["audio", "timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips",
     files: [
@@ -103,7 +103,7 @@ export const hooks: RegistryItem[] = [
   },
   hookItem("use-timeline-cursor", {
     categories: ["timeline"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator.",
     registryDependencies: ["@audio-ui/arrangement"],
@@ -123,12 +123,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-piano-roll-playback", {
     categories: ["audio", "piano", "sequencer"],
-    dependencies: [
-      "@audio-ui/core",
-      "@audio-ui/engine",
-      "@audio-ui/core",
-      "@audio-ui/primitives",
-    ],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport.",
     registryDependencies: [
@@ -294,19 +289,19 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-pitch", {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
   }),
   hookItem("use-audio-levels", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
   }),
   hookItem("use-loudness", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
     registryDependencies: [],
@@ -319,7 +314,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-spectrum", {
     categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
   }),

@@ -5,7 +5,7 @@
  * lights its step, with how late it is, and the piano roll shows the same
  * notes.
  */
-import type { Note } from "@audio-ui/core/piano-roll";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 /** A row and a step of a grid. */
 export interface StepCell {

@@ -1,4 +1,3 @@
-import { pitchClassName } from "@audio-ui/core";
 import {
   detectKeys,
   type KeyNote,
@@ -30,6 +29,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
+import { pitchClassName } from "@/registry-audio/bases/base/primitives/pitch";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

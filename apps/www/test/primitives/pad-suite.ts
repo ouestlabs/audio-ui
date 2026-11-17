@@ -104,6 +104,8 @@ export function padSuite(framework: string, mount: MountPad) {
       expect(
         g.items.every((item) => item.getAttribute("type") === "button")
       ).toBe(true);
+      // A stylesheet lays the grid out by the columns the arrows walk.
+      expect(g.root.style.getPropertyValue("--pad-columns")).toBe("3");
       g.unmount();
     });
 

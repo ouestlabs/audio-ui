@@ -108,6 +108,9 @@ async function render(
 const styleOf = (element: HTMLElement | undefined) =>
   element?.getAttribute("style") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function sequencerSuite(framework: string, mount: MountSequencer) {
   describe(`the sequencer in ${framework}`, () => {
     test("a group of rows, each with a button per step", async () => {
@@ -139,14 +142,17 @@ export function sequencerSuite(framework: string, mount: MountSequencer) {
       expect(s.changes.at(-1)?.[0][0]).toEqual([true, true, false, false]);
       expect(s.cell(0, 1).getAttribute("aria-pressed")).toBe("true");
       // A pointer reports each cell it crosses on its way.
-      const cross = (clientX: number) =>
-        s.act(() =>
+      const cross = async (clientX: number) => {
+        await s.act(() =>
           pointer(s.cell(0, 1), "pointermove", {
             clientX,
             clientY: 25,
             pointerId: 1,
           })
         );
+        await frame();
+        await s.act(() => undefined);
+      };
       await cross(250);
       await cross(350);
       // The drag carries the new state across the cells it crosses.
@@ -159,6 +165,27 @@ export function sequencerSuite(framework: string, mount: MountSequencer) {
         })
       );
       expect(s.commits.at(-1)?.[0][0]).toEqual([true, true, true, true]);
+      s.unmount();
+    });
+
+    test("a stroke quicker than a frame paints every cell on its way", async () => {
+      const s = await render(mount);
+      await s.act(() => {
+        pointer(s.cell(0, 1), "pointerdown", {
+          clientX: 150,
+          clientY: 25,
+          pointerId: 1,
+        });
+        // One move from the second step to the last, past the third.
+        pointer(s.cell(0, 1), "pointermove", {
+          clientX: 350,
+          clientY: 25,
+          pointerId: 1,
+        });
+      });
+      await frame();
+      await s.act(() => undefined);
+      expect(s.changes.at(-1)?.[0][0]).toEqual([true, true, true, true]);
       s.unmount();
     });
 

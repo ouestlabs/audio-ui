@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the `Knob` primitive of `@audio-ui/primitives`, which installs with it and adds size variants and theme styles.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the knob primitive, which installs with it, and adds size variants and theme styles.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The knob's behavior is one description, `knob` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own: a few parts, about 120 to 150 lines. The drag, the wheel, the keys, the scale and the reset are the same in all four, and one suite of tests runs against each adapter.
+The knob's behavior is one file, the primitive, written on the UI SDK kernel and copied into your project. Each framework renders it with a thin adapter that you also own: a few parts, about 120 to 150 lines. The drag, the wheel, the keys, the scale and the reset are the same in all four, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -45,21 +45,19 @@ The knob's behavior is one description, `knob` in `@audio-ui/primitives`, over t
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<Install name="knob" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with size variants and theme styles, is one command:
+
+<Install name="knob" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
 
-Each framework has its own item, and its CLI puts the files where that framework keeps its components. The CLI also installs what they import.
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -73,46 +71,214 @@ Each framework has its own item, and its CLI puts the files where that framework
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/knob-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/knob/react.tsx`. It imports `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/react`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/knob/vue.ts`. It imports `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Nine files in `components/audio-ui/knob/svelte/`: a component per part and an `index.ts`. They import `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`.
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/knob/web.ts`. Import it once, and it registers the `audio-ui-knob` tags. It imports `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/web`.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`: npm's `latest` is an older beta than the one the primitives are written for.
+### 2. The primitive
+
+The same two files for every framework: `knob.ts`, the knob's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="knob-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="knob-react"
+  title="components/audio-ui/knob/knob.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="knob-react"
+  title="components/audio-ui/knob/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/knob-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="knob-vue"
+  title="components/audio-ui/knob/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Arc.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Indicator.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Provider.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={5}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Root.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Thumb.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={7}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Track.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={8}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/Value.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={9}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={10}
+  name="knob-svelte"
+  title="src/lib/components/audio-ui/knob/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-knob` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="knob-web"
+  title="components/audio-ui/knob/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
@@ -288,7 +454,7 @@ Values stay within `min…max` and do not wrap. While dragging, the knob follows
 
 ### Scale
 
-`scale` sets how the value maps onto the dial's travel. `"linear"` (the default) suits levels and times; `"log"` suits frequency, resonance and ratios, which are heard as proportions: on a 20 Hz–20 kHz cutoff, every decade gets the same share of the dial, and 632 Hz sits at the middle. A log scale needs a positive `min`. For anything else, pass your own `{ toPosition, toValue }`, mapping a value to 0…1 along the travel and back.
+`scale` sets how the value maps onto the dial's travel. `"linear"` (the default) suits levels and times; `"log"` suits frequency, resonance and ratios, which are heard as proportions: on a 20 Hz–20 kHz cutoff, every decade gets the same share of the dial, and 632 Hz sits at the middle. A log scale needs a positive `min`. For anything else, pass your own `{ to, from }`, mapping a value into an even space and back.
 
 ```tsx
 <Knob aria-label="Cutoff" max={20_000} min={20} scale="log" />
@@ -330,7 +496,7 @@ The mouse wheel over the knob moves the value by `step` and reports `eventDetail
 <TypeRow name={"largeStep"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
 <TypeRow name={"anchor"} type={"number"} default={"min"}>Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`.</TypeRow>
 <TypeRow name={"dragMode"} type={"\"circular\" | \"vertical\" | \"revolution\""} default={"\"circular\""}>How pointer travel turns into value.</TypeRow>
-<TypeRow name={"scale"} type={"\"linear\" | \"log\" | { toPosition, toValue }"} default={"\"linear\""}>How the value maps onto the dial's travel.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"log\" | { to, from }"} default={"\"linear\""}>How the value maps onto the dial's travel.</TypeRow>
 <TypeRow name={"marks"} type={"(number | { value, label? })[]"}>Graduations drawn around the dial, on its scale. Those the value has reached from `anchor` light up.</TypeRow>
 <TypeRow name={"valueLabel"} type={"\"auto\" | \"always\" | \"hidden\""} default={"\"auto\""}>When the value shows under the dial: `auto` while hovered, turned or focused from the keyboard.</TypeRow>
 <TypeRow name={"formatValue"} type={"(value: number) => string"} default={"format"}>How the value prints in that readout and in what screen readers announce, e.g. `"8.7 kHz"`.</TypeRow>
@@ -345,7 +511,7 @@ The mouse wheel over the knob moves the value by `step` and reports `eventDetail
 <TypeRow name={"className"} type={"string"}>On the root wrapper.</TypeRow>
 </TypeTable>
 
-The `Knob` primitive that installs with it exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+The knob primitive that installs with it exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 </ForFrameworks>
 
@@ -359,7 +525,7 @@ Set on the Root, as props (an attribute in kebab case in the web adapter).
 | `min`, `max`, `step` | `number` | `0`, `100`, `1` | The range and the grid the value snaps to. |
 | `largeStep` | `number` | | What Page Up, Page Down and Shift with an arrow move by. |
 | `anchor` | `number` | | Where the Indicator's arc starts, like `0` for a pan. |
-| `scale` | `"linear"`, `"log"` or `{ toPosition, toValue }` | `"linear"` | How the value maps onto the dial. |
+| `scale` | `"linear"`, `"log"` or `{ to, from }` | `"linear"` | How the value maps onto the dial. |
 | `dragMode` | `"circular"`, `"revolution"`, `"vertical"` | `"circular"` | How pointer travel turns into value. |
 | `format`, `locale` | `Intl.NumberFormat` options, a locale | | The Value's text and the input's `aria-valuetext`. |
 | `disabled` | `boolean` | `false` | Takes no key, wheel or drag. |
@@ -434,4 +600,4 @@ The knob declares one action, `setValue`, and the name on its Thumb is what an a
 
 ## Package
 
-`@audio-ui/primitives` holds the behavior (`@audio-ui/primitives/knob`) with `@ui-sdk/core` as a peer dependency, pinned to the beta the primitives are written for. The adapters are in the registry, not the package.
+There is no package to install: the primitive is `{n}.ts` in your project, and `@ui-sdk/core` is the only dependency, pinned to the beta the primitive is written for. The adapters are files of the registry as well.

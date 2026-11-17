@@ -198,6 +198,9 @@ async function render(
 const styleOf = (element: HTMLElement | undefined) =>
   element?.getAttribute("style") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function timelineSuite(framework: string, mount: MountTimeline) {
   describe(`the timeline in ${framework}`, () => {
     test("the playhead sits at the position, placed by the lane's unit", async () => {
@@ -242,6 +245,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
       await p.act(() => {
         pointer(p.ruler, "pointermove", { clientX: 60, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.positions.at(-1)?.[0]).toBe(60);
       await p.act(() => {
         pointer(p.ruler, "pointerup", { clientX: 60, pointerId: 1 });
@@ -314,6 +319,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
         });
         pointer(p.ruler, "pointermove", { clientX: 60, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.selections.at(-1)).toEqual([20, 60]);
       await p.act(() => {
         pointer(p.ruler, "pointerup", { clientX: 60, pointerId: 1 });
@@ -350,6 +357,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
         pointer(p.mark, "pointerdown", { clientX: 25, pointerId: 1 });
         pointer(p.mark, "pointermove", { clientX: 40, pointerId: 1 });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.marks.at(-1)?.[0]).toBe(40);
       expect(p.marks.at(-1)?.[1]).toBe("25");
       expect(p.positions).toHaveLength(0);
@@ -388,6 +397,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
           pointer(range, "pointerdown", { clientX: 30, pointerId: 1 });
           pointer(range, "pointermove", { clientX: 40, pointerId: 1 });
         });
+        await frame();
+        await p.act(() => undefined);
         expect(p.ranges.at(-1)).toEqual([[30, 60], "loop", "both", "drag"]);
         expect(p.positions).toHaveLength(0);
         expect(styleOf(range)).toContain("--timeline-offset: 30");
@@ -428,6 +439,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
           pointer(p.lane, "pointerdown", { clientX: 60, pointerId: 1 });
           pointer(p.lane, "pointermove", { clientX: 75, pointerId: 1 });
         });
+        await frame();
+        await p.act(() => undefined);
         expect(p.ranges.at(-1)?.[0]).toEqual([60, 75]);
         expect(p.ranges.at(-1)?.[3]).toBe("draw");
         await p.act(() => {
@@ -470,6 +483,8 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
           pointer(header, "pointerdown", { clientX: 20, pointerId: 1 });
           pointer(header, "pointermove", { clientX: 35, pointerId: 1 });
         });
+        await frame();
+        await p.act(() => undefined);
         expect(p.clips.at(-1)?.[0].start).toBe(25);
         expect(p.clips.at(-1)?.[1]).toBe("a");
         expect(p.clips.at(-1)?.[2]).toBe("move");

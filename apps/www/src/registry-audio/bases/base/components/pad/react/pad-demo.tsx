@@ -1,4 +1,3 @@
-import type { PadOffDetails, PadOnDetails } from "@audio-ui/primitives/pad";
 import { useCallback, useRef } from "react";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -8,6 +7,10 @@ import {
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import type {
+  PadOffDetails,
+  PadOnDetails,
+} from "@/registry-audio/bases/base/primitives/pad/pad";
 
 const VOLUME = 0.7;
 /** How long the open hat rings, in seconds, unless the closed one chokes it. */

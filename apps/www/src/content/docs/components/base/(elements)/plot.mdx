@@ -27,79 +27,33 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="plot-demo" />
 
-An equalizer, a filter response or a compressor curve: a surface with two axes, on which you draw curves and live traces and place draggable handles in the axes' units. The registry component is written on the `Plot` primitive of `@audio-ui/primitives`, which installs with it.
+An equalizer, a filter response or a compressor curve: a surface with two axes, on which you draw curves and live traces and place draggable handles in the axes' units. The registry component is written on the plot primitive, which installs with it.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The plot's behavior is one description, `plot` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core`. It is a surface with two axes, each a range and a scale (linear, logarithmic or your own), on which you place curves, live traces, lines, bands, a grid, dots, marks and draggable handles in the axes' units: an EQ curve over `20` to `20000` Hz and `-12` to `12` dB is written in hertz and decibels. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The plot's behavior is one file, the primitive, written on the UI SDK kernel and copied into your project. It is a surface with two axes, each a range and a scale (linear, logarithmic or your own), on which you place curves, live traces, lines, bands, a grid, dots, marks and draggable handles in the axes' units: an EQ curve over `20` to `20000` Hz and `-12` to `12` dB is written in hertz and decibels. Each framework renders it with a thin adapter that you also own, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<CodeTabs>
-
-<TabsList>
-  <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
-  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
-  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
-</TabsList>
-
-<TabsContent value="cli">
-
-```bash component
-npx shadcn@latest add @audio-ui/plot
-```
-
-It installs the element alone. For the equalizer above, with its pink noise and spectrum, ready to run: `npx shadcn@latest add @audio-ui/plot-demo`.
-
-</TabsContent>
-
-<TabsContent value="manual">
-
-<Steps>
-
-<Step>Install the following dependencies:</Step>
-
-```bash
-npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
-```
-
-<Step>Copy and paste the following code into your project.</Step>
-
-<ComponentSource
-  styleName="base-nova"
-  name="plot"
-  title="components/audio-ui/plot.tsx"
-/>
-
-<Step>Update the import paths to match your project setup.</Step>
-
-</Steps>
-
-</TabsContent>
-
-<TabsContent value="agent">
-
-<InstallAgent name="plot" />
-
-</TabsContent>
-
-</CodeTabs>
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation) and the [sequencer](/docs/components/base/sequencer#installation) are built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with a frame, a graph layer and themed parts, is one command:
+
+<Install name="plot" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5" />
+
+For the equalizer above, with its pink noise and spectrum, ready to run: `npx shadcn@latest add @audio-ui/plot-demo`.
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -113,46 +67,221 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/plot-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/plot/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/plot/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Ten files in `components/audio-ui/plot/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/plot/web.ts`. Import it once, and it registers the `audio-ui-plot` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same two files for every framework: `plot.ts`, the plot's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="plot-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="plot-react"
+  title="components/audio-ui/plot/plot.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="plot-react"
+  title="components/audio-ui/plot/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/plot-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="plot-vue"
+  title="components/audio-ui/plot/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Band.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Curve.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Grid.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={5}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/GridLines.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={6}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Handle.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={7}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Line.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={8}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Path.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={9}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/Trace.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={10}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={11}
+  name="plot-svelte"
+  title="src/lib/components/audio-ui/plot/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-plot` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="plot-web"
+  title="components/audio-ui/plot/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
@@ -323,7 +452,7 @@ In the web adapter, what is not text is a property, not an attribute: a Curve's 
 
 ### Live traces and dots
 
-A Trace takes a `source`, a live list of values (a spectrum, a waveform) in the shape of an external store: `getSnapshot()` returns the values and `subscribe(listener)` is called on each frame. Its path is written straight onto the DOM, so a spectrum at 60 frames renders nothing. A Dot takes a `value` or a `source` of a point the same way. `createSource` from `@audio-ui/core` makes one, and the registry's `useSpectrum` gives you one over an analyser.
+A Trace takes a `source`, a live list of values (a spectrum, a waveform) in the shape of an external store: `getSnapshot()` returns the values and `subscribe(listener)` is called on each frame. Its path is written straight onto the DOM, so a spectrum at 60 frames renders nothing. A Dot takes a `value` or a `source` of a point the same way. Any object with those two methods works, with nothing to install, and the registry's `useSpectrum` gives you one over an analyser.
 
 <ForFrameworks only="react">
 
@@ -383,7 +512,7 @@ Set on the Root, as props (an attribute in kebab case in the web adapter).
 | Option | Type | Default | |
 | --- | --- | --- | --- |
 | `minX`, `maxX`, `minY`, `maxY` | `number` | `0`, `1` | The range of each axis, in your units. |
-| `scaleX`, `scaleY` | `"linear"`, `"log"` or `{ toPosition, toValue }` | `"linear"` | How values spread along an axis. |
+| `scaleX`, `scaleY` | `"linear"`, `"log"` or `{ to, from }` | `"linear"` | How values spread along an axis: a `{ to, from }` pair maps values into an even space and back. |
 | `disabled` | `boolean` | `false` | Takes no gesture. |
 | `onValueChange` | `(value, details) => void` | | A handle moved. `details.cancel()` refuses it. |
 | `onValueCommitted` | `(value, details) => void` | | A handle's gesture, key or input ended. |

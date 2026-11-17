@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type {
   Device,
   ParameterDescriptor,
@@ -70,6 +69,7 @@ import {
   DRUM_KIT_PADS,
   drumKit,
 } from "@/registry-audio/bases/base/lib/drum-kit";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

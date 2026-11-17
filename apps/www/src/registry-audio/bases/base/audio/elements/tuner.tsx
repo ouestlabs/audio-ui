@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import {
   type ChangeEvent,
   useCallback,
@@ -14,6 +13,7 @@ import {
   type PitchReading,
   usePitch,
 } from "@/registry-audio/bases/base/hooks/use-pitch";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** Cents from the note to either end of the gauge: half a semitone, where the next note begins. */
 const RANGE_CENTS = 50;

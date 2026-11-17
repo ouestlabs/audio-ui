@@ -1,4 +1,3 @@
-import type { PadOnDetails } from "@audio-ui/primitives/pad";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
@@ -12,6 +11,7 @@ import {
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
+import type { PadOnDetails } from "@/registry-audio/bases/base/primitives/pad/pad";
 
 /** The controls by what they do. */
 const GROUPS = [

@@ -1,11 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import { pitchName } from "@audio-ui/core";
-import {
-  duplicateTime,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-} from "@audio-ui/core/piano-roll";
 import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
 import type {
   RollNoteOffDetails,
@@ -104,6 +96,14 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/registry-audio/bases/base/lib/note-edits";
+import {
+  duplicateTime,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+} from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import { pitchName } from "@/registry-audio/bases/base/primitives/pitch";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;

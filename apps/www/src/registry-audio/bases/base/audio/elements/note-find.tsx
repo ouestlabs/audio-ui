@@ -1,5 +1,3 @@
-import { pitchClassName } from "@audio-ui/core";
-import type { NoteQuery } from "@audio-ui/core/piano-roll";
 import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import {
   type ChangeEvent,
@@ -25,6 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
+import type { NoteQuery } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry-audio/bases/base/primitives/pitch";
 
 /** The form's fields, as typed: empty means no limit. */
 const NO_FIND = {

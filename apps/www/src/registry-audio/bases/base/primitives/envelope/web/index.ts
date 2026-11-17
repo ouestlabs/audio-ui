@@ -1,5 +1,8 @@
-import { polylinePoints } from "@audio-ui/core/envelope";
-import { type EnvelopeState, envelope } from "@audio-ui/primitives/envelope";
+import {
+  type EnvelopeState,
+  envelope,
+  viewOf,
+} from "@audio-ui/primitives/envelope";
 import { createParts } from "@ui-sdk/web";
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -77,8 +80,8 @@ function draw(
   }
 ) {
   const paint = () => {
-    const { view } = instance.get() as EnvelopeState;
-    const points = polylinePoints(view.value);
+    const view = viewOf(instance.get() as EnvelopeState);
+    const { points } = view;
     for (const line of el.querySelectorAll("audio-ui-envelope-line")) {
       polylineOf(line, false).setAttribute("points", points);
     }
@@ -124,7 +127,7 @@ export const parts = createParts(envelope, {
     render: draw,
     state: {
       value: {
-        get: (api) => api.controller.getSnapshot().value,
+        get: (api) => api.value(),
         set: (api, value: { x: number; y: number; curve?: number }[]) =>
           api.set(value),
       },

@@ -21,6 +21,13 @@ import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
+import {
+  rewriteAdapter,
+  rewritePrimitiveImports,
+  SHARED_ITEMS,
+  SHIPPED_PRIMITIVES,
+  sharedDependencies,
+} from "../src/registry-audio/bases/primitives.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
@@ -352,6 +359,17 @@ async function buildFile(
   if (file.type !== "registry:page") {
     content = content.replace(EXPORT_DEFAULT, "export");
   }
+  // 5. An adapter of a primitive written in the registry imports it by a relative path
+  const adapter = ADAPTER_ITEM.exec(item.name);
+  if (adapter?.[1] && SHIPPED_PRIMITIVES.has(adapter[1])) {
+    content = rewriteAdapter(adapter[1], adapter[2] ?? "", content);
+  } else {
+    // 6. Any other file imports such a primitive where its adapter installs it
+    content = rewritePrimitiveImports(
+      content,
+      file.path.includes("/svelte/") || file.path.endsWith(".svelte")
+    );
+  }
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
   return {
@@ -360,6 +378,28 @@ async function buildFile(
     target: file.target || defaultTarget(item, file, fileName),
     type: file.type,
   };
+}
+
+/**
+ * The item's own dependencies, and the shared items that install what its
+ * files import from the primitives (`pitch`, `piano-roll-edits`…): the
+ * import is the declaration, so it cannot be left out. An item that ships a
+ * file itself does not ask for it.
+ */
+function withSharedItems(item: SourceItem, files: BuiltFile[]) {
+  const own = new Set(files.map((file) => file.target));
+  const needed = files
+    .flatMap((file) => [...sharedDependencies(file.content)])
+    .filter((name) => {
+      const targets = (SHARED_ITEMS[name]?.files ?? []).map(
+        (file) => `components/audio-ui/${file}`
+      );
+      return !targets.every((target) => own.has(target)) && name !== item.name;
+    });
+  if (needed.length === 0) {
+    return item.registryDependencies;
+  }
+  return [...new Set([...(item.registryDependencies ?? []), ...needed])];
 }
 
 async function buildItem(
@@ -394,7 +434,7 @@ async function buildItem(
     files,
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
-    registryDependencies: item.registryDependencies?.map((dependency) =>
+    registryDependencies: withSharedItems(item, files)?.map((dependency) =>
       itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
     ),
     title: item.title,
@@ -569,6 +609,7 @@ const itemsByBase = new Map(
 const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
 const SOURCE_EXTENSION = /\.tsx?$/;
 const INDEX_FILE = /\/index$/;
+const ADAPTER_ITEM = /^([a-z-]+)-(react|vue|svelte|web)$/;
 const SVELTE_ROOT = /^~\/src\/lib\//;
 const explicitRewrites = [...itemsByBase.values()]
   .flatMap((items) => [...items.values()])

@@ -1,4 +1,9 @@
 import type { RegistryItem } from "shadcn/schema";
+import {
+  primitiveFiles,
+  SHARED_ITEMS,
+  SHIPPED_PRIMITIVES,
+} from "./primitives.ts";
 
 /**
  * The factories of registry items: every `_registry.ts` declares its items
@@ -128,9 +133,7 @@ export function deviceItems(
     },
     {
       categories: panel.categories,
-      dependencies: [
-        ...new Set(["@audio-ui/core", ...(panel.dependencies ?? [])]),
-      ],
+      dependencies: panel.dependencies ?? [],
       description: panel.description,
       files: [deviceFile(name, "panel.tsx", "registry:ui")],
       name: `${name}-panel`,
@@ -191,9 +194,9 @@ export interface PrimitiveFramework {
 /**
  * A primitive as the registry ships it: one item per framework,
  * `<name>-<framework>`, from the adapter files in `primitives/<name>/`. Each
- * installs to `components/audio-ui/<name>/`, and the behavior it renders comes
- * from `@audio-ui/primitives` over the UI SDK kernel, so the user owns only
- * the thin adapter.
+ * installs to `components/audio-ui/<name>/`. A primitive written in the
+ * registry ships in each of its items, beside the adapter, so the user owns
+ * both; the others still render `@audio-ui/primitives`.
  */
 const ADAPTER_INDEX = /^(react|vue|web)\/index(\.\w+)$/;
 
@@ -202,6 +205,8 @@ export function primitiveItems(
   frameworks: PrimitiveFramework[],
   description: string
 ): RegistryItem[] {
+  // A primitive written in the registry ships in each item: no package of ours.
+  const ships = SHIPPED_PRIMITIVES.has(name);
   return frameworks.map((framework) => {
     // shadcn-svelte puts a `registry:ui` file under its own `ui` folder, and
     // a `registry:component` one in `components`, which is where it belongs.
@@ -212,26 +217,53 @@ export function primitiveItems(
     return {
       categories: ["primitive", framework.name],
       dependencies: [
-        "@audio-ui/primitives",
+        ...(ships ? [] : ["@audio-ui/primitives"]),
         `@ui-sdk/core@${UI_SDK}`,
-        ...framework.dependencies.map((dependency) =>
-          dependency.startsWith("@ui-sdk/")
-            ? `${dependency}@${UI_SDK}`
-            : dependency
+        ...framework.dependencies
+          .filter(
+            (dependency) => !(ships && dependency.startsWith("@audio-ui/"))
+          )
+          .map((dependency) =>
+            dependency.startsWith("@ui-sdk/")
+              ? `${dependency}@${UI_SDK}`
+              : dependency
+          ),
+      ],
+      description: `${description} Its ${framework.name} adapter${ships ? ", with the primitive it renders" : ""}.`,
+      files: [
+        ...(ships ? primitiveFiles(name) : []).map((file) =>
+          fileOf(`primitives/${file}`, type, `${root}audio-ui/${file}`)
+        ),
+        ...framework.files.map((file) =>
+          fileOf(
+            `primitives/${name}/${file}`,
+            type,
+            // Installed as `audio-ui/<name>/react.tsx`: the folder of an adapter in the registry is its source's alone.
+            `${root}audio-ui/${name}/${file.replace(ADAPTER_INDEX, "$1$2")}`
+          )
         ),
       ],
-      description: `${description} Its ${framework.name} adapter.`,
-      files: framework.files.map((file) =>
-        fileOf(
-          `primitives/${name}/${file}`,
-          type,
-          // Installed as `audio-ui/<name>/react.tsx`: the folder of an adapter in the registry is its source's alone.
-          `${root}audio-ui/${name}/${file.replace(ADAPTER_INDEX, "$1$2")}`
-        )
-      ),
       name: `${name}-${framework.name}`,
       registryDependencies: [],
       type,
     };
   });
+}
+
+/**
+ * The files the rest of the registry reads of the primitives, one item each:
+ * installed to `components/audio-ui/`, where the adapters write the same
+ * files, which the CLI skips as identical.
+ */
+export function sharedItems(): RegistryItem[] {
+  return Object.entries(SHARED_ITEMS).map(([name, item]) => ({
+    categories: ["primitive"],
+    dependencies: item.uiSdk ? [`@ui-sdk/core@${UI_SDK}`] : [],
+    description: item.description,
+    files: item.files.map((file) =>
+      fileOf(`primitives/${file}`, "registry:ui", `components/audio-ui/${file}`)
+    ),
+    name,
+    type: "registry:ui",
+  }));
 }

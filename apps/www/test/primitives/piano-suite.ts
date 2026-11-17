@@ -94,6 +94,9 @@ async function render(
 const styleOf = (element: HTMLElement | undefined) =>
   element?.getAttribute("style") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function pianoSuite(framework: string, mount: MountPiano) {
   describe(`the piano in ${framework}`, () => {
     test("a group with a button for each pitch, named by its note", async () => {
@@ -182,6 +185,8 @@ export function pianoSuite(framework: string, mount: MountPiano) {
           pointerId: 1,
         });
       });
+      await frame();
+      await p.act(() => undefined);
       expect(p.offs).toEqual([[60, "glide"]]);
       expect(p.ons.map((on) => [on[0], on[1]])).toEqual([
         [60, "press"],

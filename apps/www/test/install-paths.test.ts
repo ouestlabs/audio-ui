@@ -89,19 +89,16 @@ const byName = new Map(items.map((item) => [item.name ?? "", item]));
 
 // The item that installs `components/audio-ui/<path>`, by that path: most are
 // named after their file, a device's files sit in a folder of their own.
-const installedBy = new Map(
-  items.flatMap((item) =>
-    (item.files ?? []).map(
-      (file) =>
-        [
-          (file.target ?? "")
-            .replace("components/audio-ui/", "")
-            .replace(EXTENSION, ""),
-          item.name ?? "",
-        ] as const
-    )
-  )
-);
+/** The items that install a path under `components/audio-ui/`: a primitive's own files come with each of its adapters. */
+const installedBy = new Map<string, string[]>();
+for (const item of items) {
+  for (const file of item.files ?? []) {
+    const path = (file.target ?? "")
+      .replace("components/audio-ui/", "")
+      .replace(EXTENSION, "");
+    installedBy.set(path, [...(installedBy.get(path) ?? []), item.name ?? ""]);
+  }
+}
 
 /**
  * An item and everything `shadcn add` installs with it: our items by name, and
@@ -228,6 +225,8 @@ const PAGE_ITEM: Record<string, string> = {
 };
 
 const ADAPTER = /^([a-z-]+)\/(react|svelte|vue|web)$/;
+/** An adapter's item, `knob-vue`: what the page's headless section installs for another framework. */
+const ADAPTER_ITEM = /^[a-z-]+-(react|svelte|vue|web)$/;
 
 /** The adapter of a primitive for another framework, which the page's headless section shows: its own item installs it, `knob-vue`. */
 const adapter = (used: string) => {
@@ -256,7 +255,11 @@ test("a component's docs page only imports what installing it brings", async () 
       return [...new Set(imports(await Bun.file(page).text()))]
         .filter(
           (used) =>
-            !(brought.has(installedBy.get(used) ?? used) || adapter(used))
+            !(
+              (installedBy.get(used) ?? [used]).some(
+                (owner) => brought.has(owner) || ADAPTER_ITEM.test(owner)
+              ) || adapter(used)
+            )
         )
         .map((used) => `${component}: ${used}`);
     })
@@ -265,15 +268,15 @@ test("a component's docs page only imports what installing it brings", async () 
 });
 
 test("an item's own imports come with it when it is installed", () => {
-  // Which item installs a path: `components/audio-ui/knob` -> "knob".
-  const owner = new Map(
-    items.flatMap((item) =>
-      (item.files ?? []).map(
-        (file) =>
-          [(file.target ?? "").replace(EXTENSION, ""), item.name] as const
-      )
-    )
-  );
+  // The items that install a path: `components/audio-ui/knob` -> ["knob"].
+  // A primitive's own files come with each of its adapters.
+  const owners = new Map<string, string[]>();
+  for (const item of items) {
+    for (const file of item.files ?? []) {
+      const target = (file.target ?? "").replace(EXTENSION, "");
+      owners.set(target, [...(owners.get(target) ?? []), item.name ?? ""]);
+    }
+  }
   const problems: string[] = [];
   for (const item of items) {
     const brought = withDependencies(item.name ?? "");
@@ -300,11 +303,13 @@ test("an item's own imports come with it when it is installed", () => {
         const target = folder
           ? INSTALL_FOLDERS[folder] + specifier.slice(folder.length)
           : "";
-        const needed = owner.get(target);
+        const needed = owners.get(target);
         if (!needed) {
           problems.push(`${item.name}: ${specifier} is installed by no item`);
-        } else if (!brought.has(needed ?? "")) {
-          problems.push(`${item.name}: ${specifier} (add @audio-ui/${needed})`);
+        } else if (!needed.some((owner) => brought.has(owner))) {
+          problems.push(
+            `${item.name}: ${specifier} (add @audio-ui/${needed[0]})`
+          );
         }
       }
     }

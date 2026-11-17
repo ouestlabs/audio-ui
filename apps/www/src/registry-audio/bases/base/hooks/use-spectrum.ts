@@ -1,4 +1,3 @@
-import { createSource, type Source } from "@audio-ui/core";
 import {
   holdPeaks,
   type LogSpectrumOptions,
@@ -7,6 +6,10 @@ import {
   SPECTRUM_FLOOR_DB,
 } from "@audio-ui/engine/analysis";
 import { useEffect, useState } from "react";
+import {
+  createSource,
+  type Source,
+} from "@/registry-audio/bases/base/primitives/primitive";
 
 export interface UseSpectrumOptions extends LogSpectrumOptions {
   /** How many points the spectrum has, spread along a log frequency axis. @default 160 */

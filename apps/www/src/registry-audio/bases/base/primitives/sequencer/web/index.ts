@@ -1,4 +1,8 @@
-import { type SequencerState, sequencer } from "@audio-ui/primitives/sequencer";
+import {
+  type SequencerState,
+  sequencer,
+  viewOf,
+} from "@audio-ui/primitives/sequencer";
 import { createParts, wrappedButton, wrappedChild } from "@ui-sdk/web";
 
 const ROW = "audio-ui-sequencer-row";
@@ -73,7 +77,7 @@ function draw(
   }
 ) {
   const paint = () => {
-    const { rows, steps } = (instance.get() as SequencerState).view;
+    const { rows, steps } = viewOf(instance.get() as SequencerState);
     const bars = el.hasAttribute("velocity-bars");
     syncChildren(el, ROW, rows, (row) => {
       const element = document.createElement(ROW);

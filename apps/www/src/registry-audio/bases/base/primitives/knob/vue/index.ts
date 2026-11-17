@@ -1,6 +1,6 @@
-import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/core/knob";
 import {
   type ArcState,
+  DEFAULT_ARC_STROKE_WIDTH,
   type KnobPrimitiveOptions,
   type KnobPublicState,
   knob,

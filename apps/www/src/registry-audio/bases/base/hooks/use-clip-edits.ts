@@ -1,4 +1,3 @@
-import type { createSource } from "@audio-ui/core";
 import { type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import {
   FLAT,
@@ -22,6 +21,7 @@ import {
   splice,
   typing,
 } from "@/registry-audio/bases/base/lib/clip-edits";
+import type { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 /**
  * The edits of the sound, as an audio editor makes them, each one step of

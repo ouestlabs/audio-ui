@@ -1,13 +1,3 @@
-import { pitchClassName } from "@audio-ui/core";
-import {
-  findNotes,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-  type NoteQuery,
-  selectionSpan,
-  toggleMuted,
-} from "@audio-ui/core/piano-roll";
 import {
   downloadMidiFile,
   downloadMusicXmlFile,
@@ -103,6 +93,16 @@ import {
   VELOCITY_EDITS,
 } from "@/registry-audio/bases/base/lib/note-edits";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import {
+  findNotes,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+  type NoteQuery,
+  selectionSpan,
+  toggleMuted,
+} from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry-audio/bases/base/primitives/pitch";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;

@@ -18,6 +18,42 @@
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
+      "@audio-ui/primitives/envelope": [
+        "./src/registry-audio/bases/base/primitives/envelope/envelope.ts"
+      ],
+      "@audio-ui/primitives/fader": [
+        "./src/registry-audio/bases/base/primitives/fader/fader.ts"
+      ],
+      "@audio-ui/primitives/knob": [
+        "./src/registry-audio/bases/base/primitives/knob/knob.ts"
+      ],
+      "@audio-ui/primitives/meter": [
+        "./src/registry-audio/bases/base/primitives/meter/meter.ts"
+      ],
+      "@audio-ui/primitives/pad": [
+        "./src/registry-audio/bases/base/primitives/pad/pad.ts"
+      ],
+      "@audio-ui/primitives/piano": [
+        "./src/registry-audio/bases/base/primitives/piano/piano.ts"
+      ],
+      "@audio-ui/primitives/piano-roll": [
+        "./src/registry-audio/bases/base/primitives/piano-roll/piano-roll.ts"
+      ],
+      "@audio-ui/primitives/plot": [
+        "./src/registry-audio/bases/base/primitives/plot/plot.ts"
+      ],
+      "@audio-ui/primitives/sequencer": [
+        "./src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
+      ],
+      "@audio-ui/primitives/timeline": [
+        "./src/registry-audio/bases/base/primitives/timeline/timeline.ts"
+      ],
+      "@audio-ui/primitives/waveform": [
+        "./src/registry-audio/bases/base/primitives/waveform/waveform.ts"
+      ],
+      "@audio-ui/primitives/xypad": [
+        "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
+      ],
       "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
       "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
       "@audio-ui/gl/*": ["../../packages/gl/src/*/index.ts"],

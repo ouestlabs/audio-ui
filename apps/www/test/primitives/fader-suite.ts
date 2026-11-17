@@ -106,6 +106,9 @@ async function render(
 
 const styleOf = (element: HTMLElement) => element.getAttribute("style") ?? "";
 
+/** Waits for the frame a drag reports its moves on. */
+const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
+
 export function faderSuite(framework: string, mount: MountFader) {
   describe(`the fader in ${framework}`, () => {
     test("a native range input, named by the thumb", async () => {
@@ -297,6 +300,7 @@ export function faderSuite(framework: string, mount: MountFader) {
           pointerId: 1,
         });
       });
+      await frame();
       expect(f.changes.at(-1)).toEqual([80, "drag"]);
       for (const part of [f.root, f.control, f.thumb, f.track]) {
         expect(part.hasAttribute("data-dragging")).toBe(true);

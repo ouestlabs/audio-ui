@@ -1,4 +1,4 @@
-import { type FaderState, fader } from "@audio-ui/primitives/fader";
+import { type FaderState, fader, viewOf } from "@audio-ui/primitives/fader";
 import { createParts, wrappedChild } from "@ui-sdk/web";
 
 /** A thumb's attributes that name its input instead, so they are read once. */
@@ -53,7 +53,7 @@ function drawValue(
   }
 ) {
   const draw = () => {
-    const { view } = instance.get() as FaderState;
+    const view = viewOf(instance.get() as FaderState);
     for (const value of el.querySelectorAll("audio-ui-fader-value")) {
       writeText(value, view.formatted);
     }
@@ -89,7 +89,7 @@ export const parts = createParts(fader, {
     render: drawValue,
     state: {
       value: {
-        get: (api) => api.controller.getSnapshot().value,
+        get: (api) => api.value(),
         set: (api, value: number) => api.set(value),
       },
     },

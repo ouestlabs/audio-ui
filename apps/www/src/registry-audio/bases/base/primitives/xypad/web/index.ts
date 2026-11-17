@@ -1,4 +1,4 @@
-import { type XYPadState, xypad } from "@audio-ui/primitives/xypad";
+import { type XYPadState, viewOf, xypad } from "@audio-ui/primitives/xypad";
 import { createParts, wrappedChild } from "@ui-sdk/web";
 
 /** A thumb's attributes that name its inputs instead, so they are read once. */
@@ -63,7 +63,7 @@ function drawValue(
   }
 ) {
   const draw = () => {
-    const { view } = instance.get() as XYPadState;
+    const view = viewOf(instance.get() as XYPadState);
     for (const value of el.querySelectorAll("audio-ui-xypad-value")) {
       writeText(value, view.formattedPair);
     }
@@ -103,7 +103,7 @@ export const parts = createParts(xypad, {
     render: drawValue,
     state: {
       value: {
-        get: (api) => api.controller.getSnapshot().value,
+        get: (api) => api.value(),
         set: (api, value: { x: number; y: number }) => api.set(value),
       },
     },

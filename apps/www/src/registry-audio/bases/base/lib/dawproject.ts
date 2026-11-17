@@ -9,8 +9,6 @@
  * rest is left out, and a report says what, one line each.
  */
 
-import type { Breakpoint } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
@@ -38,6 +36,8 @@ import {
   createArrangementState,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { createZip, readZip } from "@/registry-audio/bases/base/lib/zip";
+import type { Breakpoint } from "@/registry-audio/bases/base/primitives/envelope/geometry";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */
 export interface DawprojectRecording {

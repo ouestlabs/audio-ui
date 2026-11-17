@@ -1,4 +1,3 @@
-import { createSource } from "@audio-ui/core";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -11,6 +10,7 @@ import {
   triggerSnare,
 } from "@/registry-audio/bases/base/lib/drum-synthesis";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 const STEPS = 16;
 const STEPS_PER_BEAT = 4;

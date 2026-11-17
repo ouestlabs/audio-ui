@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** Where bars and beats fall, in seconds: what position fields count in. */
 export interface ClipMeter {

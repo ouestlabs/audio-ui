@@ -1,8 +1,5 @@
-import { createSource } from "@audio-ui/core";
-import type { Note } from "@audio-ui/core/piano-roll";
 import { playedVelocity } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
-import type { RollNoteOnDetails } from "@audio-ui/primitives/piano-roll";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { UseSynthVoicesReturn } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import {
@@ -12,6 +9,8 @@ import {
 import { triggerClick } from "@/registry-audio/bases/base/lib/drum-synthesis";
 import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ramp";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** A step is a sixteenth note whatever the signature: BPM counts quarter notes. */
 const STEPS_PER_QUARTER = 4;
@@ -140,7 +139,7 @@ export function usePianoRollPlayback({
    * edit sounding a pitch it has scheduled would cut it off.
    */
   const onNoteOn = useCallback(
-    (pitch: number, details: RollNoteOnDetails) => {
+    (pitch: number, details: { reason: string; velocity: number }) => {
       const fromKeys = details.reason === "press" || details.reason === "glide";
       if (isPlayingRef.current && !fromKeys) {
         return;

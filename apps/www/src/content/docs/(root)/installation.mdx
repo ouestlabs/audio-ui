@@ -81,7 +81,7 @@ Copy the headless primitive from the address of its item, `<name>-vue.json`:
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
 ```
 
-It writes `components/audio-ui/knob/vue.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`. Every primitive installs the same way.
+It writes `components/audio-ui/knob/vue.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core`, `@ui-sdk/vue` and `vue`. Every primitive installs the same way.
 
 </ForFrameworks>
 
@@ -93,7 +93,7 @@ Copy the headless primitive from the address of its item, `<name>-svelte.json`:
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
 ```
 
-It writes a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, and installs what they import: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
+It writes a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, the primitive beside them (`knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
 
 </ForFrameworks>
 
@@ -105,7 +105,7 @@ Copy the headless primitive from the address of its item, `<name>-web.json`:
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
 ```
 
-It writes `components/audio-ui/knob/web.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/web`. Every primitive installs the same way.
+It writes `components/audio-ui/knob/web.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core` and `@ui-sdk/web`. Every primitive installs the same way.
 
 </ForFrameworks>
 
@@ -182,14 +182,14 @@ The folder of the address is a version, the one of `@audio-ui/primitives`, and t
 
 </ForFrameworks>
 
-## The package a primitive needs
+## The packages a component needs
 
-Primitives import from `@audio-ui/core` (and some components from `@audio-ui/engine`: pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
+A primitive imports no package of ours, only the kernel. Some components import `@audio-ui/engine` (pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
 
-The CLI leaves a version you already have. If an older `@audio-ui/core` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/engine/time` (or `/pitch`, `/midi`, `/analysis`). Update the package:
+The CLI leaves a version you already have. If an older `@audio-ui/engine` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/engine/time` (or `/pitch`, `/midi`, `/analysis`). Update the package:
 
 ```bash
-npm install @audio-ui/core@latest
+npm install @audio-ui/engine@latest
 ```
 
 If your package manager still resolves the old version, bypass its cache: with Bun, add `--no-cache`.

@@ -1,4 +1,3 @@
-import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,
@@ -10,6 +9,10 @@ import type {
   ClipAction,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import type { ArrangementCommand } from "@/registry-audio/bases/base/lib/arrangement-state";
+import type {
+  ClipValue,
+  FadeShape,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 
 /** The track of those given whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
 function nearestTrack(

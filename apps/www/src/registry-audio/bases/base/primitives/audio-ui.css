@@ -1,0 +1,1223 @@
+/*
+ * The anatomy of the primitives, drawn: flat and square, one thin stroke,
+ * the foreground as the accent. It reads the tokens of the UI SDK
+ * stylesheet (`--ui-*`) when the page has it, and falls back to its own.
+ * Every rule targets a `data-slot` or a state attribute, in the `ui-sdk`
+ * layer, so a class or a rule of yours outside the layer wins.
+ */
+@layer ui-sdk;
+
+/*
+ * The waveform's canvas reads these two as colors, not as text: registered as
+ * colors, the browser resolves a `light-dark()` or a `var()` before the
+ * canvas reads it.
+ */
+@property --waveform-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: currentcolor;
+}
+
+@property --waveform-progress-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: currentcolor;
+}
+
+@layer ui-sdk {
+  :where(:root, :host) {
+    --audio-ui-background: var(
+      --ui-background,
+      light-dark(oklch(1 0 0), oklch(0.145 0 0))
+    );
+    --audio-ui-foreground: var(
+      --ui-foreground,
+      light-dark(oklch(0.145 0 0), oklch(0.985 0 0))
+    );
+    --audio-ui-muted: var(
+      --ui-muted,
+      light-dark(oklch(0.967 0 0), oklch(0.226 0 0))
+    );
+    --audio-ui-muted-foreground: var(
+      --ui-muted-foreground,
+      light-dark(oklch(0.528 0 0), oklch(0.706 0 0))
+    );
+    --audio-ui-input: var(
+      --ui-input,
+      light-dark(oklch(0.82 0 0), oklch(0.409 0 0))
+    );
+    --audio-ui-ring: var(
+      --ui-ring,
+      light-dark(oklch(0.913 0 0), oklch(0.333 0 0))
+    );
+    --audio-ui-destructive: var(
+      --ui-destructive,
+      light-dark(oklch(0.577 0.245 27.325), oklch(0.704 0.191 22.216))
+    );
+    --audio-ui-warning: light-dark(
+      oklch(0.769 0.188 70.08),
+      oklch(0.828 0.189 84.429)
+    );
+    color-scheme: light dark;
+  }
+
+  :is([data-slot="knob"], [data-slot="fader"], [data-slot="xypad"]) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  :is(
+    [data-slot="knob-label"],
+    [data-slot="fader-label"],
+    [data-slot="xypad-label"],
+    [data-slot="meter-label"]
+  ) {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  :is(
+    [data-slot="knob-value"],
+    [data-slot="fader-value"],
+    [data-slot="xypad-value"],
+    [data-slot="meter-value"]
+  ) {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--audio-ui-muted-foreground);
+  }
+
+  :is(
+    [data-slot="knob-control"],
+    [data-slot="fader-control"],
+    [data-slot="xypad-control"]
+  )[data-disabled] {
+    opacity: 0.5;
+  }
+
+  /* Knob */
+
+  [data-slot="knob-control"] {
+    position: relative;
+    display: block;
+    width: 6rem;
+    height: 6rem;
+    cursor: grab;
+
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+  }
+
+  :is([data-slot="knob-track"], [data-slot="knob-indicator"]) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="knob-track"] {
+    color: var(--audio-ui-muted);
+  }
+
+  [data-slot="knob-indicator"] {
+    color: var(--audio-ui-foreground);
+  }
+
+  [data-slot="knob-thumb"] {
+    position: absolute;
+    inset: 0;
+
+    &::after {
+      position: absolute;
+      top: 14%;
+      left: 50%;
+      width: 2px;
+      height: 18%;
+      margin-left: -1px;
+      content: "";
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+      border-radius: 50%;
+    }
+  }
+
+  [data-slot="knob-mark"]::after {
+    position: absolute;
+    top: -6%;
+    left: 50%;
+    width: 1px;
+    height: 5%;
+    content: "";
+    background: var(--audio-ui-input);
+  }
+
+  [data-slot="knob-mark"][data-active]::after {
+    background: var(--audio-ui-foreground);
+  }
+
+  /* Fader */
+
+  [data-slot="fader-control"] {
+    display: block;
+    width: 1.25rem;
+    height: 10rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+
+    &[data-orientation="horizontal"] {
+      width: 10rem;
+      height: 1.25rem;
+      margin: 0 0.5rem 1rem;
+    }
+  }
+
+  [data-slot="fader-track"] {
+    display: block;
+    width: 0.25rem;
+    height: 100%;
+    margin: 0 auto;
+    background: var(--audio-ui-muted);
+
+    &[data-orientation="horizontal"] {
+      width: 100%;
+      height: 0.25rem;
+      margin: calc((1.25rem - 0.25rem) / 2) 0 0;
+    }
+  }
+
+  [data-slot="fader-indicator"] {
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="fader-thumb"] {
+    width: 1.25rem;
+    height: 0.625rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-orientation="horizontal"] {
+      width: 0.625rem;
+      height: 1.25rem;
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="fader-mark"] {
+    background: var(--audio-ui-input);
+
+    &[data-active] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-orientation="vertical"] {
+      left: 50%;
+      width: 0.5rem;
+      height: 1px;
+      margin-left: 0.5rem;
+    }
+
+    &[data-orientation="horizontal"] {
+      top: 100%;
+      width: 1px;
+      height: 0.5rem;
+    }
+  }
+
+  /* XY pad */
+
+  [data-slot="xypad-control"] {
+    display: block;
+    width: 10rem;
+    height: 10rem;
+    cursor: crosshair;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    /* The crosshair through the point, from the place the root carries. */
+    &::before,
+    &::after {
+      position: absolute;
+      pointer-events: none;
+      content: "";
+      background: var(--audio-ui-input);
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: var(--xy-pad-x);
+      width: 1px;
+    }
+
+    &::after {
+      top: var(--xy-pad-y);
+      right: 0;
+      left: 0;
+      height: 1px;
+    }
+
+    &[data-dragging]::before,
+    &[data-dragging]::after {
+      background: var(--audio-ui-foreground);
+    }
+  }
+
+  [data-slot="xypad-thumb"] {
+    position: absolute;
+    z-index: 1;
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Meter */
+
+  [data-slot="meter"] {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: flex-start;
+
+    &[data-orientation="horizontal"] {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  [data-slot="meter-channel"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+
+    &[data-orientation="horizontal"] {
+      flex-direction: row;
+    }
+  }
+
+  [data-slot="meter-track"] {
+    position: relative;
+    display: block;
+    width: 0.5rem;
+    height: 10rem;
+    overflow: hidden;
+    background: var(--audio-ui-muted);
+
+    &:has([data-orientation="horizontal"]) {
+      width: 10rem;
+      height: 0.5rem;
+    }
+  }
+
+  /* What clipped stays marked at the end of the track until a click on the meter. */
+  [data-slot="meter-channel"][data-clipped] [data-slot="meter-track"] {
+    box-shadow: inset 0 2px var(--audio-ui-destructive);
+
+    &:has([data-orientation="horizontal"]) {
+      box-shadow: inset -2px 0 var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-indicator"] {
+    position: absolute;
+    bottom: 0;
+    background: var(--audio-ui-foreground);
+
+    &[data-warning] {
+      background: var(--audio-ui-warning);
+    }
+
+    &[data-clipping] {
+      background: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-peak"] {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--audio-ui-foreground);
+
+    &[data-orientation="horizontal"] {
+      top: 0;
+      width: 1px;
+      height: 100%;
+    }
+
+    &[data-clipping] {
+      background: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-mark"] {
+    width: 0.25rem;
+    height: 1px;
+    background: var(--audio-ui-input);
+
+    &[data-orientation="horizontal"] {
+      width: 1px;
+      height: 0.25rem;
+    }
+  }
+
+  /* Pad */
+
+  [data-slot="pad"] {
+    display: grid;
+    grid-template-columns: repeat(var(--pad-columns, 4), 4rem);
+    gap: 0.5rem;
+  }
+
+  [data-slot="pad-item"] {
+    display: flex;
+    align-items: flex-start;
+    height: 4rem;
+    padding: 0.375rem;
+    font: inherit;
+    font-size: 0.75rem;
+    color: var(--audio-ui-muted-foreground);
+    text-align: start;
+    cursor: pointer;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    /* As bright as it was struck hard. */
+    &[data-active] {
+      color: var(--audio-ui-background);
+      background: color-mix(
+        in oklch,
+        var(--audio-ui-foreground) calc(40% + var(--pad-velocity, 1) * 60%),
+        var(--audio-ui-muted)
+      );
+      border-color: var(--audio-ui-foreground);
+    }
+
+    &[data-disabled] {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Piano */
+
+  [data-slot="piano"] {
+    /* A keyboard keeps its light and dark keys in either theme. */
+    --audio-ui-key-white: light-dark(oklch(1 0 0), oklch(0.87 0 0));
+    --audio-ui-key-black: oklch(0.2 0 0);
+    width: 20rem;
+    height: 6rem;
+
+    &[data-orientation="vertical"] {
+      width: 6rem;
+      height: 20rem;
+    }
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="piano-key"] {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 0.25rem;
+    font: inherit;
+    font-size: 0.625rem;
+    color: oklch(0.45 0 0);
+    cursor: pointer;
+    background: var(--audio-ui-key-white);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-orientation="horizontal"] {
+      top: 0;
+      height: 100%;
+    }
+
+    &[data-orientation="vertical"] {
+      left: 0;
+      justify-content: flex-end;
+      align-items: center;
+      width: 100%;
+      padding: 0 0.25rem 0 0;
+    }
+
+    &[data-color="black"] {
+      z-index: 1;
+      color: oklch(0.75 0 0);
+      background: var(--audio-ui-key-black);
+      border-color: var(--audio-ui-key-black);
+    }
+
+    /* A key sounding darkens, and is marked at its free end. */
+    &[data-active] {
+      background: oklch(from var(--audio-ui-key-white) calc(l - 0.15) c h);
+      box-shadow: inset 0 -3px var(--audio-ui-key-black);
+    }
+
+    &[data-orientation="vertical"][data-active] {
+      box-shadow: inset -3px 0 var(--audio-ui-key-black);
+    }
+
+    &[data-color="black"][data-active] {
+      background: oklch(0.45 0 0);
+      box-shadow: none;
+    }
+
+    /* Drawn inside the key, so a key beside it keeps its place on top. */
+    &:focus-visible {
+      outline: 3px solid var(--audio-ui-ring);
+      outline-offset: -3px;
+    }
+  }
+
+  /* On a keyboard layout, the black keys reach only part way across. */
+  [data-slot="piano"][data-layout="keyboard"]
+  [data-slot="piano-key"][data-color="black"] {
+    &[data-orientation="horizontal"] {
+      height: 60%;
+    }
+
+    &[data-orientation="vertical"] {
+      width: 60%;
+    }
+  }
+
+  /* Sequencer */
+
+  [data-slot="sequencer"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  /* A row's cells in a line, and its velocity bars, if any, in the line under them. */
+  [data-slot="sequencer-row"] {
+    display: grid;
+    grid-template-columns: repeat(var(--sequencer-steps, 16), 2rem);
+    gap: 0.25rem;
+  }
+
+  [data-slot="sequencer-cell"] {
+    height: 2rem;
+    padding: 0;
+    cursor: pointer;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-on] {
+      background: var(--audio-ui-foreground);
+      border-color: var(--audio-ui-foreground);
+    }
+
+    /* The step being played. */
+    &[data-current] {
+      border-color: var(--audio-ui-foreground);
+      box-shadow: inset 0 0 0 1px var(--audio-ui-background);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="sequencer-velocity"] {
+    position: relative;
+    height: 1.25rem;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted);
+
+    &::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: calc(var(--sequencer-velocity, 1) * 100%);
+      content: "";
+      background: var(--audio-ui-input);
+    }
+
+    &[data-on]::after {
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Envelope */
+
+  [data-slot="envelope"][data-disabled] {
+    opacity: 0.5;
+  }
+
+  [data-slot="envelope-graph"] {
+    position: relative;
+    width: 16rem;
+    height: 8rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    /* An addition refused at the most points. */
+    &[data-blocked] {
+      border-color: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="envelope-line"] {
+    color: var(--audio-ui-foreground);
+    pointer-events: none;
+  }
+
+  [data-slot="envelope-fill"] {
+    color: color-mix(in oklch, var(--audio-ui-foreground) 12%, transparent);
+    pointer-events: none;
+  }
+
+  [data-slot="envelope-point"] {
+    width: 0.75rem;
+    height: 0.75rem;
+    cursor: grab;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    /* Every part says a drag is on; the point dragged is the one with the focus. */
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+
+    &[data-dragging]:focus {
+      background: var(--audio-ui-foreground);
+    }
+
+    /* A removal refused at the least points. */
+    &[data-blocked] {
+      border-color: var(--audio-ui-destructive);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The handle that bends a segment, at its middle. */
+  [data-slot="envelope-segment"] {
+    width: 0.5rem;
+    height: 0.5rem;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-muted-foreground);
+    border-radius: 50%;
+
+    &[data-dragging]:focus {
+      background: var(--audio-ui-foreground);
+    }
+
+    /* Nothing to bend between two points of the same level. */
+    &[data-flat] {
+      visibility: hidden;
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Plot */
+
+  [data-slot="plot"] {
+    display: block;
+    width: 20rem;
+    height: 10rem;
+    overflow: hidden;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  :is([data-slot="plot-curve"], [data-slot="plot-trace"]) {
+    fill: none;
+    stroke: var(--audio-ui-foreground);
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+  }
+
+  [data-slot="plot-line"] {
+    stroke: var(--audio-ui-muted-foreground);
+    stroke-width: 1px;
+    stroke-dasharray: 3 3;
+  }
+
+  [data-slot="plot-band"] {
+    fill: color-mix(in oklch, var(--audio-ui-foreground) 8%, transparent);
+  }
+
+  [data-slot="plot-grid"] {
+    [data-part="line"] {
+      stroke: var(--audio-ui-input);
+      stroke-width: 1px;
+    }
+
+    [data-part="line"][data-zero] {
+      stroke: var(--audio-ui-muted-foreground);
+    }
+
+    /* The labels sit at the bottom for x and at the left for y, just inside the frame. */
+    [data-part="label"] {
+      padding: 0.125rem 0.25rem;
+      font-size: 0.625rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      color: var(--audio-ui-muted-foreground);
+    }
+
+    [data-part="label"][data-axis="x"] {
+      bottom: 0;
+      translate: -50% 0;
+    }
+
+    [data-part="label"][data-axis="y"] {
+      left: 0;
+      translate: 0 -50%;
+    }
+  }
+
+  [data-slot="plot-handle"] {
+    width: 0.75rem;
+    height: 0.75rem;
+    cursor: grab;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-dragging] {
+      cursor: grabbing;
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="plot-dot"] {
+    width: 0.375rem;
+    height: 0.375rem;
+    background: var(--audio-ui-foreground);
+    border-radius: 50%;
+  }
+
+  [data-slot="plot-mark"] {
+    width: 1px;
+    height: 0.375rem;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-axis="x"] {
+      bottom: 0;
+    }
+
+    &[data-axis="y"] {
+      left: 0;
+      width: 0.375rem;
+      height: 1px;
+    }
+  }
+
+  /* A crosshair at the pointer, while it is over the plot. */
+  [data-slot="plot-cursor"] {
+    visibility: hidden;
+
+    &[data-active] {
+      visibility: visible;
+    }
+
+    &::before,
+    &::after {
+      position: absolute;
+      content: "";
+      background: var(--audio-ui-muted-foreground);
+    }
+
+    &::before {
+      top: 0;
+      bottom: 0;
+      left: var(--plot-cursor-x);
+      width: 1px;
+    }
+
+    &::after {
+      top: var(--plot-cursor-y);
+      right: 0;
+      left: 0;
+      height: 1px;
+    }
+  }
+
+  [data-slot="plot-cursor-readout"] {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--audio-ui-foreground);
+    pointer-events: none;
+    translate: 0.5rem -100%;
+  }
+
+  /* Piano roll */
+
+  [data-slot="piano-roll"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 32rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="piano-roll-grid"] {
+    height: 10rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-input);
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The rows of the black keys, and those out of the scale, are shaded. */
+  [data-slot="piano-roll-row"] {
+    box-shadow: inset 0 -1px var(--audio-ui-muted);
+
+    &:is([data-color="black"], [data-out-of-scale]) {
+      background: var(--audio-ui-muted);
+    }
+
+    &[data-in-scale] {
+      background: none;
+    }
+
+    &[data-scale-root] {
+      box-shadow:
+        inset 2px 0 var(--audio-ui-foreground),
+        inset 0 -1px var(--audio-ui-muted);
+    }
+
+    &[data-active] {
+      background: color-mix(
+        in oklch,
+        var(--audio-ui-foreground) 12%,
+        transparent
+      );
+    }
+  }
+
+  [data-slot="piano-roll-note"] {
+    cursor: move;
+    background: var(--audio-ui-muted-foreground);
+    border: 1px solid var(--audio-ui-background);
+
+    &[data-selected] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-muted] {
+      opacity: 0.4;
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      outline: 2px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* The edges of a note resize it. */
+  :is([data-slot="piano-roll-note-start"], [data-slot="piano-roll-note-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.25rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="piano-roll-note-start"] {
+    left: 0;
+  }
+
+  [data-slot="piano-roll-note-end"] {
+    right: 0;
+  }
+
+  [data-slot="piano-roll-marquee"] {
+    background: color-mix(in oklch, var(--audio-ui-foreground) 8%, transparent);
+    border: 1px dashed var(--audio-ui-foreground);
+  }
+
+  [data-slot="piano-roll-selection-span"] {
+    background: color-mix(in oklch, var(--audio-ui-foreground) 5%, transparent);
+    border-inline: 1px solid var(--audio-ui-muted-foreground);
+  }
+
+  /* The edges of the selection's span stretch the notes selected. */
+  :is(
+    [data-slot="piano-roll-stretch-start"],
+    [data-slot="piano-roll-stretch-end"]
+  ) {
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="piano-roll-velocity-lane"] {
+    height: 3rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="piano-roll-velocity"] {
+    width: 3px;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-selected] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-muted] {
+      opacity: 0.4;
+    }
+
+    &:has(:focus-visible) {
+      outline: 2px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Waveform */
+
+  [data-slot="waveform"] {
+    display: block;
+    width: 24rem;
+    height: 4rem;
+    --waveform-color: var(--audio-ui-muted-foreground);
+    --waveform-progress-color: var(--audio-ui-foreground);
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+
+    /* Audio on its way: the parts wait. */
+    &[data-loading] {
+      opacity: 0.6;
+    }
+  }
+
+  [data-slot="waveform-control"] {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background: var(--audio-ui-muted);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="waveform-canvas"] {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="waveform-bars"] {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="waveform-bar"] {
+    flex: 1;
+    height: calc(var(--waveform-level, 0.08) * 100%);
+    background: var(--waveform-color);
+    border-radius: 1px;
+
+    &[data-played] {
+      background: var(--waveform-progress-color);
+    }
+  }
+
+  /* The playhead and the thumb stand at the played share. */
+  [data-slot="waveform-playhead"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-foreground);
+
+    [data-outside] > & {
+      display: none;
+    }
+  }
+
+  [data-slot="waveform-thumb"] {
+    top: 50%;
+    width: 0.625rem;
+    height: 0.625rem;
+    pointer-events: none;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+    translate: 0 -50%;
+  }
+
+  [data-slot="waveform-marker"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-muted-foreground);
+  }
+
+  [data-slot="waveform-hover"] {
+    top: 0;
+    padding: 0.125rem 0.25rem;
+    font-size: 0.625rem;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-input);
+    translate: -50% -100%;
+  }
+
+  [data-slot="waveform-region"] {
+    top: 0;
+    bottom: 0;
+    cursor: grab;
+    background: color-mix(
+      in oklch,
+      var(--audio-ui-foreground) 12%,
+      transparent
+    );
+
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+  }
+
+  :is([data-slot="waveform-region-start"], [data-slot="waveform-region-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="waveform-region-start"] {
+    left: 0;
+  }
+
+  [data-slot="waveform-region-end"] {
+    right: 0;
+  }
+
+  /* Timeline */
+
+  [data-slot="timeline"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 40rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="timeline-viewport"] {
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  /* The ruler and the lanes are the surfaces that take a press; the parts on them are placed by the timeline's unit. */
+  [data-slot="timeline-ruler"] {
+    height: 1.5rem;
+    cursor: col-resize;
+    background: var(--audio-ui-muted);
+    border-bottom: 1px solid var(--audio-ui-input);
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+      outline-offset: -4px;
+    }
+  }
+
+  [data-slot="timeline-lane"] {
+    height: 4rem;
+    border-bottom: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-track"] {
+    position: relative;
+    height: 4rem;
+    border-bottom: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-track-header"] {
+    padding: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  [data-slot="timeline-track-resize-handle"] {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    cursor: ns-resize;
+
+    &:has(:focus-visible) {
+      background: var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="timeline-playhead"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    pointer-events: none;
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="timeline-mark"] {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--audio-ui-muted-foreground);
+
+    &[data-movable] {
+      cursor: ew-resize;
+    }
+  }
+
+  [data-slot="timeline-range"] {
+    top: 0;
+    bottom: 0;
+    background: color-mix(
+      in oklch,
+      var(--audio-ui-foreground) 12%,
+      transparent
+    );
+    cursor: grab;
+  }
+
+  :is([data-slot="timeline-range-start"], [data-slot="timeline-range-end"]) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="timeline-range-start"] {
+    left: 0;
+  }
+
+  [data-slot="timeline-range-end"] {
+    right: 0;
+  }
+
+  [data-slot="timeline-clip"] {
+    top: 0.25rem;
+    bottom: 0.25rem;
+    overflow: hidden;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-selected] {
+      background: var(--audio-ui-muted);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="timeline-clip-header"] {
+    padding: 0 0.25rem;
+    font-size: 0.625rem;
+    cursor: grab;
+    color: var(--audio-ui-background);
+    background: var(--audio-ui-foreground);
+  }
+
+  :is(
+    [data-slot="timeline-clip-trim-start"],
+    [data-slot="timeline-clip-trim-end"]
+  ) {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  [data-slot="timeline-clip-trim-start"] {
+    left: 0;
+  }
+
+  [data-slot="timeline-clip-trim-end"] {
+    right: 0;
+  }
+
+  [data-slot="timeline-navigator"] {
+    position: relative;
+    height: 0.75rem;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+  }
+
+  [data-slot="timeline-navigator-window"] {
+    background: var(--audio-ui-muted-foreground);
+    cursor: grab;
+  }
+
+  :is(
+    [data-slot="timeline-navigator-start"],
+    [data-slot="timeline-navigator-end"]
+  ) {
+    cursor: ew-resize;
+    background: var(--audio-ui-foreground);
+  }
+}

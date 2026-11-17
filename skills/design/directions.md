@@ -16,7 +16,7 @@ import { Panel } from "./audio-ui/panel";
 This is the verified part tree of every skin (a test renders it in CI). It is one code block: copy the pieces you need into your own files. Its class names are the contract with the CSS: keep them, and add your own parts the same way.
 
 ```tsx
-import { createSource, type Source } from "@audio-ui/core";
+import { createSource, type Source } from "@/components/audio-ui/primitive";
 import { useEffect, useRef, useState } from "react";
 import { Envelope } from "@/components/audio-ui/envelope/react";
 import { Fader } from "@/components/audio-ui/fader/react";
@@ -431,7 +431,7 @@ The kit covers Knob, Fader, Meter, XYPad, Pad, Piano, Envelope, Sequencer, Wavef
 - **Meter zones:** the zone gradient puts amber at 60% and red at 85% of the strip (the zone gradient and its two companions in materials.css). Compute the stops from the range (0 dB sits at `(0 - min) / (max - min)`: 88.9% for -48 to +6) and override the zone gradient and its dimming layer on your skin (the three zone variables are set on the panel in materials.css: set them again with `style` on `Meter.Root`, which they inherit down to).
 - **Tab stops:** a knob with an `editable` readout has two (the slider and the readout), so five knobs give ten. That is expected.
 - **Printed numerals on a knob:** a span inside `Knob.Mark` turns with the mark and reads upside down: place it outside the tick (`position: absolute; top: -1.6rem; left: 50%; translate: -50% 0`) and give it `rotate: calc(var(--knob-mark-angle) * -1)`. On a log knob, `Knob.Mark` takes real values, so evenly spaced angles need a geometric series (20, 200, 2000). Keep 2.4rem or more between knobs so numerals do not touch the next one.
-- **A writable source** is `WritableSource<T>` from `@audio-ui/core` (`Source` has no `set`); `subscribe(listener)` returns the remover.
+- **A writable source** is `WritableSource<T>` from `@/components/audio-ui/primitive` (`Source` has no `set`); `subscribe(listener)` returns the remover.
 - Importing CSS in TypeScript needs `declare module "*.css";` in a `.d.ts` file under `moduleResolution: "Bundler"`.
 
 ### Envelope points to ADSR times
