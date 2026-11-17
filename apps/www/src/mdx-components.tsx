@@ -9,6 +9,7 @@ import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
 import { CodeFile } from "@/components/docs/mdx/code-file";
+import { ComponentIndex } from "@/components/docs/mdx/component-index";
 import { DemoSounds } from "@/components/docs/mdx/demo-sounds";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
 import { Entry, Module } from "@/components/docs/mdx/entry";
@@ -69,6 +70,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Control,
     DemoSounds,
     ForFrameworks,
+    ComponentIndex,
     ItemFiles,
     LinkCard,
     LinkCards,
