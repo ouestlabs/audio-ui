@@ -80,11 +80,13 @@ export function FileTabs({
         ))}
       </div>
       <div
-        className="overflow-hidden rounded-[max(calc(var(--frame-radius)-3px),0px)] border border-site-border bg-site-code"
+        className="overflow-hidden rounded-[max(calc(var(--frame-radius)-3px),0px)] border border-site-border bg-site-code [&_pre]:max-h-96 [&_pre]:overflow-auto"
         data-slot="code"
         role="tabpanel"
       >
+        {/* The code scrolls in a fixed height, its copy button always there: no Expand to press. */}
         <DocsComponentSource
+          collapsible={false}
           file={open}
           key={paths[open]}
           language={EXTENSION.exec(paths[open] ?? "")?.[1]}
