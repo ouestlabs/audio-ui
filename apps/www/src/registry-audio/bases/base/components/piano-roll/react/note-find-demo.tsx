@@ -1,9 +1,3 @@
-import {
-  findNotes,
-  type Note,
-  type NoteId,
-  type NoteQuery,
-} from "@audio-ui/core/piano-roll";
 import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import { useCallback, useState } from "react";
 import { NoteFind } from "@/registry-audio/bases/base/audio/elements/note-find";
@@ -15,6 +9,12 @@ import {
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import { Timeline } from "@/registry-audio/bases/base/audio/elements/timeline";
+import {
+  findNotes,
+  type Note,
+  type NoteId,
+  type NoteQuery,
+} from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 const SCALE: Scale = { name: "major", root: 0 };
 const ROLL_SCALE = rollScale(SCALE);

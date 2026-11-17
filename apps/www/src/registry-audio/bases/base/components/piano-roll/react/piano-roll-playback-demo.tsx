@@ -1,4 +1,3 @@
-import type { Note } from "@audio-ui/core/piano-roll";
 import type { Tempo } from "@audio-ui/engine/time";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,6 +18,7 @@ import {
 } from "@/registry-audio/bases/base/hooks/use-piano-roll-playback";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 const TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 110 };
 const METER = meterOf(TEMPO, 1);

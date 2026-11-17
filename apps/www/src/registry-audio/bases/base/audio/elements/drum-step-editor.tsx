@@ -1,5 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import type { Note } from "@audio-ui/core/piano-roll";
 import {
   type MouseEvent,
   useCallback,
@@ -27,6 +25,8 @@ import {
   withStep,
   withStepRepeats,
 } from "@/registry-audio/bases/base/lib/drum-steps";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** A pad of the drum rack that plays the clip: the note it answers and its name. */
 export interface DrumStepPad {

@@ -357,7 +357,7 @@ Meters, spectra, waveforms and playheads follow signals that change every frame,
 
 A level, a playhead or a spectrum changes 60 times a second. Through `setState`, that is 60 React renders a second of everything under the state owner. Meter, Plot traces and dots, Waveform and Timeline take a **`source`** instead and write each frame straight to the DOM.
 
-A source is any `{ getSnapshot, subscribe }` object. `createSource` from `@audio-ui/core` makes one you push to with `set`.
+A source is any `{ getSnapshot, subscribe }` object. `createSource` from `@/components/audio-ui/primitive` (the `primitive` item) makes one you push to with `set`.
 
 **Incorrect:**
 
@@ -379,8 +379,8 @@ useEffect(() => {
 **Correct:**
 
 ```tsx
-import { createSource } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+import { createSource } from "@/components/audio-ui/primitive";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { Meter } from "@/components/audio-ui/meter";
 
 const [levels] = useState(() =>
@@ -449,7 +449,7 @@ Without the registry, `detectPitch(samples, sampleRate, { minHz, maxHz, minLevel
 ```ts
 import { detectPitch } from "@audio-ui/engine/analysis";
 import { cents } from "@audio-ui/engine/pitch";
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/components/audio-ui/primitive";
 
 const reading = createSource<{ name: string; cents: number } | null>(null);
 const samples = new Float32Array(analyser.fftSize);
@@ -562,7 +562,7 @@ Without the registry, the same loop is a few lines per channel:
 
 ```ts
 import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/components/audio-ui/primitive";
 
 const buffer = new Float32Array(analyser.fftSize);
 const source = createSource({ levels: [-60, -60], peaks: [-60, -60] });
@@ -727,8 +727,8 @@ function ChannelStrip({ levels }: { levels: Levels }) {
 **Correct (a leaf owns the subscription):**
 
 ```tsx
-import type { Source } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+import type { Source } from "@/components/audio-ui/primitive";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { useSyncExternalStore } from "react";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
@@ -794,7 +794,7 @@ const spectrum = useSpectrum(analyser); // Source<Float32Array>, dB per point on
 Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/engine/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
 
 ```ts
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/components/audio-ui/primitive";
 import { holdPeaks, logSpectrum } from "@audio-ui/engine/analysis";
 
 analyser.fftSize = 4096;

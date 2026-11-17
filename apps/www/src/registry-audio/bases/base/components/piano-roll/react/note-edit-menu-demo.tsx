@@ -1,4 +1,3 @@
-import type { Note, NoteId } from "@audio-ui/core/piano-roll";
 import { useCallback, useRef, useState } from "react";
 import {
   DropdownMenuItem,
@@ -28,6 +27,10 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/registry-audio/bases/base/lib/note-edits";
+import type {
+  Note,
+  NoteId,
+} from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 60 };
 

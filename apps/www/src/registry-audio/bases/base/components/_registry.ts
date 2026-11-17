@@ -636,7 +636,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-piano-roll",
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
@@ -716,7 +716,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Find notes on a piano roll by pitch, scale, state, velocity, length or chance, and select them",
     files: [
@@ -735,7 +735,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "A menu of note edits over a piano roll's selection, beside an item of its own",
     files: [
@@ -755,7 +755,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll", "synth"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A one-bar piano roll on loop with a metronome, played by a synth, which hears edits on its next pass",
     files: [
@@ -777,7 +777,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A piano roll that exports its clip as a .mid file and imports one onto its grid, with the file's tempo",
     files: [
@@ -2204,7 +2204,7 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/icons"],
     categories: ["sequencer"],
     description:
       "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
@@ -2274,7 +2274,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["scrubber"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
     files: [
@@ -2298,7 +2298,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "transport-demo",
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },

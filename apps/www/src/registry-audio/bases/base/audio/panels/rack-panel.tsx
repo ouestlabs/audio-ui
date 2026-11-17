@@ -1,5 +1,3 @@
-import { pitchName } from "@audio-ui/core";
-
 import { type ReactNode, useCallback, useState } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -26,6 +24,7 @@ import {
   type RackChain,
   type RackMapping,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import { pitchName } from "@/registry-audio/bases/base/primitives/pitch";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {

@@ -1,4 +1,3 @@
-import type { Note } from "@audio-ui/core/piano-roll";
 import {
   downloadMidiFile,
   MIDI_FILE_ACCEPT,
@@ -14,6 +13,7 @@ import {
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import { Timeline } from "@/registry-audio/bases/base/audio/elements/timeline";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 const DURATION = 32;
 const MIN_PITCH = 48;

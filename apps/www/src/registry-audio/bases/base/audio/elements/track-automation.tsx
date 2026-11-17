@@ -1,4 +1,3 @@
-import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
 import { useCallback, useMemo } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
@@ -27,6 +26,7 @@ import {
   volumeGain,
   volumeValue,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import type { Breakpoint } from "@/registry-audio/bases/base/primitives/envelope/geometry";
 
 /** A gain as the decibels it plays at. */
 function formatGain(gain: number) {

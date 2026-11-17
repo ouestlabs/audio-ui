@@ -190,16 +190,7 @@
     "from": "@audio-ui/core",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "usedBy": [
-      "arrangement-engine",
-      "device-signal",
-      "use-audio-levels",
-      "use-clip-edits",
-      "use-loudness",
-      "use-piano-roll-playback",
-      "use-pitch",
-      "use-spectrum"
-    ]
+    "usedBy": []
   },
   {
     "exports": [
@@ -357,11 +348,7 @@
     "from": "@audio-ui/core/envelope",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "usedBy": [
-      "arrangement",
-      "dawproject",
-      "use-arrangement"
-    ]
+    "usedBy": []
   },
   {
     "exports": [
@@ -695,10 +682,7 @@
     "from": "@audio-ui/core/meter",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "usedBy": [
-      "device-signal",
-      "use-audio-levels"
-    ]
+    "usedBy": []
   },
   {
     "exports": [
@@ -1132,14 +1116,7 @@
     "from": "@audio-ui/core/piano-roll",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "usedBy": [
-      "arrangement",
-      "dawproject",
-      "drum-steps",
-      "recording",
-      "use-arrangement",
-      "use-piano-roll-playback"
-    ]
+    "usedBy": []
   },
   {
     "exports": [
@@ -1768,12 +1745,7 @@
     "from": "@audio-ui/core/timeline",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "usedBy": [
-      "arrangement",
-      "sound-operations",
-      "use-arrangement",
-      "use-timeline-cursor"
-    ]
+    "usedBy": []
   },
   {
     "exports": [

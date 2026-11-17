@@ -1123,7 +1123,7 @@ A clip, a range, a track and a mark each hold a controller of their own, and a p
 
 ### A live position
 
-Give the Root a `source`, a live position in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The Playhead, the Ruler's input and a seek follow it straight in the DOM, with no render. `createSource` from `@audio-ui/core` makes one, and `useTransportClock` from the registry gives you one on the audio clock.
+Give the Root a `source`, a live position in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The Playhead, the Ruler's input and a seek follow it straight in the DOM, with no render. `createSource` from the `primitive` item makes one, and `useTransportClock` from the registry gives you one on the audio clock.
 
 ## Interaction
 

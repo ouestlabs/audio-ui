@@ -1,5 +1,8 @@
-import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
-import { timeline } from "@audio-ui/primitives/timeline";
+import {
+  type FadeShape,
+  fadeGain,
+  timeline,
+} from "@audio-ui/primitives/timeline";
 import { createParts } from "@ui-sdk/web";
 
 /** Adds the part `tag` holding a native input to `owner`, with the names the owner was given. */

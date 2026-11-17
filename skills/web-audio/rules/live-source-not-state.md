@@ -9,7 +9,7 @@ tags: source, createSource, re-render, meter
 
 A level, a playhead or a spectrum changes 60 times a second. Through `setState`, that is 60 React renders a second of everything under the state owner. Meter, Plot traces and dots, Waveform and Timeline take a **`source`** instead and write each frame straight to the DOM.
 
-A source is any `{ getSnapshot, subscribe }` object. `createSource` from `@audio-ui/core` makes one you push to with `set`.
+A source is any `{ getSnapshot, subscribe }` object. `createSource` from `@/components/audio-ui/primitive` (the `primitive` item) makes one you push to with `set`.
 
 **Incorrect:**
 
@@ -31,8 +31,8 @@ useEffect(() => {
 **Correct:**
 
 ```tsx
-import { createSource } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+import { createSource } from "@/components/audio-ui/primitive";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { Meter } from "@/components/audio-ui/meter";
 
 const [levels] = useState(() =>

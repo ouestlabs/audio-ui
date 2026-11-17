@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -38,6 +37,7 @@ import {
   type DeviceSignal,
   deriveSource,
 } from "@/registry-audio/bases/base/lib/device-signal";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

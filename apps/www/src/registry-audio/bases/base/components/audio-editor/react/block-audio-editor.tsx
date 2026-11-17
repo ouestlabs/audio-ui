@@ -1,4 +1,3 @@
-import { createSource, type Source } from "@audio-ui/core";
 import {
   type AudioPeaks,
   computePeaks,
@@ -119,7 +118,6 @@ import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arra
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
-
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
 import { useSoundReport } from "@/registry-audio/bases/base/hooks/use-sound-report";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
@@ -170,6 +168,10 @@ import {
 } from "@/registry-audio/bases/base/lib/recording";
 import type { SoundOperation } from "@/registry-audio/bases/base/lib/sound-operations";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import {
+  createSource,
+  type Source,
+} from "@/registry-audio/bases/base/primitives/primitive";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */

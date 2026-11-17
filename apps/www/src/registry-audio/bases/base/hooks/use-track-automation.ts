@@ -1,5 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { AUTOMATED_PARAMETERS } from "@/registry-audio/bases/base/audio/elements/track-automation";
@@ -17,6 +15,8 @@ import {
   type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import type { ArrangementCommand } from "@/registry-audio/bases/base/lib/arrangement-state";
+import type { Breakpoint } from "@/registry-audio/bases/base/primitives/envelope/geometry";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** What a control needs to follow its envelope as the arrangement plays. */
 export interface AutomationFollowing {

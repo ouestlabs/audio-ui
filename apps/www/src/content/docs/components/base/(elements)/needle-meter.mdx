@@ -11,7 +11,7 @@ A VU meter reads the level of a signal the way an engineer's ear does, as a slow
 
 ## Installation
 
-<Install name="needle-meter" packages="@audio-ui/core" />
+<Install name="needle-meter" packages="" />
 
 ## Usage
 
@@ -34,7 +34,7 @@ The dial and the needle follow the VU meter standard, ANSI C16.5 and IEC 60268-1
 - **Ballistics**: the needle first reaches 99% of a step in 300 ms and overshoots it by 1.3%, and falls as it rises.
 - **Rest**: with no signal the needle rests at the left stop, below -20 VU.
 
-For a dial of your own, `@audio-ui/core/meter` has the two parts: `vuDeflection` gives the position of a mark, with `levelPosition` from `Number.NEGATIVE_INFINITY` to +3, and `createVuBallistics` the movement of the needle.
+For a dial of your own, the `meter-levels` item (`npx shadcn@latest add @audio-ui/meter-levels`) has the two parts: `vuDeflection` gives the position of a mark, with `levelPosition` from `Number.NEGATIVE_INFINITY` to +3, and `createVuBallistics` the movement of the needle.
 
 ## Accessibility
 

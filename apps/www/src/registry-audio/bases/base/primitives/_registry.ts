@@ -1,22 +1,22 @@
 import type { RegistryItem } from "shadcn/schema";
-import { primitiveItems } from "../../items";
+import { primitiveItems, sharedItems } from "../../items";
 
 export const primitives: RegistryItem[] = [
   ...primitiveItems(
     "knob",
     [
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/react"],
+        dependencies: ["@ui-sdk/react"],
         files: ["react/index.tsx"],
         name: "react",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/vue", "vue"],
+        dependencies: ["@ui-sdk/vue", "vue"],
         files: ["vue/index.ts"],
         name: "vue",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/svelte", "svelte"],
+        dependencies: ["@ui-sdk/svelte", "svelte"],
         files: [
           "svelte/Arc.svelte",
           "svelte/Indicator.svelte",
@@ -31,7 +31,7 @@ export const primitives: RegistryItem[] = [
         name: "svelte",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        dependencies: ["@ui-sdk/web"],
         files: ["web/index.ts"],
         name: "web",
       },
@@ -111,7 +111,7 @@ export const primitives: RegistryItem[] = [
         name: "svelte",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        dependencies: ["@ui-sdk/web"],
         files: ["web/index.ts"],
         name: "web",
       },
@@ -143,7 +143,7 @@ export const primitives: RegistryItem[] = [
         name: "svelte",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        dependencies: ["@ui-sdk/web"],
         files: ["web/index.ts"],
         name: "web",
       },
@@ -191,7 +191,7 @@ export const primitives: RegistryItem[] = [
         name: "svelte",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        dependencies: ["@ui-sdk/web"],
         files: ["web/index.ts"],
         name: "web",
       },
@@ -319,7 +319,7 @@ export const primitives: RegistryItem[] = [
         name: "svelte",
       },
       {
-        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        dependencies: ["@ui-sdk/web"],
         files: ["web/index.ts"],
         name: "web",
       },
@@ -357,6 +357,7 @@ export const primitives: RegistryItem[] = [
     ],
     "A piano roll for editing MIDI notes: a grid you draw, move, resize and select notes on, with rows by pitch and scale, velocity or chance bars, a marquee, and a native input on each bar for the keyboard. It sits on a timeline's duration, grid, zoom and playback position, which you give it."
   ),
+  ...sharedItems(),
   {
     categories: ["primitive", "css"],
     description:

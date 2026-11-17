@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,
@@ -97,6 +96,7 @@ import {
   type SoundRange,
   soundOperationTiming,
 } from "@/registry-audio/bases/base/lib/sound-operations";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {

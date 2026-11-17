@@ -28,8 +28,8 @@ function ChannelStrip({ levels }: { levels: Levels }) {
 **Correct (a leaf owns the subscription):**
 
 ```tsx
-import type { Source } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+import type { Source } from "@/components/audio-ui/primitive";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { useSyncExternalStore } from "react";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";

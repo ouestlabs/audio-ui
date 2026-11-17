@@ -6,6 +6,9 @@ import {
 } from "@ui-sdk/core";
 import { numberFormatter } from "@ui-sdk/core/number";
 import { definePrimitive, flag } from "../primitive";
+import { type LevelScale, levelPosition, type MeterFrame } from "./levels";
+
+export type { LevelScale, LevelScaleFunction, MeterFrame } from "./levels";
 
 /**
  * The meter. Levels arrive two ways: as `value` (and `peak`), arrays the app
@@ -22,73 +25,14 @@ import { definePrimitive, flag } from "../primitive";
 /** Which way a meter's bars run. */
 export type MeterOrientation = "horizontal" | "vertical";
 
-/** One reading of the meter: a level per channel, and optionally a peak-hold level per channel. */
-export interface MeterFrame {
-  levels: readonly number[];
-  peaks?: readonly number[] | undefined;
-}
-
 /** A live frame an engine pushes to: what it holds now, and a way to hear it change. */
 export interface MeterSource {
   getSnapshot: () => MeterFrame;
   subscribe: (listener: () => void) => () => void;
 }
 
-/** A custom curve: any increasing function of the level, rescaled to the meter's range. */
-export type LevelScaleFunction = (level: number) => number;
-
-/**
- * How a level in dB is spread along the meter's length: evenly, the way
- * digital peak meters spread it, with room at the top where it matters, or a
- * curve of your own.
- */
-export type LevelScale = "iec" | "linear" | LevelScaleFunction;
-
 /** Levels read to one decimal: finer than a meter can be read, and a plain number rather than a share of the range. */
 const DEFAULT_FORMAT: Intl.NumberFormatOptions = { maximumFractionDigits: 1 };
-
-/**
- * The deflection of an IEC 60268-18 style digital peak meter, from 0 at
- * -70 dB to 100 at 0 dB: each stretch of the scale gets more room than the
- * one below, so the top 20 dB take half the length.
- */
-function iecDeflection(level: number): number {
-  if (level < -70) {
-    return 0;
-  }
-  if (level < -60) {
-    return (level + 70) * 0.25;
-  }
-  if (level < -50) {
-    return (level + 60) * 0.5 + 2.5;
-  }
-  if (level < -40) {
-    return (level + 50) * 0.75 + 7.5;
-  }
-  if (level < -30) {
-    return (level + 40) * 1.5 + 15;
-  }
-  if (level < -20) {
-    return (level + 30) * 2 + 30;
-  }
-  return (level + 20) * 2.5 + 50;
-}
-
-/** A function from a level to its position along the length, 0 at `min` and 1 at `max`. */
-function levelPosition(scale: LevelScale, min: number, max: number) {
-  let curve: LevelScaleFunction;
-  if (scale === "iec") {
-    curve = iecDeflection;
-  } else if (scale === "linear") {
-    curve = (level) => level;
-  } else {
-    curve = scale;
-  }
-  const low = curve(min);
-  const span = curve(max) - low || 1;
-  return (level: number) =>
-    Math.min(1, Math.max(0, (curve(level) - low) / span));
-}
 
 export interface MeterPrimitiveOptions {
   /** Level at or above which a channel is clipping. @default 0 */

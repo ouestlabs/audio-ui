@@ -1,4 +1,3 @@
-import { pitchClassName } from "@audio-ui/core";
 import {
   ACX,
   type AcxCheck,
@@ -12,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/registry/bases/base/ui/dialog";
+import { pitchClassName } from "@/registry-audio/bases/base/primitives/pitch";
 
 interface SoundReportProps {
   onOpenChange: (open: boolean) => void;

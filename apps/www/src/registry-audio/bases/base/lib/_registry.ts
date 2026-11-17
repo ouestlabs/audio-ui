@@ -28,7 +28,7 @@ const items: RegistryItem[] = [
   }),
   libItem("sound-operations", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, with an audio editor's Delete, Crop, Paste and Gain; applySoundOperation runs one on plain channels, on all of them or a stretch spliced back with crossfaded seams, soundOperationName names it as a step of the history",
     registryDependencies: [],
@@ -76,7 +76,7 @@ const items: RegistryItem[] = [
   }),
   libItem("drum-steps", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps).",
   }),
@@ -89,7 +89,7 @@ const items: RegistryItem[] = [
   }),
   libItem("arrangement", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
   }),
@@ -109,7 +109,7 @@ const items: RegistryItem[] = [
   }),
   libItem("device-signal", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The live signal of a device, from its engine, as its face shows it: what goes in and comes out (levels, activity, a scope, a spectrum, a history, the stereo samples) and what the device declares in signals (its gain reduction, its modulator and wet taps). Analysers go on a point only while something watches it, one frame loop reads every signal on the page, and a signal follows the engine a host makes again.",
   }),
@@ -153,7 +153,7 @@ const items: RegistryItem[] = [
   }),
   libItem("dawproject", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine", "fflate"],
+    dependencies: ["@audio-ui/engine", "fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
     files: ["lib/dawproject.ts", "lib/zip.ts"],
@@ -168,7 +168,7 @@ const items: RegistryItem[] = [
   }),
   libItem("recording", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
     files: ["lib/recording.ts", "lib/input-recorder.ts"],
@@ -385,7 +385,7 @@ export const lib: RegistryItem[] = [
   ...items,
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
-      dependencies: ["@audio-ui/core"],
+      dependencies: [],
       description: `Moved to @audio-ui/core/${entry}: installs the package.`,
       files: [],
       name,

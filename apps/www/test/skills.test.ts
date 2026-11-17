@@ -40,6 +40,8 @@ const RULE_ID =
   /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
 // A primitive's adapter, as a project imports it once the CLI has copied it.
 const INSTALLED_PRIMITIVE = /"@\/components\/audio-ui\/([a-z-]+)\/react"/g;
+// What every primitive shares, as a project imports it.
+const INSTALLED_SHARED = /"@\/components\/audio-ui\/primitive"/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
@@ -373,11 +375,16 @@ describe("skills/design styles", () => {
     // The adapters the kit imports from `components/audio-ui/<name>/react`, where the CLI installs them, are the registry's files.
     await Bun.write(
       copy,
-      source.replace(
-        INSTALLED_PRIMITIVE,
-        (_, name) =>
-          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react/index.tsx"`
-      )
+      source
+        .replace(
+          INSTALLED_PRIMITIVE,
+          (_, name) =>
+            `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react/index.tsx"`
+        )
+        .replace(
+          INSTALLED_SHARED,
+          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/primitive.ts"`
+        )
     );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());
     const html = renderToString(

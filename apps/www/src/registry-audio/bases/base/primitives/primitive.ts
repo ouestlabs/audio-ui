@@ -299,6 +299,37 @@ export interface Source<Value> {
   subscribe: (listener: () => void) => () => void;
 }
 
+/** A source that also takes values: what `createSource` returns. */
+export interface WritableSource<Value> extends Source<Value> {
+  /** Publishes a value. Subscribers are told every time, so the same array, updated in place, can be published again. */
+  set: (value: Value) => void;
+}
+
+/**
+ * A source you push to yourself, from an audio callback, a WebSocket, a worker
+ * or a test: call `set` with each new reading, and whatever reads the source
+ * follows.
+ */
+export function createSource<Value>(initial: Value): WritableSource<Value> {
+  let value = initial;
+  const listeners = new Set<() => void>();
+  return {
+    getSnapshot: () => value,
+    set: (next) => {
+      value = next;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
 /** A value the primitive holds and its parts read outside any render. */
 export interface Store<Value> {
   get: () => Value;

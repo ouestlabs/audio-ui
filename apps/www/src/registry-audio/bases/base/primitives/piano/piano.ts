@@ -7,6 +7,7 @@ import {
   type SlotDefinition,
 } from "@ui-sdk/core";
 import { clamp } from "@ui-sdk/core/number";
+import { isBlackKey, pitchName } from "../pitch";
 import { definePrimitive, flag, sourceOf } from "../primitive";
 
 /**
@@ -31,18 +32,7 @@ const BLACK_KEY_DEPTH = 0.6;
 /** A black key's width, as a share of a white key's. */
 const BLACK_KEY_WIDTH = 0.65;
 
-const NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const BLACK = new Set([1, 3, 6, 8, 10]);
-const pitchClass = (pitch: number) => ((Math.round(pitch) % 12) + 12) % 12;
-
-/** "C4" for middle C (MIDI 60), the naming tuners and score editors agree on. */
-export function pitchName(pitch: number): string {
-  const rounded = Math.round(pitch);
-  return `${NAMES[pitchClass(rounded)]}${Math.floor(rounded / 12) - 1}`;
-}
-
-/** Whether `pitch` falls on a black key of a piano. */
-const isBlackKey = (pitch: number) => BLACK.has(pitchClass(pitch));
+export { pitchName } from "../pitch";
 
 /**
  * How the keys share the keyboard's length: `"keyboard"` like a piano, white

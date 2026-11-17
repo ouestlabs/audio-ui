@@ -1,5 +1,9 @@
 import type { RegistryItem } from "shadcn/schema";
-import { primitiveFiles, SHIPPED_PRIMITIVES } from "./primitives.ts";
+import {
+  primitiveFiles,
+  SHARED_ITEMS,
+  SHIPPED_PRIMITIVES,
+} from "./primitives.ts";
 
 /**
  * The factories of registry items: every `_registry.ts` declares its items
@@ -129,9 +133,7 @@ export function deviceItems(
     },
     {
       categories: panel.categories,
-      dependencies: [
-        ...new Set(["@audio-ui/core", ...(panel.dependencies ?? [])]),
-      ],
+      dependencies: panel.dependencies ?? [],
       description: panel.description,
       files: [deviceFile(name, "panel.tsx", "registry:ui")],
       name: `${name}-panel`,
@@ -246,4 +248,22 @@ export function primitiveItems(
       type,
     };
   });
+}
+
+/**
+ * The files the rest of the registry reads of the primitives, one item each:
+ * installed to `components/audio-ui/`, where the adapters write the same
+ * files, which the CLI skips as identical.
+ */
+export function sharedItems(): RegistryItem[] {
+  return Object.entries(SHARED_ITEMS).map(([name, item]) => ({
+    categories: ["primitive"],
+    dependencies: item.uiSdk ? [`@ui-sdk/core@${UI_SDK}`] : [],
+    description: item.description,
+    files: item.files.map((file) =>
+      fileOf(`primitives/${file}`, "registry:ui", `components/audio-ui/${file}`)
+    ),
+    name,
+    type: "registry:ui",
+  }));
 }

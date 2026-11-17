@@ -1,4 +1,9 @@
 import {
+  rollScale,
+  type Scale,
+  scalePitchClasses,
+} from "@audio-ui/engine/pitch";
+import {
   chopNotes,
   deleteTime,
   duplicateTime,
@@ -20,12 +25,7 @@ import {
   splitNotes,
   stretchNotes,
   toggleMuted,
-} from "@audio-ui/core/piano-roll";
-import {
-  rollScale,
-  type Scale,
-  scalePitchClasses,
-} from "@audio-ui/engine/pitch";
+} from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 /** What an edit knows of the editor it runs in. */
 export interface NoteEditContext {

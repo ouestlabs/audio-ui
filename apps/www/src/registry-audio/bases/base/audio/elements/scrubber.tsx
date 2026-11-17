@@ -1,9 +1,9 @@
-import type { Source } from "@audio-ui/core";
 import { formatTime } from "@audio-ui/engine/format";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 import { Timeline as TimelinePrimitive } from "@/registry-audio/bases/base/primitives/timeline/react";
 
 /** The thumb stays inside the bar, as a slider's does: at either end its edge meets the bar's. */

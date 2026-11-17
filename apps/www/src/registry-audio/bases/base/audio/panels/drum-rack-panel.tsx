@@ -1,4 +1,3 @@
-import { pitchName } from "@audio-ui/core";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -48,6 +47,7 @@ import {
   type RackMapping,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import type { PadOnDetails } from "@/registry-audio/bases/base/primitives/pad/pad";
+import { pitchName } from "@/registry-audio/bases/base/primitives/pitch";
 
 /** How many pads a bank shows, four by four. */
 const BANK = 16;

@@ -1,4 +1,3 @@
-import { FADE_SHAPES, type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import {
@@ -52,6 +51,11 @@ import type {
   Mix,
   TrackColor,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import {
+  FADE_SHAPES,
+  type FadeShape,
+  fadeGain,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 import { Timeline as TimelinePrimitive } from "@/registry-audio/bases/base/primitives/timeline/react";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;

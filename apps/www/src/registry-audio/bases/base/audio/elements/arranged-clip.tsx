@@ -1,5 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type {
@@ -51,6 +49,11 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
+import type {
+  ClipValue,
+  FadeShape,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";

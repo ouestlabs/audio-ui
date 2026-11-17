@@ -1,4 +1,3 @@
-import { createSource } from "@audio-ui/core";
 import type { SpectrogramScale } from "@audio-ui/gl/spectrogram";
 import type { WaveformClip, WaveformLayout } from "@audio-ui/gl/waveform";
 import { type ComponentProps, useState } from "react";
@@ -8,6 +7,7 @@ import {
   SpectrogramLane,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import { WaveformLane } from "@/registry-audio/bases/base/audio/elements/waveform-lane";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** How a sound lane draws its clips: the waveform, the waveform by band, or the spectrogram on one of its frequency axes. */
 export type SoundView = "bands" | "wave" | SpectrogramScale;

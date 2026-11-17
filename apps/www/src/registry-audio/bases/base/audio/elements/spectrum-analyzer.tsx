@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import { formatFrequency } from "@audio-ui/engine/format";
 import type { ComponentProps } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -11,6 +10,7 @@ import {
   PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { useSpectrumPeaks } from "@/registry-audio/bases/base/hooks/use-spectrum";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */
 const dbTicks = (min: number, max: number) => {

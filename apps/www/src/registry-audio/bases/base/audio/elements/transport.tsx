@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import {
   barsBeatsWith,
   gridLabel,
@@ -50,6 +49,7 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 

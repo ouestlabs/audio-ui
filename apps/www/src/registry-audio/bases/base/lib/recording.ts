@@ -4,11 +4,12 @@
  * from a MIDI input, the clip goes to the arrangement as one command, so one
  * undo takes the whole take away (REC-007, REC-009, REC-010).
  */
-import type { Note } from "@audio-ui/core/piano-roll";
+
 import {
   type Arranged,
   withEdgeFades,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import type { Note } from "@/registry-audio/bases/base/primitives/piano-roll/edits";
 
 /** What came in from an input, block by block: each block's first frame on the audio clock, and its channels. */
 export interface RecordedBlock {

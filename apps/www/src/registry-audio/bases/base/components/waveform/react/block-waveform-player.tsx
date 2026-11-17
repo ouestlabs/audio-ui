@@ -1,4 +1,3 @@
-import { createSource } from "@audio-ui/core";
 import {
   type AudioPeaks,
   computePeaks,
@@ -29,6 +28,7 @@ import {
   WaveformRegionHandle,
 } from "@/registry-audio/bases/base/audio/elements/waveform";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 4096;

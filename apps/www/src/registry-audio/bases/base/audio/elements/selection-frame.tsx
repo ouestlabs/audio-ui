@@ -1,8 +1,3 @@
-import {
-  type ClipValue,
-  type FadeShape,
-  fadeGain,
-} from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { formatTime } from "@audio-ui/engine/format";
 import type { ClipChangeDetails } from "@audio-ui/primitives/timeline";
@@ -19,6 +14,11 @@ import {
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import {
+  type ClipValue,
+  type FadeShape,
+  fadeGain,
+} from "@/registry-audio/bases/base/primitives/timeline/clip";
 
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
 export interface SelectionShape {

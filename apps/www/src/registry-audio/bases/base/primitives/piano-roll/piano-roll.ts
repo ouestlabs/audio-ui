@@ -1,4 +1,21 @@
 import {
+  createChange,
+  css,
+  dispatch,
+  type PrimitiveInstance,
+  type PropSpec,
+  type SlotDefinition,
+} from "@ui-sdk/core";
+import { isBlackKey, pitchName } from "../pitch";
+import {
+  type ChangeDetails,
+  type CommitDetails,
+  definePrimitive,
+  flag,
+  sourceOf,
+  VISUALLY_HIDDEN,
+} from "../primitive";
+import {
   createPianoRollController,
   type PianoRollBand,
   type PianoRollController,
@@ -12,22 +29,6 @@ import {
   spatialOrder,
 } from "./edits";
 import type { RollScale, Rows } from "./rows";
-import {
-  createChange,
-  css,
-  dispatch,
-  type PrimitiveInstance,
-  type PropSpec,
-  type SlotDefinition,
-} from "@ui-sdk/core";
-import {
-  type ChangeDetails,
-  type CommitDetails,
-  definePrimitive,
-  flag,
-  sourceOf,
-  VISUALLY_HIDDEN,
-} from "../primitive";
 
 export type { ChangeDetails, CommitDetails } from "../primitive";
 export type { Note, NoteId, NoteLevel } from "./edits";
@@ -49,17 +50,6 @@ export interface PositionSource {
   getSnapshot: () => number;
   subscribe: (listener: () => void) => () => void;
 }
-
-const NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-const BLACK = new Set([1, 3, 6, 8, 10]);
-const classOf = (pitch: number) => ((Math.round(pitch) % 12) + 12) % 12;
-
-/** "C4" for middle C (MIDI 60). */
-const pitchName = (pitch: number) =>
-  `${NAMES[classOf(pitch)]}${Math.floor(Math.round(pitch) / 12) - 1}`;
-
-/** Whether `pitch` falls on a black key of a piano. */
-const isBlackKey = (pitch: number) => BLACK.has(classOf(pitch));
 
 export const UNIT_PROPERTY = "--timeline-unit";
 export const OFFSET_PROPERTY = "--timeline-offset";

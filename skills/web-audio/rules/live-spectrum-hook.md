@@ -44,7 +44,7 @@ const spectrum = useSpectrum(analyser); // Source<Float32Array>, dB per point on
 Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/engine/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
 
 ```ts
-import { createSource } from "@audio-ui/core";
+import { createSource } from "@/components/audio-ui/primitive";
 import { holdPeaks, logSpectrum } from "@audio-ui/engine/analysis";
 
 analyser.fftSize = 4096;

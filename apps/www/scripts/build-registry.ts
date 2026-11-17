@@ -24,7 +24,9 @@ import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
   rewriteAdapter,
   rewritePrimitiveImports,
+  SHARED_ITEMS,
   SHIPPED_PRIMITIVES,
+  sharedDependencies,
 } from "../src/registry-audio/bases/primitives.ts";
 
 // ---------------------------------------------------------------------------
@@ -378,6 +380,28 @@ async function buildFile(
   };
 }
 
+/**
+ * The item's own dependencies, and the shared items that install what its
+ * files import from the primitives (`pitch`, `piano-roll-edits`…): the
+ * import is the declaration, so it cannot be left out. An item that ships a
+ * file itself does not ask for it.
+ */
+function withSharedItems(item: SourceItem, files: BuiltFile[]) {
+  const own = new Set(files.map((file) => file.target));
+  const needed = files
+    .flatMap((file) => [...sharedDependencies(file.content)])
+    .filter((name) => {
+      const targets = (SHARED_ITEMS[name]?.files ?? []).map(
+        (file) => `components/audio-ui/${file}`
+      );
+      return !targets.every((target) => own.has(target)) && name !== item.name;
+    });
+  if (needed.length === 0) {
+    return item.registryDependencies;
+  }
+  return [...new Set([...(item.registryDependencies ?? []), ...needed])];
+}
+
 async function buildItem(
   item: SourceItem,
   build: StyleBuild
@@ -410,7 +434,7 @@ async function buildItem(
     files,
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
-    registryDependencies: item.registryDependencies?.map((dependency) =>
+    registryDependencies: withSharedItems(item, files)?.map((dependency) =>
       itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
     ),
     title: item.title,
