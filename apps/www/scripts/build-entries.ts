@@ -388,9 +388,38 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
   );
 }
 
+export const ITEM_FILES_MANIFEST = `${WEB}/src/lib/docs/content/item-files.generated.json`;
+
+/**
+ * Where each item's files land, as the built registry says (`~/` for the
+ * project's root): what a docs page lists before it reads a file's code, so
+ * the list is in its HTML.
+ */
+export async function buildItemFiles(): Promise<Record<string, string[]>> {
+  const dir = `${WEB}/public/r/styles/base-nova`;
+  const names = [...new Bun.Glob("*.json").scanSync(dir)].sort();
+  const built = await Promise.all(
+    names.map(
+      (name) =>
+        Bun.file(`${dir}/${name}`).json() as Promise<{
+          files?: { path: string; target?: string }[];
+          name?: string;
+        }>
+    )
+  );
+  const items: Record<string, string[]> = {};
+  for (const item of built) {
+    if (item.name && item.files && item.files.length > 0) {
+      items[item.name] = item.files.map((file) => file.target ?? file.path);
+    }
+  }
+  return items;
+}
+
 const MANIFESTS = [
   { build: buildEntries, path: MANIFEST },
   { build: buildPackageModules, path: MODULES_MANIFEST },
+  { build: buildItemFiles, path: ITEM_FILES_MANIFEST },
 ];
 
 /** Writes a manifest, or with `check` says whether it is stale: `true` when it is up to date. */

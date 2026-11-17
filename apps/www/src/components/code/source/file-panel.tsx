@@ -1,5 +1,5 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useCallback, useRef, useState } from "react";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { getIconForLanguageExtension } from "@/components/site/icons";
 import { FrameContent } from "@/components/site/layout/frame";
@@ -22,19 +22,29 @@ const EXTENSION = /\.([a-z]+)$/;
 export function FilePanel({
   className,
   name,
+  onCode,
   path,
   source,
 }: {
   className?: string;
   /** The registry item the file is read from, for the copy's event. */
   name: string;
+  /** Called with the code once it is loaded: for what holds several files, such as a stack's download. */
+  onCode?: (code: string) => void;
   /** Where the file lands (`components/audio-ui/knob/knob.ts`), or its name. */
   path: string;
   /** The code, given where to report it once loaded. */
   source: (onCode: (code: string) => void) => ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [code, setCode] = useState<string>();
+  const [code, setOwnCode] = useState<string>();
+  const setCode = useCallback(
+    (loaded: string) => {
+      setOwnCode(loaded);
+      onCode?.(loaded);
+    },
+    [onCode]
+  );
   const near = useIntersectionObserver(ref, {
     freezeOnceVisible: true,
     rootMargin: "800px",

@@ -1,5 +1,8 @@
 import { siteConfig } from "@/lib/config";
+import { frameworkAddressOf } from "@/lib/docs/content/framework-paths";
 import { getCategoryDocsDescription } from "@/lib/registry/core/registry";
+
+const WHITESPACE = /\s+/g;
 
 const CANONICAL_COMPONENT_DOC_SLUGS = [
   "compressor",
@@ -265,13 +268,30 @@ export function getComponentDocSeo(
   slug: CanonicalComponentDocSlug,
   label: string,
   base: "base",
-  docDescription?: string | null
+  docDescription?: string | null,
+  /** The framework the page is read for, from its address: React's unless another is named. */
+  framework?: { id: string; label: string } | null
 ): ComponentDocSeo {
-  const canonicalPath = `/docs/components/${base}/${slug}`;
+  const ownPath = `/docs/components/${base}/${slug}`;
   const displayTitle = label;
 
   const docHook = docDescription?.trim() ?? "";
   const leadDescription = docHook || `${label} component for audio/ui.`;
+
+  // Read for another framework, the page is its headless primitive: named for that framework, at that framework's address.
+  if (framework && framework.id !== "react") {
+    return {
+      canonicalPath: frameworkAddressOf(ownPath, framework.id) ?? ownPath,
+      description:
+        `The headless ${label.toLowerCase()} primitive for ${framework.label}, copied into your project. ${docHook}`
+          .replace(WHITESPACE, " ")
+          .trim(),
+      displayTitle,
+      leadDescription,
+      shouldIndex: true,
+      title: `${label} component for ${framework.label}`,
+    };
+  }
 
   const registryDesc = getCategoryDocsDescription(slug);
   const title = `${label} component for React`;
@@ -281,8 +301,8 @@ export function getComponentDocSeo(
     : `${label} for React and Tailwind CSS, built on top of shadcn/ui. ${docHook || getGenericComponentDocDescription(label)}`;
 
   return {
-    canonicalPath,
-    description: description.replace(/\s+/g, " ").trim(),
+    canonicalPath: ownPath,
+    description: description.replace(WHITESPACE, " ").trim(),
     displayTitle,
     leadDescription,
     shouldIndex: true,

@@ -21,6 +21,10 @@ const { version } = (await Bun.file(
 ).json()) as { version: string };
 const OUT = join(ROOT, "public/web", version);
 const ENTRIES = join(ROOT, "node_modules/.cache/web-entries");
+const DOCS = join(ROOT, "src/content/docs");
+const SCRIPT_ORIGIN = "https://www.audio-ui.dev";
+/** A script of any version, as a docs page writes its address. */
+const SCRIPT_ADDRESS = /https:\/\/www\.audio-ui\.dev\/web\/\d+\.\d+\.\d+\//g;
 
 const names = readdirSync(PRIMITIVES, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -62,3 +66,18 @@ if (!result.success) {
 console.log(
   `  web ${version}: ${names.length} primitives, ${result.outputs.length} files`
 );
+
+// The docs show the scripts at the version just written: a page never names another, so raising the version is the one edit.
+let pinned = 0;
+for await (const path of new Bun.Glob("**/*.mdx").scan(DOCS)) {
+  const page = Bun.file(join(DOCS, path));
+  const text = await page.text();
+  const next = text.replace(SCRIPT_ADDRESS, `${SCRIPT_ORIGIN}/web/${version}/`);
+  if (next !== text) {
+    await Bun.write(page, next);
+    pinned += 1;
+  }
+}
+if (pinned > 0) {
+  console.log(`  web ${version}: pinned in ${pinned} docs page(s)`);
+}

@@ -1,19 +1,17 @@
-import { useEffect, useState } from "react";
 import { FileStack } from "@/components/code/source/file-stack";
-import { getRegistryJsonUrl } from "@/lib/registry/core/registry";
+import itemFiles from "@/lib/docs/content/item-files.generated.json";
 
 /** A Svelte target names the project's root: `~/src/lib/...` lands in `src/lib/...`. */
 const PROJECT_ROOT = /^~\//;
 
-interface BuiltFile {
-  path: string;
-  target?: string;
-}
+const TARGETS: Record<string, readonly string[] | undefined> = itemFiles;
 
 /**
  * The files of a registry item, to copy and paste where they land: a panel
- * each, stacked, named by where it lands. Read from the item itself, so it
- * shows what the CLI would write.
+ * each, stacked, named by where it lands. Where they land comes from the built
+ * registry (`registry:build` writes it), so the list is in the page's HTML and
+ * says what the CLI would write; each file's code is read when it nears the
+ * screen.
  */
 export function ItemFiles({
   name,
@@ -29,35 +27,16 @@ export function ItemFiles({
   /** Where a target under the components alias lands in the project: `src/` in a Vite app. */
   under?: string;
 }) {
-  const [files, setFiles] = useState<BuiltFile[]>([]);
-  useEffect(() => {
-    let live = true;
-    fetch(getRegistryJsonUrl("base-nova", name))
-      .then((response) => response.json() as Promise<{ files?: BuiltFile[] }>)
-      .then((item) => {
-        if (live) {
-          setFiles(item.files ?? []);
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      live = false;
-    };
-  }, [name]);
   // A target from the project's root (`~/`) is written as it is; one under the components alias, under `under`.
-  const where = (file: BuiltFile) => {
-    const target = file.target ?? file.path;
-    return PROJECT_ROOT.test(target)
+  const where = (target: string) =>
+    PROJECT_ROOT.test(target)
       ? target.replace(PROJECT_ROOT, "")
       : `${under}${target}`;
-  };
-  if (files.length === 0) {
-    return <div aria-hidden="true" className="min-h-24" />;
-  }
+  const targets = TARGETS[name] ?? [];
   return (
     <FileStack
       name={name}
-      paths={files.slice(from, to).map(where)}
+      paths={targets.slice(from, to).map(where)}
       start={from}
     />
   );
