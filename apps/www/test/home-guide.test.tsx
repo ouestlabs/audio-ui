@@ -27,7 +27,7 @@ async function renderGuide() {
       component: () => (
         // The site reads the reader's framework from the address, as nuqs gives it.
         <NuqsTestingAdapter>
-          <HomeGuide figures={[]} {...getHomeIndex()} />
+          <HomeGuide {...getHomeIndex()} />
         </NuqsTestingAdapter>
       ),
     }),
