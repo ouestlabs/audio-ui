@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/primitives",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The behavior of audio/ui's primitives, written once on the UI SDK kernel: a knob, a meter, a timeline. Each framework renders it with a thin adapter.",
   "keywords": [
     "audio-ui",
