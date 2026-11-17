@@ -484,4 +484,71 @@
       width: 60%;
     }
   }
+
+  /* Sequencer */
+
+  [data-slot="sequencer"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  /* A row's cells in a line, and its velocity bars, if any, in the line under them. */
+  [data-slot="sequencer-row"] {
+    display: grid;
+    grid-template-columns: repeat(var(--sequencer-steps, 16), 2rem);
+    gap: 0.25rem;
+  }
+
+  [data-slot="sequencer-cell"] {
+    height: 2rem;
+    padding: 0;
+    cursor: pointer;
+    background: var(--audio-ui-muted);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-on] {
+      background: var(--audio-ui-foreground);
+      border-color: var(--audio-ui-foreground);
+    }
+
+    /* The step being played. */
+    &[data-current] {
+      border-color: var(--audio-ui-foreground);
+      box-shadow: inset 0 0 0 1px var(--audio-ui-background);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="sequencer-velocity"] {
+    position: relative;
+    height: 1.25rem;
+    cursor: ns-resize;
+    background: var(--audio-ui-muted);
+
+    &::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: calc(var(--sequencer-velocity, 1) * 100%);
+      content: "";
+      background: var(--audio-ui-input);
+    }
+
+    &[data-on]::after {
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
 }
