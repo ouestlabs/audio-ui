@@ -73,7 +73,8 @@ function SelectContent({
   side = "bottom",
   sideOffset = 4,
   align = "center",
-  alignItemWithTrigger = false,
+  // Items go straight in SelectContent: inside a SelectGroup, ui-sdk misplaces the selected item over the trigger.
+  alignItemWithTrigger = true,
   ...props
 }: ComponentProps<typeof SelectContentPrimitive>) {
   return (
