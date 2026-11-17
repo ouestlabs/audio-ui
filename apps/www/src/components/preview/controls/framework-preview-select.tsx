@@ -63,10 +63,10 @@ export function FrameworkPreviewSelect({
           {(value: FrameworkId) => {
             const Logo = LOGOS[value];
             return (
-              <>
-                <Logo aria-hidden="true" className="size-3.5" />
+              <span className="flex items-center gap-2">
+                <Logo aria-hidden="true" className="size-3.5 shrink-0" />
                 {FRAMEWORKS.find((each) => each.id === value)?.label}
-              </>
+              </span>
             );
           }}
         </SelectValue>
@@ -77,8 +77,10 @@ export function FrameworkPreviewSelect({
             const Logo = LOGOS[each.id];
             return (
               <SelectItem key={each.id} value={each.id}>
-                <Logo aria-hidden="true" className="size-3.5" />
-                {each.label}
+                <span className="flex items-center gap-2">
+                  <Logo aria-hidden="true" className="size-3.5 shrink-0" />
+                  {each.label}
+                </span>
               </SelectItem>
             );
           })}
