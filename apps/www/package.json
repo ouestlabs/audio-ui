@@ -24,7 +24,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@audio-ui/core": "*",
     "@audio-ui/engine": "*",
     "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",

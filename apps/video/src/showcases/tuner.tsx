@@ -1,7 +1,7 @@
-import { createSource } from "@audio-ui/core";
 import { type CSSProperties, useLayoutEffect, useState } from "react";
 import { TunerDisplay } from "@/registry-audio/bases/base/audio/elements/tuner";
 import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 import { MOTION, ramp, tw } from "../motion.ts";
 
 const A4_HZ = 440;

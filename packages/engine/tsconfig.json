@@ -11,11 +11,6 @@
     "moduleDetection": "force",
     "moduleResolution": "Bundler",
     "noUncheckedIndexedAccess": true,
-    "paths": {
-      "@audio-ui/core": ["../core/src/index.ts"],
-      "@audio-ui/core/internal": ["../core/src/internal.ts"],
-      "@audio-ui/core/*": ["../core/src/primitives/*/index.ts"]
-    },
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
     "skipLibCheck": true,

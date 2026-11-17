@@ -16,11 +16,7 @@ The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (Vue, Svelte 
 
 ## Another framework
 
-Vue, Svelte and the web have the same primitives, as items of the registry (`knob-vue`, `knob-svelte`, `knob-web`): see the `core` skill. For a control of your own, or a framework with no adapter (Solid, Angular, Lit), `@audio-ui/core` has the framework-free controllers, with no dependency:
-
-```bash
-npm install @audio-ui/core
-```
+Vue, Svelte and the web have the same primitives, as items of the registry (`knob-vue`, `knob-svelte`, `knob-web`), copied by hand as above. A framework with no adapter (Solid, Angular, Lit) uses the web adapter: its custom elements (`audio-ui-knob`…) work in any page, registered once the file is imported.
 
 ## MCP server
 

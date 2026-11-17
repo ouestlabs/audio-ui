@@ -1,7 +1,27 @@
-import type { FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "../analysis/level.ts";
 import { type WarpMarker, warpedTime, warpMarkers } from "../time/warp.ts";
 import { toFrames } from "./transport.ts";
+
+/** How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends. */
+export type FadeShape = "fast" | "linear" | "slow" | "smooth";
+
+/**
+ * The gain a fade of `shape` has `progress` of the way through it, from 0
+ * (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards.
+ */
+export function fadeGain(shape: FadeShape, progress: number): number {
+  const t = Math.max(0, Math.min(progress, 1));
+  switch (shape) {
+    case "fast":
+      return 1 - (1 - t) * (1 - t);
+    case "slow":
+      return t * t;
+    case "smooth":
+      return t * t * (3 - 2 * t);
+    default:
+      return t;
+  }
+}
 
 /**
  * An audio clip as an arrangement stores it, in seconds: the fields a player

@@ -1,5 +1,5 @@
-import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { type RefObject, useCallback, useState } from "react";
+import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,

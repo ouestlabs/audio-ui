@@ -15,7 +15,7 @@ Where `apps/daw` departs from the reference on purpose, the rule says so and why
 ```
 ### CLP-003 Fade-in
 From the clip's start, over its fade-in length, the gain rises from 0 to 1 along the fade's shape.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
+Test: packages/engine/src/playback/render.test.ts "CLP-003"
 ```
 
 - The id is the chapter's prefix and a number that never changes. A rule that goes keeps its number, marked **Withdrawn**.

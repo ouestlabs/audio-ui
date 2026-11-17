@@ -195,7 +195,7 @@ function FindSelect({
 
 interface NoteFindFormProps
   extends Omit<ComponentProps<"div">, "children" | "onChange"> {
-  /** Fired with the query when Select is pressed: pass it to `findNotes` from `@audio-ui/core/piano-roll`. */
+  /** Fired with the query when Select is pressed: pass it to `findNotes` from the piano roll's edits. */
   onFind: (query: NoteQuery) => void;
   /** The scale marked, which the "Scale" choice reads; unset, the choice is off. */
   scale: Scale | null;

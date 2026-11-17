@@ -14,9 +14,42 @@
     "paths": {
       "@/components/icon-placeholder": ["./src/icon-placeholder.tsx"],
       "@/*": ["../www/src/*"],
-      "@audio-ui/core": ["../../packages/core/src/index.ts"],
-      "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
-      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
+      "@/primitives/envelope": [
+        "../www/src/registry-audio/bases/base/primitives/envelope/envelope.ts"
+      ],
+      "@/primitives/fader": [
+        "../www/src/registry-audio/bases/base/primitives/fader/fader.ts"
+      ],
+      "@/primitives/knob": [
+        "../www/src/registry-audio/bases/base/primitives/knob/knob.ts"
+      ],
+      "@/primitives/meter": [
+        "../www/src/registry-audio/bases/base/primitives/meter/meter.ts"
+      ],
+      "@/primitives/pad": [
+        "../www/src/registry-audio/bases/base/primitives/pad/pad.ts"
+      ],
+      "@/primitives/piano": [
+        "../www/src/registry-audio/bases/base/primitives/piano/piano.ts"
+      ],
+      "@/primitives/piano-roll": [
+        "../www/src/registry-audio/bases/base/primitives/piano-roll/piano-roll.ts"
+      ],
+      "@/primitives/plot": [
+        "../www/src/registry-audio/bases/base/primitives/plot/plot.ts"
+      ],
+      "@/primitives/sequencer": [
+        "../www/src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
+      ],
+      "@/primitives/timeline": [
+        "../www/src/registry-audio/bases/base/primitives/timeline/timeline.ts"
+      ],
+      "@/primitives/waveform": [
+        "../www/src/registry-audio/bases/base/primitives/waveform/waveform.ts"
+      ],
+      "@/primitives/xypad": [
+        "../www/src/registry-audio/bases/base/primitives/xypad/xypad.ts"
+      ],
       "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"]
     },
     "types": ["bun", "react", "react-dom"]

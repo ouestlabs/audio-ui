@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import { defineDevice } from "@audio-ui/engine/device";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
 import { createCompressorEngine } from "@/registry-audio/bases/base/devices/compressor/engine";
@@ -6,6 +5,7 @@ import {
   createDeviceSignal,
   type SignalTarget,
 } from "@/registry-audio/bases/base/lib/device-signal";
+import type { Source } from "@/registry-audio/bases/base/primitives/primitive";
 import { assert, check } from "./harness.ts";
 
 const effect = defineDevice({

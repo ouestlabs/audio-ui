@@ -1,10 +1,3 @@
-/**
- * How a meter's reading follows the level it measures, over time. A VU meter
- * is slow and symmetric, with the small overshoot of a swinging pointer; a PPM
- * is quick to rise and slow to fall. Both take and give a level in dB and are
- * pure: a host calls `step` once per frame with the time since the last call,
- * and draws the value it returns.
- */
 export interface MeterBallistics {
   /** Puts the reading at `value` (dB), or at the floor when none is given. */
   reset: (value?: number) => void;

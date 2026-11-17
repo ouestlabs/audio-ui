@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -12,9 +11,10 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
+import type { Source } from "@/components/audio-ui/primitive";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /** Where bars and beats fall, in seconds: what position fields count in. */
 export interface ClipMeter {

@@ -1,6 +1,3 @@
-import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
-import type { ClipValue } from "@audio-ui/core/timeline";
 import { autoWarp, type BeatAnalysis } from "@audio-ui/engine/analysis";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import type { Scale } from "@audio-ui/engine/pitch";
@@ -10,6 +7,12 @@ import {
   type WarpMarker,
   warpedTime,
 } from "@audio-ui/engine/time";
+import {
+  type Breakpoint,
+  levelAt,
+} from "@/components/audio-ui/envelope/geometry";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
+import type { ClipValue } from "@/components/audio-ui/timeline/clip";
 
 /** What a clip's menu does to it. */
 export type ClipAction =

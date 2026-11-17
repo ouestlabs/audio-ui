@@ -1,6 +1,6 @@
-import type { NoteLevel } from "@audio-ui/core/piano-roll";
 import type { GridDivision, MetronomeRhythm } from "@audio-ui/engine/time";
 import { type RefObject, useCallback, useEffect, useState } from "react";
+import type { NoteLevel } from "@/components/audio-ui/piano-roll/edits";
 
 import type { SoundView } from "@/components/audio-ui/sound-lane";
 import { rackDevices } from "@/lib/arrangement";

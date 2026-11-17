@@ -40,10 +40,6 @@ function AboutPage() {
           Styled components and blocks for shadcn/ui, installed from the same
           registry with the shadcn CLI and owned as your own code.
         </li>
-        <li>
-          <code>@audio-ui/core</code>, the same controllers without a framework,
-          for Solid, Angular or the plain DOM.
-        </li>
       </ul>
       <h2>Who makes it</h2>
       <p>

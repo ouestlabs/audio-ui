@@ -1,7 +1,7 @@
-import type { Source } from "@audio-ui/core";
-import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import { useCallback, useState, useSyncExternalStore } from "react";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import type { Source } from "@/components/audio-ui/primitive";
 import { AUTOMATED_PARAMETERS } from "@/components/audio-ui/track-automation";
 import {
   type ArrangementTrack,

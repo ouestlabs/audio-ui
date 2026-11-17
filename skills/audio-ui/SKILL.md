@@ -27,7 +27,6 @@ audio/ui ships as one plugin of four skills. Each one loads when its job comes u
 | `audio-ui` | Pick, install and wire the components: layers, component selection, values and events, accessibility, styling, AI control |
 | `web-audio` | Sound and live data: the AudioContext, click-free ramps, scheduling, meters, spectra, playheads, microphone and MIDI input |
 | `design` | How it looks: retro, minimal and modern skins, materials, and composing a look from a brief |
-| `core` | Outside React: the primitives for Vue, Svelte and plain HTML, and the framework-free controllers for a control of your own |
 
 ## When to Apply
 

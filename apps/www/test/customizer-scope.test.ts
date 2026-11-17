@@ -21,7 +21,7 @@ describe("pageScope", () => {
   });
 
   test("a page with no preview follows none", async () => {
-    expect(await scopeOf("core/knob.mdx")).toBe("none");
+    expect(await scopeOf("engine/analysis.mdx")).toBe("none");
   });
 });
 

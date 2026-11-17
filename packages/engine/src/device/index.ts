@@ -46,6 +46,13 @@ export {
   type ResponseMeasurement,
 } from "./measure.ts";
 export {
+  LINEAR_SCALE,
+  LOGARITHMIC_SCALE,
+  type ParameterScale,
+  type ParameterScaleProp,
+  resolveScale,
+} from "./scale.ts";
+export {
   type DeviceTool,
   type DeviceToolResult,
   deviceTools,

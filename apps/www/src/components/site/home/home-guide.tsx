@@ -62,7 +62,7 @@ const FAQ: FaqItem[] = [
   },
   {
     answer:
-      "Yes. Every primitive comes for React, Vue, Svelte and plain web components, over @audio-ui/core, which holds the logic with no dependency.",
+      "Yes. Every primitive comes for React, Vue, Svelte and plain web components, copied into your project, with only the UI SDK kernel as a dependency.",
     question: "Can I use it outside React?",
   },
   {

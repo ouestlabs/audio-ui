@@ -136,12 +136,11 @@ const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
 // `export default function name`, with its JSDoc, in a module or its declarations.
 const DEFAULT_EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
-const OUR_MODULE = /^@audio-ui\/(core|engine)(?:\/([a-z-]+))?$/;
+const OUR_MODULE = /^@audio-ui\/(engine)(?:\/([a-z-]+))?$/;
 const SCRIPT_EXTENSION = /\.[cm]?js$/;
 
 /** The published packages whose modules have a page of their own: the folder of each under `packages/`. */
 const MODULE_PACKAGES = [
-  { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
   { folder: "gl", name: "@audio-ui/gl" },
 ] as const;
@@ -196,16 +195,8 @@ async function fileOf(from: string, specifier: string): Promise<string | null> {
   }
   const ours = OUR_MODULE.exec(specifier);
   if (ours) {
-    const [, pkg, sub] = ours;
-    if (pkg === "engine") {
-      return `${PACKAGES}/engine/src/${sub}/index.ts`;
-    }
-    if (!sub) {
-      return `${PACKAGES}/core/src/index.ts`;
-    }
-    return sub === "internal"
-      ? `${PACKAGES}/core/src/internal.ts`
-      : `${PACKAGES}/core/src/primitives/${sub}/index.ts`;
+    const [, , sub] = ours;
+    return `${PACKAGES}/engine/src/${sub}/index.ts`;
   }
   try {
     const entry = Bun.resolveSync(

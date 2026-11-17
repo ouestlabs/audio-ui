@@ -23,7 +23,7 @@ import { NoteFind } from "@/components/audio-ui/note-find";
 />;
 ```
 
-`NoteFind` is a search button that opens the form in a popover. Pressing Select hands `onFind` a `NoteQuery`, and `findNotes` from `@audio-ui/core/piano-roll` returns the ids of the notes it matches, ready to be a [Piano roll](/docs/components/base/piano-roll)'s `selection`. The query is data, so it can also feed anything else that reads notes: a step sequencer, a list, an agent's tool.
+`NoteFind` is a search button that opens the form in a popover. Pressing Select hands `onFind` a `NoteQuery`, and `findNotes` from the piano roll's edits (`piano-roll/edits.ts`) returns the ids of the notes it matches, ready to be a [Piano roll](/docs/components/base/piano-roll)'s `selection`. The query is data, so it can also feed anything else that reads notes: a step sequencer, a list, an agent's tool.
 
 Each field narrows the notes found, and an empty one sets no limit:
 

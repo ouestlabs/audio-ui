@@ -1,6 +1,6 @@
-import { createSource } from "@audio-ui/core";
 import { useLayoutEffect, useState } from "react";
 import { Scrubber } from "@/registry-audio/bases/base/audio/elements/scrubber";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 import { MOTION, tw } from "../motion.ts";
 
 const DURATION = 215;

@@ -1,9 +1,7 @@
-import { adjacentPoint, snapMove } from "@audio-ui/core/timeline";
 import { useCallback } from "react";
-import type {
-  Arranged,
-  ArrangementTrack,
-} from "@/lib/arrangement";
+import { snapMove } from "@/components/audio-ui/grid";
+import { adjacentPoint } from "@/components/audio-ui/timeline/locators";
+import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 
 /** The part of a key press the cursor reads: a native event or React's. */
 type KeyPress = Pick<

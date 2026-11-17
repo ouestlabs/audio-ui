@@ -45,7 +45,7 @@ The headless primitives are headless: they bring behavior, input and ARIA, and n
 4. **Group by signal flow** in labelled sections, with three sizes at most, and draw state (`data-dragging`, `data-active`, focus), not only hover.
 5. **Verify.** Render the page and look at a screenshot; check the panel at the size it ships.
 
-Outside React the same skins apply, with `styles/dom.css` and the plain DOM kit of the `core` skill. Choosing, installing and wiring the components: the `audio-ui` skill.
+Outside React the same skins apply, with `styles/dom.css` over the custom elements of the web primitives. Choosing, installing and wiring the components: the `audio-ui` skill.
 
 ## How to Use
 

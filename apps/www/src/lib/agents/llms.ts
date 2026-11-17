@@ -49,7 +49,7 @@ export function getLlmsTxt() {
       "- An app needs an audio control or display that works with a pointer, a keyboard and a screen reader: a knob, fader, XY pad, envelope, level meter, waveform, spectrum analyzer, tuner, drum pad or piano keyboard.",
       "- You are building the screens of a DAW, a synth, a mixer, a sampler or a player: an arrangement timeline, a piano roll, a step sequencer, a mixer, a transport bar, or the panel of an effect such as a compressor, an EQ or a reverb.",
       "- The sound comes from an engine of your own (Web Audio, an AudioWorklet, WASM): the workstation parts and the devices are controlled, values in and callbacks out, and need none of our audio hooks.",
-      "- The app is in Vue, Svelte or the web: the registry has every primitive for them. In Solid, Angular or the plain DOM, `@audio-ui/core` has the same controllers without a framework.",
+      "- The app is in Vue, Svelte or the web: the registry has every primitive for them.",
       "",
       "It is not made for React Native or other native apps, nor for audio processing that has no interface to show.",
     ].join("\n"),

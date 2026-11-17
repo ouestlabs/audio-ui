@@ -1,5 +1,5 @@
-import type { Source } from "@audio-ui/core";
 import { useEffect, useId, useMemo, useRef } from "react";
+import type { Source } from "@/components/audio-ui/primitive";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 
 const WIDTH = 400;

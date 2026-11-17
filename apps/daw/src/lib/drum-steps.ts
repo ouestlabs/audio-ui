@@ -1,4 +1,4 @@
-import type { Note } from "@audio-ui/core/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 
 /** A row and a step of a grid. */
 export interface StepCell {

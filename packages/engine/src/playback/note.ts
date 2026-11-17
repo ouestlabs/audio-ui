@@ -1,5 +1,27 @@
-import { clamp } from "@audio-ui/core";
-import type { Note } from "@audio-ui/core/piano-roll";
+/** A note's id: unique within its clip. */
+export type NoteId = number | string;
+
+/** A note of a MIDI clip: its pitch, start and length, how hard and how likely it plays, how far its velocity may stray, and whether it is deactivated. */
+export interface Note {
+  /** How likely the note is to play each time it comes round, 0 to 1. @default 1 */
+  chance?: number;
+  /** How far the velocity may stray each time the note plays, as a share of the full range. @default 0 */
+  deviation?: number;
+  id: NoteId;
+  /** Length, in the clip's units. */
+  length: number;
+  /** Whether the note is deactivated: it stays in the clip, and does not play. @default false */
+  muted?: boolean;
+  /** MIDI pitch: 60 is middle C. */
+  pitch: number;
+  /** Where the note starts, in the clip's units. */
+  start: number;
+  /** How hard the note is played, 0 to 1. @default 1 */
+  velocity?: number;
+}
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(value, max));
 
 /**
  * How hard a note plays this time round, from 0 to 1, or `null` when it does

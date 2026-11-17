@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { fadeGain, splitClip } from "@audio-ui/core/timeline";
-import { type ArrangedAudio, type PlayedClip, playedClip } from "./clip.ts";
+import {
+  type ArrangedAudio,
+  fadeGain,
+  type PlayedClip,
+  playedClip,
+} from "./clip.ts";
 import {
   DECLICK_SECONDS,
   type DecodedRecording,
@@ -51,6 +55,23 @@ function audio(
     ...rest,
     value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start, ...rest.value },
   };
+}
+
+/** A clip with no fades cut in two at `at`: what an arrangement's split gives. */
+function splitAt(
+  clip: ArrangedAudio["value"],
+  at: number
+): [ArrangedAudio["value"], ArrangedAudio["value"]] {
+  const cut = at - clip.start;
+  return [
+    { ...clip, length: cut },
+    {
+      ...clip,
+      length: clip.length - cut,
+      offset: clip.offset + cut,
+      start: at,
+    },
+  ];
 }
 
 /** Plays from `position` (a frame of the arrangement) at the audio clock's frame `at`. */
@@ -288,7 +309,7 @@ describe("arrangement playback", () => {
       sourceLength: 2,
       value: { offset: 0.37 },
     });
-    const pieces = splitClip(whole.value, 0.1 + 0.6131) ?? [];
+    const pieces = splitAt(whole.value, 0.1 + 0.6131);
     const [leftPiece, rightPiece] = pieces.map((value) =>
       playedClip({ ...whole, value }, "rec", RATE)
     ) as [PlayedClip, PlayedClip];

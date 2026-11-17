@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import { formatFrequency } from "@audio-ui/engine/format";
 import type { ComponentProps } from "react";
 import {
@@ -9,6 +8,7 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { Source } from "@/components/audio-ui/primitive";
 import { useSpectrumPeaks } from "@/hooks/use-spectrum";
 import { cn } from "@/lib/utils";
 

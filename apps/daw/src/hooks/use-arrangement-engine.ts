@@ -1,5 +1,5 @@
-import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createSource } from "@/components/audio-ui/primitive";
 import type { AutomatedParameter } from "@/lib/arrangement";
 import {
   type ArrangementEngine,

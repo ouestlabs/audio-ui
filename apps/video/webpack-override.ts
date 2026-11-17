@@ -6,15 +6,15 @@ import type { WebpackOverrideFn } from "@remotion/bundler";
 // package scripts run from apps/video, so paths start from there.
 const root = path.resolve(process.cwd(), "../..");
 const www = path.join(root, "apps/www/src");
-const core = path.join(root, "packages/core/src");
+const primitives = path.join(www, "registry-audio/bases/base/primitives");
 
-/** `@audio-ui/core/<name>` for every primitive, as www's tsconfig `paths` resolve it. */
-const corePrimitives = Object.fromEntries(
-  readdirSync(path.join(core, "primitives"), { withFileTypes: true })
+/** `@/primitives/<name>` for every primitive, as www's tsconfig `paths` resolve it. */
+const primitiveFiles = Object.fromEntries(
+  readdirSync(primitives, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => [
-      `@audio-ui/core/${entry.name}$`,
-      path.join(core, "primitives", entry.name, "index.ts"),
+      `@/primitives/${entry.name}$`,
+      path.join(primitives, entry.name, `${entry.name}.ts`),
     ])
 );
 
@@ -89,15 +89,13 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
     ...config.resolve,
     alias: {
       ...config.resolve?.alias,
-      ...corePrimitives,
+      ...primitiveFiles,
       // The site's icon customizer drags the whole design system along, for
       // menu icons a video never opens.
       "@/components/icon-placeholder$": path.resolve(
         "src/icon-placeholder.tsx"
       ),
       "@": www,
-      "@audio-ui/core$": path.join(core, "index.ts"),
-      "@audio-ui/core/internal$": path.join(core, "internal.ts"),
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),
     },

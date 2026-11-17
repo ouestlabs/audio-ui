@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { createSource } from "@audio-ui/core";
-import type { MeterFrame } from "@audio-ui/core/meter";
+import type { MeterFrame } from "@/registry-audio/bases/base/primitives/meter/levels";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 /**
  * One suite for the meter in every framework: it writes no markup of its own,

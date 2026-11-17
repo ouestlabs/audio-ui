@@ -1,6 +1,6 @@
-import { fadeGain } from "@audio-ui/core/timeline";
 import {
   createWarpReader,
+  fadeGain,
   type PlayedClip,
   type PlayedStretch,
 } from "./clip.ts";

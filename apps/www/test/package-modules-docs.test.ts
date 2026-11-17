@@ -5,7 +5,6 @@ const DOCS = `${import.meta.dir}/../src/content/docs`;
 
 /** Each package's docs folder, and the guides that live there beside its modules. */
 const SECTIONS = [
-  { folder: "core", guides: ["controllers"], package: "@audio-ui/core" },
   { folder: "engine", guides: [], package: "@audio-ui/engine" },
   { folder: "gl", guides: [], package: "@audio-ui/gl" },
 ] as const;

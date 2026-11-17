@@ -1,6 +1,6 @@
 import parseMidi from "@audio/midi-parse";
 import writeMidi from "@audio/midi-write";
-import type { Note } from "@audio-ui/core/piano-roll";
+import type { Note } from "../playback/note.ts";
 
 const SECONDS_PER_MINUTE = 60;
 const MICROSECONDS_PER_MINUTE = 60_000_000;

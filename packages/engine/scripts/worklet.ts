@@ -13,8 +13,6 @@
  */
 
 const PLAYBACK = `${import.meta.dir}/../src/playback`;
-/** Where `@audio-ui/core` is in this repository: a bundle takes what it imports from there, so its sources count too. */
-const CORE = `${import.meta.dir}/../../core/src`;
 
 /** Each bundle: its entry, the file it is written to, the constant that holds it and what that constant says. */
 export const BUNDLES = [
@@ -36,17 +34,9 @@ export const BUNDLES = [
   },
 ] as const;
 
-const IMPORT = /from "(\.{1,2}\/[^"]+\.ts|@audio-ui\/core(?:\/[a-z-]+)?)"/g;
+const IMPORT = /from "(\.{1,2}\/[^"]+\.ts)"/g;
 
-/** The source file an import of `@audio-ui/core` resolves to, as the tsconfig's `paths` map it. */
-const coreSource = (specifier: string) => {
-  const subpath = specifier.slice("@audio-ui/core".length + 1);
-  return subpath
-    ? `${CORE}/primitives/${subpath}/index.ts`
-    : `${CORE}/index.ts`;
-};
-
-/** The files the entry imports, itself included, following relative imports and those of `@audio-ui/core`. */
+/** The files the entry imports, itself included, following its relative imports. */
 async function inputsOf(entry: string): Promise<string[]> {
   const seen = new Set<string>();
   const visit = async (path: string) => {
@@ -58,11 +48,7 @@ async function inputsOf(entry: string): Promise<string[]> {
     const folder = path.slice(0, path.lastIndexOf("/"));
     await Promise.all(
       [...source.matchAll(IMPORT)].map(([, specifier = ""]) =>
-        visit(
-          specifier.startsWith("@audio-ui/core")
-            ? new URL(`file://${coreSource(specifier)}`).pathname
-            : new URL(specifier, `file://${folder}/`).pathname
-        )
+        visit(new URL(specifier, `file://${folder}/`).pathname)
       )
     );
   };

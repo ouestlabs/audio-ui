@@ -1,8 +1,3 @@
-import {
-  type ClipValue,
-  type FadeShape,
-  fadeGain,
-} from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { formatTime } from "@audio-ui/engine/format";
 import {
@@ -17,6 +12,11 @@ import {
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/components/audio-ui/timeline";
+import {
+  type ClipValue,
+  type FadeShape,
+  fadeGain,
+} from "@/components/audio-ui/timeline/clip";
 import type { ClipChangeDetails } from "@/components/audio-ui/timeline/timeline";
 import { cn } from "@/lib/utils";
 

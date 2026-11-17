@@ -1,4 +1,3 @@
-import { createSource } from "@audio-ui/core";
 import {
   DEFAULT_TEMPO,
   type MetronomeRhythm,
@@ -6,6 +5,7 @@ import {
   type Tempo,
 } from "@audio-ui/engine/time";
 import { useCallback, useEffect, useState } from "react";
+import { createSource } from "@/components/audio-ui/primitive";
 import { Transport } from "@/components/audio-ui/transport";
 
 const LOOP_BARS = 4;

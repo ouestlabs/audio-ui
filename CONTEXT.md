@@ -9,7 +9,7 @@ A bounded, stepped, continuously controllable value (gain, pan, playback positio
 _Avoid_: value control, setting, param
 
 **Device**:
-An effect or an instrument as a set of named Parameters, with no interface and no audio in it (`defineDevice` in `@audio-ui/core/device`). Its **state** is a plain object keyed by parameter id (numbers and booleans), a value a host stores and saves. One description feeds a panel, an engine adapter and an agent, so none of them redefines a range. Its id is stable and reverse-DNS (`audioui.compressor`): a project stores that, not the panel that draws it.
+An effect or an instrument as a set of named Parameters, with no interface and no audio in it (`defineDevice` in `@audio-ui/engine/device`). Its **state** is a plain object keyed by parameter id (numbers and booleans), a value a host stores and saves. One description feeds a panel, an engine adapter and an agent, so none of them redefines a range. Its id is stable and reverse-DNS (`audioui.compressor`): a project stores that, not the panel that draws it.
 _Avoid_: plugin (a Device is a description, not a package), module, processor
 
 **Parameter Descriptor**:
@@ -33,7 +33,7 @@ A styled registry wrapper over a primitive, copied into user projects via the re
 _Avoid_: styled component, wrapper
 
 **TransportClock**:
-The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start, stop and seek, plays inside the loop region it is given, and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `@audio-ui/core/time`.
+The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start, stop and seek, plays inside the loop region it is given, and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `@audio-ui/engine/time`.
 _Avoid_: scheduler (bare: say the core or the clock), timer, metronome
 
 **Voice**:

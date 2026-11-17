@@ -1,5 +1,10 @@
-import type { Breakpoint } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
+import {
+  type SignatureChange,
+  secondsPerBar,
+  type Tempo,
+} from "@audio-ui/engine/time";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import {
   type ClipValue,
   copyRange,
@@ -12,12 +17,7 @@ import {
   setClipFadeShape,
   splitClip,
   trimClipEnd,
-} from "@audio-ui/core/timeline";
-import {
-  type SignatureChange,
-  secondsPerBar,
-  type Tempo,
-} from "@audio-ui/engine/time";
+} from "@/components/audio-ui/timeline/clip";
 import {
   type Arranged,
   type ArrangementTrack,

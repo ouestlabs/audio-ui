@@ -1,6 +1,6 @@
-import { createSource } from "@audio-ui/core";
 import { useLayoutEffect, useState } from "react";
 import { Sequencer } from "@/registry-audio/bases/base/audio/elements/sequencer";
+import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
 
 const STEPS = 16;
 const STEPS_PER_SECOND = 8;

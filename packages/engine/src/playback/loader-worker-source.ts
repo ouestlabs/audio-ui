@@ -2,7 +2,7 @@
 
 /** A hash of the sources this bundle was made from, checked by a test. */
 export const RECORDING_LOADER_WORKER_INPUTS =
-  "af86bc6f44ddfa3e2a59f7a704b0cca36302b186cca2b419377295e3debab3dc";
+  "1b866f89258c95c058abb36c4ce98d4bbea3527377e04b3dbe9a1acbca536fb3";
 
 /**
  * The loader of streamed recordings, as the source of a module: start it

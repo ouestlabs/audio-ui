@@ -1,11 +1,13 @@
-import type { Source } from "@audio-ui/core";
+import { useEffect, useRef } from "react";
 import {
   createVuBallistics,
   FLOOR_DB,
+} from "@/components/audio-ui/meter/ballistics";
+import {
   levelPosition,
   vuDeflection,
-} from "@audio-ui/core/meter";
-import { useEffect, useRef } from "react";
+} from "@/components/audio-ui/meter/levels";
+import type { Source } from "@/components/audio-ui/primitive";
 import { cn } from "@/lib/utils";
 
 /** The reading a needle meter follows: the levels of its channels, in dB. */

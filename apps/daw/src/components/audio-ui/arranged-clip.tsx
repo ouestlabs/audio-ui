@@ -1,5 +1,3 @@
-import type { Source } from "@audio-ui/core";
-import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
@@ -19,6 +17,7 @@ import {
   type ClipSamples,
   ClipWaveform,
 } from "@/components/audio-ui/clip-waveform";
+import type { Source } from "@/components/audio-ui/primitive";
 import {
   TimelineClip,
   TimelineClipFade,
@@ -27,6 +26,7 @@ import {
   TimelineClipHeader,
   trackSwatch,
 } from "@/components/audio-ui/timeline";
+import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,

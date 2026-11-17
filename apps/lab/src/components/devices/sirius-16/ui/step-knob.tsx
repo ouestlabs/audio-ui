@@ -1,6 +1,6 @@
-import { pitchName } from "@audio-ui/core";
 import { useCallback } from "react";
 import { Knob } from "@/components/audio-ui/knob/react";
+import { pitchName } from "@/components/audio-ui/pitch";
 import { ROOT, SPAN } from "../audio/engine";
 
 /** One step's pitch: a small knob over two octaves, the note it plays printed under it. */

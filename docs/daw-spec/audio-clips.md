@@ -4,24 +4,24 @@ How an audio clip turns its recording into frames: which frames of the recording
 
 ### CLP-001 Neutral playback
 A clip at 0 dB with no fade, not stretched, whose recording is at the engine's sample rate, played through a track at unity and centre, comes out bit-identical to its recording.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-001"
+Test: packages/engine/src/playback/render.test.ts "CLP-001"
 
 ### CLP-002 Gain
 The clip's gain, in dB, multiplies each of its frames by 10^(gain/20).
 Status: partial: OBS-002 gives the reference's range and default; the clip panel allows -36 to +24 dB today.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-002"
+Test: packages/engine/src/playback/render.test.ts "CLP-002"
 
 ### CLP-003 Fade-in
 From the clip's start, over its fade-in length, the gain rises from 0 to 1 along the fade's shape (linear, fast, slow or smooth). The first frame of a fade-in is silent.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
+Test: packages/engine/src/playback/render.test.ts "CLP-003"
 
 ### CLP-004 Fade-out
 Over the clip's fade-out length, up to its end, the gain falls from 1 to 0 along the shape, the curve of the fade-in played backwards.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-004"
+Test: packages/engine/src/playback/render.test.ts "CLP-004"
 
 ### CLP-005 Fades fit
 A fade-in and a fade-out never overlap: together they are as long as the clip at most.
-Test: packages/core/src/primitives/timeline/test/clip.test.ts (fitFades)
+Test: apps/www/test/primitives/timeline-suite.ts (the registry's timeline/clip.ts)
 
 ### CLP-006 Fades on clip edges
 A clip laid down gets a fade of 4 ms at each edge (or half its length when shorter), which can be edited, and a cut gives an audio clip one each side of it. Delete or Backspace on a fade's handle sets it back to 4 ms; dragged to nothing, it stays at nothing. It applies to clips made from now on: a project already saved keeps its fades.
@@ -29,19 +29,19 @@ Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "CLP-006";
 
 ### CLP-007 Loop
 A looped clip plays from where it starts in its recording to the loop's end, then the loop again and again, for as long as the clip lasts. Each pass starts on the frame after the last one of the pass before.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-007"
+Test: packages/engine/src/playback/render.test.ts "CLP-007"
 
 ### CLP-008 Reverse
 A reversed clip plays the same stretch of its recording, backwards: its region and its loop are mirrored onto the reversed recording, so what it played from first it now plays last.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-008" (the mirror), apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-008" (the region and the loop)
+Test: packages/engine/src/playback/render.test.ts "CLP-008" (the mirror), apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-008" (the region and the loop)
 
 ### CLP-009 Repitch
 Between two warp markers, the recording plays at the speed that takes it from one to the other, and its pitch moves with the speed: twice as fast is an octave up. Past the first and the last marker it keeps the speed of the stretch next to it.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-009"
+Test: packages/engine/src/playback/render.test.ts "CLP-009"
 
 ### CLP-010 Interpolation
 A clip played at a speed other than 1, or from between two frames, reads its recording through an interpolator. Frames read at speed 1 on whole frames are copied as they are (CLP-001).
-Test: packages/core/src/audio/playback/render.test.ts "CLP-010"
+Test: packages/engine/src/playback/render.test.ts "CLP-010"
 
 ### CLP-011 Recordings at another sample rate
 A recording at another sample rate than the engine's is converted to the engine's when it is decoded. The conversion is not neutral.
@@ -49,11 +49,11 @@ Test: apps/daw/test/arrangement.test.ts "CLP-011"
 
 ### CLP-012 Mono recordings
 A mono recording plays at full level in both channels: a track's chain is always stereo.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-012"
+Test: packages/engine/src/playback/render.test.ts "CLP-012"
 
 ### CLP-013 Transpose
 In Beats or Tones, a clip plays `transpose` semitones from its pitch, at the speed its warp gives it. In Repitch the transpose does nothing: its speed is its pitch.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-013"
+Test: packages/engine/src/playback/render.test.ts "CLP-013"
 
 ### CLP-014 Crossfades
 Two clips that meet on a track with fades of one length play through each other: each goes on past the join by as much as both sources hold, up to that length, and both fade over the same stretch around it, along their shapes. With a shape whose two sides add up to one, such as linear, what they share stays level, and a clip cut in two plays on as if it were whole. Dragging a fade between two clips that meet gives both that length. With fades of different lengths, or nothing to play past the join, each keeps its own fade, down to silence at the join. In a `.dawproject` file they go out as the fades they are.
@@ -61,24 +61,24 @@ Test: apps/www/test/browser/arrangement-engine.check.ts "CLP-014"
 
 ### CLP-015 Warp modes
 A clip plays in one of three warp modes. Repitch keeps the speed and the pitch together (CLP-009), and is what a clip with no mode plays. Beats and Tones keep the pitch whatever the speed. A clip with no warp and no transpose is copied as it is in any mode (CLP-001).
-Test: packages/core/src/audio/playback/render.test.ts "CLP-015"
+Test: packages/engine/src/playback/render.test.ts "CLP-015"
 
 ### CLP-016 Beats
 Beats plays slices of the recording, a sixteenth note long by default, each at its own speed from where the warp places its start: what a slice holds, such as a drum's attack, sounds as it was recorded. Slowed down, a slice stops where the next begins; sped up, it is cut. The next slice crosses in just before its start, so an attack on its start is at full level. Where a slice falls is worked out from its frame alone, so a jump, a loop and an export all play the same.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-016"
+Test: packages/engine/src/playback/render.test.ts "CLP-016"
 
 ### CLP-017 Tones
 Tones plays grains that overlap, each lined up on the sound of the one before it, so a held note keeps its pitch and its level. The lining up goes grain by grain from the clip's start or from where playback began: an export from its start is the same every time, and a play from the middle can differ from it in phase, not in pitch or time.
-Test: packages/core/src/audio/playback/render.test.ts "CLP-017"
+Test: packages/engine/src/playback/render.test.ts "CLP-017"
 
 ### CLP-018 Transients and tempo
 A recording's transients are where its notes and beats begin: frames where its level rises sharply, found to the sample. Its tempo is read from how its onsets repeat (spectral flux, a comb of tempos from 60 to 200 BPM), then the beat grid is fitted on its transients, to a hundredth of a BPM, with the first beat where it falls. A recording with no attack (silence, noise, a single hit) has no tempo. Measured on 2026-11-09 on 27 drum grooves of human drummers played to a click (Groove MIDI Dataset) and 3 loops: 24 read at their tempo, 6 at its double or half, none wrong; the transients alone found no tempo in 19 of them.
-Test: packages/core/src/audio/analysis/beat.test.ts (transients), apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-018"
+Test: packages/engine/src/analysis/beat.test.ts (transients), apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-018"
 
 ### CLP-019 Warp on import
 A file dropped in is warped in Beats when its tempo can be told, so it plays in time at the arrangement's. A short file taken as a well-cut loop of 1, 2, 4, 8 or 16 bars (one of them gives a tempo within 4 % of the estimate, or of its double or half) takes the tempo its length gives, with a warp marker at its start and one at its end. Any other gets a marker on the first beat of each bar, each moved onto the transient within an eighth of a beat of it, and the clip starts on its first beat. A file with no tempo plays as recorded. Warp files on import, in the Record settings and on by default, turns this off: every dropped file then plays as recorded, as a voice or an ambience would want.
 Deviation: the reference also warps files it reads as one-shots; here a single hit has no tempo and plays as recorded.
-Test: packages/core/src/audio/analysis/beat.test.ts (autoWarp); apps/daw/test/drop.test.ts "CLP-019"; apps/daw/test/browser/run.ts "CLP-019"
+Test: packages/engine/src/analysis/beat.test.ts (autoWarp); apps/daw/test/drop.test.ts "CLP-019"; apps/daw/test/browser/run.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
 An audio clip's waveform on its track is drawn on the GPU where WebGL 2 is, from its recording (its samples, or a streamed one's leaves), every column its exact lowest and highest sample, a row a channel on a tall track; a reversed clip, or without WebGL 2, is drawn from its peaks. It has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. Each column is joined to the next, and a column narrower than a peak takes the level between the two peaks around it, so a close zoom draws slopes, never steps. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.

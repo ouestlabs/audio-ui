@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { polylinePoints } from "@audio-ui/core/envelope";
+import { polylinePoints } from "@/registry-audio/bases/base/primitives/envelope/geometry";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

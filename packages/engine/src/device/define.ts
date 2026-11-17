@@ -1,4 +1,8 @@
-import { clamp, type ParameterScaleProp, resolveScale } from "@audio-ui/core";
+import { type ParameterScaleProp, resolveScale } from "./scale.ts";
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(value, max));
+
 import type { Tempo } from "../time/tempo.ts";
 
 /**
