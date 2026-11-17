@@ -497,10 +497,12 @@ export function getIconForLanguageExtension(
     case "shell":
       return <Icons.bash {...props} />;
     case "js":
-    case "jsx":
       return <Icons.javascript {...props} />;
-    case "ts":
+    // A file of JSX is a React component.
+    case "jsx":
     case "tsx":
+      return <Icons.reactColor {...props} />;
+    case "ts":
     case "typescript":
       return <Icons.ts {...props} />;
     default:
