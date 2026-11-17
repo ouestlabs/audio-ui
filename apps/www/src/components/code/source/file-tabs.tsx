@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { getIconForLanguageExtension } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
@@ -60,39 +61,57 @@ export function FileTabs({
   paths: readonly string[];
 }) {
   const [open, setOpen] = useState(0);
+  // The open file's code, as it shows: the header's copy button copies it.
+  const [code, setCode] = useState<string>();
   const pick = useCallback(
-    (path: string) => setOpen(Math.max(paths.indexOf(path), 0)),
+    (path: string) => {
+      setOpen(Math.max(paths.indexOf(path), 0));
+      setCode(undefined);
+    },
     [paths]
   );
   return (
     <div className="not-typeset mt-6 overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5">
-      <div
-        aria-label="Files"
-        // Its padding is the room a tab's focus ring needs inside the scroller.
-        className="no-scrollbar scroll-fade-x flex gap-1 overflow-x-auto p-1"
-        role="tablist"
-      >
-        {paths.map((path, index) => (
-          <FileTab
-            active={index === open}
-            key={path}
-            onPick={pick}
-            path={path}
+      {/* The tabs scroll when they outgrow the frame; the copy button stays at its end. */}
+      <div className="flex items-center">
+        <div
+          aria-label="Files"
+          // Its padding is the room a tab's focus ring needs inside the scroller.
+          className="no-scrollbar scroll-fade-x flex min-w-0 flex-1 gap-1 overflow-x-auto p-1"
+          role="tablist"
+        >
+          {paths.map((path, index) => (
+            <FileTab
+              active={index === open}
+              key={path}
+              onPick={pick}
+              path={path}
+            />
+          ))}
+        </div>
+        {code ? (
+          <CopyButton
+            className="static mr-1 shrink-0 bg-transparent"
+            event="copy_component_code"
+            properties={{ name, path: paths[open] }}
+            value={code}
           />
-        ))}
+        ) : null}
       </div>
       <div
         className="overflow-hidden rounded-[max(calc(var(--frame-radius)-3px),0px)] border border-site-border bg-site-code [&_pre]:max-h-96 [&_pre]:overflow-auto"
         data-slot="code"
         role="tabpanel"
       >
-        {/* The code scrolls in a fixed height, its copy button always there: no Expand to press. */}
+        {/* The code scrolls in a fixed height: no Expand to press. */}
         <DocsComponentSource
           collapsible={false}
           file={open}
           key={paths[open]}
           language={EXTENSION.exec(paths[open] ?? "")?.[1]}
           name={name}
+          onCode={setCode}
+          showCopyButton={false}
           styleName="base-nova"
         />
       </div>
