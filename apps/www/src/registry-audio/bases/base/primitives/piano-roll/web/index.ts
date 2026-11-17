@@ -120,8 +120,14 @@ function drawParts(
   };
 }
 
-const jsonAttribute = (value: string | null) =>
-  value ? JSON.parse(value) : undefined;
+/** An attribute that is not JSON, such as a list written as text, is left unset instead of throwing while the element upgrades. */
+const jsonAttribute = (value: string | null) => {
+  try {
+    return value ? JSON.parse(value) : undefined;
+  } catch {
+    // Not JSON: the option stays unset.
+  }
+};
 
 const numberAttribute = (value: string | null) =>
   value === null ? undefined : Number(value);
