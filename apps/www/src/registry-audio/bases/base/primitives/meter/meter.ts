@@ -361,6 +361,8 @@ interface PartProps {
 /** The props of a part inside a channel: the channel's index, which it inherits. */
 interface InChannel extends PartProps {
   index?: number;
+  /** The same index, inherited too: what the kernel tells the parts of two channels apart by. */
+  value?: number;
 }
 
 /** The meter's slots, by name, with the props and the public state of each. */

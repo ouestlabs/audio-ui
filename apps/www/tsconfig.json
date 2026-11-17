@@ -30,6 +30,9 @@
       "@audio-ui/primitives/pad": [
         "./src/registry-audio/bases/base/primitives/pad/pad.ts"
       ],
+      "@audio-ui/primitives/piano": [
+        "./src/registry-audio/bases/base/primitives/piano/piano.ts"
+      ],
       "@audio-ui/primitives/xypad": [
         "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
       ],

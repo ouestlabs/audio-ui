@@ -18,6 +18,7 @@ export const SHIPPED_PRIMITIVES = new Set([
   "knob",
   "meter",
   "pad",
+  "piano",
   "xypad",
 ]);
 

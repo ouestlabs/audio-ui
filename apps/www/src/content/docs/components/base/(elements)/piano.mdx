@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="piano-size-default-demo" />
 
-Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord reference. The registry component is written on the `Piano` primitive of `@audio-ui/primitives`, which installs with it and draws white and black keys for any MIDI range.
+Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord reference. The registry component is written on the piano primitive, which installs with it, and draws white and black keys for any MIDI range.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The piano's behavior is one description, `piano` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. A key sounds while it is pressed, by pointer or from the keyboard, and dragging across the keys glides from one to the next. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The piano's behavior is one file, the primitive, written on the UI SDK kernel and copied into your project. A key sounds while it is pressed, by pointer or from the keyboard, and dragging across the keys glides from one to the next. Each framework renders it with a thin adapter that you also own, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -48,19 +48,19 @@ The piano's behavior is one description, `piano` in `@audio-ui/primitives`, over
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<Install name="piano" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation) and the [envelope](/docs/components/base/envelope#installation) are built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with sizes and themed keys, is one command:
+
+<Install name="piano" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -74,46 +74,172 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/piano-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/piano/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/piano/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Three files in `components/audio-ui/piano/svelte/`: the label, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/piano/web.ts`. Import it once, and it registers the `audio-ui-piano` tags. It also imports `@audio-ui/core`.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The primitive
+
+The same two files for every framework: `piano.ts`, the piano's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="piano-react"
+  title="components/audio-ui/primitive.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="piano-react"
+  title="components/audio-ui/piano/piano.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="piano-react"
+  title="components/audio-ui/piano/react.tsx"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add @audio-ui/piano-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="piano-vue"
+  title="components/audio-ui/piano/vue.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+The label's component, the parts made from the primitive in `parts.ts`, and an `index.ts` that names them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="piano-svelte"
+  title="src/lib/components/audio-ui/piano/svelte/Label.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="piano-svelte"
+  title="src/lib/components/audio-ui/piano/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={4}
+  name="piano-svelte"
+  title="src/lib/components/audio-ui/piano/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-piano` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="piano-web"
+  title="components/audio-ui/piano/web.ts"
+/>
+
+Or let the CLI write it, with the primitive it renders:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the primitives, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 

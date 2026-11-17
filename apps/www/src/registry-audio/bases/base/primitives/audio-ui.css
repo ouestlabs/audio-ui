@@ -399,4 +399,89 @@
       outline: 4px solid var(--audio-ui-ring);
     }
   }
+
+  /* Piano */
+
+  [data-slot="piano"] {
+    /* A keyboard keeps its light and dark keys in either theme. */
+    --audio-ui-key-white: light-dark(oklch(1 0 0), oklch(0.87 0 0));
+    --audio-ui-key-black: oklch(0.2 0 0);
+    width: 20rem;
+    height: 6rem;
+
+    &[data-orientation="vertical"] {
+      width: 6rem;
+      height: 20rem;
+    }
+
+    &[data-disabled] {
+      opacity: 0.5;
+    }
+  }
+
+  [data-slot="piano-key"] {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 0.25rem;
+    font: inherit;
+    font-size: 0.625rem;
+    color: oklch(0.45 0 0);
+    cursor: pointer;
+    background: var(--audio-ui-key-white);
+    border: 1px solid var(--audio-ui-input);
+
+    &[data-orientation="horizontal"] {
+      top: 0;
+      height: 100%;
+    }
+
+    &[data-orientation="vertical"] {
+      left: 0;
+      justify-content: flex-end;
+      align-items: center;
+      width: 100%;
+      padding: 0 0.25rem 0 0;
+    }
+
+    &[data-color="black"] {
+      z-index: 1;
+      color: oklch(0.75 0 0);
+      background: var(--audio-ui-key-black);
+      border-color: var(--audio-ui-key-black);
+    }
+
+    /* A key sounding darkens, and is marked at its free end. */
+    &[data-active] {
+      background: oklch(from var(--audio-ui-key-white) calc(l - 0.15) c h);
+      box-shadow: inset 0 -3px var(--audio-ui-key-black);
+    }
+
+    &[data-orientation="vertical"][data-active] {
+      box-shadow: inset -3px 0 var(--audio-ui-key-black);
+    }
+
+    &[data-color="black"][data-active] {
+      background: oklch(0.45 0 0);
+      box-shadow: none;
+    }
+
+    /* Drawn inside the key, so a key beside it keeps its place on top. */
+    &:focus-visible {
+      outline: 3px solid var(--audio-ui-ring);
+      outline-offset: -3px;
+    }
+  }
+
+  /* On a keyboard layout, the black keys reach only part way across. */
+  [data-slot="piano"][data-layout="keyboard"]
+  [data-slot="piano-key"][data-color="black"] {
+    &[data-orientation="horizontal"] {
+      height: 60%;
+    }
+
+    &[data-orientation="vertical"] {
+      width: 60%;
+    }
+  }
 }

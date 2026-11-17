@@ -1,5 +1,9 @@
-import { pitchName } from "@audio-ui/core";
-import { type PianoState, piano } from "@audio-ui/primitives/piano";
+import {
+  type PianoState,
+  piano,
+  pitchName,
+  viewOf,
+} from "@audio-ui/primitives/piano";
 import { createParts, wrappedButton } from "@ui-sdk/web";
 
 const KEY = "audio-ui-piano-key";
@@ -66,7 +70,7 @@ function draw(
   }
 ) {
   const paint = () => {
-    syncKeys(el, (instance.get() as PianoState).view.pitches);
+    syncKeys(el, viewOf(instance.get() as PianoState).pitches);
     writeLabels(el);
   };
   paint();
