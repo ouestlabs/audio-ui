@@ -1,22 +1,23 @@
 /**
- * The site's sections: the Docs (what the reader learns first), the
- * components, with the primitives they install for each framework and the
- * packages they build on (engine and gl), and the icons, with theirs.
+ * The site's sections: the Docs (what the reader learns first, and what makes
+ * the sound: the guides, the hooks, the libraries, the engine and gl), the
+ * components, with the primitives they install for each framework, and the
+ * icons, with theirs.
  * The switcher at the top of the sidebar lists them. A section gathers top-level folders of the
  * content whatever their addresses, so a component page keeps its URL under
  * the Registry.
  */
 export const DOCS_SECTIONS = [
   {
-    description: "Get started, guides and agents",
-    folders: ["(root)", "guides"],
+    description: "Get started, guides, hooks, libraries and the engine",
+    folders: ["(root)", "guides", "hooks", "lib", "engine", "gl"],
     href: "/docs",
     id: "docs",
     label: "Docs",
   },
   {
-    description: "Components, devices, hooks and the packages under them",
-    folders: ["components", "(overview)", "hooks", "lib", "engine", "gl"],
+    description: "Elements, workstation and devices",
+    folders: ["components", "(overview)"],
     href: "/docs/components/base/knob",
     id: "registry",
     label: "Components",

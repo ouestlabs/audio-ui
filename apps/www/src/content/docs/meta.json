@@ -3,11 +3,11 @@
   "pages": [
     "(root)",
     "guides",
-    "components",
     "hooks",
     "lib",
     "engine",
     "gl",
+    "components",
     "icons"
   ]
 }
