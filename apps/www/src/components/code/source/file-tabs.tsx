@@ -23,10 +23,11 @@ function FileTab({
     <button
       aria-selected={active}
       className={cn(
-        "-mb-px flex h-9 shrink-0 items-center gap-1.5 border-site-border border-r px-3 text-xs transition-colors last:border-r-0",
+        // Its corners follow the frame's, less the frame's border, its padding and the list's.
+        "flex h-8 shrink-0 items-center gap-1.5 rounded-[max(calc(var(--frame-radius)-7px),0px)] border px-2.5 text-xs outline-none transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50",
         active
-          ? "bg-site-code text-site-foreground"
-          : "text-site-muted-foreground hover:text-site-foreground"
+          ? "border-site-border bg-site-code text-site-foreground"
+          : "border-transparent text-site-muted-foreground hover:text-site-foreground"
       )}
       onClick={pick}
       role="tab"
@@ -67,7 +68,8 @@ export function FileTabs({
     <div className="not-typeset mt-6 overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-site-muted/50 p-0.5">
       <div
         aria-label="Files"
-        className="no-scrollbar scroll-fade-x flex overflow-x-auto"
+        // Its padding is the room a tab's focus ring needs inside the scroller.
+        className="no-scrollbar scroll-fade-x flex gap-1 overflow-x-auto p-1"
         role="tablist"
       >
         {paths.map((path, index) => (
