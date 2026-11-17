@@ -27,4 +27,4 @@ watchEffect(() => {
 });
 ```
 
-Every primitive follows the same shape: `create<Name>Controller` from `@audio-ui/core/<name>` (`createKnobController`, `createFaderController`, `createXYPadController`, `createSequencerController`…).
+Every control of `@audio-ui/core` follows the same shape: `create<Name>Controller` from `@audio-ui/core/<name>` (`createKnobController`, `createFaderController`, `createXYPadController`, `createSequencerController`…).

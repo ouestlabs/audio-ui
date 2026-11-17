@@ -1,6 +1,6 @@
 ---
 name: core
-description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers behind every audio/ui primitive (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), the primitives for Vue, Svelte and the web from the audio/ui registry, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
+description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers, one per audio/ui control (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), the primitives for Vue, Svelte and the web from the audio/ui registry, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
 license: MIT
 metadata:
   author: audio/ui
@@ -9,7 +9,7 @@ metadata:
 
 # Audio controls without React
 
-`@audio-ui/core` holds the logic of every audio/ui primitive with no framework in it: value math, scales, pointer, wheel and keyboard handling, and live sources. A control outside React is one controller, a native range input for accessibility, and a few lines of drawing.
+`@audio-ui/core` holds the logic of every audio/ui control with no framework in it (the registry's primitives are written on the UI SDK, apart from it): value math, scales, pointer, wheel and keyboard handling, and live sources. A control outside React is one controller, a native range input for accessibility, and a few lines of drawing.
 
 ## When to Apply
 

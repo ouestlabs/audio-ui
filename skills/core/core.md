@@ -1,6 +1,6 @@
 # Without React: @audio-ui/core
 
-`@audio-ui/core` is the logic of every audio/ui control with no UI framework in it: value math, scales, pointer, wheel and keyboard handling, live sources. The primitives are adapters over it. Use it directly for Solid, Angular, Lit or the plain DOM, or for a control of your own.
+`@audio-ui/core` is the logic of every audio/ui control with no UI framework in it: value math, scales, pointer, wheel and keyboard handling, live sources. The registry's primitives are written on the UI SDK and do not depend on it. Use it directly for Solid, Angular, Lit or the plain DOM, or for a control of your own.
 
 ```bash
 npm install @audio-ui/core   # no dependencies
