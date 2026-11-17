@@ -38,11 +38,7 @@ Usage and API: [`clip-player`](/docs/lib/clip-player).
 
 ## The mixer's arithmetic
 
-<TypeTable title="Mixer">
-<TypeRow name={"panGains(pan)"} type={"[left, right]"}>The gains for a pan from -1 to 1: constant power on sine curves, 0 dB on both channels in the centre, +3 dB on the side it is turned to at either end. Each channel keeps its own gain, so nothing of one moves into the other.</TypeRow>
-<TypeRow name={"soloState(tracks, { inPlace? })"} type={"{ heard, sends }"}>Which tracks a solo lets through, and which sends. Soloed tracks are heard and the others silenced with their sends; the returns stay heard with `inPlace` (the default), and a soloed return is heard with what every track sends it.</TypeRow>
-<TypeRow name={"delayCompensation(tracks, returns)"} type={"Compensation"}>How many frames each path waits so all of them meet the main track on the same frame, from the latency each device chain declares, and the frames the whole mix comes out late.</TypeRow>
-</TypeTable>
+The pan law (`panGains`), what a solo lets through (`soloState`) and the delay that lines every path up (`delayCompensation`) are plain functions of the engine: [`@/lib/engine/playback`](/docs/engine/playback#the-mixer) has them, with an example.
 
 ## Playing an arrangement
 
