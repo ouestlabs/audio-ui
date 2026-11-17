@@ -46,8 +46,8 @@ const NAMESPACE = "@audio-ui";
 const HOMEPAGE = "https://www.audio-ui.dev";
 const DEFAULT_STYLE = "base-nova";
 
-// Only the `base` base ships audio items, and its catalog drives the manifests.
-const BASES = ALL_BASES.filter((base) => base.name === "base");
+// Only the `base` base ships audio items and drives the manifests: the others (`ui-sdk`) ship the `ui/` components their style is made of.
+const BASES = ALL_BASES;
 const MANIFEST_BASE = "base";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
@@ -63,6 +63,7 @@ const REGISTRY_FOLDERS = [
   "components",
   "lib",
   "primitives",
+  "ui",
 ];
 
 // A folder a registry file imports from, and where it lands in a project.
@@ -78,7 +79,7 @@ const INSTALL_FOLDERS: [folder: string, installed: string][] = [
 // system generates, and the base itself.
 const SOURCE_ROOTS = [
   `@/registry-audio/bases/__generated/base-(?:${STYLES.join("|")})/`,
-  "@/registry(?:-audio)?/bases/base/",
+  "@/registry(?:-audio)?/bases/(?:base|ui-sdk)/",
 ];
 
 const IMPORT_REWRITES = SOURCE_ROOTS.flatMap((root) =>

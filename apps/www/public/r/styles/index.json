@@ -34,5 +34,37 @@
   {
     "label": "Base Sera",
     "name": "base-sera"
+  },
+  {
+    "label": "Ui Sdk Vega",
+    "name": "ui-sdk-vega"
+  },
+  {
+    "label": "Ui Sdk Nova",
+    "name": "ui-sdk-nova"
+  },
+  {
+    "label": "Ui Sdk Maia",
+    "name": "ui-sdk-maia"
+  },
+  {
+    "label": "Ui Sdk Lyra",
+    "name": "ui-sdk-lyra"
+  },
+  {
+    "label": "Ui Sdk Mira",
+    "name": "ui-sdk-mira"
+  },
+  {
+    "label": "Ui Sdk Luma",
+    "name": "ui-sdk-luma"
+  },
+  {
+    "label": "Ui Sdk Rhea",
+    "name": "ui-sdk-rhea"
+  },
+  {
+    "label": "Ui Sdk Sera",
+    "name": "ui-sdk-sera"
   }
 ]
