@@ -48,8 +48,8 @@ export function CodeCollapsibleWrapper({
       />
       <CollapsibleContent
         className={cn(
-          // Closed, the code is cut in its panel; the frame around it stays whole.
-          "mt-6 h-full data-closed:[&_pre]:max-h-64 data-closed:[&_pre]:overflow-hidden [&>figure]:mt-0 [&>figure]:md:mx-0!"
+          // Closed, the code is cut in its panel; open, it scrolls inside a panel of at most 32rem. The frame around it stays whole.
+          "mt-6 h-full data-closed:[&_pre]:max-h-64 data-closed:[&_pre]:overflow-hidden data-open:[&_pre]:max-h-[32rem] data-open:[&_pre]:overflow-y-auto [&>figure]:mt-0 [&>figure]:md:mx-0!"
         )}
         hidden={false}
         keepMounted

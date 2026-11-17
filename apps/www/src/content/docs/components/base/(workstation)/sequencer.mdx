@@ -45,11 +45,45 @@ The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. No
 
 The styled component, with sizes and themed steps, is one command:
 
-<Install name="sequencer" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5" />
+</ForFrameworks>
 
-The rest of this section is the primitive alone, without the styling.
+<CodeTabs>
+
+<TabsList>
+  <ForFrameworks only="react">
+    <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
+  </ForFrameworks>
+  <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
+  <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
+</TabsList>
+
+<ForFrameworks only="react">
+
+<TabsContent value="cli">
+
+The styled component, with size variants and theme styles:
+
+```bash component
+npx shadcn@latest add @audio-ui/sequencer
+```
+
+Or the primitive alone, to style yourself:
+
+```bash component
+npx shadcn@latest add @audio-ui/sequencer-react
+```
+
+It writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` and installs the kernel's packages and what each file imports. The optional styles are one more command:
+
+```bash component
+npx shadcn@latest add @audio-ui/primitives-css
+```
+
+</TabsContent>
 
 </ForFrameworks>
+
+<TabsContent value="manual">
 
 ### 1. The kernel
 
@@ -135,12 +169,6 @@ Your framework's few parts, over the primitive. They import it by a relative pat
   title="components/audio-ui/sequencer/react.tsx"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add @audio-ui/sequencer-react
-```
-
 </TabsContent>
 
 <TabsContent value="vue">
@@ -151,12 +179,6 @@ npx shadcn@latest add @audio-ui/sequencer-react
   name="sequencer-vue"
   title="components/audio-ui/sequencer/vue.ts"
 />
-
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-vue.json
-```
 
 </TabsContent>
 
@@ -192,12 +214,6 @@ A component per part, and an `index.ts` that gathers them. Svelte keeps its file
   title="src/lib/components/audio-ui/sequencer/svelte/parts.ts"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-svelte.json
-```
-
 </TabsContent>
 
 <TabsContent value="web">
@@ -211,17 +227,9 @@ Import it once, and it registers the `audio-ui-sequencer` tags.
   title="components/audio-ui/sequencer/web.ts"
 />
 
-Or let the CLI write it, with the primitive it renders:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-web.json
-```
-
 </TabsContent>
 
 </FrameworkTabs>
-
-The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
 
 ### 4. The styles
 
@@ -233,11 +241,31 @@ Optional, and the same for every framework: the anatomy of the primitives, drawn
   title="src/audio-ui-primitives.css"
 />
 
-Import it once, or let the CLI write it:
+Import it once.
 
-```bash
-npx shadcn@latest add @audio-ui/primitives-css
-```
+<ForFrameworks only="react">
+
+### 5. The styled component
+
+Optional: size variants and theme styles over the primitive.
+
+<ComponentSource
+  styleName="base-nova"
+  name="sequencer"
+  title="components/audio-ui/sequencer.tsx"
+/>
+
+</ForFrameworks>
+
+</TabsContent>
+
+<TabsContent value="agent">
+
+<InstallAgent name="sequencer" />
+
+</TabsContent>
+
+</CodeTabs>
 
 ## Usage
 

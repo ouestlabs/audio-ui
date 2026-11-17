@@ -15,41 +15,23 @@ audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com)
 
 <ForFrameworks only="vue">
 
-A Vue 3 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The file lands in `src/components/audio-ui/`, whatever alias `components.json` names. Your bundler needs that alias to build, as for any import of yours: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
+A Vue 3 app. The files go in `src/components/audio-ui/`, and your bundler needs an alias for them to build, as for any import of yours: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
 
-In Nuxt 4, the CLI writes to `components/` at the project root, not under `app/`: import from there with Nuxt's root alias, `~~/components/audio-ui/knob/vue`.
+In Nuxt 4, put them in `components/` at the project root, not under `app/`, and import from there with Nuxt's root alias, `~~/components/audio-ui/knob/vue`.
 
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
 
-A Svelte 5 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The files land in `src/lib/components`. Import them through the alias of `src/lib`: `$lib` in SvelteKit before its removal, `#lib` in the latest SvelteKit (its docs say how to keep `$lib`), and in a Vite app without SvelteKit, an alias of your own: `resolve.alias` of `$lib` to `./src/lib`. Tailwind CSS is not needed.
+A Svelte 5 app. The files go in `src/lib/components/audio-ui/`. Import them through the alias of `src/lib`: `$lib` in SvelteKit before its removal, `#lib` in the latest SvelteKit (its docs say how to keep `$lib`), and in a Vite app without SvelteKit, an alias of your own: `resolve.alias` of `$lib` to `./src/lib`. Tailwind CSS is not needed.
 
 </ForFrameworks>
 
 <ForFrameworks only="web">
 
-A page, or an app, with a bundler such as Vite that resolves package imports. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The file lands in `src/components/audio-ui/`. It needs no Tailwind and no path alias.
+A page, or an app, with a bundler such as Vite that resolves package imports. The files go in `src/components/audio-ui/`. It needs no Tailwind and no path alias.
 
-With `"tsx": false` in `components.json`, the CLI writes the file as `web.js`; with `true`, as `web.ts`. Import the one you got.
-
-</ForFrameworks>
-
-<ForFrameworks only="vue svelte web">
-
-A minimal `components.json` is enough:
-
-```json
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-nova",
-  "tsx": true,
-  "tailwind": { "css": "src/style.css", "baseColor": "neutral", "cssVariables": true },
-  "aliases": { "components": "@/components", "utils": "@/lib/utils" }
-}
-```
-
-The shadcn-vue and shadcn-svelte CLIs install the same items, with their own prerequisites (an alias in `tsconfig.json`, and Tailwind CSS for shadcn-svelte).
+The primitive is TypeScript (`web.ts`): a bundler such as Vite compiles it.
 
 </ForFrameworks>
 
@@ -75,37 +57,19 @@ The same works for every item of the [Docs](/docs), including the `block-*` bloc
 
 <ForFrameworks only="vue">
 
-Copy the headless primitive from the address of its item, `<name>-vue.json`:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
-```
-
-It writes `components/audio-ui/knob/vue.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core`, `@ui-sdk/vue` and `vue`. Every primitive installs the same way.
+The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-vue.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`): write each entry of `files` to its path, and install `@ui-sdk/core`, `@ui-sdk/vue` and `vue`. For the knob, that is `components/audio-ui/knob/vue.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
 
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
 
-Copy the headless primitive from the address of its item, `<name>-svelte.json`:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
-```
-
-It writes a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, the primitive beside them (`knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
+The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-svelte.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json`): write each entry of `files` to its path, and install `@ui-sdk/core`, `@ui-sdk/svelte` and `svelte`. For the knob, that is a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, the primitive beside them (`knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
 
 </ForFrameworks>
 
 <ForFrameworks only="web">
 
-Copy the headless primitive from the address of its item, `<name>-web.json`:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
-```
-
-It writes `components/audio-ui/knob/web.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares, and installs what they import: `@ui-sdk/core` and `@ui-sdk/web`. Every primitive installs the same way.
+The shadcn CLI is for React, so copy the headless primitive by hand, from the address of its item, `<name>-web.json` (for the knob, `https://www.audio-ui.dev/r/styles/base-nova/knob-web.json`): write each entry of `files` to its path, and install `@ui-sdk/core` and `@ui-sdk/web`. For the knob, that is `components/audio-ui/knob/web.ts`, the primitive beside it (`knob/knob.ts`) and `primitive.ts`, which every primitive shares. Every primitive installs the same way.
 
 </ForFrameworks>
 
@@ -170,7 +134,7 @@ The page of each component has its parts, its options and an example in your fra
 A plain HTML page can run a primitive with no CLI, no bundler and no `node_modules`: the site serves each web adapter as a script, with its packages inside. Load the one you need, and write its tags:
 
 ```html title="index.html"
-<script type="module" src="https://www.audio-ui.dev/web/0.1.0/knob.js"></script>
+<script type="module" src="https://www.audio-ui.dev/web/0.1.1/knob.js"></script>
 
 <audio-ui-knob value="40">
   <audio-ui-knob-control>

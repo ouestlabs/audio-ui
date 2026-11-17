@@ -39,7 +39,7 @@ metadata:
 
 ## Workflow
 
-1. **Install.** The registry's primitive for the framework (`npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, the same command with `knob-svelte.json`, and `knob-web.json` for the web): every primitive, unstyled and ready to style, with the same parts as in React; see [core.md](./core.md). Write a binding over `@audio-ui/core` (no dependencies) only for a control the primitives do not cover: [core.md](./core.md) has the entries, a plain DOM knob, and Vue and Svelte bindings.
+1. **Install.** The registry's primitive for the framework (copied by hand from its item's address, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, and `knob-svelte.json` or `knob-web.json` beside it: the shadcn CLI is for React): every primitive, unstyled and ready to style, with the same parts as in React; see [core.md](./core.md). Write a binding over `@audio-ui/core` (no dependencies) only for a control the primitives do not cover: [core.md](./core.md) has the entries, a plain DOM knob, and Vue and Svelte bindings.
 2. **Create one controller per control**, once (`core-one-controller`), wire a hidden `<input type="range">` to it (`core-native-range-input`), and draw from `getSnapshot()` (`core-draw-from-snapshot`).
 3. **Handle the pointer the way the rules say** (`core-pointer-handler`) and call the removers on teardown (`core-cleanup`).
 4. **Look.** The `design` skill has the skins and `styles/dom.css` for the plain DOM; sound and live data come from the `web-audio` skill.
