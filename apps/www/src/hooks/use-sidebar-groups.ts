@@ -83,8 +83,8 @@ export function useGroupFolding() {
 }
 
 const EXCLUDED_FOLDERS = ["test"];
-/** The folders of a section open to any framework that only a React app uses: the hooks, the libraries the registry's React components build on, and the guides on them. */
-const REACT_FOLDERS: readonly string[] = ["guides", "hooks", "lib"];
+/** The folders of a section open to any framework that only a React app uses: the hooks, and the guides on them. A library is React's by its page (`REACT_LIBS`). */
+const REACT_FOLDERS: readonly string[] = ["guides", "hooks"];
 /** The pages of a section open to any framework that only a React app uses: the REST API serves the registry's components. */
 const REACT_PAGES = new Set(["/docs/api"]);
 const NO_FOLDERS: readonly string[] = [];

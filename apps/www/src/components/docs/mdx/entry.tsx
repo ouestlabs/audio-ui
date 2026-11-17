@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
+import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Command } from "@/components/docs/mdx/install";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFramework } from "@/hooks/use-framework";
 import {
   audioJsUrl,
@@ -11,6 +13,7 @@ import {
   importLine,
   moduleOf,
 } from "@/lib/docs/content/entries";
+import { MODULE_SETS } from "@/registry-audio/bases/modules";
 
 /** A line of TypeScript as the page's fences draw it. */
 function Code({ code }: { code: string }) {
@@ -134,6 +137,96 @@ function Exports({ exports }: { exports: EntryData["exports"] }) {
   );
 }
 
+const ITEM_PREFIX = /^(engine|gl)-/;
+
+/** Where an item the reader also copies is documented: a hook's or a lib's page, or a module's. */
+function itemUrl(name: string): string | undefined {
+  const module = ITEM_PREFIX.exec(name);
+  return module
+    ? `/docs/${module[1]}/${name.slice(module[0].length)}`
+    : entryUrl(name);
+}
+
+interface ItemInstallProps {
+  /** The npm packages its files import. */
+  dependencies: readonly string[];
+  /** Its files, where they land in a project: `lib/engine/time/index.ts`. */
+  files: readonly string[];
+  /** The registry item: `engine-time`. */
+  name: string;
+  /** The other items of ours it needs, copied the same way. */
+  needs: readonly string[];
+}
+
+/**
+ * How an item installs: one command with the shadcn CLI in React; in the
+ * other frameworks, which have no CLI, what to copy and paste: the packages,
+ * then each file at its path, then the items it needs.
+ */
+function ItemInstall({ dependencies, files, name, needs }: ItemInstallProps) {
+  const [framework] = useFramework();
+  if (!framework || framework === "react") {
+    return <Command code={`npx shadcn@latest add @audio-ui/${name}`} />;
+  }
+  const own = needs.filter((each) => !each.includes("/"));
+  return (
+    <>
+      {dependencies.length > 0 ? (
+        <Command code={`npm install ${dependencies.join(" ")}`} />
+      ) : null}
+      {files.length === 1 ? (
+        <DocsComponentSource
+          className="not-typeset"
+          name={name}
+          styleName="base-nova"
+          title={files[0]}
+        />
+      ) : (
+        <Tabs className="not-typeset" defaultValue={files[0]}>
+          <TabsList className="max-w-full overflow-x-auto">
+            {files.map((file) => (
+              <TabsTrigger key={file} value={file}>
+                {file.slice(file.lastIndexOf("/") + 1)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {files.map((file, index) => (
+            <TabsContent key={file} value={file}>
+              <DocsComponentSource
+                file={index}
+                name={name}
+                styleName="base-nova"
+                title={file}
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
+      )}
+      {own.length > 0 ? (
+        <p>
+          It needs{" "}
+          {own.map((each, index) => {
+            const url = itemUrl(each);
+            return (
+              <span key={each}>
+                {index > 0 ? ", " : null}
+                {url ? (
+                  <Link to={url}>
+                    <code>{each}</code>
+                  </Link>
+                ) : (
+                  <code>{each}</code>
+                )}
+              </span>
+            );
+          })}
+          : copy them the same way.
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 /**
  * The head of a hook's or a lib's page, read from the registry and its
  * source: how it installs and is imported, what it is made of and part of,
@@ -142,9 +235,17 @@ function Exports({ exports }: { exports: EntryData["exports"] }) {
  */
 export function Entry({ name }: { name: string }) {
   const entry = entryOf(name);
+  // What uses it is the registry's React components and hooks: a row React's alone.
+  const [framework] = useFramework();
+  const react = !framework || framework === "react";
   return (
     <>
-      <Command code={`npx shadcn@latest add @audio-ui/${entry.name}`} />
+      <ItemInstall
+        dependencies={entry.dependencies}
+        files={entry.files}
+        name={entry.name}
+        needs={entry.registryDependencies}
+      />
       <Code code={importLine(entry)} />
       <Facts
         rows={[
@@ -154,11 +255,32 @@ export function Entry({ name }: { name: string }) {
             <Items key="deps" names={entry.registryDependencies} />,
           ],
           ["npm", <Items key="npm" names={entry.dependencies} />],
-          ["Used by", <Items key="used" names={entry.usedBy} />],
+          ...(react
+            ? ([["Used by", <Items key="used" names={entry.usedBy} />]] as [
+                string,
+                React.ReactNode,
+              ][])
+            : []),
         ]}
       />
       <Exports exports={entry.exports} />
     </>
+  );
+}
+
+const MODULE_FROM = /^@\/lib\/(engine|gl)\/([a-z-]+)$/;
+
+/** The install of a module of the engine or of gl, from the registry's list of them. */
+function ModuleInstall({ from }: { from: string }) {
+  const [, set = "engine", module = ""] = MODULE_FROM.exec(from) ?? [];
+  const spec = MODULE_SETS[set as keyof typeof MODULE_SETS][module];
+  return (
+    <ItemInstall
+      dependencies={spec?.dependencies ?? []}
+      files={(spec?.files ?? []).map((file) => `lib/${set}/${module}/${file}`)}
+      name={`${set}-${module}`}
+      needs={(spec?.modules ?? []).map((each) => `${set}-${each}`)}
+    />
   );
 }
 
@@ -175,7 +297,7 @@ export function Module({ from }: { from: string }) {
   const usedBy = framework && framework !== "react" ? [] : packageModule.usedBy;
   return (
     <>
-      <Command code={`npx shadcn@latest add ${packageModule.package}`} />
+      <ModuleInstall from={from} />
       <Code code={importLine(packageModule)} />
       <Facts
         rows={[
