@@ -38,8 +38,8 @@ test("a page read for a framework goes back to its framework address", () => {
   );
   expect(frameworkAddressOf("/docs/components/base/lcd", "vue")).toBeNull();
   expect(frameworkAddressOf("/docs", "web")).toBe("/docs/web-components");
-  expect(frameworkAddressOf("/docs/registry", "web")).toBe(
-    "/docs/web-components/registry"
+  expect(frameworkAddressOf("/docs/installation", "web")).toBe(
+    "/docs/web-components/installation"
   );
   expect(frameworkAddressOf("/docs/components/base/lcd", "react")).toBe(
     "/docs/react/components/base/lcd"

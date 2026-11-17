@@ -3,12 +3,11 @@
   "pages": [
     "(root)",
     "guides",
-    "engine",
-    "gl",
-    "(registry)",
-    "components",
     "hooks",
     "lib",
+    "engine",
+    "gl",
+    "components",
     "icons"
   ]
 }

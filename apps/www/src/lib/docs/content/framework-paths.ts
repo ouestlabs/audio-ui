@@ -5,14 +5,21 @@
  * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`).
  */
 
-/** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
+/**
+ * The libraries that need React, by what they import or install: the others
+ * are plain TypeScript, shown to every framework. `test/react-libs.test.ts`
+ * keeps the list in step with the registry.
+ */
+export const REACT_LIBS = ["arrangement-engine", "clip-edits", "dawproject"];
+
+/** The addresses only a React app uses: the styled catalog, its guides, its hooks, the libraries that need React and its API. The pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
 export const REACT_ADDRESSES = [
   "/docs/api",
   "/docs/components",
   "/docs/devices",
   "/docs/guides",
   "/docs/hooks",
-  "/docs/lib",
+  ...REACT_LIBS.map((name) => `/docs/lib/${name}`),
   "/docs/styling",
 ];
 
