@@ -87,10 +87,6 @@ const REACT_FOLDERS: readonly string[] = ["guides"];
 /** The pages of a section open to any framework that only a React app uses: the REST API serves the registry's components. */
 const REACT_PAGES = new Set(["/docs/api"]);
 const NO_FOLDERS: readonly string[] = [];
-/** The landing page of each section but the Docs': named Overview in the sidebar, as the section's row names it already. */
-const LANDING_PAGES = new Set<string>(
-  DOCS_SECTIONS.filter((each) => each.id !== "docs").map((each) => each.href)
-);
 
 type PageTree = ReturnType<typeof source.getPageTree>;
 type PageTreeNode = PageTree["children"][number];
@@ -223,11 +219,6 @@ export function useSidebarGroups(tree: PageTree) {
                 (page) =>
                   !(otherThanReact && REACT_PAGES.has(page.url)) &&
                   shownTo(page.url, framework ?? "react")
-              )
-              .map((page) =>
-                LANDING_PAGES.has(page.url)
-                  ? { ...page, name: "Overview" }
-                  : page
               ),
           }))
           .filter((part) => part.pages.length > 0),
