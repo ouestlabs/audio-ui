@@ -9,7 +9,6 @@ import {
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -68,34 +67,29 @@ export function CodeBlockCommand({
           >
             <SelectTrigger aria-label="Package manager">
               <SelectValue>
-                {(value: PackageManager) => {
-                  const Icon = Icons[value];
+                {({ label, value }) => {
+                  const Icon = Icons[value as PackageManager];
                   return (
                     <span className="flex items-center gap-2">
                       <Icon aria-hidden="true" className="size-3.5 shrink-0" />
-                      {value}
+                      {label}
                     </span>
                   );
                 }}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                {(Object.keys(commands) as PackageManager[]).map((key) => {
-                  const Icon = Icons[key];
-                  return (
-                    <SelectItem key={key} value={key}>
-                      <span className="flex items-center gap-2">
-                        <Icon
-                          aria-hidden="true"
-                          className="size-3.5 shrink-0"
-                        />
-                        {key}
-                      </span>
-                    </SelectItem>
-                  );
-                })}
-              </SelectGroup>
+              {(Object.keys(commands) as PackageManager[]).map((key) => {
+                const Icon = Icons[key];
+                return (
+                  <SelectItem key={key} label={key} value={key}>
+                    <span className="flex items-center gap-2">
+                      <Icon aria-hidden="true" className="size-3.5 shrink-0" />
+                      {key}
+                    </span>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

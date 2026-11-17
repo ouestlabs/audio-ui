@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -86,14 +85,12 @@ export function QuickStart() {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectGroup>
-              {FRAMEWORKS.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  <LogoOf id={item.id} />
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
+            {FRAMEWORKS.map((item) => (
+              <SelectItem key={item.id} label={item.label} value={item.id}>
+                <LogoOf id={item.id} />
+                {item.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </PromptBox>

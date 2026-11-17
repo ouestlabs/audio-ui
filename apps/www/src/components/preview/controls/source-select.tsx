@@ -2,11 +2,10 @@ import { useCallback, useSyncExternalStore } from "react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/base/ui/select";
+} from "@/components/ui/select";
 import {
   silentSource,
   useAudioSession,
@@ -59,17 +58,15 @@ export function SourceSelect() {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          {ITEMS.map((item) => (
-            <SelectItem
-              key={item.value}
-              title={DEMO_SOURCES[item.value].about}
-              value={item.value}
-            >
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {ITEMS.map((item) => (
+          <SelectItem
+            key={item.value}
+            title={DEMO_SOURCES[item.value].about}
+            value={item.value}
+          >
+            {item.label}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

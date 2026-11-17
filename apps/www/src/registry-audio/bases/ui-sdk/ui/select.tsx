@@ -18,10 +18,7 @@ function SelectGroup({
   ...props
 }: ComponentProps<typeof SelectGroupPrimitive>) {
   return (
-    <SelectGroupPrimitive
-      className={cn("cn-select-group", className)}
-      {...props}
-    />
+    <SelectGroupPrimitive className={cn("scroll-my-1", className)} {...props} />
   );
 }
 
@@ -82,7 +79,7 @@ function SelectContent({
       align={align}
       alignItemWithTrigger={alignItemWithTrigger}
       className={cn(
-        "cn-select-content cn-select-content-logical cn-menu-translucent relative isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none",
+        "cn-select-content cn-select-content-logical cn-menu-translucent relative p-1 isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none",
         className
       )}
       data-align-trigger={alignItemWithTrigger}
