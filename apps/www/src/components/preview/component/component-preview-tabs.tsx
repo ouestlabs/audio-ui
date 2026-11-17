@@ -18,6 +18,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { getRegistryItemMetadata } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
@@ -51,17 +52,13 @@ export function ComponentPreviewTabs({
   /** The registry name of what is shown. */
   name: string;
   /** The code, given where to report it once loaded: the panel's copy button copies it, open or closed. */
-  source: (onCode: (code: string, path?: string) => void) => React.ReactNode;
+  source: (onCode: (code: string) => void) => React.ReactNode;
 }) {
   const previewRef = React.useRef<HTMLDivElement>(null);
-  const [file, setFile] = React.useState<{ code?: string; path?: string }>({});
-  const onCode = React.useCallback(
-    (content: string, path?: string) => setFile({ code: content, path }),
-    []
-  );
-  const { code } = file;
-  // The file as the registry names it (`knob-demo.js`), the item's name until it is read.
-  const fileName = file.path?.split("/").at(-1) ?? `${name}.tsx`;
+  const [code, setCode] = React.useState<string>();
+  // The file as the registry names it (`knob-demo.js`), known before anything loads: the bar never changes once drawn.
+  const fileName =
+    getRegistryItemMetadata(name)?.files?.[0]?.path?.split("/").at(-1) ?? name;
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
   // elements, pointer listeners, etc.). Defer mounting each one until it's
@@ -135,7 +132,7 @@ export function ComponentPreviewTabs({
               className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
               keepMounted
             >
-              {hasBeenVisible ? source(onCode) : null}
+              {hasBeenVisible ? source(setCode) : null}
             </CollapsibleContent>
           </Collapsible>
         )}

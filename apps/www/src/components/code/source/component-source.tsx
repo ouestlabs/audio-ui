@@ -21,8 +21,7 @@ const DEFAULT_STYLE_NAME = "base-nova";
 const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
   "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";
 
-/** Each file read, with the path the registry gives it (`knob-demo.js`). */
-const clientCodeCache = new Map<string, { content: string; path?: string }>();
+const clientCodeCache = new Map<string, string>();
 
 export interface ComponentSourceProps {
   className?: string;
@@ -35,8 +34,8 @@ export interface ComponentSourceProps {
   language?: string;
   maxLines?: number;
   name?: string;
-  /** Called with the code shown, once it is loaded, and the file's path in the registry when it was read from it: for a bar drawn outside it. */
-  onCode?: (code: string, path?: string) => void;
+  /** Called with the code shown, once it is loaded: for a bar drawn outside it. */
+  onCode?: (code: string) => void;
   showCopyButton?: boolean;
   src?: string;
   styleName?: string;
@@ -63,7 +62,6 @@ export function ComponentSource({
 
   // The code to show, once it is transformed for the style: nothing shows before.
   const [code, setCode] = React.useState<string | undefined>();
-  const [path, setPath] = React.useState<string | undefined>();
   const [isLoading, setIsLoading] = React.useState(!initialCode);
 
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -79,7 +77,6 @@ export function ComponentSource({
 
       setIsLoading(true);
       let currentCode = initialCode;
-      let currentPath: string | undefined;
 
       if (name) {
         if (styleName.includes("undefined")) {
@@ -88,10 +85,8 @@ export function ComponentSource({
 
         const cacheKey = `${getRegistryDeploymentId()}:${styleName}:${name}:${file}`;
 
-        const cached = clientCodeCache.get(cacheKey);
-        if (cached) {
-          currentCode = cached.content;
-          currentPath = cached.path;
+        if (clientCodeCache.has(cacheKey)) {
+          currentCode = clientCodeCache.get(cacheKey);
         } else {
           try {
             const url = getRegistryJsonUrl(styleName, name);
@@ -101,15 +96,11 @@ export function ComponentSource({
 
             if (res.ok) {
               const data = (await res.json()) as {
-                files?: { content?: string; path?: string }[];
+                files?: { content?: string }[];
               };
               currentCode = data.files?.[file]?.content;
-              currentPath = data.files?.[file]?.path;
               if (currentCode) {
-                clientCodeCache.set(cacheKey, {
-                  content: currentCode,
-                  path: currentPath,
-                });
+                clientCodeCache.set(cacheKey, currentCode);
               }
             }
           } catch (error) {
@@ -153,7 +144,6 @@ export function ComponentSource({
         }
 
         setCode(currentCode);
-        setPath(currentPath);
       }
       setIsLoading(false);
     }
@@ -168,9 +158,9 @@ export function ComponentSource({
 
   React.useEffect(() => {
     if (code) {
-      onCode?.(code, path);
+      onCode?.(code);
     }
-  }, [code, onCode, path]);
+  }, [code, onCode]);
 
   if (isLoading) {
     // The room the code takes, with nothing moving in it.
