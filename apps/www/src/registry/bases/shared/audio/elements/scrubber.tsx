@@ -115,9 +115,8 @@ function Scrubber({
           getAriaValueText={formatClock}
         >
           <TimelinePrimitive.Playhead
-            className="cn-scrubber-fill pointer-events-none absolute inset-y-0"
+            className="cn-scrubber-fill pointer-events-none absolute inset-y-0 left-0!"
             style={{
-              left: 0,
               width: `calc(var(--timeline-unit) * var(--timeline-offset) - ${THUMB_SIZE} * var(--timeline-offset) / ${duration} + ${THUMB_SIZE} / 2)`,
             }}
           />
@@ -125,7 +124,7 @@ function Scrubber({
             className="cn-scrubber-thumb pointer-events-none absolute top-1/2 -translate-y-1/2"
             style={{
               height: THUMB_SIZE,
-              left: `calc(var(--timeline-unit) * var(--timeline-offset) - ${THUMB_SIZE} * var(--timeline-offset) / ${duration})`,
+              marginLeft: `calc(${THUMB_SIZE} * var(--timeline-offset) / ${duration} * -1)`,
               width: THUMB_SIZE,
             }}
           />
