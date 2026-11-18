@@ -27,7 +27,7 @@ ${steps([
   svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The files go in src/lib/components/audio-ui: import them through the alias of src/lib ($lib, or #lib in the latest SvelteKit; outside SvelteKit, add the alias to the bundler's config): create what is missing. Tailwind CSS is not needed.
 
 ${steps([
-  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json for the knob, <primitive>-svelte.json for the others. ${RELEASE_AGE} ${BY_HAND}`,
+  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/ui-sdk-nova/knob-svelte.json for the knob, <primitive>-svelte.json for the others. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
@@ -35,7 +35,7 @@ ${steps([
   vue: `Set up audio/ui in this Vue project. It needs Vue 3. The files go in src/components/audio-ui, and the bundler needs the @ alias to import them: create what is missing. Tailwind CSS is not needed.
 
 ${steps([
-  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json for the knob, <primitive>-vue.json for the others. ${RELEASE_AGE} ${BY_HAND}`,
+  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/ui-sdk-nova/knob-vue.json for the knob, <primitive>-vue.json for the others. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
@@ -43,7 +43,7 @@ ${steps([
   web: `Set up audio/ui in this project, with no framework: plain HTML and a module script. No Tailwind CSS.
 
 ${steps([
-  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/base-nova/knob-web.json for the knob, <primitive>-web.json for the others. Import the file once, and it registers the audio-ui-knob tags. ${RELEASE_AGE} ${BY_HAND}`,
+  `The shadcn CLI is for React, so do it by hand. The address of its item is https://www.audio-ui.dev/r/styles/ui-sdk-nova/knob-web.json for the knob, <primitive>-web.json for the others. Import the file once, and it registers the audio-ui-knob tags. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,

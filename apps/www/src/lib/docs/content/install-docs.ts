@@ -6,6 +6,8 @@
  */
 
 export interface InstallProps {
+  /** The packages the Base UI base needs, when they are not `packages`: a component whose files name the behavior library. @default packages */
+  basePackages?: string;
   /** `"device"` for a page of a device: its state, its panel and its engine install together. */
   kind?: "device";
   /** The registry item, `npx shadcn@latest add @audio-ui/<name>`. */
@@ -53,7 +55,10 @@ const REACT = "@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5";
 const REACT_AND_CORE = REACT;
 
 /** What the two tabs hold, as data: the site draws it, and the markdown pages print it. */
-export function installPlan(props: InstallProps): InstallPlan {
+export function installPlan(
+  props: InstallProps,
+  base: "base" | "ui-sdk" = "ui-sdk"
+): InstallPlan {
   const { name } = props;
   const add = (items: string) => `npx shadcn@latest add ${items}`;
   if (props.kind === "device") {
@@ -102,7 +107,10 @@ export function installPlan(props: InstallProps): InstallPlan {
     };
   }
   // A component built on shadcn/ui alone, `packages=""`, has no package to install first.
-  const packages = props.packages ?? REACT;
+  const packages =
+    (base === "base" ? props.basePackages : undefined) ??
+    props.packages ??
+    REACT;
   return {
     agent: installAgent(name),
     cli: [{ code: add(`@audio-ui/${name}`), type: "command" }],
@@ -204,6 +212,7 @@ export function parseInstallProps(attrs: string): InstallProps | null {
   return {
     kind: found.kind === "device" ? "device" : undefined,
     name: found.name,
+    basePackages: found.basePackages,
     packages: found.packages,
     source: found.source,
     title: found.title,

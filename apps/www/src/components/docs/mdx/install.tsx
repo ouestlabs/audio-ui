@@ -6,6 +6,7 @@ import { CopyButton } from "@/components/code/copy/copy-button";
 import { FileStack } from "@/components/code/source/file-stack";
 import { Icons } from "@/components/site/icons";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDocsRegistryOptions } from "@/hooks/use-docs-registry-options";
 import { packageManagerCommands } from "@/lib/code/highlight-code";
 import {
   type InstallPart,
@@ -117,7 +118,11 @@ export function Install({
   TabsContent,
   ...props
 }: InstallProps & InstallParts) {
-  const plan = installPlan(props);
+  const { styleName } = useDocsRegistryOptions();
+  const plan = installPlan(
+    props,
+    styleName.startsWith("base-") ? "base" : "ui-sdk"
+  );
   return (
     <CodeTabs>
       <TabsList>
