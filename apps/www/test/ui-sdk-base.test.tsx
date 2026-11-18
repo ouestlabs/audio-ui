@@ -37,6 +37,17 @@ const { Tabs, TabsContent, TabsList, TabsTrigger } = await import(
   "@/registry/bases/ui-sdk/ui/tabs"
 );
 const { Toggle } = await import("@/registry/bases/ui-sdk/ui/toggle");
+const { Avatar, AvatarFallback } = await import(
+  "@/registry/bases/ui-sdk/ui/avatar"
+);
+const { Checkbox } = await import("@/registry/bases/ui-sdk/ui/checkbox");
+const { Progress, ProgressLabel, ProgressValue } = await import(
+  "@/registry/bases/ui-sdk/ui/progress"
+);
+const { RadioGroup, RadioGroupItem } = await import(
+  "@/registry/bases/ui-sdk/ui/radio-group"
+);
+const { ScrollArea } = await import("@/registry/bases/ui-sdk/ui/scroll-area");
 const { Accordion, AccordionContent, AccordionItem, AccordionTrigger } =
   await import("@/registry/bases/ui-sdk/ui/accordion");
 const { Collapsible, CollapsibleContent, CollapsibleTrigger } = await import(
@@ -303,5 +314,53 @@ describe("the sections", () => {
     });
     await settled();
     expect(files.getAttribute("aria-expanded")).toBe("true");
+  });
+});
+
+describe("the choices and the readouts", () => {
+  test("a checkbox toggles, a radio group chooses one value, a progress reads its value", async () => {
+    render(
+      <>
+        <Checkbox aria-label="Loop" />
+        <RadioGroup aria-label="Speed" defaultValue="slow">
+          <RadioGroupItem aria-label="Slow" value="slow" />
+          <RadioGroupItem aria-label="Fast" value="fast" />
+        </RadioGroup>
+        <Progress value={40}>
+          <ProgressLabel>Export</ProgressLabel>
+          <ProgressValue />
+        </Progress>
+        <Avatar>
+          <AvatarFallback>LL</AvatarFallback>
+        </Avatar>
+        <ScrollArea>
+          <p>Long content</p>
+        </ScrollArea>
+      </>
+    );
+    await settled();
+    const loop = screen.getByRole("checkbox", { name: "Loop" });
+    expect(loop.getAttribute("aria-checked")).toBe("false");
+    act(() => {
+      fireEvent.click(loop);
+    });
+    await settled();
+    expect(loop.getAttribute("aria-checked")).toBe("true");
+
+    const fast = screen.getByRole("radio", { name: "Fast" });
+    act(() => {
+      fireEvent.click(fast);
+    });
+    await settled();
+    expect(fast.getAttribute("aria-checked")).toBe("true");
+    expect(
+      screen.getByRole("radio", { name: "Slow" }).getAttribute("aria-checked")
+    ).toBe("false");
+
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe(
+      "40"
+    );
+    expect(screen.getByText("LL")).toBeTruthy();
+    expect(screen.getByText("Long content")).toBeTruthy();
   });
 });
