@@ -37,6 +37,11 @@ const { Tabs, TabsContent, TabsList, TabsTrigger } = await import(
   "@/registry/bases/ui-sdk/ui/tabs"
 );
 const { Toggle } = await import("@/registry/bases/ui-sdk/ui/toggle");
+const { Accordion, AccordionContent, AccordionItem, AccordionTrigger } =
+  await import("@/registry/bases/ui-sdk/ui/accordion");
+const { Collapsible, CollapsibleContent, CollapsibleTrigger } = await import(
+  "@/registry/bases/ui-sdk/ui/collapsible"
+);
 
 // What ui-sdk expects of a DOM, and happy-dom leaves out.
 HTMLElement.prototype.showPopover = () => undefined;
@@ -257,5 +262,46 @@ describe("an agent", () => {
     await settled();
     expect(screen.getByLabelText<HTMLInputElement>("Name").value).toBe("Atlas");
     expect(screen.getByLabelText("speed").textContent).toBe("fast");
+  });
+});
+
+describe("the sections", () => {
+  test("an accordion opens one item at a time and a collapsible toggles its panel", async () => {
+    render(
+      <>
+        <Accordion defaultValue={["a"]}>
+          <AccordionItem value="a">
+            <AccordionTrigger>First</AccordionTrigger>
+            <AccordionContent>One</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="b">
+            <AccordionTrigger>Second</AccordionTrigger>
+            <AccordionContent>Two</AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        <Collapsible>
+          <CollapsibleTrigger>Files</CollapsibleTrigger>
+          <CollapsibleContent>Listing</CollapsibleContent>
+        </Collapsible>
+      </>
+    );
+    await settled();
+    const first = screen.getByRole("button", { name: "First" });
+    const second = screen.getByRole("button", { name: "Second" });
+    expect(first.getAttribute("aria-expanded")).toBe("true");
+    act(() => {
+      fireEvent.click(second);
+    });
+    await settled();
+    expect(second.getAttribute("aria-expanded")).toBe("true");
+    expect(first.getAttribute("aria-expanded")).toBe("false");
+
+    const files = screen.getByRole("button", { name: "Files" });
+    expect(files.getAttribute("aria-expanded")).toBe("false");
+    act(() => {
+      fireEvent.click(files);
+    });
+    await settled();
+    expect(files.getAttribute("aria-expanded")).toBe("true");
   });
 });

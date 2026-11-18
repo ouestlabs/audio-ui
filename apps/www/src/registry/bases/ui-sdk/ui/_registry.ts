@@ -150,6 +150,11 @@ export const ui: Registry["items"] = [
     "A horizontal or vertical line that divides groups of content."
   ),
   ui_(
+    "switch",
+    "Switch",
+    "Turns a setting on or off, in a default or a small size."
+  ),
+  ui_(
     "tabs",
     "Tabs",
     "Switches between related panels, one tab selected at a time, in a default or a line variant.",

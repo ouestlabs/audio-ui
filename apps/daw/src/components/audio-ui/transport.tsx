@@ -5,11 +5,7 @@ import {
   RecordIcon,
   StopIcon,
 } from "@audio-ui/icons/react";
-import { Toolbar } from "@base-ui/react/toolbar";
-import { CaretDownIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { BpmControl } from "@/components/audio-ui/bpm-control";
-import type { Source } from "@/components/audio-ui/primitive";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
@@ -34,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Toolbar, ToolbarButton, ToolbarGroup } from "@/components/ui/toolbar";
 import {
   barsBeatsWith,
   gridLabel,
@@ -46,7 +43,10 @@ import {
   secondsPerQuarter,
   type Tempo,
 } from "@/lib/engine/time";
+import { BpmControl } from "@/components/audio-ui/bpm-control";
 import { cn } from "@/lib/utils";
+import type { Source } from "@/components/audio-ui/primitive";
+import { CaretDownIcon } from "@phosphor-icons/react";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 
@@ -242,13 +242,14 @@ function RecordMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Toolbar.Button
+          <ToolbarButton
             aria-label="Record settings"
             render={<Button size="icon" variant="outline" />}
           />
         }
       >
-        <CaretDownIcon />
+        <CaretDownIcon
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-auto min-w-40">
         {onCountInChange ? (
@@ -315,7 +316,7 @@ function RecordControls({
   }
   return (
     <>
-      <Toolbar.Button
+      <ToolbarButton
         aria-label="Record"
         aria-pressed={recording}
         onClick={toggle}
@@ -329,7 +330,7 @@ function RecordControls({
         title="Record (F9)"
       >
         <RecordIcon weight="fill" />
-      </Toolbar.Button>
+      </ToolbarButton>
       {onCountInChange || onPunchChange || settings ? (
         <RecordMenu
           countIn={countIn}
@@ -382,14 +383,15 @@ function MetronomeMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Toolbar.Button
+          <ToolbarButton
             aria-label="Metronome settings"
             className="hidden @lg/transport:flex"
             render={<Button size="icon" variant="outline" />}
           />
         }
       >
-        <CaretDownIcon />
+        <CaretDownIcon
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-48">
         {sounds && onSoundChange ? (
@@ -475,7 +477,7 @@ function TransportTempo({
   // Wide, the tempo sits in the bar. Narrow, only the BPM shows, and a click opens the full setting.
   return (
     <>
-      <Toolbar.Group
+      <ToolbarGroup
         className="hidden @lg/transport:flex"
         render={<ButtonGroup className="shrink-0" />}
       >
@@ -484,7 +486,7 @@ function TransportTempo({
           <SelectTrigger
             aria-label="Time signature"
             className="w-20"
-            render={<Toolbar.Button />}
+            render={<ToolbarButton />}
           >
             <SelectValue />
           </SelectTrigger>
@@ -498,7 +500,7 @@ function TransportTempo({
             </SelectGroup>
           </SelectContent>
         </Select>
-      </Toolbar.Group>
+      </ToolbarGroup>
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
@@ -688,7 +690,7 @@ function Transport({
   const hasClusterTwo = Boolean(onLoopingChange || onMetronomeChange);
 
   return (
-    <Toolbar.Root
+    <Toolbar
       aria-label="Transport"
       className={cn(
         "@container/transport flex w-full min-w-0 flex-wrap items-center gap-2",
@@ -696,21 +698,21 @@ function Transport({
       )}
       data-slot="transport"
     >
-      <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
-        <Toolbar.Button
+      <ToolbarGroup render={<ButtonGroup className="shrink-0" />}>
+        <ToolbarButton
           aria-label={playing ? "Pause" : "Play"}
           onClick={onPlayPause}
           render={<Button size="icon" />}
         >
           {playing ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
-        </Toolbar.Button>
-        <Toolbar.Button
+        </ToolbarButton>
+        <ToolbarButton
           aria-label="Stop"
           onClick={onStop}
           render={<Button size="icon" variant="outline" />}
         >
           <StopIcon weight="fill" />
-        </Toolbar.Button>
+        </ToolbarButton>
         <RecordControls
           countIn={countIn}
           onCountInChange={onCountInChange}
@@ -727,11 +729,11 @@ function Transport({
             tempo={tempo}
           />
         </ButtonGroupText>
-      </Toolbar.Group>
+      </ToolbarGroup>
       {hasClusterTwo ? (
-        <Toolbar.Group render={<ButtonGroup className="shrink-0" />}>
+        <ToolbarGroup render={<ButtonGroup className="shrink-0" />}>
           {onLoopingChange ? (
-            <Toolbar.Button
+            <ToolbarButton
               aria-label="Loop"
               aria-pressed={looping}
               className="hidden @lg/transport:flex"
@@ -742,10 +744,10 @@ function Transport({
               title="Loop"
             >
               <LoopIcon weight="fill" />
-            </Toolbar.Button>
+            </ToolbarButton>
           ) : null}
           {onMetronomeChange ? (
-            <Toolbar.Button
+            <ToolbarButton
               aria-label="Metronome"
               aria-pressed={metronome}
               className="hidden @lg/transport:flex"
@@ -764,7 +766,7 @@ function Transport({
                 source={source}
                 tempo={tempo}
               />
-            </Toolbar.Button>
+            </ToolbarButton>
           ) : null}
           {onMetronomeChange && (onRhythmChange || onSoundChange) ? (
             <MetronomeMenu
@@ -776,7 +778,7 @@ function Transport({
               tempo={tempo}
             />
           ) : null}
-        </Toolbar.Group>
+        </ToolbarGroup>
       ) : null}
       {onTempoChange ? (
         <TransportTempo
@@ -791,7 +793,7 @@ function Transport({
         />
       ) : null}
       {children}
-    </Toolbar.Root>
+    </Toolbar>
   );
 }
 
