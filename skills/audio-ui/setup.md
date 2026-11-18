@@ -16,7 +16,7 @@ The same registry installs the primitive of your framework alone, with no styles
 npx shadcn@latest add @audio-ui/knob-react
 ```
 
-The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (Vue, Svelte and the web have no CLI: copy the files by hand from the item's URL, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, writing each entry of `files` under `components/audio-ui/`). The primitives are unstyled: `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano`, `PianoRoll` and `Pad`. Each is one file written on the UI SDK kernel (`knob/knob.ts`, over `primitive.ts`), copied into your project with its adapter: nothing of ours comes from npm, and the only packages are the kernel's.
+The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (Vue, Svelte and the web have no CLI: copy the files by hand from the item's URL, `https://www.audio-ui.dev/r/styles/ui-sdk-nova/knob-vue.json`, writing each entry of `files` under `components/audio-ui/`). The primitives are unstyled: `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano`, `PianoRoll` and `Pad`. Each is one file written on the UI SDK kernel (`knob/knob.ts`, over `primitive.ts`), copied into your project with its adapter: nothing of ours comes from npm, and the only packages are the kernel's.
 
 ## Another framework
 

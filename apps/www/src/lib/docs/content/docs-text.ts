@@ -23,7 +23,7 @@ const rawDocs = import.meta.glob<string>("/src/content/docs/**/*.mdx", {
 
 /** The registry items' JSON for the default style, which holds the source of each component as it installs. */
 const registryItems = import.meta.glob<{ files?: { content?: string }[] }>(
-  "/public/r/styles/base-nova/*.json",
+  "/public/r/styles/ui-sdk-nova/*.json",
   { import: "default" }
 );
 
@@ -39,7 +39,7 @@ export async function readRawDoc(path: string): Promise<string> {
 
 /** The source of a registry item as a reader installs it, or nothing for an item without files. */
 async function readItemSource(name: string): Promise<string | undefined> {
-  const load = registryItems[`/public/r/styles/base-nova/${name}.json`];
+  const load = registryItems[`/public/r/styles/ui-sdk-nova/${name}.json`];
   const item = load ? await load() : undefined;
   return item?.files?.[0]?.content;
 }
