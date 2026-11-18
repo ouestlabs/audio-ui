@@ -25,6 +25,51 @@ const ui_ = (
 
 export const ui: Registry["items"] = [
   ui_(
+    "button-group",
+    "Button group",
+    "Joins buttons, selects and inputs into one bar, with a separator and a text part.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["separator"],
+    }
+  ),
+  ui_(
+    "input",
+    "Input",
+    "A text field that takes a number or a list as its value too."
+  ),
+  ui_(
+    "input-group",
+    "Input group",
+    "An input or a textarea with addons, buttons and text on its sides.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["button", "input", "textarea"],
+    }
+  ),
+  ui_("kbd", "Kbd", "A keyboard key, for a shortcut hint."),
+  ui_(
+    "slider",
+    "Slider",
+    "Adjusts a number or a range with draggable thumbs and keyboard controls."
+  ),
+  ui_("textarea", "Textarea", "A multiline text field that grows as you type."),
+  ui_(
+    "toggle",
+    "Toggle",
+    "A button that stays pressed, in a default or an outline variant.",
+    { dependencies: ["class-variance-authority"] }
+  ),
+  ui_(
+    "toggle-group",
+    "Toggle group",
+    "A row of toggles, one or several pressed at a time.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["toggle"],
+    }
+  ),
+  ui_(
     "button",
     "Button",
     "Runs an action, stays pending while an async action runs, and has the variants and sizes of the style.",

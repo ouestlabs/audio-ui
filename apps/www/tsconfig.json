@@ -16,6 +16,30 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@/registry/bases/base/ui/toggle": [
+        "./src/registry-audio/bases/ui-sdk/ui/toggle.tsx"
+      ],
+      "@/registry/bases/base/ui/toggle-group": [
+        "./src/registry-audio/bases/ui-sdk/ui/toggle-group.tsx"
+      ],
+      "@/registry/bases/base/ui/input": [
+        "./src/registry-audio/bases/ui-sdk/ui/input.tsx"
+      ],
+      "@/registry/bases/base/ui/slider": [
+        "./src/registry-audio/bases/ui-sdk/ui/slider.tsx"
+      ],
+      "@/registry/bases/base/ui/kbd": [
+        "./src/registry-audio/bases/ui-sdk/ui/kbd.tsx"
+      ],
+      "@/registry/bases/base/ui/button-group": [
+        "./src/registry-audio/bases/ui-sdk/ui/button-group.tsx"
+      ],
+      "@/registry/bases/base/ui/input-group": [
+        "./src/registry-audio/bases/ui-sdk/ui/input-group.tsx"
+      ],
+      "@/registry/bases/base/ui/textarea": [
+        "./src/registry-audio/bases/ui-sdk/ui/textarea.tsx"
+      ],
       "@/registry/bases/base/ui/dialog": [
         "./src/registry-audio/bases/ui-sdk/ui/dialog.tsx"
       ],
