@@ -1,0 +1,21 @@
+import { useMemo } from "react";
+import { NeedleMeter } from "@/registry/bases/shared/audio/elements/needle-meter";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
+import { usePageMicrophone } from "@/registry/bases/shared/hooks/use-microphone";
+import { useSimulatedLevels } from "@/registry/bases/shared/hooks/use-simulated-levels";
+
+/** The needle follows the microphone when the bar's microphone is on, and a moving signal when it is not. */
+export default function NeedleMeterDemo() {
+  const microphone = usePageMicrophone();
+  const heard = useAudioLevels(
+    useMemo(() => (microphone ? [microphone] : []), [microphone])
+  );
+  // 0 VU is -18 dB: the levels stay between -15 and +3 VU, where the dial is.
+  const simulated = useSimulatedLevels(1, { max: -15, min: -33 });
+  return (
+    <NeedleMeter
+      aria-label="Output level"
+      source={microphone ? heard : simulated}
+    />
+  );
+}

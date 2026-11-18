@@ -12,13 +12,14 @@
  */
 
 import * as React from "react";
-import { audio } from "../../../registry/bases/base/audio/_registry";
-import { components } from "../../../registry/bases/base/components/_registry";
-import { devices } from "../../../registry/bases/base/devices/_registry";
-import { lib } from "../../../registry/bases/base/lib/_registry";
+import { audio as baseAudio } from "../../../registry/bases/base/audio/_registry";
 import componentsManifest from "../../../registry/bases/components.json";
 import registryStats from "../../../registry/bases/registry.json";
 import registrySeo from "../../../registry/bases/seo.json";
+import { audio } from "../../../registry/bases/shared/audio/_registry";
+import { components } from "../../../registry/bases/shared/components/_registry";
+import { devices } from "../../../registry/bases/shared/devices/_registry";
+import { lib } from "../../../registry/bases/shared/lib/_registry";
 import { audio as sdkAudio } from "../../../registry/bases/ui-sdk/audio/_registry";
 
 const WHITESPACE_REGEX = /\s+/;
@@ -232,10 +233,12 @@ function getStats(): StatsData {
   return _stats;
 }
 
-/** The sub-registries of each base, which `getMetadata` merges by item name. */
+/** The items no behavior library names, which every base serves from `bases/shared/`. */
+const SHARED: unknown[][] = [audio, devices, components, lib];
+
+/** The items of each base whose files name its behavior library, by the same name and path in each. */
 const SUB_REGISTRIES: Record<string, unknown[][]> = {
-  base: [audio, devices, components, lib],
-  // The items a base overrides: the others are the `base` base's, as the build serves them.
+  base: [baseAudio],
   "ui-sdk": [sdkAudio],
 };
 
@@ -258,15 +261,10 @@ function getMetadata(base = "base"): MetadataData {
       const metadata: Record<string, RegistryItem> = {};
       const origins: Record<string, string> = {};
 
-      // Directly load audio, devices, catalog, and lib registries for reliability and
-      // performance. This avoids potential issues with the aggregate registry.ts file
-      if (base !== "base") {
-        mergeSubRegistry(
-          metadata,
-          Object.values(getMetadata("base").Metadata.base ?? {})
-        );
-        for (const name of Object.keys(metadata)) {
-          origins[name] = "base";
+      for (const items of SHARED) {
+        mergeSubRegistry(metadata, items);
+        for (const item of items as RegistryItem[]) {
+          origins[item.name] = "shared";
         }
       }
       for (const items of SUB_REGISTRIES[base] ?? []) {
@@ -403,7 +401,7 @@ export function hasComponent(base: string, name: string): boolean {
 // Category Functions - Use registry.json category manifest
 // ============================================================================
 
-function fallbackCategoryLabel(category: string) {
+function _fallbackCategoryLabel(category: string) {
   return category
     .split("-")
     .filter(Boolean)

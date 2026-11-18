@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Envelope } from "@/registry/bases/base/primitives/envelope/vue/index.ts";
+import { Envelope } from "@/registry/bases/shared/primitives/envelope/vue/index.ts";
 import { envelopeSuite } from "./envelope-suite.ts";
 
 envelopeSuite("Vue", async ({ options }) => {

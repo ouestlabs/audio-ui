@@ -14,45 +14,49 @@
     "paths": {
       "@/components/icon-placeholder": ["./src/icon-placeholder.tsx"],
       "@/*": ["../www/src/*"],
+      "@/components/audio-ui/parameter-field": [
+        "../www/src/registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+      ],
+      "@/components/audio-ui/rocker-switch": [
+        "../www/src/registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+      ],
       "@/primitives/envelope": [
-        "../www/src/registry/bases/base/primitives/envelope/envelope.ts"
+        "../www/src/registry/bases/shared/primitives/envelope/envelope.ts"
       ],
       "@/primitives/fader": [
-        "../www/src/registry/bases/base/primitives/fader/fader.ts"
+        "../www/src/registry/bases/shared/primitives/fader/fader.ts"
       ],
       "@/primitives/knob": [
-        "../www/src/registry/bases/base/primitives/knob/knob.ts"
+        "../www/src/registry/bases/shared/primitives/knob/knob.ts"
       ],
       "@/primitives/meter": [
-        "../www/src/registry/bases/base/primitives/meter/meter.ts"
+        "../www/src/registry/bases/shared/primitives/meter/meter.ts"
       ],
       "@/primitives/pad": [
-        "../www/src/registry/bases/base/primitives/pad/pad.ts"
+        "../www/src/registry/bases/shared/primitives/pad/pad.ts"
       ],
       "@/primitives/piano": [
-        "../www/src/registry/bases/base/primitives/piano/piano.ts"
+        "../www/src/registry/bases/shared/primitives/piano/piano.ts"
       ],
       "@/primitives/piano-roll": [
-        "../www/src/registry/bases/base/primitives/piano-roll/piano-roll.ts"
+        "../www/src/registry/bases/shared/primitives/piano-roll/piano-roll.ts"
       ],
       "@/primitives/plot": [
-        "../www/src/registry/bases/base/primitives/plot/plot.ts"
+        "../www/src/registry/bases/shared/primitives/plot/plot.ts"
       ],
       "@/primitives/sequencer": [
-        "../www/src/registry/bases/base/primitives/sequencer/sequencer.ts"
+        "../www/src/registry/bases/shared/primitives/sequencer/sequencer.ts"
       ],
       "@/primitives/timeline": [
-        "../www/src/registry/bases/base/primitives/timeline/timeline.ts"
+        "../www/src/registry/bases/shared/primitives/timeline/timeline.ts"
       ],
       "@/primitives/waveform": [
-        "../www/src/registry/bases/base/primitives/waveform/waveform.ts"
+        "../www/src/registry/bases/shared/primitives/waveform/waveform.ts"
       ],
       "@/primitives/xypad": [
-        "../www/src/registry/bases/base/primitives/xypad/xypad.ts"
+        "../www/src/registry/bases/shared/primitives/xypad/xypad.ts"
       ],
-      "@/engine/*": [
-        "../www/src/registry/bases/base/lib/engine/*/index.ts"
-      ]
+      "@/engine/*": ["../www/src/registry/bases/shared/lib/engine/*/index.ts"]
     },
     "types": ["bun", "react", "react-dom"]
   },

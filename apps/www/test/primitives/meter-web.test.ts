@@ -1,4 +1,4 @@
-import "@/registry/bases/base/primitives/meter/web/index.ts";
+import "@/registry/bases/shared/primitives/meter/web/index.ts";
 import { decibels, type MeterTree, meterSuite } from "./meter-suite.ts";
 
 const kebab = (name: string) =>

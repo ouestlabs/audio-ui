@@ -4,15 +4,15 @@ The arrangement plays what is laid out on its tracks. Editing commands (split, c
 
 ### ARR-001 A clip plays where it lies
 A clip that starts at a time on the arrangement plays its first frame at the frame nearest that time on the audio clock, and lasts its length to the frame.
-Test: apps/www/src/registry/bases/base/lib/engine/playback/render.test.ts "ARR-001"
+Test: apps/www/src/registry/bases/shared/lib/engine/playback/render.test.ts "ARR-001"
 
 ### ARR-002 Deactivated clips are silent
 A deactivated clip (key 0) stays on its track, drawn faded, and plays nothing.
-Test: apps/www/src/registry/bases/base/lib/engine/playback/render.test.ts "ARR-002"
+Test: apps/www/src/registry/bases/shared/lib/engine/playback/render.test.ts "ARR-002"
 
 ### ARR-003 A split is seamless
 Splitting a clip anywhere changes nothing in what plays: the two pieces render the same frames as the clip did.
-Test: apps/www/src/registry/bases/base/lib/engine/playback/render.test.ts "ARR-003"
+Test: apps/www/src/registry/bases/shared/lib/engine/playback/render.test.ts "ARR-003"
 
 ### ARR-004 Edits while playing
 Adding, moving, trimming or removing a clip while playing changes what plays within one render quantum of the engine receiving it, without stopping or restarting playback.

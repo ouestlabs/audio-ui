@@ -241,7 +241,7 @@ export function sequencerSuite(framework: string, mount: MountSequencer) {
 
     test("the step being played is marked with data-current from a live source", async () => {
       const { createSource } = await import(
-        "@/registry/bases/base/primitives/primitive"
+        "@/registry/bases/shared/primitives/primitive"
       );
       const source = createSource(0);
       const s = await render(mount, { source });

@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Plot } from "@/registry/bases/base/primitives/plot/react/index.tsx";
+import { Plot } from "@/registry/bases/shared/primitives/plot/react/index.tsx";
 import { plotSuite } from "./plot-suite.ts";
 
 plotSuite("React", async (tree) => {
