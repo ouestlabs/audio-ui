@@ -638,7 +638,7 @@ export function searchCatalog(query: string): ComponentCatalogItem[] {
 /**
  * Get a lazy-loaded component by name
  */
-export function getRegistryComponent(name: string, styleName = "base-nova") {
+export function getRegistryComponent(name: string, styleName = "ui-sdk-nova") {
   const base = getRegistryKey(styleName);
   return getComponent(base, name);
 }
@@ -646,6 +646,9 @@ export function getRegistryComponent(name: string, styleName = "base-nova") {
 function getRegistryKey(styleName: string): string {
   if (styleName.startsWith("base-")) {
     return "base";
+  }
+  if (styleName.startsWith("ui-sdk-")) {
+    return "ui-sdk";
   }
   return styleName;
 }

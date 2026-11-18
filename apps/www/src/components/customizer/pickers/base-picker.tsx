@@ -55,8 +55,8 @@ export function BasePicker({
           </div>
         </div>
         {mounted && currentBase ? (
-          <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 size-4 select-none text-site-foreground">
-            <BaseLogo className="size-4" name={currentBase.name} />
+          <div className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-4 flex h-5 select-none items-center text-site-foreground">
+            <BaseLogo className="h-5 w-auto" name={currentBase.name} />
           </div>
         ) : null}
       </PickerTrigger>
@@ -73,7 +73,7 @@ export function BasePicker({
             {BASES.map((base) => (
               <PickerRadioItem key={base.name} value={base.name}>
                 <BaseLogo
-                  className="size-4 shrink-0 text-site-foreground"
+                  className="h-5 w-auto shrink-0 text-site-foreground"
                   name={base.name}
                 />
                 {base.title}

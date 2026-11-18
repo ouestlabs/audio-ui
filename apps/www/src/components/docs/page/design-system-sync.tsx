@@ -1,8 +1,10 @@
+import { useRouterState } from "@tanstack/react-router";
 import * as React from "react";
 import { useMenuColor } from "@/components/customizer/use-menu-color";
 import { useConfig } from "@/hooks/use-config";
 import { saveDesignSystemBoot } from "@/lib/design-system/boot-cache";
 import { ensurePreviewFontsLoaded, FONTS } from "@/lib/design-system/fonts";
+import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
 import {
   getThemeStyleElement,
   writeThemeVars,
@@ -37,8 +39,22 @@ function syncBodyStyleClass(styleClass: string) {
  * page around it is rendered on the server as it is.
  */
 export function DocsDesignSystemEffects() {
-  const [config] = useConfig();
+  const [config, setConfig] = useConfig();
+  const [{ base: baseParam }] = useDesignSystemSearchParams();
+  const onComponentPage = useRouterState({
+    select: (state) =>
+      state.location.pathname.startsWith("/docs/components/base/"),
+  });
+  // On a component page, the base is the address's: `/ui-sdk/` names it, `/base/` is the other.
+  const urlBase = onComponentPage ? (baseParam ?? "base") : baseParam;
   useMenuColor(config.menuColor);
+
+  // The base in the address of a component page is the reader's choice from then on.
+  React.useEffect(() => {
+    if (urlBase && urlBase !== config.base) {
+      setConfig((prev) => ({ ...prev, base: urlBase }));
+    }
+  }, [urlBase, config.base, setConfig]);
 
   // What is applied is kept for the next load, which puts it back before the first paint.
   React.useEffect(() => {

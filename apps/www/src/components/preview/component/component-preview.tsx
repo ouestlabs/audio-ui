@@ -8,7 +8,7 @@ import { getRegistryComponent } from "@/lib/registry/core/registry";
 import type { IconLibraryName } from "@/registry/config";
 
 // Default styleName - matches the API default
-const DEFAULT_STYLE_NAME = "base-nova";
+const DEFAULT_STYLE_NAME = "ui-sdk-nova";
 
 export function ComponentPreview({
   name,

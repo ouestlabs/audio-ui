@@ -145,7 +145,7 @@ function partMdx(part: InstallPart, fence = "bash"): string {
   if (part.type === "prompt") {
     return `\`\`\`text\n${part.text}\n\`\`\``;
   }
-  return `<ComponentSource\n  styleName="base-nova"\n  name="${part.name}"\n  title="${part.title}"\n/>`;
+  return `<ComponentSource\n  styleName="ui-sdk-nova"\n  name="${part.name}"\n  title="${part.title}"\n/>`;
 }
 
 /** The plan as the MDX the pages used to carry: the form the markdown conversion reads. */

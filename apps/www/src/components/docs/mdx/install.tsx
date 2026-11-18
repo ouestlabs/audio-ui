@@ -108,7 +108,7 @@ function Part({ part }: { part: InstallPart }) {
     <DocsComponentSource
       className="not-typeset"
       name={part.name}
-      styleName="base-nova"
+      styleName="ui-sdk-nova"
       title={part.title}
     />
   );

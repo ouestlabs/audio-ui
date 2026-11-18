@@ -50,7 +50,6 @@ export function PresetPicker({
     }
     return presets.find(
       (preset) =>
-        preset.base === effectiveParams.base &&
         preset.style === effectiveParams.style &&
         preset.baseColor === effectiveParams.baseColor &&
         preset.theme === effectiveParams.theme &&
@@ -63,7 +62,6 @@ export function PresetPicker({
   }, [
     mounted,
     presets,
-    effectiveParams.base,
     effectiveParams.style,
     effectiveParams.baseColor,
     effectiveParams.theme,
@@ -74,11 +72,8 @@ export function PresetPicker({
     effectiveParams.radius,
   ]);
 
-  // Filter presets for current base only
-  const currentBasePresets = React.useMemo(
-    () => presets.filter((preset) => preset.base === effectiveParams.base),
-    [presets, effectiveParams.base]
-  );
+  // A preset is a look, for every base.
+  const currentBasePresets = presets;
 
   const handlePresetChange = React.useCallback(
     (value: string) => {
@@ -88,7 +83,6 @@ export function PresetPicker({
       }
 
       const newValues = {
-        base: preset.base,
         baseColor: preset.baseColor,
         custom: false,
         font: preset.font,

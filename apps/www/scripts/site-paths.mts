@@ -5,6 +5,7 @@
  */
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { baseAddresses } from "../src/lib/docs/content/base-paths.ts";
 import { frameworkAddresses } from "../src/lib/docs/content/framework-paths.ts";
 
 const DOCS = join(import.meta.dirname, "../src/content/docs");
@@ -68,6 +69,9 @@ export function prerenderPages() {
     ...frameworkAddresses(docsPages().map(({ path }) => path)).map((path) => ({
       path,
     })),
+    ...frameworkAddresses(baseAddresses(docsPages().map(({ path }) => path)))
+      .concat(baseAddresses(docsPages().map(({ path }) => path)))
+      .map((path) => ({ path })),
     ...STATIC_TEXT_PATHS.map((path) => ({
       path,
       prerender: { outputPath: path },

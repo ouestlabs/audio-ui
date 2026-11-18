@@ -41,7 +41,7 @@ export type Config = {
 
 export const DEFAULT_CONFIG: Config = {
   // Design system defaults (matching DEFAULT_CONFIG from registry/config.ts)
-  base: "base",
+  base: "ui-sdk",
   baseColor: "neutral",
   chartColor: "neutral",
   custom: false,
@@ -68,6 +68,19 @@ export const configAtom = atomWithStorage<Config>(
   undefined,
   { getOnInit: true }
 );
+
+/** The base the reader chose, kept in their browser: null on the server, where the pages are prerendered for the default one. */
+export function keptBase(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  try {
+    const stored = JSON.parse(window.localStorage.getItem("config") ?? "null");
+    return typeof stored?.base === "string" ? stored.base : null;
+  } catch {
+    return null;
+  }
+}
 
 const baseAtom = selectAtom(configAtom, (config) => config?.base);
 
