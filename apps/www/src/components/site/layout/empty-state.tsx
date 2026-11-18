@@ -7,7 +7,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/registry/bases/base/ui/empty";
+} from "@/components/ui/empty";
 
 interface ComponentEmptyStateProps {
   /** What to do next, such as a link back to the whole list. */

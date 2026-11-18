@@ -5,7 +5,7 @@
  * loads several downloads the common part once, and the packages they build on
  * (`@ui-sdk/web`) are inside.
  *
- * The folder is named by the version in `src/registry-audio/web-version.json`,
+ * The folder is named by the version in `src/registry/web-version.json`,
  * and the files of a version are served as immutable: a build writes the
  * folder of the current version and never touches another, so a page pinned
  * to a version keeps what it was written against. An adapter that changes
@@ -15,9 +15,9 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dir, "..");
-const PRIMITIVES = join(ROOT, "src/registry-audio/bases/base/primitives");
+const PRIMITIVES = join(ROOT, "src/registry/bases/base/primitives");
 const { version } = (await Bun.file(
-  join(ROOT, "src/registry-audio/web-version.json")
+  join(ROOT, "src/registry/web-version.json")
 ).json()) as { version: string };
 const OUT = join(ROOT, "public/web", version);
 const ENTRIES = join(ROOT, "node_modules/.cache/web-entries");

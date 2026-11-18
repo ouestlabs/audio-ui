@@ -4,7 +4,6 @@ import { Icons } from "@/components/site/icons";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -60,8 +59,8 @@ export function FrameworkPreviewSelect({
     <Select onValueChange={pick} value={current}>
       <SelectTrigger aria-label="Framework">
         <SelectValue>
-          {(value: FrameworkId) => {
-            const Logo = LOGOS[value];
+          {({ value }) => {
+            const Logo = LOGOS[value as FrameworkId];
             return (
               <span className="flex items-center gap-2">
                 <Logo aria-hidden="true" className="size-3.5 shrink-0" />
@@ -72,19 +71,17 @@ export function FrameworkPreviewSelect({
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          {offered.map((each) => {
-            const Logo = LOGOS[each.id];
-            return (
-              <SelectItem key={each.id} value={each.id}>
-                <span className="flex items-center gap-2">
-                  <Logo aria-hidden="true" className="size-3.5 shrink-0" />
-                  {each.label}
-                </span>
-              </SelectItem>
-            );
-          })}
-        </SelectGroup>
+        {offered.map((each) => {
+          const Logo = LOGOS[each.id];
+          return (
+            <SelectItem key={each.id} label={each.label} value={each.id}>
+              <span className="flex items-center gap-2">
+                <Logo aria-hidden="true" className="size-3.5 shrink-0" />
+                {each.label}
+              </span>
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );

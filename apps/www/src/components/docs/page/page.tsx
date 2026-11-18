@@ -144,7 +144,6 @@ function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
       {neighbours.previous ? (
         <Button
           className="extend-touch-target ml-auto hidden shadow-none md:size-7"
-          nativeButton={false}
           render={
             <Link to={neighbours.previous.url}>
               <ArrowLeftIcon />
@@ -158,7 +157,6 @@ function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
       {neighbours.next ? (
         <Button
           className="extend-touch-target hidden shadow-none md:size-7"
-          nativeButton={false}
           render={
             <Link to={neighbours.next.url}>
               <span className="sr-only">Next</span>
@@ -210,7 +208,6 @@ function DocsPager({ neighbours }: { neighbours: Neighbours }) {
       {neighbours.previous ? (
         <Button
           className="shadow-none"
-          nativeButton={false}
           render={
             <Link to={neighbours.previous.url}>
               <ArrowLeftIcon /> {neighbours.previous.name}
@@ -222,7 +219,6 @@ function DocsPager({ neighbours }: { neighbours: Neighbours }) {
       {neighbours.next ? (
         <Button
           className="ml-auto shadow-none"
-          nativeButton={false}
           render={
             <Link to={neighbours.next.url}>
               {neighbours.next.name} <ArrowRightIcon />

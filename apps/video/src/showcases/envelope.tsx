@@ -1,4 +1,4 @@
-import { Envelope } from "@/registry-audio/bases/base/audio/elements/envelope";
+import { Envelope } from "@/registry/bases/base/audio/elements/envelope";
 import { MOTION, ramp, tw } from "../motion.ts";
 
 /** An ADSR: the attack is pulled out, then the sustain lowered, then both breathe. */

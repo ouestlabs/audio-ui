@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The drum synth device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/drum-synth/.","files":[],"name":"drum-synth","registryDependencies":["@audio-ui/drum-synth-device","@audio-ui/drum-synth-engine","@audio-ui/drum-synth-panel"],"type":"registry:ui"}

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The compressor device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/compressor/.","files":[],"name":"compressor","registryDependencies":["@audio-ui/compressor-device","@audio-ui/compressor-engine","@audio-ui/compressor-panel"],"type":"registry:ui"}

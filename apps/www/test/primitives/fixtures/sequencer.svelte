@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/svelte/index.ts";
+import { Sequencer } from "@/registry/bases/base/primitives/sequencer/svelte/index.ts";
 
 /** The sequencer the shared suite drives: its options, its velocity bars and its source. */
 let {

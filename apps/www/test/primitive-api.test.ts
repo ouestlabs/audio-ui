@@ -26,7 +26,7 @@ const EXPORTED_NAME = /(?:^|,)\s*(\w+)/g;
 
 const ADAPTERS = join(
   import.meta.dir,
-  "../src/registry-audio/bases/base/primitives"
+  "../src/registry/bases/base/primitives"
 );
 
 const apis = await build();

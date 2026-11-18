@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved to the engine, @/lib/engine/pitch: installs it.","files":[],"name":"pitch-detection","registryDependencies":["@audio-ui/engine-pitch"],"type":"registry:lib"}

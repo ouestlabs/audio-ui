@@ -16,10 +16,11 @@ export function CodeTabs({ children }: React.ComponentProps<typeof Tabs>) {
     ? (config.installationType ?? DEFAULT_CONFIG.installationType)
     : DEFAULT_CONFIG.installationType;
   const handleInstallationChange = useCallback(
-    (value: string) =>
+    (next: string | null) =>
+      next &&
       setConfig({
         ...config,
-        installationType: value as "agent" | "cli" | "manual",
+        installationType: next as "agent" | "cli" | "manual",
       }),
     [config, setConfig]
   );

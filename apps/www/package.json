@@ -17,13 +17,13 @@
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "registry:build": "bun ./scripts/build-registry.ts && bun ./scripts/build-entries.ts && bun ./scripts/build-primitive-api.ts && bun ./scripts/build-web.ts",
-    "registry:sync": "bun ./scripts/sync-registry.ts && bun ./scripts/build-icons.ts",
     "skill:build": "bun ./scripts/build-skill.ts",
     "start": "vite preview",
     "test": "bun test",
     "test:browser": "bun test/browser/run.ts",
     "test:primitives": "bun test --conditions browser --path-ignore-patterns '' ./test/primitives && SVELTE_GENERATE=server bun test --path-ignore-patterns '' ./test/primitives/ssr-svelte.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ui:sync": "bun ./scripts/sync-site-ui.ts"
   },
   "dependencies": {
     "@audio-ui/icons": "*",

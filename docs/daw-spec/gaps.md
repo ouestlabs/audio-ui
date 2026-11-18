@@ -176,19 +176,19 @@ Status: fixed (checked in Chromium in the DAW, DEV-010).
 
 ### G-031 Sixteen tracks through an equalizer and a compressor load the audio thread to three quarters
 Measured on 2026-11-04, 30 s each: 16 tracks not stretched, load mean 73 %, peak 89 %, one underrun; the same 16 stretched in Repitch, mean 73 %, peak 93 %, 38 underruns. Stretching costs next to nothing more: the load is the tracks'. PRF-004 read 26 % for the same set in phase 1, on a quieter machine; the graph of a track has barely changed since, so that gap is not shown to be the code's. A trace of the audio nodes over 8 s gave, per render quantum, 32 worklets where the clips need 16 (each compressor's key detector ran with its key off), about 330 gain nodes (some 20 a track: 9 in the channel strip, 9 in the compressor, 3 in the equalizer), 64 biquads and 16 compressor nodes.
-Fix: the compressor links a path to its output only while it is heard, and makes its key detector the first time the key is on, so at full mix with no key it renders its node alone (`apps/www/test/registry-audio/base/lib/compressor-engine.test.ts` "G-031").
+Fix: the compressor links a path to its output only while it is heard, and makes its key detector the first time the key is on, so at full mix with no key it renders its node alone (`apps/www/test/registry/base/lib/compressor-engine.test.ts` "G-031").
 Status: fixed: at the end of phase 4, 16 tracks load the audio thread at 40 % on average, peak 59 %, with no underrun (PRF-004). The channel strip's nine gains a track are where to look next if a set needs more.
 
 
 ### G-032 The registry wrote WAV files only
 An export to FLAC or MP3, and the encoders for them, were not in the registry: its `wav-file` wrote 16 or 24-bit PCM and 32-bit floats, and nothing else.
-Fix: `audio-encode` replaces it: `encodeAudio` writes WAV, FLAC or MP3 through `@audio/encode`, in chunks with a paint between two, each format's encoder loaded the first time it is used (`apps/www/test/registry-audio/base/lib/audio-encode.test.ts`). The DAW installs it and keeps it out of its server's build.
+Fix: `audio-encode` replaces it: `encodeAudio` writes WAV, FLAC or MP3 through `@audio/encode`, in chunks with a paint between two, each format's encoder loaded the first time it is used (`apps/www/test/registry/base/lib/audio-encode.test.ts`). The DAW installs it and keeps it out of its server's build.
 Status: fixed (EXP-003).
 
 
 ### G-033 Chrome left out AIFF, CAF and Apple Lossless files
 The registry's `audio-decode` read a file with the browser's decoder only, and Chrome's reads no AIFF (the usual export of a Mac DAW), no CAF and no Apple Lossless: a dropped one was left out as not sound. Measured on 2026-11-09 with a second of each format: Chrome refuses AIFF, CAF, Apple Lossless, WavPack and QOA; the Safari engine refuses WavPack and QOA.
-Fix: an AIFF, CAF or Apple Lossless file the browser refuses goes through a decoder of its format (`@audio/decode-aiff`, `-caf`, `-mp4`), then `@audio/resample-sinc` to the context's rate, each loaded the first time a file needs it. `@audio/decode` itself was left out: its 4.2.0 imports two decoders it does not depend on, which fails a bundler's build. WavPack and QOA, which no browser decodes, stay out until a file of one turns up (`apps/www/test/registry-audio/base/lib/audio-decode.test.ts`).
+Fix: an AIFF, CAF or Apple Lossless file the browser refuses goes through a decoder of its format (`@audio/decode-aiff`, `-caf`, `-mp4`), then `@audio/resample-sinc` to the context's rate, each loaded the first time a file needs it. `@audio/decode` itself was left out: its 4.2.0 imports two decoders it does not depend on, which fails a bundler's build. WavPack and QOA, which no browser decodes, stay out until a file of one turns up (`apps/www/test/registry/base/lib/audio-decode.test.ts`).
 Status: fixed (ARR-007).
 
 

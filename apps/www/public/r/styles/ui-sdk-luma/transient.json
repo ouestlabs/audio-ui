@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The transient device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/transient/.","files":[],"name":"transient","registryDependencies":["@audio-ui/transient-device","@audio-ui/transient-engine","@audio-ui/transient-panel"],"type":"registry:ui"}

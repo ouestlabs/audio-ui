@@ -11,7 +11,6 @@ export function GitHubLink() {
       <Button
         aria-label="GitHub"
         className="shadow-none"
-        nativeButton={false}
         render={
           <a href={siteConfig.links.github} rel="noreferrer" target="_blank" />
         }

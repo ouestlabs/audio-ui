@@ -1,4 +1,4 @@
-import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
+import { XYPad } from "@/registry/bases/base/audio/elements/xypad";
 import { activeRing, MOTION, ramp } from "../motion.ts";
 
 const describe = ({ x, y }: { x: number; y: number }) =>

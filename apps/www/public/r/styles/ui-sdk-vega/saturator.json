@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The saturator device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/saturator/.","files":[],"name":"saturator","registryDependencies":["@audio-ui/saturator-device","@audio-ui/saturator-engine","@audio-ui/saturator-panel"],"type":"registry:ui"}

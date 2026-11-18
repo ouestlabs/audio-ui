@@ -1,13 +1,13 @@
 import { PauseIcon, PlayIcon } from "@phosphor-icons/react/ssr";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/base/hooks/use-master-bus";
 import {
   DEMO_SOURCES,
   type DemoSourceName,
   renderDemoSource,
-} from "@/registry-audio/bases/base/lib/demo-sound";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+} from "@/registry/bases/base/lib/demo-sound";
+import { webAudio } from "@/registry/bases/base/lib/web-audio";
 
 const NAMES = Object.keys(DEMO_SOURCES) as DemoSourceName[];
 
@@ -47,7 +47,7 @@ export function DemoSounds() {
     };
   }, [master, playing]);
 
-  const toggle = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const toggle = useCallback((event: React.MouseEvent<HTMLElement>) => {
     const name = event.currentTarget.dataset.name as DemoSourceName;
     setPlaying((current) => (current === name ? null : name));
   }, []);

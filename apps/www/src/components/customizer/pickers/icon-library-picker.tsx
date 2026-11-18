@@ -14,7 +14,7 @@ import {
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
-import { Item, ItemContent, ItemTitle } from "@/registry/bases/base/ui/item";
+import { Item, ItemContent, ItemTitle } from "@/components/ui/item";
 import {
   type IconLibrary,
   type IconLibraryName,

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Renamed to undo-history: installs it.","files":[],"name":"history","registryDependencies":["@audio-ui/undo-history"],"type":"registry:lib"}

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { MODULE_SETS } from "@/registry-audio/bases/modules";
+import { MODULE_SETS } from "@/registry/bases/modules";
 
 /**
  * The items of the engine and of gl list each module's files, the npm packages
@@ -7,7 +7,7 @@ import { MODULE_SETS } from "@/registry-audio/bases/modules";
  * added, removed or importing something new shows here first.
  */
 
-const LIB = `${import.meta.dir}/../src/registry-audio/bases/base/lib`;
+const LIB = `${import.meta.dir}/../src/registry/bases/base/lib`;
 // A static import or export, and a dynamic `import("…")`.
 const SPECIFIER = /(?:from\s+"|import\(\s*")([^"]+)"/g;
 const NOT_SHIPPED = /\.(?:test|bench)\.ts$/;

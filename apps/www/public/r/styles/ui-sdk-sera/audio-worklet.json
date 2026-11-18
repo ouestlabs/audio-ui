@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: audio-worklet is part of the engine now, imported from @/lib/engine/worklet.","files":[],"name":"audio-worklet","registryDependencies":["@audio-ui/engine-worklet"],"type":"registry:lib"}

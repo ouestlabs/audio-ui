@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Envelope } from "@/registry-audio/bases/base/primitives/envelope/react/index.tsx";
+import { Envelope } from "@/registry/bases/base/primitives/envelope/react/index.tsx";
 import { envelopeSuite } from "./envelope-suite.ts";
 import { range } from "./helpers.ts";
 

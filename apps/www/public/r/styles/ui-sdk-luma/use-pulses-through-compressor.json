@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Gone: a device's own block plays its loop through its engine with use-device-loop, and the compressor's panel draws the level going in. Installs use-device-loop.","files":[],"name":"use-pulses-through-compressor","registryDependencies":["@audio-ui/use-device-loop"],"type":"registry:hook"}

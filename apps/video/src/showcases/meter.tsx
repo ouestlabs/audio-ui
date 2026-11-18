@@ -1,4 +1,4 @@
-import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { Meter } from "@/registry/bases/base/audio/elements/meter";
 import { lerp, MOTION, ramp } from "../motion.ts";
 
 const MARKS = [0, -6, -12, -24, -48];

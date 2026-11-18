@@ -16,11 +16,7 @@ export function NotFoundContent() {
       <p className="max-w-md text-balance text-site-muted-foreground">
         The page you're looking for doesn't exist or may have been moved.
       </p>
-      <Button
-        className="group mt-4"
-        nativeButton={false}
-        render={<Link to="/" />}
-      >
+      <Button className="group mt-4" render={<Link to="/" />}>
         <CaretLeftIcon
           aria-hidden="true"
           className="group-hover:-translate-x-0.5 opacity-60 transition-transform"

@@ -1,4 +1,4 @@
-import { DEVICE_LIBRARY } from "@/registry-audio/bases/base/lib/device-library";
+import { DEVICE_LIBRARY } from "@/registry/bases/base/lib/device-library";
 import { assert, check } from "./harness.ts";
 
 const RATE = 48_000;

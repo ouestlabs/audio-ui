@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The wah device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/wah/.","files":[],"name":"wah","registryDependencies":["@audio-ui/wah-device","@audio-ui/wah-engine","@audio-ui/wah-panel"],"type":"registry:ui"}

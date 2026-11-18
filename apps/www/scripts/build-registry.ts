@@ -2,7 +2,7 @@
  * Build Static Registry
  *
  * Pre-compiles every registry item (the audio components, hooks and lib items,
- * and the catalog blocks and demos under `registry-audio/bases/{base}`) into
+ * and the catalog blocks and demos under `registry/bases/{base}`) into
  * static JSON in `public/r/styles/`, so the registry is served from the CDN
  * edge with no serverless function in between.
  *
@@ -19,36 +19,37 @@
 import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
-import { BASES as ALL_BASES } from "../src/registry/bases.ts";
-import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
+import { categories, rootSeo } from "../src/registry/bases/categories.ts";
 import {
   moduleDependencies,
   rewriteModuleImports,
-} from "../src/registry-audio/bases/modules.ts";
+} from "../src/registry/bases/modules.ts";
 import {
   rewriteAdapter,
   rewritePrimitiveImports,
   SHARED_ITEMS,
   SHIPPED_PRIMITIVES,
   sharedDependencies,
-} from "../src/registry-audio/bases/primitives.ts";
+} from "../src/registry/bases/primitives.ts";
+import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = `${import.meta.dir}/..`;
-const REGISTRY_AUDIO = `${PROJECT_ROOT}/src/registry-audio`;
-const BASES_DIR = `${REGISTRY_AUDIO}/bases`;
+const REGISTRY = `${PROJECT_ROOT}/src/registry`;
+const BASES_DIR = `${REGISTRY}/bases`;
 const OUTPUT_ROOT = `${PROJECT_ROOT}/public/r/styles`;
 
 const NAMESPACE = "@audio-ui";
 const HOMEPAGE = "https://www.audio-ui.dev";
 const DEFAULT_STYLE = "base-nova";
 
-// Only the `base` base ships audio items, and its catalog drives the manifests.
-const BASES = ALL_BASES.filter((base) => base.name === "base");
+// Only the `base` base ships audio items and drives the manifests: the others (`ui-sdk`) ship the `ui/` components their style is made of.
+const BASES = ALL_BASES;
 const MANIFEST_BASE = "base";
+const UI_BASE = "ui-sdk";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
 // can't be evaluated here, and the set is `registry/styles/style-*.css`.
@@ -63,6 +64,7 @@ const REGISTRY_FOLDERS = [
   "components",
   "lib",
   "primitives",
+  "ui",
 ];
 
 // A folder a registry file imports from, and where it lands in a project.
@@ -77,8 +79,8 @@ const INSTALL_FOLDERS: [folder: string, installed: string][] = [
 // The module roots those folders sit under: the per-style copies the design
 // system generates, and the base itself.
 const SOURCE_ROOTS = [
-  `@/registry-audio/bases/__generated/base-(?:${STYLES.join("|")})/`,
-  "@/registry(?:-audio)?/bases/base/",
+  `@/registry/bases/__generated/base-(?:${STYLES.join("|")})/`,
+  "@/registry(?:-audio)?/bases/(?:base|ui-sdk)/",
 ];
 
 const IMPORT_REWRITES = SOURCE_ROOTS.flatMap((root) =>
@@ -94,6 +96,11 @@ const APPLY_RULE = /\.([a-zA-Z0-9_-]+)\s*\{\s*@apply\s+([^;]+);\s*\}/g;
 const CN_CLASS = /\bcn-[a-zA-Z0-9_-]+\b/;
 const CN_CLASSES = new RegExp(CN_CLASS.source, "g");
 const EXPORT_DEFAULT = /export default/g;
+// The state attributes the style hooks are written against, and the ones ui-sdk's parts carry instead.
+const GROUP_ORIENTATION = /group-data-(horizontal|vertical)\//g;
+const ORIENTATION = /(?<![\w\]-])data-(horizontal|vertical):/g;
+const ACTIVE = /(?<![\w-])data-active\b/g;
+const POPUP_OPEN = /\bdata-popup-open\b/g;
 const DEMO_METADATA =
   /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm;
 
@@ -103,7 +110,7 @@ const SVG_PATH_DATA = /^\s*d ?=/;
 // A bundle the engine ships as a string (`bun run engine:worklet` writes it): one long line by design.
 const BUNDLED_SOURCE = /-source\.ts$/;
 const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
-const REGISTRY_IMPORT = /@\/registry-audio\/|@\/registry\/bases\//;
+const REGISTRY_IMPORT = /@\/registry\/bases\//;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -125,6 +132,8 @@ interface SourceItem {
   devDependencies?: string[];
   files?: SourceFile[];
   name: string;
+  /** The base whose folder holds the item's files, when the style built is another's. */
+  origin?: string;
   registryDependencies?: string[];
   title?: string;
   type: string;
@@ -167,7 +176,7 @@ interface Problem {
 // ---------------------------------------------------------------------------
 // cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
 // components reference placeholder classes like `cn-fader-track`, defined in
-// registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
+// registry/styles/audio/style-{style}.css (a `.style-{name} { .cn-x { @apply
 // ...; } }` block). The official registry never ships that placeholder text,
 // it's resolved to real utility classes before the JSON is served, so the
 // shadcn CLI never meets a `cn-*` token it has no definition for and would
@@ -176,17 +185,35 @@ interface Problem {
 
 async function readCnClasses(style: string): Promise<Map<string, string>> {
   const classes = new Map<string, string>();
-  const css = Bun.file(`${REGISTRY_AUDIO}/styles/style-${style}.css`);
-  if (!(await css.exists())) {
-    return classes;
-  }
-
-  const source = (await css.text()).replace(CSS_COMMENT, "");
-  const rules = source.match(STYLE_WRAPPER)?.[1] ?? source;
-  for (const [, className, utilities] of rules.matchAll(APPLY_RULE)) {
-    classes.set(className, utilities.trim());
+  // The hooks of the audio components, then those of the ui components: `registry/styles` is the shadcn-derived set the `ui-sdk` base's own components use.
+  const files = await Promise.all(
+    [
+      `${REGISTRY}/styles/audio/style-${style}.css`,
+      `${REGISTRY}/styles/style-${style}.css`,
+    ].map(async (path) => {
+      const css = Bun.file(path);
+      return (await css.exists()) ? await css.text() : "";
+    })
+  );
+  for (const css of files) {
+    const source = css.replace(CSS_COMMENT, "");
+    const rules = source.match(STYLE_WRAPPER)?.[1] ?? source;
+    for (const [, className, utilities] of rules.matchAll(APPLY_RULE)) {
+      if (!classes.has(className)) {
+        classes.set(className, utilities.trim());
+      }
+    }
   }
   return classes;
+}
+
+/** The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others. */
+function toUiSdkAttributes(content: string): string {
+  return content
+    .replace(GROUP_ORIENTATION, "group-data-[orientation=$1]/")
+    .replace(ORIENTATION, "data-[orientation=$1]:")
+    .replace(ACTIVE, "data-selected")
+    .replace(POPUP_OPEN, "data-open");
 }
 
 function expandCnClasses(
@@ -213,6 +240,7 @@ async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
 }
 
 async function loadItems(base: string): Promise<Map<string, SourceItem>> {
+  // Each base publishes its own ui components: a base takes the others from shadcn.
   const folders = await Promise.all(
     REGISTRY_FOLDERS.map((folder) => loadFolder(base, folder))
   );
@@ -296,7 +324,7 @@ async function buildManifests(): Promise<void> {
 
   // Normalize to the repo's Biome formatting so build then lint is idempotent.
   try {
-    await $`bunx biome check --write ${Object.keys(manifests).map((file) => `src/registry-audio/bases/${file}`)}`
+    await $`bunx biome check --write ${Object.keys(manifests).map((file) => `src/registry/bases/${file}`)}`
       .cwd(PROJECT_ROOT)
       .quiet();
   } catch {
@@ -346,7 +374,7 @@ async function buildFile(
   item: SourceItem,
   build: StyleBuild
 ): Promise<BuiltFile | null> {
-  const source = `src/registry-audio/bases/${build.base}/${file.path}`;
+  const source = `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
   let content: string;
   try {
     content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();
@@ -359,6 +387,9 @@ async function buildFile(
   content = transformStyleClassNames(content, build.name);
   // 2. cn-* placeholder classes become their utility classes
   content = expandCnClasses(content, build.cnClasses);
+  if (build.base === UI_BASE) {
+    content = toUiSdkAttributes(content);
+  }
   // 3. Import paths become the paths the files land at
   content = transformImportPaths(content);
   // 4. export default becomes a named export
@@ -489,9 +520,15 @@ async function buildItem(
     files,
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
-    registryDependencies: withSharedItems(item, files)?.map((dependency) =>
-      itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
-    ),
+    registryDependencies: withSharedItems(item, files)?.map((dependency) => {
+      const shadcn = SHADCN_DEPENDENCY.exec(dependency)?.[1];
+      if (shadcn && build.base === UI_BASE && uiNames.has(shadcn)) {
+        return `${NAMESPACE}/${shadcn}`;
+      }
+      return itemNames.has(dependency)
+        ? `${NAMESPACE}/${dependency}`
+        : dependency;
+    }),
     title: item.title,
     type: item.type,
   };
@@ -511,7 +548,7 @@ function indexEntry(item: BuiltItem) {
 // ---------------------------------------------------------------------------
 
 async function emitItem(name: string, build: StyleBuild) {
-  const item = itemsByBase.get(build.base)?.get(name);
+  const item = itemOf(name, build.base);
   const built = item ? await buildItem(item, build) : null;
   if (!built) {
     return null;
@@ -704,6 +741,18 @@ const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
 );
 
+// The `ui-sdk` base serves its own ui components and, beside them, every item of `base`, whose `@shadcn/<name>` dependencies it answers with its own components.
+const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
+const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
+function itemOf(name: string, base: string): SourceItem | undefined {
+  const own = itemsByBase.get(base)?.get(name);
+  if (own || base !== UI_BASE) {
+    return own;
+  }
+  const shared = itemsByBase.get(MANIFEST_BASE)?.get(name);
+  return shared && { ...shared, origin: MANIFEST_BASE };
+}
+
 const startedAt = Date.now();
 console.log("Building static registry...");
 await buildManifests();
@@ -714,6 +763,17 @@ const cnClassesByStyle = new Map(
     STYLES.map(async (style) => [style, await readCnClasses(style)] as const)
   )
 );
+// A hook one style leaves out (lyra has no `cn-dialog-footer`) is empty there, not left in the file.
+const everyHook = new Set(
+  [...cnClassesByStyle.values()].flatMap((classes) => [...classes.keys()])
+);
+for (const classes of cnClassesByStyle.values()) {
+  for (const hook of everyHook) {
+    if (!classes.has(hook)) {
+      classes.set(hook, "");
+    }
+  }
+}
 const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
   STYLES.map((style) => ({
     base,

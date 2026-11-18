@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
+import { useMidiInput } from "@/registry/bases/base/hooks/use-midi-input";
 
 /**
  * Connects the page's MIDI input from a preview's bar, for the previews that

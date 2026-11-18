@@ -2,20 +2,19 @@ import { useCallback, useSyncExternalStore } from "react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/base/ui/select";
+} from "@/components/ui/select";
 import {
   silentSource,
   useAudioSession,
-} from "@/registry-audio/bases/base/hooks/use-audio-session";
+} from "@/registry/bases/base/hooks/use-audio-session";
 import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
-} from "@/registry-audio/bases/base/lib/demo-sound";
+} from "@/registry/bases/base/lib/demo-sound";
 
 const NONE = { chosen: null, fallback: null };
 
@@ -59,17 +58,15 @@ export function SourceSelect() {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          {ITEMS.map((item) => (
-            <SelectItem
-              key={item.value}
-              title={DEMO_SOURCES[item.value].about}
-              value={item.value}
-            >
-              {item.label}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {ITEMS.map((item) => (
+          <SelectItem
+            key={item.value}
+            title={DEMO_SOURCES[item.value].about}
+            value={item.value}
+          >
+            {item.label}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

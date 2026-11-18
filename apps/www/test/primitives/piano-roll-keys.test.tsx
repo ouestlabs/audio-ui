@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Piano } from "@/registry-audio/bases/base/primitives/piano/react/index.tsx";
-import { PianoRoll } from "@/registry-audio/bases/base/primitives/piano-roll/react/index.tsx";
+import { Piano } from "@/registry/bases/base/primitives/piano/react/index.tsx";
+import { PianoRoll } from "@/registry/bases/base/primitives/piano-roll/react/index.tsx";
 import { mockRect, pointer } from "./helpers.ts";
 
 const notes = [

@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { PianoRoll } from "@/registry-audio/bases/base/primitives/piano-roll/vue/index.ts";
+import { PianoRoll } from "@/registry/bases/base/primitives/piano-roll/vue/index.ts";
 import { pianoRollSuite } from "./piano-roll-suite.ts";
 
 pianoRollSuite("Vue", async (tree) => {

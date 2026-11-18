@@ -4,13 +4,13 @@ import {
   PianoRollKeys,
   PianoRollStrip,
   PianoRollViewport,
-} from "@/registry-audio/bases/base/audio/elements/piano-roll";
+} from "@/registry/bases/base/audio/elements/piano-roll";
 import {
   Timeline,
   TimelineMark,
   TimelinePlayhead,
   TimelineRuler,
-} from "@/registry-audio/bases/base/audio/elements/timeline";
+} from "@/registry/bases/base/audio/elements/timeline";
 import { ramp } from "../motion.ts";
 
 const STEPS_PER_BEAT = 4;

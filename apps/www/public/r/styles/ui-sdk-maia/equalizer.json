@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The equalizer device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/equalizer/.","files":[],"name":"equalizer","registryDependencies":["@audio-ui/equalizer-device","@audio-ui/equalizer-engine","@audio-ui/equalizer-panel"],"type":"registry:ui"}

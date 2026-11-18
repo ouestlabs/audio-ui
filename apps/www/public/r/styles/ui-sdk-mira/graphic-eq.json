@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The graphic eq device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/graphic-eq/.","files":[],"name":"graphic-eq","registryDependencies":["@audio-ui/graphic-eq-device","@audio-ui/graphic-eq-engine","@audio-ui/graphic-eq-panel"],"type":"registry:ui"}

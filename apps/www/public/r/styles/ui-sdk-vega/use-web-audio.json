@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Gone: the page's one AudioContext is the webAudio of the web-audio lib, imported where it is used. Installs that lib.","files":[],"name":"use-web-audio","registryDependencies":["@audio-ui/web-audio"],"type":"registry:hook"}

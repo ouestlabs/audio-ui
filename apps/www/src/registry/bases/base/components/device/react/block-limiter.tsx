@@ -1,0 +1,33 @@
+import { useState } from "react";
+import {
+  type LimiterState,
+  limiterDevice,
+} from "@/registry/bases/base/devices/limiter/device";
+import { createLimiterEngine } from "@/registry/bases/base/devices/limiter/engine";
+import { LimiterPanel } from "@/registry/bases/base/devices/limiter/panel";
+import { useDeviceLoop } from "@/registry/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/base/hooks/use-device-signal";
+import { useMasterBus } from "@/registry/bases/base/hooks/use-master-bus";
+
+const MASTER_VOLUME = 0.7;
+
+/**
+ * A limiter you can plug in: its state, a panel that draws its transfer curve with a handle on the ceiling and an engine that plays it, each its own file. Play the loop, push the gain and pull the ceiling down.
+ */
+export default function BlockLimiter() {
+  const [state, setState] = useState<LimiterState>(() =>
+    limiterDevice.defaults()
+  );
+  const master = useMasterBus(MASTER_VOLUME);
+  const { engine } = useDeviceLoop({
+    create: createLimiterEngine,
+    destination: master,
+    state,
+  });
+  const signal = useDeviceSignal(engine, limiterDevice);
+  return (
+    <div className="cn-audio-panel h-full w-full min-w-0">
+      <LimiterPanel onValueChange={setState} signal={signal} value={state} />
+    </div>
+  );
+}

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The reverb device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/reverb/.","files":[],"name":"reverb","registryDependencies":["@audio-ui/reverb-device","@audio-ui/reverb-engine","@audio-ui/reverb-panel"],"type":"registry:ui"}

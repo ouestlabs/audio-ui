@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from "react";
 import { DEFAULT_TEMPO, secondsPerBar } from "@/engine/time";
-import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
-import { createSource } from "@/registry-audio/bases/base/primitives/primitive";
+import { Transport } from "@/registry/bases/base/audio/elements/transport";
+import { createSource } from "@/registry/bases/base/primitives/primitive";
 
 const LOOP_BARS = 4;
 const START = 0.3;
