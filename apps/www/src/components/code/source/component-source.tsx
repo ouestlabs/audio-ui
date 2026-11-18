@@ -1,5 +1,4 @@
 import * as React from "react";
-import { CodeCollapsibleWrapper } from "@/components/code/block/code-collapsible-wrapper";
 import { HighlightedCode } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { getIconForLanguageExtension } from "@/components/site/icons";
@@ -18,15 +17,11 @@ import type { IconLibraryName } from "@/registry/config";
 
 const DEFAULT_STYLE_NAME = "ui-sdk-nova";
 
-const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
-  "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";
-
 const clientCodeCache = new Map<string, string>();
 
 export interface ComponentSourceProps {
   className?: string;
   code?: string;
-  collapsible?: boolean;
   eventName?: "copy_component_code";
   /** Which file of the registry item to show, when it installs several. @default 0 */
   file?: number;
@@ -48,7 +43,6 @@ export function ComponentSource({
   file = 0,
   title,
   language,
-  collapsible = true,
   className,
   styleName = DEFAULT_STYLE_NAME,
   iconLibrary: _iconLibrary,
@@ -175,35 +169,18 @@ export function ComponentSource({
 
   const effectiveEventName = eventName ?? "copy_component_code";
 
-  if (!collapsible) {
-    return (
-      <div className={cn("relative", className)}>
-        <ComponentCode
-          code={code}
-          config={config}
-          eventName={effectiveEventName}
-          language={lang}
-          name={name}
-          showCopyButton={showCopyButton}
-          title={title}
-        />
-      </div>
-    );
-  }
-
   return (
-    <CodeCollapsibleWrapper className={className}>
+    <div className={cn("relative", className)}>
       <ComponentCode
         code={code}
         config={config}
-        copyButtonClassName={COLLAPSIBLE_COPY_BUTTON_CLASS_NAME}
         eventName={effectiveEventName}
         language={lang}
         name={name}
         showCopyButton={showCopyButton}
         title={title}
       />
-    </CodeCollapsibleWrapper>
+    </div>
   );
 }
 
@@ -215,7 +192,6 @@ function ComponentCode({
   name,
   config,
   showCopyButton,
-  copyButtonClassName,
 }: {
   code: string;
   language: string;
@@ -224,7 +200,6 @@ function ComponentCode({
   name?: string;
   config?: any;
   showCopyButton?: boolean;
-  copyButtonClassName?: string;
 }) {
   return (
     <figure data-rehype-pretty-code-figure="">
@@ -240,7 +215,6 @@ function ComponentCode({
       ) : null}
       {showCopyButton ? (
         <CopyButton
-          className={copyButtonClassName}
           event={eventName as any}
           properties={{
             base: config?.base,

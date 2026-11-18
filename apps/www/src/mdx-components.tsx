@@ -3,10 +3,10 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import type * as React from "react";
 import { CodeBlockCommand } from "@/components/code/block/code-block-command";
-import { CodeCollapsibleWrapper } from "@/components/code/block/code-collapsible-wrapper";
 import { CodeTabs } from "@/components/code/block/code-tabs";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
+import { FileStack } from "@/components/code/source/file-stack";
 import { Callout } from "@/components/docs/mdx/callout";
 import { CodeFile } from "@/components/docs/mdx/code-file";
 import { ComponentIndex } from "@/components/docs/mdx/component-index";
@@ -88,7 +88,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Module,
     CodeBlockCommand,
     InstallAgent: InstallAgentParts,
-    CodeCollapsibleWrapper,
     CodeTabs,
     ComponentPreview: ({
       className,
@@ -99,15 +98,19 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         {...props}
       />
     ),
+    // A registry file with its path is a row like the rest of the page's code.
     ComponentSource: ({
       className,
       ...props
-    }: React.ComponentProps<typeof DocsComponentSource>) => (
-      <DocsComponentSource
-        className={cn("not-typeset", className)}
-        {...props}
-      />
-    ),
+    }: React.ComponentProps<typeof DocsComponentSource>) =>
+      props.name && props.title ? (
+        <FileStack name={props.name} paths={[props.title]} />
+      ) : (
+        <DocsComponentSource
+          className={cn("not-typeset", className)}
+          {...props}
+        />
+      ),
     code: ({
       className,
       __raw__,
