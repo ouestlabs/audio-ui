@@ -1,24 +1,58 @@
 import {
-  Select,
+  type ListData,
   SelectContent as SelectContentPrimitive,
   SelectGroupLabel,
   SelectGroup as SelectGroupPrimitive,
   SelectItemIndicator,
   SelectItem as SelectItemPrimitive,
+  Select as SelectPrimitive,
+  type SelectProps,
   SelectSeparator as SelectSeparatorPrimitive,
   SelectTrigger as SelectTriggerPrimitive,
   SelectValue as SelectValuePrimitive,
 } from "@ui-sdk/react/select";
-import type { ComponentProps, ReactNode } from "react";
+import {
+  Children,
+  type ComponentProps,
+  isValidElement,
+  type ReactNode,
+} from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/lib/utils";
 
+// ui-sdk types `items` as a mutable list, the shared sources hold theirs as `as const`.
+function Select<T = string>({
+  items,
+  ...props
+}: Omit<SelectProps<T, false>, "items"> & {
+  items?: ListData<T> | readonly unknown[];
+}) {
+  return (
+    <SelectPrimitive<T>
+      {...(props as SelectProps<T, false>)}
+      items={items as ListData<T> | undefined}
+    />
+  );
+}
+
+// A group without a label only wraps its items in the shadcn API, and ui-sdk misplaces the selected item over the trigger inside any group.
 function SelectGroup({
+  children,
   className,
   ...props
-}: ComponentProps<typeof SelectGroupPrimitive>) {
+}: Omit<ComponentProps<typeof SelectGroupPrimitive>, "children"> & {
+  children?: ReactNode;
+}) {
+  const labelled = Children.toArray(children).some(
+    (child) => isValidElement(child) && child.type === SelectLabel
+  );
+  if (!labelled) {
+    return children;
+  }
   return (
-    <SelectGroupPrimitive className={cn("scroll-my-1", className)} {...props} />
+    <SelectGroupPrimitive className={cn("scroll-my-1", className)} {...props}>
+      {children}
+    </SelectGroupPrimitive>
   );
 }
 

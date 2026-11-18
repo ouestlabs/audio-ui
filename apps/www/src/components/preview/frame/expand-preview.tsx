@@ -1,9 +1,9 @@
-import type { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   ArrowsOutSimpleIcon,
   InfoIcon,
   XIcon,
 } from "@phosphor-icons/react/ssr";
+import type { DialogOpenChangeDetails } from "@ui-sdk/react/dialog";
 import { useCallback } from "react";
 import { CopyRegistry } from "@/components/code/copy/copy-registry";
 import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
@@ -78,10 +78,11 @@ export function ExpandPreview({
 }) {
   const { onOpenChange } = preview;
   const handleOpenChange = useCallback(
-    (open: boolean, eventDetails: DialogPrimitive.Root.ChangeEventDetails) => {
+    (open: boolean, eventDetails: DialogOpenChangeDetails) => {
       if (
         !open &&
         eventDetails.reason === "outside-press" &&
+        eventDetails.event &&
         isOwnMenuPress(eventDetails.event)
       ) {
         eventDetails.cancel();

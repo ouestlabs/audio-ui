@@ -16,6 +16,24 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@/registry/bases/base/ui/dialog": [
+        "./src/registry-audio/bases/ui-sdk/ui/dialog.tsx"
+      ],
+      "@/registry/bases/base/ui/button": [
+        "./src/registry-audio/bases/ui-sdk/ui/button.tsx"
+      ],
+      "@/registry/bases/base/ui/select": [
+        "./src/registry-audio/bases/ui-sdk/ui/select.tsx"
+      ],
+      "@/registry/bases/base/ui/dropdown-menu": [
+        "./src/registry-audio/bases/ui-sdk/ui/dropdown-menu.tsx"
+      ],
+      "@/registry/bases/base/ui/context-menu": [
+        "./src/registry-audio/bases/ui-sdk/ui/context-menu.tsx"
+      ],
+      "@/registry/bases/base/ui/popover": [
+        "./src/registry-audio/bases/ui-sdk/ui/popover.tsx"
+      ],
       "@/primitives/envelope": [
         "./src/registry-audio/bases/base/primitives/envelope/envelope.ts"
       ],

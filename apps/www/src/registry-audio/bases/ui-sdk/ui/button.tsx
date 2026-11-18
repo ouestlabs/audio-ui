@@ -1,6 +1,6 @@
 import { Button as ButtonPrimitive } from "@ui-sdk/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentProps } from "react";
+import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -38,13 +38,20 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  nativeButton: _nativeButton,
+  onClick,
   ...props
-}: ComponentProps<typeof ButtonPrimitive> &
-  VariantProps<typeof buttonVariants>) {
+}: Omit<ComponentProps<typeof ButtonPrimitive>, "children" | "onClick"> & {
+  children?: ReactNode;
+  /** Base UI's flag for a button that renders a link: ui-sdk needs none. */
+  nativeButton?: boolean;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+} & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       className={cn(buttonVariants({ className, size, variant }))}
       data-slot="button"
+      onClick={onClick as ComponentProps<typeof ButtonPrimitive>["onClick"]}
       {...props}
     />
   );

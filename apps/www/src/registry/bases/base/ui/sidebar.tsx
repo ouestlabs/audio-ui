@@ -5,7 +5,6 @@ import * as React from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { useIsMobile } from "@/registry/bases/base/hooks/use-mobile";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
 import { Input } from "@/registry/bases/base/ui/input";
 import { Separator } from "@/registry/bases/base/ui/separator";
 import {
@@ -21,6 +20,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/registry/bases/base/ui/tooltip";
+import { Button } from "./button";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

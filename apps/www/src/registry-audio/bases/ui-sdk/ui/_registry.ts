@@ -31,10 +31,25 @@ export const ui: Registry["items"] = [
     { dependencies: ["class-variance-authority"] }
   ),
   ui_(
+    "context-menu",
+    "Context menu",
+    "A menu that opens at a right-click or a long press, with groups, checkboxes, radio choices and submenus."
+  ),
+  ui_(
     "dialog",
     "Dialog",
     "A focused task over the page, with a backdrop, a title, a description and a close button.",
     { registryDependencies: ["button"] }
+  ),
+  ui_(
+    "dropdown-menu",
+    "Dropdown menu",
+    "A menu that opens from a button, with groups, checkboxes, radio choices and submenus."
+  ),
+  ui_(
+    "popover",
+    "Popover",
+    "Content in a floating panel that opens from a trigger."
   ),
   ui_(
     "select",
