@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMicrophoneSwitch } from "@/registry/bases/base/hooks/use-microphone";
+import { useMicrophoneSwitch } from "@/registry/bases/shared/hooks/use-microphone";
 
 /**
  * Turns the microphone on for a preview from its bar, for the previews that

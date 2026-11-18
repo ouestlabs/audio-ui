@@ -13,7 +13,7 @@ import type { RegistryItem } from "shadcn/schema";
 import { MODULE_SETS } from "../src/registry/bases/modules.ts";
 
 const WEB = `${import.meta.dir}/..`;
-const BASE = `${WEB}/src/registry/bases/base`;
+const SHARED = `${WEB}/src/registry/bases/shared`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
 const FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
 
@@ -84,10 +84,9 @@ const importOf = (path: string) =>
 async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
   const loaded = await Promise.all(
     folders.map(async (folder) => {
-      const module = (await import(`${BASE}/${folder}/_registry.ts`)) as Record<
-        string,
-        RegistryItem[] | undefined
-      >;
+      const module = (await import(
+        `${SHARED}/${folder}/_registry.ts`
+      )) as Record<string, RegistryItem[] | undefined>;
       return module[folder] ?? [];
     })
   );
@@ -105,7 +104,7 @@ export async function buildEntries(): Promise<Entry[]> {
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
       const files = (item.files ?? []).map((file) => file.path);
-      const main = await Bun.file(`${BASE}/${files[0]}`).text();
+      const main = await Bun.file(`${SHARED}/${files[0]}`).text();
       return {
         dependencies: item.dependencies ?? [],
         description: item.description ?? "",
@@ -144,7 +143,7 @@ const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const SOURCE_FILE = /\.tsx?$/;
 
 /** Where the modules of the engine and of gl are, in the registry. */
-const LIB = `${BASE}/lib`;
+const LIB = `${SHARED}/lib`;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
@@ -359,7 +358,7 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
     items.map(async (item) => ({
       name: item.name,
       sources: await Promise.all(
-        (item.files ?? []).map((file) => read(`${BASE}/${file.path}`))
+        (item.files ?? []).map((file) => read(`${SHARED}/${file.path}`))
       ),
     }))
   );

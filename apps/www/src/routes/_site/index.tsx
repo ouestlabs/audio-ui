@@ -11,7 +11,7 @@ import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
-import BlockAudioEditor from "@/registry/bases/base/components/audio-editor/react/block-audio-editor";
+import BlockAudioEditor from "@/registry/bases/shared/components/audio-editor/react/block-audio-editor";
 
 /** The component spaces and the guides, read once on the server. */
 const loadHome = createServerFn({ method: "GET" }).handler(() =>

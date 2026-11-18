@@ -21,7 +21,6 @@ function StackedFile({
   const source = useCallback(
     (onCode: (code: string) => void) => (
       <DocsComponentSource
-        collapsible={false}
         file={index}
         language={EXTENSION.exec(path)?.[1]}
         name={name}

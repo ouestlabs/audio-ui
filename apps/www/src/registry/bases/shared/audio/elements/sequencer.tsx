@@ -1,0 +1,138 @@
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
+import { cn } from "@/registry/bases/shared/lib/utils";
+import { Sequencer as SequencerPrimitive } from "@/registry/bases/shared/primitives/sequencer/react";
+
+/** The numbers 0 to length - 1, to make a part of each row or step from. */
+const indexes = (length: number) => Array.from({ length }, (_, index) => index);
+
+type SequencerProps = Omit<
+  ComponentProps<typeof SequencerPrimitive.Root>,
+  "children" | "className"
+> & {
+  className?: string;
+  /** Names each row, such as "Kick": it labels the row for assistive technology and is written beside it. */
+  rowLabels?: readonly string[];
+  /** What sits beside a row in place of its written name, such as a button that sounds it: the row keeps its name for assistive technology. */
+  renderRowLabel?: (row: number) => ReactNode;
+  /** Highlights every `beatEvery` steps, such as 4 for a beat in sixteenths. */
+  beatEvery?: number;
+  /** Draws a bar under each row to set how loud every step plays: press or drag across it; Alt + click returns a step to full. */
+  showVelocity?: boolean;
+  /** `sm` draws short steps and a thin bar under them, so many rows fit. @default "default" */
+  size?: "default" | "sm";
+  /** Draws a step that plays fainter the softer it plays, by `velocities`: a ghost note shows as one. @default false */
+  shadeByVelocity?: boolean;
+  /** What a step shows inside it, such as how many times it repeats. */
+  renderCell?: (row: number, step: number) => ReactNode;
+};
+
+/**
+ * A step sequencer: a row of steps per sound. Press a step to flip it and
+ * drag on to paint the same state across the others; the arrow keys move
+ * between steps and Space flips one. Pass `source` with the step being played
+ * and its column lights up. With `showVelocity`, a bar under each row sets
+ * how loud each step plays; pass `velocities` and `onVelocityChange` to follow
+ * them.
+ */
+function Sequencer({
+  beatEvery = 4,
+  className,
+  renderCell,
+  renderRowLabel,
+  rowLabels,
+  shadeByVelocity = false,
+  showVelocity = false,
+  size = "default",
+  ...props
+}: SequencerProps) {
+  const { velocities } = props;
+  return (
+    <SequencerPrimitive.Root
+      className={cn(
+        "cn-sequencer w-full min-w-0 select-none data-disabled:opacity-50",
+        // Labelled rows share one label column, as wide as the longest label.
+        rowLabels
+          ? "grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1.5"
+          : "flex flex-col gap-1.5",
+        className
+      )}
+      data-slot="sequencer"
+      {...props}
+    >
+      {({ rows, steps }) =>
+        indexes(rows).map((row) => (
+          <SequencerPrimitive.Row
+            aria-label={rowLabels?.[row] ?? `Row ${row + 1}`}
+            className={
+              rowLabels
+                ? "col-span-2 grid grid-cols-subgrid items-center"
+                : "flex items-center"
+            }
+            index={row}
+            key={row}
+          >
+            {renderRowLabel?.(row) ??
+              (rowLabels ? (
+                <span
+                  aria-hidden="true"
+                  className="max-w-24 truncate text-muted-foreground text-xs"
+                >
+                  {rowLabels[row]}
+                </span>
+              ) : null)}
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <div className="grid grid-flow-col auto-cols-fr gap-1">
+                {indexes(steps).map((step) => (
+                  <SequencerPrimitive.Cell
+                    aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
+                    className={cn(
+                      "cn-sequencer-cell flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
+                      size === "sm" ? "h-6" : "h-9",
+                      step % beatEvery === 0 && "cn-sequencer-cell-beat",
+                      shadeByVelocity &&
+                        "aria-pressed:opacity-(--sequencer-cell-level)"
+                    )}
+                    data-step={step}
+                    key={step}
+                    row={row}
+                    step={step}
+                    style={
+                      shadeByVelocity
+                        ? ({
+                            "--sequencer-cell-level":
+                              0.35 + 0.65 * (velocities?.[row]?.[step] ?? 1),
+                          } as CSSProperties)
+                        : undefined
+                    }
+                  >
+                    {renderCell?.(row, step)}
+                  </SequencerPrimitive.Cell>
+                ))}
+              </div>
+              {showVelocity ? (
+                <div className="grid grid-flow-col auto-cols-fr gap-1">
+                  {indexes(steps).map((step) => (
+                    <SequencerPrimitive.Velocity
+                      aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
+                      className={cn(
+                        "cn-sequencer-velocity group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
+                        size === "sm" ? "h-3" : "h-8"
+                      )}
+                      key={step}
+                      row={row}
+                      step={step}
+                    >
+                      <span className="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]" />
+                    </SequencerPrimitive.Velocity>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </SequencerPrimitive.Row>
+        ))
+      }
+    </SequencerPrimitive.Root>
+  );
+}
+
+export { Sequencer };

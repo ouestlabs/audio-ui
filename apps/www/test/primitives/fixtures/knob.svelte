@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Knob } from "@/registry/bases/base/primitives/knob/svelte/index.ts";
+import { Knob } from "@/registry/bases/shared/primitives/knob/svelte/index.ts";
 
 /** The knob the shared suite drives: its options, how it is named, and its provider. */
 let {

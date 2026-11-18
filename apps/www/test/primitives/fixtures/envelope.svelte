@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Envelope } from "@/registry/bases/base/primitives/envelope/svelte/index.ts";
+import { Envelope } from "@/registry/bases/shared/primitives/envelope/svelte/index.ts";
 
 /** The envelope the shared suite drives: its options. */
 let { options = {} }: { options?: Record<string, unknown> } = $props();

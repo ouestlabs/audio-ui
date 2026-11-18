@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Fader } from "@/registry/bases/base/primitives/fader/react/index.tsx";
+import { Fader } from "@/registry/bases/shared/primitives/fader/react/index.tsx";
 import { faderSuite } from "./fader-suite.ts";
 
 faderSuite("React", async ({ label, marks, options, thumbLabel }) => {

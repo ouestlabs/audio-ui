@@ -1,4 +1,4 @@
-import "@/registry/bases/base/primitives/pad/web/index.ts";
+import "@/registry/bases/shared/primitives/pad/web/index.ts";
 import { type PadTree, padSuite } from "./pad-suite.ts";
 
 const kebab = (name: string) =>

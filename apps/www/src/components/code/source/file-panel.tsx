@@ -68,7 +68,7 @@ export function FilePanel({
     >
       <div className="flex items-center pr-1.5">
         <CollapsibleTrigger
-          className="flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&[data-panel-open]>svg:last-child]:rotate-180"
+          className="flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-site-muted-foreground outline-none transition-colors hover:text-site-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset [&[data-open]>svg:last-child]:rotate-180"
           title={path}
         >
           {getIconForLanguageExtension(EXTENSION.exec(base)?.[1] ?? "", {
@@ -94,10 +94,7 @@ export function FilePanel({
           />
         ) : null}
       </div>
-      <CollapsibleContent
-        className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-200 ease-out data-ending-style:h-0 data-starting-style:h-0 motion-reduce:transition-none"
-        keepMounted
-      >
+      <CollapsibleContent className="overflow-hidden" keepMounted>
         {near ? source(setCode) : null}
       </CollapsibleContent>
     </Collapsible>

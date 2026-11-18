@@ -59,14 +59,6 @@ function isEditableTarget(target: EventTarget | null) {
 
 type HighlightType = "color" | "page" | "component" | "category";
 
-/** Whether an entry matches what is typed, its keywords included: 1 or 0, as the command list ranks. */
-const matchesSearch = (value: string, search: string, keywords?: string[]) =>
-  `${value} ${keywords?.join(" ") ?? ""}`
-    .toLowerCase()
-    .includes(search.toLowerCase())
-    ? 1
-    : 0;
-
 export type CommandMenuGroup = {
   id: string;
   name: string;
@@ -204,7 +196,7 @@ export function CommandMenu({
         }
       />
       <DialogContent
-        className="flex max-h-[calc(100dvh-1.5rem)] flex-col max-sm:h-[calc(100dvh-1.5rem)] gap-0 overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] p-0.5 shadow-2xl ring-0 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-selected:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command]:bg-transparent"
+        className="flex max-h-[calc(100dvh-1.5rem)] flex-col max-sm:h-[calc(100dvh-1.5rem)] gap-0 overflow-hidden rounded-(--frame-radius) border border-site-border/80 bg-[color-mix(in_oklab,var(--site-muted)_50%,var(--site-background))] p-0.5 shadow-2xl ring-0 max-sm:top-3 max-sm:max-w-[calc(100%-1.5rem)] max-sm:translate-y-0 sm:max-w-xl **:data-[slot=command-item]:data-highlighted:bg-site-muted **:data-[slot=command-item]:max-sm:py-2.5 **:data-[slot=command]:bg-transparent"
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
@@ -213,7 +205,7 @@ export function CommandMenu({
         </DialogHeader>
         <Command
           className="min-h-0 flex-1 gap-0 rounded-none! p-0"
-          filter={matchesSearch}
+          filter="contains"
         >
           <FrameHeader className="shrink-0 flex-row items-center gap-1 p-1 **:data-[slot=command-input-wrapper]:flex-1 **:data-[slot=command-input-wrapper]:p-0">
             <CommandInput placeholder="Search…" />
@@ -241,7 +233,7 @@ export function CommandMenu({
               </CommandEmpty>
               {navItems && navItems.length > 0 && (
                 <CommandGroup
-                  className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
+                  className="p-0! **:data-[slot=command-group-label]:scroll-mt-16 **:data-[slot=command-group-label]:p-3! **:data-[slot=command-group-label]:pb-1!"
                   heading="Pages"
                 >
                   {navItems.map((item) => (
@@ -275,7 +267,7 @@ export function CommandMenu({
               )}
               {shownGroups.map((group) => (
                 <CommandGroup
-                  className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
+                  className="p-0! **:data-[slot=command-group-label]:scroll-mt-16 **:data-[slot=command-group-label]:p-3! **:data-[slot=command-group-label]:pb-1!"
                   heading={group.name}
                   key={group.id}
                 >
@@ -354,8 +346,6 @@ function CommandMenuItem({
   href?: string;
   onHighlight: (type: HighlightType, payload: string) => void;
   onNavigate: (href: string) => void;
-  "data-selected"?: string;
-  "aria-selected"?: string;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const handleSelect = React.useCallback(() => {
@@ -368,8 +358,8 @@ function CommandMenuItem({
     for (const mutation of mutations) {
       if (
         mutation.type === "attributes" &&
-        mutation.attributeName === "aria-selected" &&
-        ref.current?.getAttribute("aria-selected") === "true"
+        mutation.attributeName === "data-highlighted" &&
+        ref.current?.hasAttribute("data-highlighted")
       ) {
         onHighlight(highlightType, highlightPayload);
       }
@@ -379,7 +369,7 @@ function CommandMenuItem({
   return (
     <CommandItem
       className={cn(
-        "site-rounded-md h-9 border border-transparent px-3! font-medium data-[selected=true]:border-site-input data-[selected=true]:bg-site-input/50",
+        "site-rounded-md h-9 border border-transparent px-3! font-medium data-highlighted:border-site-input data-highlighted:bg-site-input/50",
         className
       )}
       onSelect={handleSelect}

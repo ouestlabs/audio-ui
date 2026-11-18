@@ -1,4 +1,4 @@
-import "@/registry/bases/base/primitives/sequencer/web/index.ts";
+import "@/registry/bases/shared/primitives/sequencer/web/index.ts";
 import { type SequencerTree, sequencerSuite } from "./sequencer-suite.ts";
 
 const kebab = (name: string) =>
