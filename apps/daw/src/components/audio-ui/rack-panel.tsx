@@ -313,6 +313,7 @@ function RackChainRow({
       <Button
         aria-label={`Remove ${chain.name}`}
         className="text-muted-foreground"
+        data-agent-confirm={`Removes the ${chain.name} chain from the rack`}
         disabled={!removable}
         onClick={remove}
         size="icon-sm"

@@ -616,7 +616,11 @@ function SlotMenu() {
       ) : null}
       {move && remove ? <ContextMenuSeparator /> : null}
       {remove ? (
-        <ContextMenuItem onClick={removeIt} variant="destructive">
+        <ContextMenuItem
+          data-agent-confirm={`Removes ${title} from the chain`}
+          onClick={removeIt}
+          variant="destructive"
+        >
           Remove
           <ContextMenuShortcut>Del</ContextMenuShortcut>
         </ContextMenuItem>

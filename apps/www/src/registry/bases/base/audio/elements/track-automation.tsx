@@ -250,6 +250,7 @@ function TrackAutomationChooser({
       </Select>
       <Button
         aria-label={`Clear the ${label.toLowerCase()} envelope of ${name}`}
+        data-agent-confirm={`Clears the ${label.toLowerCase()} envelope of ${name}`}
         disabled={!automation?.[parameter]}
         onClick={clear}
         size="icon-xs"

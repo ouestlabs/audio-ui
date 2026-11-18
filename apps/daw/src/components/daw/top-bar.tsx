@@ -331,7 +331,10 @@ export function TopBar(props: TopBarProps) {
             <DotsThreeIcon aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-auto min-w-48">
-            <DropdownMenuItem onClick={props.onNew}>
+            <DropdownMenuItem
+              data-agent-confirm="Closes this project and opens an empty one in its place"
+              onClick={props.onNew}
+            >
               New project
             </DropdownMenuItem>
             {props.onOpen ? (

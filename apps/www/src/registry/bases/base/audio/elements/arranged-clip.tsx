@@ -618,6 +618,9 @@ const ArrangedClip = memo(function ArrangedClipView({
             {entry.separatorBefore ? <ContextMenuSeparator /> : null}
             <ContextMenuItem
               data-action={entry.action}
+              data-agent-confirm={
+                entry.destructive ? `Deletes the clip ${clip.name}` : undefined
+              }
               onClick={handleMenuItem}
               variant={entry.destructive ? "destructive" : "default"}
             >

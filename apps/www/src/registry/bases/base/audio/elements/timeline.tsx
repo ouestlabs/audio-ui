@@ -1003,17 +1003,23 @@ type TrackAction = (trackId: string) => void;
 function TimelineTrackMenuItem({
   action,
   children,
+  confirm,
   trackId,
   variant,
 }: {
   action?: TrackAction;
   children: ReactNode;
+  confirm?: string;
   trackId: string;
   variant?: "destructive";
 }) {
   const handleClick = useCallback(() => action?.(trackId), [action, trackId]);
   return action ? (
-    <ContextMenuItem onClick={handleClick} variant={variant}>
+    <ContextMenuItem
+      data-agent-confirm={confirm}
+      onClick={handleClick}
+      variant={variant}
+    >
       {children}
     </ContextMenuItem>
   ) : null;
@@ -1022,6 +1028,7 @@ function TimelineTrackMenuItem({
 /** A track's context menu: an entry for each action it is given, then the colors. */
 function TimelineTrackMenu({
   folded,
+  name,
   onColor,
   onCustomColor,
   onDuplicate,
@@ -1034,6 +1041,7 @@ function TimelineTrackMenu({
   trackId,
 }: {
   folded?: boolean;
+  name: string;
   onColor: (event: MouseEvent<HTMLElement>) => void;
   onCustomColor: () => void;
   onDuplicate?: TrackAction;
@@ -1065,6 +1073,7 @@ function TimelineTrackMenu({
       {onRemove ? <ContextMenuSeparator /> : null}
       <TimelineTrackMenuItem
         action={onRemove}
+        confirm={`Deletes the track ${name} and its clips`}
         trackId={trackId}
         variant="destructive"
       >
@@ -1431,6 +1440,7 @@ function TimelineTrackControls({
       </ContextMenuTrigger>
       <TimelineTrackMenu
         folded={folded}
+        name={name}
         onColor={handleColor}
         onCustomColor={openPicker}
         onDuplicate={onDuplicate}

@@ -3,12 +3,14 @@ import type { ReactNode } from "react";
 /** A transport key with its lamp: it stays down while it is on. */
 export function Key({
   children,
+  confirm,
   disabled,
   lit,
   onPress,
   pressed,
 }: {
   children: ReactNode;
+  confirm?: string;
   disabled?: boolean;
   lit?: boolean;
   onPress: () => void;
@@ -18,6 +20,7 @@ export function Key({
     <button
       aria-pressed={pressed}
       className="vesta-key"
+      data-agent-confirm={confirm}
       disabled={disabled}
       onClick={onPress}
       type="button"

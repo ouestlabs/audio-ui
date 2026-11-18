@@ -87,7 +87,12 @@ export default function NoteEditMenuDemo() {
             <NoteEditMenuSub edits={PITCH_EDITS} label="Pitch" />
             <NoteEditMenuSub edits={VELOCITY_EDITS} label="Velocity" />
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={reset}>Reset</DropdownMenuItem>
+            <DropdownMenuItem
+              data-agent-confirm="Puts the phrase back as it was, without the edits"
+              onClick={reset}
+            >
+              Reset
+            </DropdownMenuItem>
           </NoteEditMenuContent>
         </NoteEditMenu>
       </div>

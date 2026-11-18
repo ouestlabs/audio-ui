@@ -358,6 +358,7 @@ function PadMix({
       <Button
         aria-label={`Remove ${name}`}
         className="text-muted-foreground"
+        data-agent-confirm={`Removes ${name} from the drum rack`}
         onClick={remove}
         size="icon"
         variant="ghost"
