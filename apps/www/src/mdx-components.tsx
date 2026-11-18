@@ -292,7 +292,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
         <FrameContent className="typeset-scroll no-scrollbar mt-0">
           <table
             className={cn(
-              "[&_:is(th,td):first-child]:ps-4 [&_:is(th,td):last-child]:pe-4",
+              "w-full [&_:is(th,td):first-child]:ps-4 [&_:is(th,td):last-child]:pe-4",
               className
             )}
             {...props}
