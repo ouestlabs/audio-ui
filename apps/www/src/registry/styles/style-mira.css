@@ -155,7 +155,7 @@
   }
 
   .cn-button-variant-outline {
-    @apply border-input dark:bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground;
+    @apply border-border dark:bg-input/30 hover:bg-input/50 hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground;
   }
 
   .cn-button-variant-secondary {
@@ -220,7 +220,7 @@
   }
 
   .cn-button-group-text {
-    @apply bg-muted gap-2 rounded-md border border-input px-2.5 text-xs/relaxed font-medium [&_svg:not([class*='size-'])]:size-4;
+    @apply bg-muted gap-2 rounded-md border px-2.5 text-xs/relaxed font-medium [&_svg:not([class*='size-'])]:size-4;
   }
 
   .cn-button-group-separator {
