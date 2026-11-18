@@ -211,9 +211,6 @@
   "block-wave-shaper": [
     "components/examples/block-wave-shaper.tsx"
   ],
-  "block-waveform-player": [
-    "components/examples/block-waveform-player.tsx"
-  ],
   "bpm-control": [
     "components/audio-ui/bpm-control.tsx"
   ],

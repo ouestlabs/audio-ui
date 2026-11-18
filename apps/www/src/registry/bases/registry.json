@@ -169,7 +169,7 @@
       "name": "timeline"
     },
     {
-      "count": 5,
+      "count": 4,
       "description": "Seekable waveform components for scrubbing and visualizing audio playback.",
       "label": "Waveform",
       "name": "waveform"
@@ -181,5 +181,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 124
+  "totalComponents": 123
 }

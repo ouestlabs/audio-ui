@@ -212,9 +212,8 @@ function PlotCursor({ className, format, ...props }: PlotCursorProps) {
         style={{ top: "var(--plot-cursor-y)" }}
       />
       <PlotPrimitive.CursorReadout
-        className="cn-plot-cursor-readout tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
+        className="cn-plot-cursor-readout top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
         format={format}
-        style={{ left: "auto", right: "0.5rem", top: "0.375rem" }}
       />
     </PlotPrimitive.Cursor>
   );

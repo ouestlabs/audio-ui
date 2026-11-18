@@ -183,7 +183,7 @@ describe("GET /api/v1/search", () => {
 describe("GET /api/v1/catalog", () => {
   test("lists every block without a query, a page at a time", async () => {
     expect(await body(catalogResponse(url("/catalog")))).toEqual(
-      expect.objectContaining({ has_more: false, total: 2 })
+      expect.objectContaining({ has_more: false, total: 1 })
     );
   });
 

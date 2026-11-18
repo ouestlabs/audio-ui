@@ -57,7 +57,6 @@ describe("takesPlay", () => {
           "block-wave-shaper",
           "block-piano-roll",
           "block-timeline",
-          "block-waveform-player",
         ].includes(name)
     );
     expect(effects.filter((name) => !takesPlay(name))).toEqual([]);

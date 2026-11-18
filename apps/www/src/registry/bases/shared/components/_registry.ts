@@ -934,28 +934,6 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["waveform"],
-    description:
-      "A waveform player that shows what the waveform does: seek and hover, a loop region with handles, markers and zoom that follows the playhead. It starts on a synthesized phrase and takes any audio file",
-    files: [
-      {
-        path: "components/waveform/react/block-waveform-player.tsx",
-        type: "registry:block",
-      },
-    ],
-    name: "block-waveform-player",
-    dependencies: ["@audio-ui/icons"],
-    registryDependencies: [
-      "@audio-ui/scrubber",
-      "@audio-ui/timeline",
-      "@audio-ui/waveform",
-      "@shadcn/button",
-      "@shadcn/toggle",
-      "@audio-ui/web-audio",
-    ],
-    type: "registry:block",
-  },
-  {
     categories: ["audio-editor"],
     description:
       "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, Undo and Redo follow, the meter and the main volume close the bar; the waveform seeks, zooms down to the samples and selects, its menu cuts, copies, pastes, deletes, crops and marks with their shortcuts, and the selection's corners fade it and its grip sets its level; Export renders the selection, or the whole sound, through the chain and saves it as WAV, MP3 or FLAC, and the readouts under the waveform give the time to the millisecond, the selection's length, the sound's loudness, peak, rate and channels; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
