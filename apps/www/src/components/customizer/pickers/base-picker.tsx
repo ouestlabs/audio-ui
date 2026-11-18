@@ -73,7 +73,7 @@ export function BasePicker({
             {BASES.map((base) => (
               <PickerRadioItem key={base.name} value={base.name}>
                 <BaseLogo
-                  className="h-5 w-auto shrink-0 text-site-foreground"
+                  className="size-auto h-4 w-auto shrink-0 text-site-foreground"
                   name={base.name}
                 />
                 {base.title}

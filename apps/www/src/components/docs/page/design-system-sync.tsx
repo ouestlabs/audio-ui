@@ -41,9 +41,15 @@ function syncBodyStyleClass(styleClass: string) {
 export function DocsDesignSystemEffects() {
   const [config, setConfig] = useConfig();
   const [{ base: baseParam }] = useDesignSystemSearchParams();
+  // Only React's catalog has a base address: another framework's page names none, so it leaves the reader's base be.
   const onComponentPage = useRouterState({
-    select: (state) =>
-      state.location.pathname.startsWith("/docs/components/base/"),
+    select: (state) => {
+      const { framework } = state.location.search as { framework?: unknown };
+      return (
+        state.location.pathname.startsWith("/docs/components/base/") &&
+        (framework === undefined || framework === "react")
+      );
+    },
   });
   // On a component page, the base is the address's: `/ui-sdk/` names it, `/base/` is the other.
   const urlBase = onComponentPage ? (baseParam ?? "base") : baseParam;
