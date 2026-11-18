@@ -25,6 +25,43 @@ const ui_ = (
 
 export const ui: Registry["items"] = [
   ui_(
+    "avatar",
+    "Avatar",
+    "A user's image with a fallback, in three sizes, with a badge and a group."
+  ),
+  ui_(
+    "command",
+    "Command",
+    "Searches a list and runs a command, in a panel or a dialog, with groups, separators and shortcuts.",
+    { registryDependencies: ["dialog", "input-group"] }
+  ),
+  ui_(
+    "checkbox",
+    "Checkbox",
+    "Chooses one or more independent options, with a check and a mixed state."
+  ),
+  ui_(
+    "hover-card",
+    "Hover card",
+    "A card that previews a link when the pointer rests on it or focus reaches it.",
+    { registryDependencies: ["use-popup-container"] }
+  ),
+  ui_(
+    "progress",
+    "Progress",
+    "The progress of a task, with a label and a value."
+  ),
+  ui_(
+    "radio-group",
+    "Radio group",
+    "Chooses one of a few options, all visible."
+  ),
+  ui_(
+    "scroll-area",
+    "Scroll area",
+    "Styled scrolling, with a scrollbar and a corner."
+  ),
+  ui_(
     "accordion",
     "Accordion",
     "Sections that open and close, one at a time or several."
