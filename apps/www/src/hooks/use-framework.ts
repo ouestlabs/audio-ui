@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
+import { keptBase } from "@/hooks/use-config";
 import { createKeptChoice } from "@/hooks/use-kept-choice";
+import { baseAddressOf } from "@/lib/docs/content/base-paths";
 import { frameworkAddressOf } from "@/lib/docs/content/framework-paths";
 import { type FrameworkId, isFramework } from "@/lib/docs/content/frameworks";
 
@@ -48,12 +50,19 @@ export function useFramework() {
   const choose = useCallback(
     (next: FrameworkId) => {
       framework.remember(next);
+      // The base kept goes with it, or a component page would read as the default base's and replace the choice.
+      const base = keptBase();
+      const search: Record<string, string> = {};
+      if (frameworkAddressOf(pathname, next)) {
+        search.framework = next;
+        if (base && baseAddressOf(pathname, base)) {
+          search.base = base;
+        }
+      }
       // Inside the router the page keeps its own address and names the framework in a parameter, which the router writes as the framework's address.
       navigate({
         replace: true,
-        search: (frameworkAddressOf(pathname, next)
-          ? { framework: next }
-          : {}) as never,
+        search: search as never,
         to: pathname as never,
       });
     },
