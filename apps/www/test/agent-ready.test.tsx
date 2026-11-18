@@ -7,22 +7,27 @@ HTMLElement.prototype.showPopover = () => undefined;
 HTMLElement.prototype.hidePopover = () => undefined;
 Element.prototype.getAnimations = () => [];
 Element.prototype.scrollIntoView = () => undefined;
-globalThis.ResizeObserver ??= class {
-  observe() {
-    return undefined;
-  }
-  unobserve() {
-    return undefined;
-  }
-  disconnect() {
-    return undefined;
-  }
-};
 
-// `cn` sits beside the SEO helpers, which load the registry through Vite's glob: Bun has none.
-mock.module("@/lib/seo/seo", () => ({ absoluteUrl: (path: string) => path }));
+// Bun's mocks outlive the file, so every export of lib/utils stays: it reaches the SEO helpers
+// and, through them, the registry's lookup, a Vite glob that Bun does not have.
+const { cn } = await import("cn");
+const TRAILING_SLASH = /\/$/;
+mock.module("@/lib/utils", () => ({
+  absoluteUrl: (path: string) =>
+    new URL(path, "https://www.audio-ui.dev/").toString(),
+  cn,
+  formatLabel: (value: string) =>
+    value
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" "),
+  isActive: (pathname: string, href: string) =>
+    pathname.replace(TRAILING_SLASH, "") === href.replace(TRAILING_SLASH, ""),
+  isFileUrl: (url: string) => url.includes("."),
+  normalizeSlug: (value: string) => value.toLowerCase().replaceAll(" ", "-"),
+}));
 const { default: SequencerDemo } = await import(
-  "@/registry/bases/base/components/sequencer/react/sequencer-demo"
+  "@/registry/bases/shared/components/sequencer/react/sequencer-demo"
 );
 
 let approved = false;
@@ -36,14 +41,19 @@ afterEach(() => {
 });
 
 const named = () =>
-  agent.snapshot().filter((entry) => !entry.offPage && entry.component !== "more");
+  agent
+    .snapshot()
+    .filter((entry) => !entry.offPage && entry.component !== "more");
 
 describe("the drum machine demo, for an agent", () => {
   test("every control in the snapshot has a name an agent can find", () => {
     render(<SequencerDemo />);
     const entries = named();
     for (const entry of entries) {
-      expect(entry.label, `${entry.component} ${entry.ref} has no name`).toBeTruthy();
+      expect(
+        entry.label,
+        `${entry.component} ${entry.ref} has no name`
+      ).toBeTruthy();
     }
     const labels = entries.map((entry) => entry.label);
     expect(labels).toContain("Play");

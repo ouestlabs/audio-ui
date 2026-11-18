@@ -192,7 +192,7 @@ export function CommandMenu({
                 aria-hidden
                 className="shrink-0 opacity-60"
               />
-              <span className="truncate font-normal text-muted-foreground">
+              <span className="truncate font-normal text-site-muted-foreground">
                 Search…
               </span>
             </span>

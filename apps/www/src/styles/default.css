@@ -94,7 +94,7 @@
   /* A touch toward the text color: small muted text on a muted ground stays above 4.5:1. */
   --site-muted-foreground: color-mix(
     in oklab,
-    var(--muted-foreground) 82%,
+    var(--muted-foreground) 70%,
     var(--foreground)
   );
   --site-accent: var(--accent);
@@ -528,7 +528,7 @@
   --site-muted: var(--muted);
   --site-muted-foreground: color-mix(
     in oklab,
-    var(--muted-foreground) 82%,
+    var(--muted-foreground) 70%,
     var(--foreground)
   );
   --site-accent: var(--accent);
