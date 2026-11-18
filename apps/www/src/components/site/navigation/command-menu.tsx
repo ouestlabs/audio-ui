@@ -224,7 +224,7 @@ export function CommandMenu({
           </FrameHeader>
           <FrameContent className="flex min-h-0 flex-1 flex-col rounded-(--frame-radius-inner) p-1">
             <CommandList className="no-scrollbar scroll-fade min-h-0 flex-1 scroll-pt-2 scroll-pb-1.5 max-sm:max-h-none sm:min-h-80 sm:flex-none">
-              <CommandEmpty className="flex h-full min-h-80 p-0">
+              <CommandEmpty className="p-0 data-empty:flex data-empty:h-full data-empty:min-h-80">
                 <ComponentEmptyState
                   className="m-1"
                   description="Try another word, such as a component, a device or a page."
