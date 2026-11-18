@@ -1,17 +1,24 @@
 import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
 import {
-  Select,
   SelectContent as SelectContentPrimitive,
   SelectGroupLabel,
   SelectGroup as SelectGroupPrimitive,
   SelectItemIndicator,
   SelectItem as SelectItemPrimitive,
+  Select as SelectPrimitive,
+  type SelectProps,
   SelectSeparator as SelectSeparatorPrimitive,
   SelectTrigger as SelectTriggerPrimitive,
   SelectValue as SelectValuePrimitive,
 } from "@ui-sdk/react/select";
 import { cn } from "cn";
 import type { ComponentProps, ReactNode } from "react";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+
+function Select<T = string>({ container, ...props }: SelectProps<T, false>) {
+  const popups = usePopupContainer();
+  return <SelectPrimitive<T> container={container ?? popups} {...props} />;
+}
 
 function SelectGroup({
   className,

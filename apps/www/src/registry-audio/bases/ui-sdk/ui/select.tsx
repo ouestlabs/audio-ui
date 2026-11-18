@@ -19,17 +19,21 @@ import {
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
 
 // ui-sdk types `items` as a mutable list, the shared sources hold theirs as `as const`.
 function Select<T = string>({
+  container,
   items,
   ...props
 }: Omit<SelectProps<T, false>, "items"> & {
   items?: ListData<T> | readonly unknown[];
 }) {
+  const popups = usePopupContainer();
   return (
     <SelectPrimitive<T>
       {...(props as SelectProps<T, false>)}
+      container={container ?? popups}
       items={items as ListData<T> | undefined}
     />
   );

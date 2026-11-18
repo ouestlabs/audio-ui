@@ -1,16 +1,25 @@
 import {
-  Dialog,
   DialogBackdrop,
   DialogClose,
   DialogContent as DialogContentPrimitive,
   DialogDescription as DialogDescriptionPrimitive,
+  Dialog as DialogPrimitive,
   DialogTitle as DialogTitlePrimitive,
   DialogTrigger,
 } from "@ui-sdk/react/dialog";
 import type { ComponentProps, ReactNode } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
 import { Button } from "@/registry-audio/bases/ui-sdk/ui/button";
+
+function Dialog({
+  container,
+  ...props
+}: ComponentProps<typeof DialogPrimitive>) {
+  const popups = usePopupContainer();
+  return <DialogPrimitive container={container ?? popups} {...props} />;
+}
 
 function DialogOverlay({
   className,

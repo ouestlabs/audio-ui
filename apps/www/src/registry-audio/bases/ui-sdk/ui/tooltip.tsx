@@ -1,12 +1,21 @@
 import {
-  Tooltip,
   TooltipArrow,
   TooltipContent as TooltipContentPrimitive,
+  Tooltip as TooltipPrimitive,
   TooltipTrigger,
 } from "@ui-sdk/react/tooltip";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+
+function Tooltip({
+  container,
+  ...props
+}: ComponentProps<typeof TooltipPrimitive>) {
+  const popups = usePopupContainer();
+  return <TooltipPrimitive container={container ?? popups} {...props} />;
+}
 
 function TooltipContent({
   className,

@@ -1,16 +1,25 @@
 import { XIcon } from "@phosphor-icons/react/ssr";
 import {
-  Dialog,
   DialogBackdrop,
   DialogClose,
   DialogContent as DialogContentPrimitive,
   DialogDescription as DialogDescriptionPrimitive,
+  Dialog as DialogPrimitive,
   DialogTitle as DialogTitlePrimitive,
   DialogTrigger,
 } from "@ui-sdk/react/dialog";
 import type { ComponentProps, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+
+function Dialog({
+  container,
+  ...props
+}: ComponentProps<typeof DialogPrimitive>) {
+  const popups = usePopupContainer();
+  return <DialogPrimitive container={container ?? popups} {...props} />;
+}
 
 /*
  * Below the popups (z-50), not level with them: a menu or a popover opened

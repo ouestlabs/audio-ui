@@ -17,8 +17,12 @@ import {
 import { type ComponentProps, type ReactNode, useCallback, useId } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
 
-const ContextMenu = Menu;
+function ContextMenu({ container, ...props }: ComponentProps<typeof Menu>) {
+  const popups = usePopupContainer();
+  return <Menu container={container ?? popups} {...props} />;
+}
 
 function ContextMenuTrigger({
   className,

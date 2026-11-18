@@ -78,28 +78,32 @@ export const ui: Registry["items"] = [
   ui_(
     "context-menu",
     "Context menu",
-    "A menu that opens at a right-click or a long press, with groups, checkboxes, radio choices and submenus."
+    "A menu that opens at a right-click or a long press, with groups, checkboxes, radio choices and submenus.",
+    { registryDependencies: ["use-popup-container"] }
   ),
   ui_(
     "dialog",
     "Dialog",
     "A focused task over the page, with a backdrop, a title, a description and a close button.",
-    { registryDependencies: ["button"] }
+    { registryDependencies: ["button", "use-popup-container"] }
   ),
   ui_(
     "dropdown-menu",
     "Dropdown menu",
-    "A menu that opens from a button, with groups, checkboxes, radio choices and submenus."
+    "A menu that opens from a button, with groups, checkboxes, radio choices and submenus.",
+    { registryDependencies: ["use-popup-container"] }
   ),
   ui_(
     "popover",
     "Popover",
-    "Content in a floating panel that opens from a trigger."
+    "Content in a floating panel that opens from a trigger.",
+    { registryDependencies: ["use-popup-container"] }
   ),
   ui_(
     "select",
     "Select",
-    "Chooses one value from a popup list, with groups, separators and a check on the chosen item."
+    "Chooses one value from a popup list, with groups, separators and a check on the chosen item.",
+    { registryDependencies: ["use-popup-container"] }
   ),
   ui_(
     "separator",
@@ -115,6 +119,7 @@ export const ui: Registry["items"] = [
   ui_(
     "tooltip",
     "Tooltip",
-    "Names a control or adds a short hint on hover and keyboard focus."
+    "Names a control or adds a short hint on hover and keyboard focus.",
+    { registryDependencies: ["use-popup-container"] }
   ),
 ];

@@ -1,13 +1,22 @@
 import {
-  Popover,
   PopoverContent as PopoverContentPrimitive,
   PopoverDescription as PopoverDescriptionPrimitive,
+  Popover as PopoverPrimitive,
   PopoverTitle as PopoverTitlePrimitive,
   PopoverTrigger as PopoverTriggerPrimitive,
 } from "@ui-sdk/react/popover";
 import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+
+function Popover({
+  container,
+  ...props
+}: ComponentProps<typeof PopoverPrimitive>) {
+  const popups = usePopupContainer();
+  return <PopoverPrimitive container={container ?? popups} {...props} />;
+}
 
 function PopoverTrigger({
   nativeButton: _nativeButton,
