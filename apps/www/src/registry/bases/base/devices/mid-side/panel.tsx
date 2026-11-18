@@ -1,14 +1,5 @@
-import { formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import { formatLevel } from "@/engine/format";
 import {
   Plot,
   PlotGraph,
@@ -27,6 +18,15 @@ import {
   midSideDevice,
 } from "@/registry/bases/base/devices/mid-side/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 const MIN_DB = -24;
 const MAX_DB = 12;

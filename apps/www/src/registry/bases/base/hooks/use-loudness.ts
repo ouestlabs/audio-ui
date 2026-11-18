@@ -1,9 +1,9 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createLoudnessMeter,
   type LiveLoudness,
   type LoudnessMeter,
 } from "@/engine/analysis";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { createSource } from "@/registry/bases/base/primitives/primitive";
 
 const UNMEASURED: LiveLoudness = {

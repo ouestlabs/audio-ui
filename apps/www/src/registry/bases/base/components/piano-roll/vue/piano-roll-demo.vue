@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { Note } from "@/primitives/piano-roll";
 import { ref } from "vue";
+import type { Note } from "@/primitives/piano-roll";
 import { PianoRoll } from "@/registry/bases/base/primitives/piano-roll/vue";
 
 const NOTES: Note[] = [

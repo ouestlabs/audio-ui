@@ -1,5 +1,4 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotGraph,
@@ -20,6 +19,7 @@ import {
   binauralPoint,
 } from "@/registry/bases/base/devices/binaural-panner/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = binauralPannerDevice.parameters

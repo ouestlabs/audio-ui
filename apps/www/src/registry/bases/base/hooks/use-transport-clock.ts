@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   advance,
   anchoredCursor,
@@ -8,7 +9,6 @@ import {
   type SchedulerConfig,
   type SchedulerCursor,
 } from "@/engine/time";
-import { useCallback, useEffect, useRef, useState } from "react";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 
 const DEFAULT_BPM = 120;

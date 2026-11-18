@@ -1,5 +1,3 @@
-import { dbToGain, gainToDb } from "@/engine/analysis";
-import { formatTime } from "@/engine/format";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -7,13 +5,15 @@ import {
   useRef,
   useState,
 } from "react";
+import { dbToGain, gainToDb } from "@/engine/analysis";
+import { formatTime } from "@/engine/format";
 import type { ClipChangeDetails } from "@/primitives/timeline";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   TimelineClip,
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/registry/bases/base/audio/elements/timeline";
+import { cn } from "@/registry/bases/base/lib/utils";
 import {
   type ClipValue,
   type FadeShape,

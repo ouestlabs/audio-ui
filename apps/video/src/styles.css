@@ -4,7 +4,7 @@
 @import "../../www/src/registry/styles/audio/style-vega.css" layer(base);
 
 @source "../../www/src/registry/bases/base/audio";
-@source "../../www/src/registry/bases/base/ui";
+@source "../../www/src/components/ui";
 
 /* Frames are seeked, not played: a transition would show each value halfway. */
 *,

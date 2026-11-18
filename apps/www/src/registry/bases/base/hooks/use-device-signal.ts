@@ -1,5 +1,5 @@
-import type { Device, ParameterDescriptor } from "@/engine/device";
 import { useMemo, useRef } from "react";
+import type { Device, ParameterDescriptor } from "@/engine/device";
 import {
   createDeviceSignal,
   type DeviceSignal,

@@ -1,14 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import { midiToHz } from "@/engine/pitch";
 import { Pad, PadItem } from "@/registry/bases/base/audio/elements/pad";
 import {
   DeviceFrame,
@@ -23,7 +14,16 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry/bases/base/devices/sampler/device";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { PadOnDetails } from "@/registry/bases/base/primitives/pad/pad";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;

@@ -398,6 +398,10 @@
     @apply text-sm;
   }
 
+  .cn-tabs-indicator {
+    @apply rounded-md bg-background shadow-sm dark:border dark:border-input dark:bg-input/30;
+  }
+
   /* MARK: Card */
   .cn-card {
     @apply bg-card text-card-foreground ring-foreground/5 dark:ring-foreground/10 gap-(--card-spacing) overflow-hidden rounded-4xl py-(--card-spacing) text-sm shadow-md ring-1 [--card-spacing:--spacing(6)] has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(4)] *:[img:first-child]:rounded-t-4xl *:[img:last-child]:rounded-b-4xl;

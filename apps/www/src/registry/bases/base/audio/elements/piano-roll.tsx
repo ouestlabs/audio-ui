@@ -10,8 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import { useTimelineValues } from "@/registry/bases/base/audio/elements/timeline";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { Piano as PianoPrimitive } from "@/registry/bases/base/primitives/piano/react";
 import { PianoRoll as PianoRollPrimitive } from "@/registry/bases/base/primitives/piano-roll/react";
 import { Timeline as TimelinePrimitive } from "@/registry/bases/base/primitives/timeline/react";

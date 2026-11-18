@@ -1,5 +1,5 @@
-import type { EngineFactory, InstrumentEngine } from "@/engine/device";
 import { useCallback, useMemo } from "react";
+import type { EngineFactory, InstrumentEngine } from "@/engine/device";
 import {
   type DeviceEngineLike,
   useDeviceEngines,

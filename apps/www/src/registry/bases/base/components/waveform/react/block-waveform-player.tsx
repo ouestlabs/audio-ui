@@ -1,3 +1,7 @@
+import { LoopIcon } from "@audio-ui/icons/react";
+import type { ChangeEvent } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
 import {
   type AudioPeaks,
   computePeaks,
@@ -5,12 +9,6 @@ import {
 } from "@/engine/analysis";
 import { decodeAudioChannels } from "@/engine/files";
 import { formatTime } from "@/engine/format";
-import { LoopIcon } from "@audio-ui/icons/react";
-import type { ChangeEvent } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
-import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Scrubber } from "@/registry/bases/base/audio/elements/scrubber";
 import {
   Timeline,
@@ -29,6 +27,8 @@ import {
 } from "@/registry/bases/base/audio/elements/waveform";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 import { createSource } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 4096;

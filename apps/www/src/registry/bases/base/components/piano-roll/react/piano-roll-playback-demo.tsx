@@ -1,5 +1,5 @@
-import type { Tempo } from "@/engine/time";
 import { useEffect, useRef, useState } from "react";
+import type { Tempo } from "@/engine/time";
 import {
   PianoRoll,
   PianoRollGrid,

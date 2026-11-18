@@ -34,6 +34,12 @@ export const ui: Registry["items"] = [
     }
   ),
   ui_(
+    "empty",
+    "Empty",
+    "A placeholder for a screen with nothing to show, with a header, a media, a title and a description.",
+    { dependencies: ["class-variance-authority"] }
+  ),
+  ui_(
     "input",
     "Input",
     "A text field that takes a number or a list as its value too."
@@ -45,6 +51,15 @@ export const ui: Registry["items"] = [
     {
       dependencies: ["class-variance-authority"],
       registryDependencies: ["button", "input", "textarea"],
+    }
+  ),
+  ui_(
+    "item",
+    "Item",
+    "A row with a media, a title and a description, and actions on its side.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["separator"],
     }
   ),
   ui_("kbd", "Kbd", "A keyboard key, for a shortcut hint."),

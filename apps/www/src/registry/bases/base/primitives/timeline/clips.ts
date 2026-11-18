@@ -1,4 +1,16 @@
-import { createChangeEventDetails } from "../primitive";
+import {
+  css,
+  dispatch,
+  type PrimitiveContext,
+  type SlotDefinition,
+} from "@ui-sdk/core";
+import {
+  createChangeEventDetails,
+  flag,
+  sourceOf,
+  VISUALLY_HIDDEN,
+} from "../primitive";
+import { type ClipValue, clipEnd, type FadeShape, fadeGain } from "./clip";
 import {
   type ClipChangeEventDetails,
   type ClipCommitEventDetails,
@@ -6,14 +18,6 @@ import {
   type ClipTarget,
   createClipController,
 } from "./clip-controller";
-import { type ClipValue, clipEnd, type FadeShape, fadeGain } from "./clip";
-import {
-  css,
-  dispatch,
-  type PrimitiveContext,
-  type SlotDefinition,
-} from "@ui-sdk/core";
-import { flag, sourceOf, VISUALLY_HIDDEN } from "../primitive";
 import { laneOf, placedOver, UNIT_PROPERTY, unitLength } from "./layout";
 import type {
   DescribePosition,

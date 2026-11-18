@@ -1,5 +1,4 @@
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
@@ -21,6 +20,7 @@ import {
   type DeviceSignal,
   peakDots,
 } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;

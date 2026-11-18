@@ -1,5 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { useCallback, useState } from "react";
+import { midiToHz } from "@/engine/pitch";
 import {
   type FmSynthNote,
   type FmSynthState,

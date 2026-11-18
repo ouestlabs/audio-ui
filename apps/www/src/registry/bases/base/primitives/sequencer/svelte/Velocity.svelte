@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { VelocityState } from "@/primitives/sequencer";
 import type { ComponentProps, Snippet } from "svelte";
+import type { VelocityState } from "@/primitives/sequencer";
 import { type Known, parts } from "./parts";
 
 /**

@@ -1,5 +1,4 @@
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import { Pad, PadItem } from "@/registry/bases/base/audio/elements/pad";
 import {
   DeviceFrame,
@@ -11,6 +10,7 @@ import {
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry/bases/base/devices/drum-synth/device";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { PadOnDetails } from "@/registry/bases/base/primitives/pad/pad";
 
 /** The controls by what they do. */

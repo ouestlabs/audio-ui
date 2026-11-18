@@ -7,15 +7,6 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
 import { Sequencer } from "@/registry/bases/base/audio/elements/sequencer";
 import {
   filledEvery,
@@ -25,8 +16,17 @@ import {
   withStep,
   withStepRepeats,
 } from "@/registry/bases/base/lib/drum-steps";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Note } from "@/registry/bases/base/primitives/piano-roll/edits";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** A pad of the drum rack that plays the clip: the note it answers and its name. */
 export interface DrumStepPad {

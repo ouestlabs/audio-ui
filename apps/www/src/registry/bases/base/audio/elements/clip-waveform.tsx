@@ -1,5 +1,4 @@
 import { type ComponentProps, useLayoutEffect, useRef } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   type ClipPeaks,
   type ClipReading,
@@ -10,6 +9,7 @@ import {
   sampleBands,
   sampleLine,
 } from "@/registry/bases/base/lib/arrangement";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /**
  * A recording's samples, for a waveform drawn closer than its peaks allow:

@@ -1,5 +1,4 @@
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
@@ -21,6 +20,7 @@ import {
   unlimiterUnused,
 } from "@/registry/bases/base/devices/unlimiter/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const MAX_SIZE_DB = 30;
 const MAX_LIFT_DB = 18;

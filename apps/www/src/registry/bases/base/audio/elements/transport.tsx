@@ -1,4 +1,14 @@
 import {
+  LoopIcon,
+  PauseIcon,
+  PlayIcon,
+  RecordIcon,
+  StopIcon,
+} from "@audio-ui/icons/react";
+import { Toolbar } from "@base-ui/react/toolbar";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
+import {
   barsBeatsWith,
   gridLabel,
   METRONOME_RHYTHMS,
@@ -10,22 +20,14 @@ import {
   secondsPerQuarter,
   type Tempo,
 } from "@/engine/time";
-import {
-  LoopIcon,
-  PauseIcon,
-  PlayIcon,
-  RecordIcon,
-  StopIcon,
-} from "@audio-ui/icons/react";
-import { Toolbar } from "@base-ui/react/toolbar";
-import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { IconPlaceholder } from "@/components/icon-placeholder";
+import { BpmControl } from "@/registry/bases/base/audio/elements/bpm-control";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
+import type { Source } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import {
   ButtonGroup,
   ButtonGroupText,
-} from "@/registry/bases/base/ui/button-group";
+} from "@/registry/bases/ui-sdk/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -39,7 +41,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -47,9 +49,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/base/ui/select";
-import { BpmControl } from "@/registry/bases/base/audio/elements/bpm-control";
-import type { Source } from "@/registry/bases/base/primitives/primitive";
+} from "@/registry/bases/ui-sdk/ui/select";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 

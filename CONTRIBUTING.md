@@ -112,7 +112,7 @@ import { Knob } from "@/registry/bases/base/audio/elements/knob";
 **shadcn/ui components, from the `base` base of the design-system tree:**
 
 ```tsx
-import { Button } from "@/registry/bases/base/ui/button";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import { cn } from "@/registry/bases/base/lib/utils";
 ```
 
@@ -321,7 +321,6 @@ bun run lint:fix
 
 `registry:build` pre-compiles every item for every style into `public/r/styles/`, which is what `https://www.audio-ui.dev/r/...` serves from the CDN.
 
-> **Maintainers only:** `bun run registry:sync` re-syncs `src/registry/` from upstream shadcn-ui/ui and rebuilds icons. `src/registry/` is edited by hand now, so a sync overwrites those edits and brings back what was removed (such as Radix). Run it on purpose only.
 
 ---
 
@@ -330,7 +329,7 @@ bun run lint:fix
 - File at `src/registry/bases/base/components/{category}/react/block-{component}-{variant}.tsx`
 - Default export named `Block{ComponentVariant}` matching the filename
 - Audio components imported from `@/registry/bases/base/audio/...`
-- shadcn components imported from `@/registry/bases/base/ui/...`
+- shadcn components imported from `@/registry/bases/ui-sdk/ui/...`
 - Icons via `IconPlaceholder` with all five library props, sized with `className`
 - `aria-label` on all icon-only interactive elements
 - `aria-hidden="true"` on all decorative icons

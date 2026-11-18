@@ -1,5 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { useCallback, useEffect, useRef } from "react";
+import { midiToHz } from "@/engine/pitch";
 import {
   type EnvelopePoint,
   SUSTAIN_SPLIT_X,

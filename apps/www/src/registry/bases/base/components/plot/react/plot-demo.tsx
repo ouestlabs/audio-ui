@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type BiquadType,
   bandGainForHandle,
@@ -7,20 +8,6 @@ import {
   eqResponse,
 } from "@/engine/analysis";
 import { formatFrequency, formatLevel } from "@/engine/format";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/registry/bases/base/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
 import { Knob } from "@/registry/bases/base/audio/elements/knob";
 import {
   Plot,
@@ -35,6 +22,19 @@ import {
 } from "@/registry/bases/base/audio/elements/plot";
 import { useNoiseThroughEq } from "@/registry/bases/base/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry/bases/base/hooks/use-spectrum";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/registry/bases/ui-sdk/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 type Band = EqBand & { id: number };
 

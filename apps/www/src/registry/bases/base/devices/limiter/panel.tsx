@@ -1,5 +1,4 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
@@ -23,6 +22,7 @@ import {
   curveDot,
   type DeviceSignal,
 } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const MIN_DB = -48;
 const MAX_DB = 0;

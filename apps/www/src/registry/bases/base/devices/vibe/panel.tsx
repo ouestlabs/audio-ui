@@ -1,5 +1,4 @@
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
@@ -18,6 +17,7 @@ import {
   vibeLight,
 } from "@/registry/bases/base/devices/vibe/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /** Two seconds of the lamp, whatever its speed: the plot shows how it pulses meanwhile. */
 const WINDOW_SECONDS = 2;

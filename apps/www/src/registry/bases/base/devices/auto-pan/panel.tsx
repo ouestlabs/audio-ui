@@ -1,6 +1,5 @@
-import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import {
   Plot,
   PlotCurve,
@@ -19,6 +18,7 @@ import {
   autoPanSweep,
 } from "@/registry/bases/base/devices/auto-pan/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

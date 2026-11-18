@@ -1,6 +1,5 @@
-import { formatFrequency, formatLevel } from "@/engine/format";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import {
   Plot,
   PlotArea,
@@ -22,6 +21,7 @@ import {
   tiltEqDevice,
 } from "@/registry/bases/base/devices/tilt-eq/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

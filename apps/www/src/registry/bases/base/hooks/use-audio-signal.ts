@@ -1,8 +1,5 @@
-import {
-  type SpectrumBandsOptions,
-  spectrumBands,
-} from "@/engine/analysis";
 import { useEffect, useState } from "react";
+import { type SpectrumBandsOptions, spectrumBands } from "@/engine/analysis";
 
 /**
  * A live signal of levels, 0-1 each, in the shape of an external store. Pass

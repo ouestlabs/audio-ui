@@ -1,9 +1,3 @@
-import type {
-  Device,
-  ParameterDescriptor,
-  ParameterValue,
-} from "@/engine/device";
-import { secondsPerBeat, type Tempo } from "@/engine/time";
 import {
   type ReactNode,
   Suspense,
@@ -13,21 +7,12 @@ import {
   useSyncExternalStore,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import type {
+  Device,
+  ParameterDescriptor,
+  ParameterValue,
+} from "@/engine/device";
+import { secondsPerBeat, type Tempo } from "@/engine/time";
 import { devicePanel } from "@/registry/bases/base/audio/device-panels";
 import {
   DeviceChain,
@@ -65,11 +50,23 @@ import {
 import { trackOf } from "@/registry/bases/base/lib/arrangement-state";
 import { libraryDevice } from "@/registry/bases/base/lib/device-library";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
-import {
-  DRUM_KIT_PADS,
-  drumKit,
-} from "@/registry/bases/base/lib/drum-kit";
+import { DRUM_KIT_PADS, drumKit } from "@/registry/bases/base/lib/drum-kit";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

@@ -1,6 +1,5 @@
-import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import {
   Plot,
   PlotCurve,
@@ -19,6 +18,7 @@ import {
   chorusSweep,
 } from "@/registry/bases/base/devices/chorus/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

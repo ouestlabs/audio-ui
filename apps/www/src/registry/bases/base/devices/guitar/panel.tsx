@@ -1,6 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { midiToHz } from "@/engine/pitch";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
 import {
   DeviceFrame,
@@ -14,6 +13,7 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/registry/bases/base/devices/guitar/device";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

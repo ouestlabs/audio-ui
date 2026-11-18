@@ -1,5 +1,5 @@
-import type { ParameterValue } from "@/engine/device";
 import { useCallback, useState, useSyncExternalStore } from "react";
+import type { ParameterValue } from "@/engine/device";
 import { AUTOMATED_PARAMETERS } from "@/registry/bases/base/audio/elements/track-automation";
 import {
   type ArrangementTrack,

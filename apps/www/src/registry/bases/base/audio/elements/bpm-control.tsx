@@ -1,5 +1,5 @@
-import { cn } from "@/registry/bases/base/lib/utils";
 import { ParameterField } from "@/registry/bases/base/audio/elements/parameter-field";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const DEFAULT_MIN_BPM = 20;
 const DEFAULT_MAX_BPM = 200;

@@ -1,6 +1,5 @@
-import { DEFAULT_TEMPO, secondsPerBeat } from "@/engine/time";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { DEFAULT_TEMPO, secondsPerBeat } from "@/engine/time";
 import {
   Plot,
   PlotArea,
@@ -20,6 +19,7 @@ import {
   stutterDevice,
 } from "@/registry/bases/base/devices/stutter/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = stutterDevice.parameters

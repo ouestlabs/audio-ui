@@ -1,4 +1,3 @@
-import { dbToGain, gainToDb } from "@/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,
@@ -19,8 +18,19 @@ import {
   useSyncExternalStore,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { dbToGain, gainToDb } from "@/engine/analysis";
+import { Fader } from "@/registry/bases/base/audio/elements/fader";
+import { Knob } from "@/registry/bases/base/audio/elements/knob";
+import { Led } from "@/registry/bases/base/audio/elements/led";
+import type { Mix, TrackColor } from "@/registry/bases/base/lib/arrangement";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
+import {
+  FADE_SHAPES,
+  type FadeShape,
+  fadeGain,
+} from "@/registry/bases/base/primitives/timeline/clip";
+import { Timeline as TimelinePrimitive } from "@/registry/bases/base/primitives/timeline/react";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import {
   ContextMenu,
   ContextMenuCheckboxItem,
@@ -33,30 +43,17 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "@/registry/bases/base/ui/context-menu";
+} from "@/registry/bases/ui-sdk/ui/context-menu";
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
-} from "@/registry/bases/base/ui/dropdown-menu";
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@/registry/bases/base/ui/toggle-group";
-import { Fader } from "@/registry/bases/base/audio/elements/fader";
-import { Knob } from "@/registry/bases/base/audio/elements/knob";
-import { Led } from "@/registry/bases/base/audio/elements/led";
-import type {
-  Mix,
-  TrackColor,
-} from "@/registry/bases/base/lib/arrangement";
-import {
-  FADE_SHAPES,
-  type FadeShape,
-  fadeGain,
-} from "@/registry/bases/base/primitives/timeline/clip";
-import { Timeline as TimelinePrimitive } from "@/registry/bases/base/primitives/timeline/react";
+} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;
 

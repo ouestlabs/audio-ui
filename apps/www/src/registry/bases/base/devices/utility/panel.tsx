@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import { StereoField } from "@/registry/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
@@ -11,6 +10,7 @@ import {
   utilityDevice,
 } from "@/registry/bases/base/devices/utility/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const KNOBS = ["gainDb", "pan", "width"] as const;
 const OFF = utilityDevice.parameters

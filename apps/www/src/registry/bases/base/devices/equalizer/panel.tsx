@@ -1,8 +1,6 @@
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { bandGainForHandle, bandHandleDb } from "@/engine/analysis";
 import { formatFrequency, formatLevel } from "@/engine/format";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { FilterTypeSelect } from "@/registry/bases/base/audio/elements/filter-type-select";
 import {
   Plot,
@@ -28,6 +26,8 @@ import {
   FILTER_TAKES,
 } from "@/registry/bases/base/devices/equalizer/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

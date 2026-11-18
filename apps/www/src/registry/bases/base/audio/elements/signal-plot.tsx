@@ -1,5 +1,4 @@
 import type { ComponentProps } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotGraph,
@@ -7,6 +6,7 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/registry/bases/base/audio/elements/plot";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { PlotSource } from "@/registry/bases/base/primitives/plot/plot";
 
 type PlotFrameProps = Omit<

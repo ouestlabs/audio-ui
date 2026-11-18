@@ -4,7 +4,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@/registry/bases/base/ui/toggle-group";
+} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 interface CurveOption {
   label: string;

@@ -1,10 +1,10 @@
+import { useEffect, useRef, useState } from "react";
 import {
   type EqBand,
   toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
 } from "@/engine/analysis";
 import { noiseBuffer } from "@/engine/device";
-import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry/bases/base/hooks/use-play-switch";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 

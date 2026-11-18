@@ -36,36 +36,6 @@ import {
 import { formatLevel, formatSampleRate, formatTime } from "@/engine/format";
 import { secondsPerBeat, type Tempo } from "@/engine/time";
 import { hasWebGL2 } from "@/gl/lane";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupText,
-} from "@/registry/bases/base/ui/button-group";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/registry/bases/base/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
 import { ArrangedTake } from "@/registry/bases/base/audio/elements/arranged-clip";
 import type { SpectrogramBand } from "@/registry/bases/base/audio/elements/clip-spectrogram";
 import {
@@ -163,11 +133,41 @@ import {
   sliceBlocks,
 } from "@/registry/bases/base/lib/recording";
 import type { SoundOperation } from "@/registry/bases/base/lib/sound-operations";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 import {
   createSource,
   type Source,
 } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  ButtonGroup,
+  ButtonGroupText,
+} from "@/registry/bases/ui-sdk/ui/button-group";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */

@@ -25,11 +25,7 @@ import {
   speedChannels,
   stretchChannels,
 } from "@/engine/files";
-import {
-  formatFrequency,
-  formatLevel,
-  formatPan,
-} from "@/engine/format";
+import { formatFrequency, formatLevel, formatPan } from "@/engine/format";
 import { type Repair, repairChannels } from "@/engine/repair";
 import {
   type FadeShape,

@@ -1,15 +1,3 @@
-import {
-  analyzeBeat,
-  computePeaks,
-  normalizePeaks,
-} from "@/engine/analysis";
-import { decodeAudioChannels } from "@/engine/files";
-import {
-  barsBeatsWith,
-  type MetronomeRhythm,
-  secondsPerBar,
-  type Tempo,
-} from "@/engine/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,
@@ -21,22 +9,14 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/base/ui/button";
-import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
+import { analyzeBeat, computePeaks, normalizePeaks } from "@/engine/analysis";
+import { decodeAudioChannels } from "@/engine/files";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
-import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
+  barsBeatsWith,
+  type MetronomeRhythm,
+  secondsPerBar,
+  type Tempo,
+} from "@/engine/time";
 import {
   ArrangementView,
   shownLength,
@@ -104,6 +84,22 @@ import {
 } from "@/registry/bases/base/lib/demo-song";
 import { drumKit } from "@/registry/bases/base/lib/drum-kit";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { ButtonGroup } from "@/registry/bases/ui-sdk/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/registry/bases/ui-sdk/ui/kbd";
 
 const BARS = 24;
 

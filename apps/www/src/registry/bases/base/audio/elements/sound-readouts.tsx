@@ -1,5 +1,5 @@
-import { formatLevel, formatSampleRate } from "@/engine/format";
 import { type ComponentProps, useCallback, useState } from "react";
+import { formatLevel, formatSampleRate } from "@/engine/format";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** The layouts a sound can be mixed to, each with what it is. */
 export const LAYOUTS = [

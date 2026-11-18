@@ -1,8 +1,4 @@
-import {
-  type BiquadType,
-  type EqBand,
-  eqResponse,
-} from "@/engine/analysis";
+import { type BiquadType, type EqBand, eqResponse } from "@/engine/analysis";
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { formatFrequency } from "@/engine/format";
 

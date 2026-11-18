@@ -5,15 +5,15 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import { Input } from "@/registry/bases/base/ui/input";
 import { useMicrophone } from "@/registry/bases/base/hooks/use-microphone";
 import {
   type PitchReading,
   usePitch,
 } from "@/registry/bases/base/hooks/use-pitch";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Input } from "@/registry/bases/ui-sdk/ui/input";
 
 /** Cents from the note to either end of the gauge: half a semitone, where the next note begins. */
 const RANGE_CENTS = 50;

@@ -1,14 +1,4 @@
 import {
-  downloadMidiFile,
-  downloadMusicXmlFile,
-  MIDI_FILE_ACCEPT,
-  MUSICXML_FILE_ACCEPT,
-  readMidiFile,
-  readMusicXmlFile,
-} from "@/engine/files";
-import { rollScale, type Scale } from "@/engine/pitch";
-import type { Tempo } from "@/engine/time";
-import {
   type ChangeEvent,
   type DragEvent,
   type KeyboardEvent as ReactKeyboardEvent,
@@ -21,16 +11,16 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
 import {
-  DropdownMenuCheckboxItem,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-} from "@/registry/bases/base/ui/dropdown-menu";
+  downloadMidiFile,
+  downloadMusicXmlFile,
+  MIDI_FILE_ACCEPT,
+  MUSICXML_FILE_ACCEPT,
+  readMidiFile,
+  readMusicXmlFile,
+} from "@/engine/files";
+import { rollScale, type Scale } from "@/engine/pitch";
+import type { Tempo } from "@/engine/time";
 import { Fader } from "@/registry/bases/base/audio/elements/fader";
 import {
   NoteEditMenu,
@@ -92,6 +82,7 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/registry/bases/base/lib/note-edits";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 import {
   findNotes,
@@ -103,6 +94,15 @@ import {
   toggleMuted,
 } from "@/registry/bases/base/primitives/piano-roll/edits";
 import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { ButtonGroup } from "@/registry/bases/ui-sdk/ui/button-group";
+import {
+  DropdownMenuCheckboxItem,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;

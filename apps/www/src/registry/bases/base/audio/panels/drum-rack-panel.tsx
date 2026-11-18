@@ -10,24 +10,6 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  InputGroupText,
-} from "@/registry/bases/base/ui/input-group";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
-import { Toggle } from "@/registry/bases/base/ui/toggle";
 import { Knob } from "@/registry/bases/base/audio/elements/knob";
 import { Pad, PadItem } from "@/registry/bases/base/audio/elements/pad";
 import {
@@ -46,8 +28,26 @@ import {
   type RackChain,
   type RackMapping,
 } from "@/registry/bases/base/lib/arrangement";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { PadOnDetails } from "@/registry/bases/base/primitives/pad/pad";
 import { pitchName } from "@/registry/bases/base/primitives/pitch";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from "@/registry/bases/ui-sdk/ui/input-group";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
+import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
 
 /** How many pads a bank shows, four by four. */
 const BANK = 16;

@@ -17,15 +17,6 @@ import type {
   ClipChangeDetails,
   ClipCommitDetails,
 } from "@/primitives/timeline";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/registry/bases/base/ui/context-menu";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -49,11 +40,20 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/registry/bases/base/lib/arrangement";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
 import type {
   ClipValue,
   FadeShape,
 } from "@/registry/bases/base/primitives/timeline/clip";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/context-menu";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";

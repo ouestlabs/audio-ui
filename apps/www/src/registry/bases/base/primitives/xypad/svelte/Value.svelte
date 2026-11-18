@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { XYPadPublicState } from "@/primitives/xypad";
 import type { ComponentProps, Snippet } from "svelte";
+import type { XYPadPublicState } from "@/primitives/xypad";
 import { parts } from "./parts";
 
 let {

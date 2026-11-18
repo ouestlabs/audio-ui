@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { Note } from "@/primitives/piano-roll";
 import type { Snippet } from "svelte";
+import type { Note } from "@/primitives/piano-roll";
 import { parts } from "./parts";
 
 /** The notes, in reading order: a note moved past another keeps its place in the DOM while it is dragged. */

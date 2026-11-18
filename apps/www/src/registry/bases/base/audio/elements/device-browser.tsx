@@ -9,14 +9,14 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { DEVICE_DRAG_TYPE } from "@/registry/bases/base/audio/elements/device-chain";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/registry/bases/base/ui/input-group";
-import { DEVICE_DRAG_TYPE } from "@/registry/bases/base/audio/elements/device-chain";
+} from "@/registry/bases/ui-sdk/ui/input-group";
 
 /** A device as the library lists it: a device definition is one. */
 export interface DeviceBrowserItem {

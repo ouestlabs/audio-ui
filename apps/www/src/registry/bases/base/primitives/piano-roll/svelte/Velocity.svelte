@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { Note } from "@/primitives/piano-roll";
 import type { ComponentProps, Snippet } from "svelte";
+import type { Note } from "@/primitives/piano-roll";
 import { type Known, parts } from "./parts";
 
 /** A bar under a note, in a `VelocityLane`: its height is the note's velocity, or its chance, which a drag or the keys set through its native input. */

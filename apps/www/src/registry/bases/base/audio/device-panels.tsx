@@ -1,6 +1,6 @@
+import { type ComponentType, lazy, type ReactNode } from "react";
 import type { ParameterValue } from "@/engine/device";
 import type { Tempo } from "@/engine/time";
-import { type ComponentType, lazy, type ReactNode } from "react";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
@@ -116,9 +116,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     "w-[52rem]"
   ),
   "audioui.gate": entry(() =>
-    import("@/registry/bases/base/devices/gate/panel").then(
-      (m) => m.GatePanel
-    )
+    import("@/registry/bases/base/devices/gate/panel").then((m) => m.GatePanel)
   ),
   "audioui.unlimiter": entry(() =>
     import("@/registry/bases/base/devices/unlimiter/panel").then(
@@ -169,16 +167,14 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   ),
   "audioui.frequency-shifter": entry(
     () =>
-      import(
-        "@/registry/bases/base/devices/frequency-shifter/panel"
-      ).then((m) => m.FrequencyShifterPanel),
+      import("@/registry/bases/base/devices/frequency-shifter/panel").then(
+        (m) => m.FrequencyShifterPanel
+      ),
     "w-96"
   ),
   "audioui.wah": entry(
     () =>
-      import("@/registry/bases/base/devices/wah/panel").then(
-        (m) => m.WahPanel
-      ),
+      import("@/registry/bases/base/devices/wah/panel").then((m) => m.WahPanel),
     "w-[32rem]"
   ),
   "audioui.graphic-eq": entry(
@@ -282,9 +278,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     )
   ),
   "audioui.lofi": entry(() =>
-    import("@/registry/bases/base/devices/lofi/panel").then(
-      (m) => m.LofiPanel
-    )
+    import("@/registry/bases/base/devices/lofi/panel").then((m) => m.LofiPanel)
   ),
   "audioui.reverb": entry(() =>
     import("@/registry/bases/base/devices/reverb/panel").then(
@@ -314,9 +308,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     )
   ),
   "audioui.vibe": entry(() =>
-    import("@/registry/bases/base/devices/vibe/panel").then(
-      (m) => m.VibePanel
-    )
+    import("@/registry/bases/base/devices/vibe/panel").then((m) => m.VibePanel)
   ),
   "audioui.wave-shaper": entry(() =>
     import("@/registry/bases/base/devices/wave-shaper/panel").then(

@@ -1,10 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/base/ui/toggle-group";
+import { midiToHz } from "@/engine/pitch";
 import { Fader } from "@/registry/bases/base/audio/elements/fader";
 import { WaveformSelect } from "@/registry/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry/bases/base/audio/elements/xypad";
@@ -20,6 +15,11 @@ import {
   pocketSynthPitch,
   pocketSynthPosition,
 } from "@/registry/bases/base/devices/pocket-synth/device";
+import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];

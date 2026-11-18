@@ -1,6 +1,6 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import { playedVelocity } from "@/engine/playback";
 import type { Tempo } from "@/engine/time";
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { UseSynthVoicesReturn } from "@/registry/bases/base/hooks/use-synth-voices";
 import {
   type TransportRegion,

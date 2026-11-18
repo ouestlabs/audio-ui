@@ -1,10 +1,10 @@
+import { useCallback, useEffect, useState } from "react";
 import {
   DEFAULT_TEMPO,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
 } from "@/engine/time";
-import { useCallback, useEffect, useState } from "react";
 import { Transport } from "@/registry/bases/base/audio/elements/transport";
 import { createSource } from "@/registry/bases/base/primitives/primitive";
 

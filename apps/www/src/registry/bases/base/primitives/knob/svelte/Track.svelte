@@ -1,6 +1,6 @@
 <script lang="ts">
-import { DEFAULT_ARC_STROKE_WIDTH } from "@/primitives/knob";
 import type { ComponentProps } from "svelte";
+import { DEFAULT_ARC_STROKE_WIDTH } from "@/primitives/knob";
 import Arc from "./Arc.svelte";
 import { parts } from "./parts";
 

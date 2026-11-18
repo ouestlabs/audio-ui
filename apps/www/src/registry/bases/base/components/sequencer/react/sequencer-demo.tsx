@@ -1,6 +1,5 @@
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/registry/bases/base/ui/button";
 import { Sequencer } from "@/registry/bases/base/audio/elements/sequencer";
 import { useMasterBus } from "@/registry/bases/base/hooks/use-master-bus";
 import { useTransportClock } from "@/registry/bases/base/hooks/use-transport-clock";
@@ -11,6 +10,7 @@ import {
 } from "@/registry/bases/base/lib/drum-synthesis";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
 import { createSource } from "@/registry/bases/base/primitives/primitive";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 
 const STEPS = 16;
 const STEPS_PER_BEAT = 4;

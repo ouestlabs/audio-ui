@@ -1,11 +1,5 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
-import {
-  dattorro,
-  fdn,
-  freeverb,
-  schroeder,
-  spring,
-} from "@/engine/dsp";
+import { dattorro, fdn, freeverb, schroeder, spring } from "@/engine/dsp";
 import { formatFrequency } from "@/engine/format";
 
 /** The level a tail has fallen to when its decay time is over, in dB: what "decay time" means in a room. */

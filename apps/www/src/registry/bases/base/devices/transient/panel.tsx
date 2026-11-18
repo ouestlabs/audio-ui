@@ -1,6 +1,5 @@
-import { formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { formatLevel } from "@/engine/format";
 import {
   Plot,
   PlotGraph,
@@ -20,6 +19,7 @@ import {
   transientDevice,
 } from "@/registry/bases/base/devices/transient/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const LIMIT_DB = 12;
 const TICKS = [-12, 0, 12];

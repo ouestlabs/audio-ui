@@ -1,8 +1,8 @@
 import { type DragEvent, useCallback, useState } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
 import { DeviceBrowser } from "@/registry/bases/base/audio/elements/device-browser";
 import { DEVICE_DRAG_TYPE } from "@/registry/bases/base/audio/elements/device-chain";
 import { DEVICE_SHELVES } from "@/registry/bases/base/lib/device-library";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const SHELVES = DEVICE_SHELVES.map((shelf) => ({
   items: shelf.devices.map((entry) => entry.device),

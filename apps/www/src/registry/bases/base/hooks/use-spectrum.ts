@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   holdPeaks,
   type LogSpectrumOptions,
@@ -5,7 +6,6 @@ import {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "@/engine/analysis";
-import { useEffect, useState } from "react";
 import {
   createSource,
   type Source,

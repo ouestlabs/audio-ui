@@ -16,48 +16,6 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@/registry/bases/base/ui/toggle": [
-        "./src/registry/bases/ui-sdk/ui/toggle.tsx"
-      ],
-      "@/registry/bases/base/ui/toggle-group": [
-        "./src/registry/bases/ui-sdk/ui/toggle-group.tsx"
-      ],
-      "@/registry/bases/base/ui/input": [
-        "./src/registry/bases/ui-sdk/ui/input.tsx"
-      ],
-      "@/registry/bases/base/ui/slider": [
-        "./src/registry/bases/ui-sdk/ui/slider.tsx"
-      ],
-      "@/registry/bases/base/ui/kbd": [
-        "./src/registry/bases/ui-sdk/ui/kbd.tsx"
-      ],
-      "@/registry/bases/base/ui/button-group": [
-        "./src/registry/bases/ui-sdk/ui/button-group.tsx"
-      ],
-      "@/registry/bases/base/ui/input-group": [
-        "./src/registry/bases/ui-sdk/ui/input-group.tsx"
-      ],
-      "@/registry/bases/base/ui/textarea": [
-        "./src/registry/bases/ui-sdk/ui/textarea.tsx"
-      ],
-      "@/registry/bases/base/ui/dialog": [
-        "./src/registry/bases/ui-sdk/ui/dialog.tsx"
-      ],
-      "@/registry/bases/base/ui/button": [
-        "./src/registry/bases/ui-sdk/ui/button.tsx"
-      ],
-      "@/registry/bases/base/ui/select": [
-        "./src/registry/bases/ui-sdk/ui/select.tsx"
-      ],
-      "@/registry/bases/base/ui/dropdown-menu": [
-        "./src/registry/bases/ui-sdk/ui/dropdown-menu.tsx"
-      ],
-      "@/registry/bases/base/ui/context-menu": [
-        "./src/registry/bases/ui-sdk/ui/context-menu.tsx"
-      ],
-      "@/registry/bases/base/ui/popover": [
-        "./src/registry/bases/ui-sdk/ui/popover.tsx"
-      ],
       "@/primitives/envelope": [
         "./src/registry/bases/base/primitives/envelope/envelope.ts"
       ],
@@ -70,9 +28,7 @@
       "@/primitives/meter": [
         "./src/registry/bases/base/primitives/meter/meter.ts"
       ],
-      "@/primitives/pad": [
-        "./src/registry/bases/base/primitives/pad/pad.ts"
-      ],
+      "@/primitives/pad": ["./src/registry/bases/base/primitives/pad/pad.ts"],
       "@/primitives/piano": [
         "./src/registry/bases/base/primitives/piano/piano.ts"
       ],

@@ -1,4 +1,12 @@
-import { createEdgeScroll, screenScale, scrollParent } from "./edge-scroll";
+import {
+  bypassesGrid,
+  type Grid,
+  SNAP_RADIUS_PX,
+  snapMove,
+  snapSpanMove,
+  withoutSnapPoints,
+  withSnapRadius,
+} from "../grid";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -18,15 +26,7 @@ import {
   trimClipEnd,
   trimClipStart,
 } from "./clip";
-import {
-  bypassesGrid,
-  type Grid,
-  SNAP_RADIUS_PX,
-  snapMove,
-  snapSpanMove,
-  withoutSnapPoints,
-  withSnapRadius,
-} from "../grid";
+import { createEdgeScroll, screenScale, scrollParent } from "./edge-scroll";
 
 /** What a change to the clip moves. */
 export type ClipTarget =

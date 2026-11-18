@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import {
   adjacentDivision,
   divisionAt,
@@ -8,7 +9,6 @@ import {
   type Tempo,
   TRIPLET_FACTOR,
 } from "@/engine/time";
-import { useCallback, useState } from "react";
 
 /** How close an adaptive grid's lines may be, in px: a finer grid halves it, a wider one doubles it. */
 const DENSITIES = [6, 12, 24, 48, 96] as const;

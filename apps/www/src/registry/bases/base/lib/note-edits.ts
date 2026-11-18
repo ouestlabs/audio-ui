@@ -1,8 +1,4 @@
-import {
-  rollScale,
-  type Scale,
-  scalePitchClasses,
-} from "@/engine/pitch";
+import { rollScale, type Scale, scalePitchClasses } from "@/engine/pitch";
 import {
   chopNotes,
   deleteTime,

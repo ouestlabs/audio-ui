@@ -1,11 +1,4 @@
 import {
-  detectKeys,
-  type KeyNote,
-  SCALES,
-  type Scale,
-  type ScaleName,
-} from "@/engine/pitch";
-import {
   type ComponentProps,
   createContext,
   type ReactNode,
@@ -13,8 +6,16 @@ import {
   useCallback,
   useMemo,
 } from "react";
+import {
+  detectKeys,
+  type KeyNote,
+  SCALES,
+  type Scale,
+  type ScaleName,
+} from "@/engine/pitch";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
+import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,8 +29,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
-import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

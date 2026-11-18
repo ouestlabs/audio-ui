@@ -1,5 +1,5 @@
-import { reportSound, type SoundReport } from "@/engine/analysis";
 import { useCallback, useState } from "react";
+import { reportSound, type SoundReport } from "@/engine/analysis";
 import { renderEdited } from "@/registry/bases/base/hooks/use-bake";
 import type { ArrangementDoc } from "@/registry/bases/base/lib/arrangement-state";
 import type { RecordingSource } from "@/registry/bases/base/lib/clip-player";

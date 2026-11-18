@@ -1,13 +1,4 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
 import {
   Plot,
   PlotGraph,
@@ -27,6 +18,15 @@ import {
   frequencyShifterPartials,
 } from "@/registry/bases/base/devices/frequency-shifter/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

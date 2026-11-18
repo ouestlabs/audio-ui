@@ -1,14 +1,5 @@
-import { formatFrequency, formatLevel } from "@/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import { formatFrequency, formatLevel } from "@/engine/format";
 import {
   Plot,
   PlotArea,
@@ -31,6 +22,15 @@ import {
   deesserUnused,
 } from "@/registry/bases/base/devices/deesser/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 const MIN_HZ = 500;
 const MAX_HZ = 20_000;

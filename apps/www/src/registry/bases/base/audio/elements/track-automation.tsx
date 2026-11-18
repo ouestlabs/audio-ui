@@ -1,17 +1,6 @@
-import type { Device, ParameterDescriptor } from "@/engine/device";
 import { useCallback, useMemo } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import type { Device, ParameterDescriptor } from "@/engine/device";
 import { AutomationEnvelope } from "@/registry/bases/base/audio/elements/automation-envelope";
 import {
   type ArrangementTrack,
@@ -26,7 +15,18 @@ import {
   volumeGain,
   volumeValue,
 } from "@/registry/bases/base/lib/arrangement";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Breakpoint } from "@/registry/bases/base/primitives/envelope/geometry";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 /** A gain as the decibels it plays at. */
 function formatGain(gain: number) {

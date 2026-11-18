@@ -1,10 +1,10 @@
-import type {
-  DitherMethod,
-  ShiftMethod,
-  StretchMethod,
-} from "@/engine/files";
-import type { Repair } from "@/engine/repair";
 import { type ReactNode, useCallback } from "react";
+import type { DitherMethod, ShiftMethod, StretchMethod } from "@/engine/files";
+import type { Repair } from "@/engine/repair";
+import {
+  REPAIR_NAMES,
+  type SoundOperation,
+} from "@/registry/bases/base/lib/sound-operations";
 import {
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -13,11 +13,7 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
-import {
-  REPAIR_NAMES,
-  type SoundOperation,
-} from "@/registry/bases/base/lib/sound-operations";
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** One operation as the menu offers it: what it says, with a note at its end. */
 interface OperationEntry {

@@ -1,10 +1,10 @@
+import { cva, type VariantProps } from "class-variance-authority";
 import {
   formatFrequency,
   formatLevel,
   formatPan,
   formatTime,
 } from "@/engine/format";
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 /** What a value is, which says how it reads. */

@@ -1256,6 +1256,10 @@
     @apply text-sm;
   }
 
+  .cn-tabs-indicator {
+    @apply rounded-md bg-background shadow-sm dark:border dark:border-input dark:bg-input/30;
+  }
+
   /* MARK: Textarea */
   .cn-textarea {
     @apply border-transparent border-b-input bg-transparent focus-visible:border-b-ring aria-invalid:border-b-destructive dark:aria-invalid:border-b-destructive/50 resize-none rounded-none border px-0 py-3 text-base transition-[color,border-color] md:text-sm;

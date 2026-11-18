@@ -1,5 +1,5 @@
-import { rollScale, type Scale } from "@/engine/pitch";
 import { useCallback, useState } from "react";
+import { rollScale, type Scale } from "@/engine/pitch";
 import { NoteFind } from "@/registry/bases/base/audio/elements/note-find";
 import {
   PianoRoll,

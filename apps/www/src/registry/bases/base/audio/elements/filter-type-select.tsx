@@ -13,7 +13,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
-} from "@/registry/bases/base/ui/toggle-group";
+} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 /** The response of each filter type, as the curve a plot draws: gain up the page, frequency across. */
 const FILTER_ICONS: Record<string, ComponentType<IconProps>> = {

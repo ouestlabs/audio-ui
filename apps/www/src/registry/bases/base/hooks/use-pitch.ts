@@ -1,6 +1,6 @@
+import { useEffect, useState } from "react";
 import { detectPitch, type PitchEstimate } from "@/engine/analysis";
 import { cents } from "@/engine/pitch";
-import { useEffect, useState } from "react";
 import {
   createSource,
   type Source,

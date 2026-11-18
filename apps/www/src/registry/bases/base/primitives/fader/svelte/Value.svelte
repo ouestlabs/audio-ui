@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { FaderPublicState } from "@/primitives/fader";
 import type { ComponentProps, Snippet } from "svelte";
+import type { FaderPublicState } from "@/primitives/fader";
 import { parts } from "./parts";
 
 let {

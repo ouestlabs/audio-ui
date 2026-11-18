@@ -1,10 +1,4 @@
 import {
-  barsBeatsWith,
-  secondsPerBar,
-  secondsPerBeat,
-  type Tempo,
-} from "@/engine/time";
-import {
   type ComponentProps,
   type DragEvent,
   type MouseEvent,
@@ -20,21 +14,12 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/base/ui/button";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/registry/bases/base/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/registry/bases/base/ui/dropdown-menu";
+  barsBeatsWith,
+  secondsPerBar,
+  secondsPerBeat,
+  type Tempo,
+} from "@/engine/time";
 import {
   ArrangedClip,
   ArrangedClipGhost,
@@ -112,6 +97,21 @@ import {
   trackDepth,
 } from "@/registry/bases/base/lib/arrangement-state";
 import { drumKit } from "@/registry/bases/base/lib/drum-kit";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

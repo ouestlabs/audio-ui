@@ -4,14 +4,14 @@ import {
   type SoundReport as Report,
 } from "@/engine/analysis";
 import { formatLevel, formatTempo } from "@/engine/format";
+import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/registry/bases/base/ui/dialog";
-import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
+} from "@/registry/bases/ui-sdk/ui/dialog";
 
 interface SoundReportProps {
   onOpenChange: (open: boolean) => void;

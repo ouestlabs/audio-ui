@@ -1,5 +1,3 @@
-import { LOUDNESS_TARGETS } from "@/engine/analysis";
-import type { AudioFileFormat } from "@/engine/files";
 import {
   type ComponentProps,
   type ReactNode,
@@ -7,7 +5,13 @@ import {
   useCallback,
   useId,
 } from "react";
-import { Button } from "@/registry/bases/base/ui/button";
+import { LOUDNESS_TARGETS } from "@/engine/analysis";
+import type { AudioFileFormat } from "@/engine/files";
+import type {
+  ExportNormalize,
+  ExportSettings,
+} from "@/registry/bases/base/lib/audio-export";
+import { Button } from "@/registry/bases/ui-sdk/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -16,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/registry/bases/base/ui/dialog";
+} from "@/registry/bases/ui-sdk/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -24,11 +28,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/base/ui/select";
-import type {
-  ExportNormalize,
-  ExportSettings,
-} from "@/registry/bases/base/lib/audio-export";
+} from "@/registry/bases/ui-sdk/ui/select";
 
 interface SettingItem {
   label: string;

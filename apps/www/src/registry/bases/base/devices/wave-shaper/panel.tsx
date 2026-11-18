@@ -1,6 +1,5 @@
-import { midiToHz } from "@/engine/pitch";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { midiToHz } from "@/engine/pitch";
 import { WaveformSelect } from "@/registry/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry/bases/base/audio/elements/xypad";
 import {
@@ -16,6 +15,7 @@ import {
   waveShaperPosition,
   waveShaperResonance,
 } from "@/registry/bases/base/devices/wave-shaper/device";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 const PAD_MAX = 100;
 /** The knobs under the pad: the wave is the row of buttons. */

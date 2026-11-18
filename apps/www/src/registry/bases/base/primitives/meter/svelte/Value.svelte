@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { ChannelPublicState } from "@/primitives/meter";
 import type { ComponentProps, Snippet } from "svelte";
+import type { ChannelPublicState } from "@/primitives/meter";
 import { parts } from "./parts";
 
 let {

@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { HandleState } from "@/primitives/plot";
 import type { ComponentProps, Snippet } from "svelte";
+import type { HandleState } from "@/primitives/plot";
 import { type Known, parts } from "./parts";
 
 /**

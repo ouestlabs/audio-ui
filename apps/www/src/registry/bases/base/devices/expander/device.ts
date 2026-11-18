@@ -1,9 +1,5 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
-import {
-  expander,
-  expanderGain,
-  upwardExpanderGain,
-} from "@/engine/dsp";
+import { expander, expanderGain, upwardExpanderGain } from "@/engine/dsp";
 import { EXPANDER_KERNELS } from "@/engine/kernels";
 import { manifestWorklet } from "@/registry/bases/base/lib/manifest-worklet";
 

@@ -1,11 +1,6 @@
 import { SAMPLE_RATE } from "@/engine/analysis";
 import { type DeviceState, defineDevice } from "@/engine/device";
-import {
-  diodeLadder,
-  korg35,
-  moogLadder,
-  oberheim,
-} from "@/engine/dsp";
+import { diodeLadder, korg35, moogLadder, oberheim } from "@/engine/dsp";
 import { formatFrequency, formatLevel } from "@/engine/format";
 import { FILTER_KERNELS } from "@/engine/kernels";
 

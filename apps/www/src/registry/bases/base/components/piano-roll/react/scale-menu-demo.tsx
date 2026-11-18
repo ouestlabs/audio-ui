@@ -1,6 +1,5 @@
-import { inScale, type Scale } from "@/engine/pitch";
 import { useState } from "react";
-import { DropdownMenuSeparator } from "@/registry/bases/base/ui/dropdown-menu";
+import { inScale, type Scale } from "@/engine/pitch";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
 import {
   ScaleMenu,
@@ -10,6 +9,7 @@ import {
   ScaleMenuToggle,
   ScaleMenuTrigger,
 } from "@/registry/bases/base/audio/elements/scale-menu";
+import { DropdownMenuSeparator } from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 const MIN_PITCH = 48;
 const MAX_PITCH = 72;

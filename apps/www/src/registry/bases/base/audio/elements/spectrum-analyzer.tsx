@@ -1,6 +1,5 @@
-import { formatFrequency } from "@/engine/format";
 import type { ComponentProps } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { formatFrequency } from "@/engine/format";
 import {
   Plot,
   PlotCursor,
@@ -10,6 +9,7 @@ import {
   PlotTraceArea,
 } from "@/registry/bases/base/audio/elements/plot";
 import { useSpectrumPeaks } from "@/registry/bases/base/hooks/use-spectrum";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
 
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */

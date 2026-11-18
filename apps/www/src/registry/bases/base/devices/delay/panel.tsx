@@ -1,14 +1,5 @@
-import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
+import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import {
   Plot,
   PlotCursor,
@@ -37,7 +28,16 @@ import {
   type DeviceSignal,
   deriveSource,
 } from "@/registry/bases/base/lib/device-signal";
+import { cn } from "@/registry/bases/base/lib/utils";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/ui-sdk/ui/select";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

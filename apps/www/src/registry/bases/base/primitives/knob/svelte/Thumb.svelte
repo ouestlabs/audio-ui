@@ -1,6 +1,6 @@
 <script lang="ts">
-import type { KnobPublicState } from "@/primitives/knob";
 import type { ComponentProps, Snippet } from "svelte";
+import type { KnobPublicState } from "@/primitives/knob";
 import { parts } from "./parts";
 
 /** The thumb, with the native input that carries the knob's name inside it. */

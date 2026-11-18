@@ -1,5 +1,5 @@
-import { peakDb, rmsDb } from "@/engine/analysis";
 import { useEffect, useState } from "react";
+import { peakDb, rmsDb } from "@/engine/analysis";
 import type { MeterFrame } from "@/registry/bases/base/primitives/meter/levels";
 import { createSource } from "@/registry/bases/base/primitives/primitive";
 

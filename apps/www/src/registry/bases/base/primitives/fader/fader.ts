@@ -7,10 +7,10 @@ import {
 import {
   clamp,
   fractionOf,
+  numberFormatter,
   scrubTo,
   stepBy,
   stepFromKey,
-  numberFormatter,
 } from "@ui-sdk/core/number";
 import {
   type ChangeDetails,

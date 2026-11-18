@@ -1,8 +1,4 @@
-import {
-  type SignatureChange,
-  secondsPerBar,
-  type Tempo,
-} from "@/engine/time";
+import { type SignatureChange, secondsPerBar, type Tempo } from "@/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,
