@@ -3,7 +3,7 @@
  * Writes one barrel of icons per icon library (`src/registry/icons/__lucide__.ts`
  * and the rest) from the icons the registry uses: the `<IconPlaceholder>`
  * usages in the shadcn bases and in the audio catalog and elements under
- * `registry/bases/shared`, the icon arrays in `src/app`, and the Lucide
+ * `registry/bases/shared`, the icon arrays in `src/components`, and the Lucide
  * icons `scan-icons.ts` reported as unmapped.
  *
  * Run: bun run icons:build [--watch]
@@ -27,7 +27,7 @@ const PLACEHOLDER_DIRS = [
   "src/registry/bases/shared/audio",
 ].map((dir) => `${PROJECT_ROOT}/${dir}`);
 // Where plain icon arrays (`PREVIEW_ICONS`) live.
-const APP_DIR = `${PROJECT_ROOT}/src/app`;
+const APP_DIR = `${PROJECT_ROOT}/src/components`;
 
 const LIBRARIES = Object.entries(iconLibraries) as [
   IconLibraryName,
@@ -118,7 +118,7 @@ async function scanIconUsage(): Promise<IconUsage> {
     }
   }
 
-  // 2. Plain icon arrays (e.g. PREVIEW_ICONS) in the app
+  // 2. Plain icon arrays (e.g. PREVIEW_ICONS) in the site's components
   for (const content of await readSources([APP_DIR])) {
     for (const [key, pattern] of ICON_ARRAY) {
       for (const [, list] of content.matchAll(pattern)) {
