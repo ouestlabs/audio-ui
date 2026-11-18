@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: audio-decode is part of the engine now, imported from @/lib/engine/files.","files":[],"name":"audio-decode","registryDependencies":["@audio-ui/engine-files"],"type":"registry:lib"}

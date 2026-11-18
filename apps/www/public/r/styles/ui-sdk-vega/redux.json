@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The redux device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/redux/.","files":[],"name":"redux","registryDependencies":["@audio-ui/redux-device","@audio-ui/redux-engine","@audio-ui/redux-panel"],"type":"registry:ui"}

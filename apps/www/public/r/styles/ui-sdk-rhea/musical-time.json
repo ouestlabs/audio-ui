@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved to the engine, @/lib/engine/time: installs it.","files":[],"name":"musical-time","registryDependencies":["@audio-ui/engine-time"],"type":"registry:lib"}

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The expander device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/expander/.","files":[],"name":"expander","registryDependencies":["@audio-ui/expander-device","@audio-ui/expander-engine","@audio-ui/expander-panel"],"type":"registry:ui"}

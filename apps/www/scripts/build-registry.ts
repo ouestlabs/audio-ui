@@ -126,6 +126,8 @@ interface SourceItem {
   devDependencies?: string[];
   files?: SourceFile[];
   name: string;
+  /** The base whose folder holds the item's files, when the style built is another's. */
+  origin?: string;
   registryDependencies?: string[];
   title?: string;
   type: string;
@@ -356,7 +358,7 @@ async function buildFile(
   item: SourceItem,
   build: StyleBuild
 ): Promise<BuiltFile | null> {
-  const source = `src/registry-audio/bases/${build.base}/${file.path}`;
+  const source = `src/registry-audio/bases/${item.origin ?? build.base}/${file.path}`;
   let content: string;
   try {
     content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();
@@ -499,9 +501,15 @@ async function buildItem(
     files,
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
-    registryDependencies: withSharedItems(item, files)?.map((dependency) =>
-      itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
-    ),
+    registryDependencies: withSharedItems(item, files)?.map((dependency) => {
+      const shadcn = SHADCN_DEPENDENCY.exec(dependency)?.[1];
+      if (shadcn && build.base === UI_BASE && uiNames.has(shadcn)) {
+        return `${NAMESPACE}/${shadcn}`;
+      }
+      return itemNames.has(dependency)
+        ? `${NAMESPACE}/${dependency}`
+        : dependency;
+    }),
     title: item.title,
     type: item.type,
   };
@@ -521,7 +529,7 @@ function indexEntry(item: BuiltItem) {
 // ---------------------------------------------------------------------------
 
 async function emitItem(name: string, build: StyleBuild) {
-  const item = itemsByBase.get(build.base)?.get(name);
+  const item = itemOf(name, build.base);
   const built = item ? await buildItem(item, build) : null;
   if (!built) {
     return null;
@@ -713,6 +721,19 @@ const explicitRewrites = [...itemsByBase.values()]
 const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
 );
+
+// The `ui-sdk` base serves its own ui components and, beside them, every item of `base`, whose `@shadcn/<name>` dependencies it answers with its own components.
+const UI_BASE = "ui-sdk";
+const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
+const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
+function itemOf(name: string, base: string): SourceItem | undefined {
+  const own = itemsByBase.get(base)?.get(name);
+  if (own || base !== UI_BASE) {
+    return own;
+  }
+  const shared = itemsByBase.get(MANIFEST_BASE)?.get(name);
+  return shared && { ...shared, origin: MANIFEST_BASE };
+}
 
 const startedAt = Date.now();
 console.log("Building static registry...");

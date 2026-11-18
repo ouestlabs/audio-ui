@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The unlimiter device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/unlimiter/.","files":[],"name":"unlimiter","registryDependencies":["@audio-ui/unlimiter-device","@audio-ui/unlimiter-engine","@audio-ui/unlimiter-panel"],"type":"registry:ui"}

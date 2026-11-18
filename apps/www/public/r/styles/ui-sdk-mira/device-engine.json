@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","dependencies":[],"description":"Moved: device-engine is part of the engine now, imported from @/lib/engine/device.","files":[],"name":"device-engine","registryDependencies":["@audio-ui/engine-device"],"type":"registry:lib"}

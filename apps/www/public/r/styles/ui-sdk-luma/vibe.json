@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The vibe device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/vibe/.","files":[],"name":"vibe","registryDependencies":["@audio-ui/vibe-device","@audio-ui/vibe-engine","@audio-ui/vibe-panel"],"type":"registry:ui"}

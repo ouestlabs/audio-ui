@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Gone: the arrangement engine plays MIDI clips through each track's instrument and chain, on the audio clock. Installs arrangement-engine.","files":[],"name":"use-midi-playback","registryDependencies":["@audio-ui/arrangement-engine"],"type":"registry:hook"}

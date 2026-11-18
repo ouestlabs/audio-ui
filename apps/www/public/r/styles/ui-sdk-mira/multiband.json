@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The multiband device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/multiband/.","files":[],"name":"multiband","registryDependencies":["@audio-ui/multiband-device","@audio-ui/multiband-engine","@audio-ui/multiband-panel"],"type":"registry:ui"}

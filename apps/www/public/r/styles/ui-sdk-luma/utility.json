@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The utility device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/utility/.","files":[],"name":"utility","registryDependencies":["@audio-ui/utility-device","@audio-ui/utility-engine","@audio-ui/utility-panel"],"type":"registry:ui"}

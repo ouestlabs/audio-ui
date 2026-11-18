@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The channel eq device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/channel-eq/.","files":[],"name":"channel-eq","registryDependencies":["@audio-ui/channel-eq-device","@audio-ui/channel-eq-engine","@audio-ui/channel-eq-panel"],"type":"registry:ui"}

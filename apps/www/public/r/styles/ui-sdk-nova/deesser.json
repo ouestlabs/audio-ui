@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The deesser device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/deesser/.","files":[],"name":"deesser","registryDependencies":["@audio-ui/deesser-device","@audio-ui/deesser-engine","@audio-ui/deesser-panel"],"type":"registry:ui"}

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Renamed to web-audio: installs it.","files":[],"name":"web","registryDependencies":["@audio-ui/web-audio"],"type":"registry:lib"}

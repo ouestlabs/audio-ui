@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The rotary device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/rotary/.","files":[],"name":"rotary","registryDependencies":["@audio-ui/rotary-device","@audio-ui/rotary-engine","@audio-ui/rotary-panel"],"type":"registry:ui"}

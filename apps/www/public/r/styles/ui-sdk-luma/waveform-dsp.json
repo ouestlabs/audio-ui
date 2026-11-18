@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"Renamed to waveform-peaks: installs it.","files":[],"name":"waveform-dsp","registryDependencies":["@audio-ui/waveform-peaks"],"type":"registry:lib"}
