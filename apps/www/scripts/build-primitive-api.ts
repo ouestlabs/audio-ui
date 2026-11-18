@@ -278,8 +278,11 @@ export async function build(): Promise<PrimitiveApi[]> {
     const exported = exportsOf(vue);
     const parts: ApiPart[] = exported.map((part) => {
       const slot = slots[part.charAt(0).toLowerCase() + part.slice(1)];
-      const props = { ...((slot?.props as Record<string, string>) ?? {}) };
-      props["data-slot"] = undefined;
+      const props = Object.fromEntries(
+        Object.entries((slot?.props ?? {}) as Record<string, string>).filter(
+          ([key]) => key !== "data-slot"
+        )
+      );
       return {
         element: elements.get(part.charAt(0).toLowerCase() + part.slice(1)),
         name: part,
