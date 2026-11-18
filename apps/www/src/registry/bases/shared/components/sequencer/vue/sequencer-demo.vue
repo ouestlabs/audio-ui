@@ -131,6 +131,7 @@ onBeforeUnmount(() => player.stop());
       </button>
       <button
         class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted"
+        data-agent-confirm="Clears every step of the pattern"
         type="button"
         @click="pattern = EMPTY()"
       >

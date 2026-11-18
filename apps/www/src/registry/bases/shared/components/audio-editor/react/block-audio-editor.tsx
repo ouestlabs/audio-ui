@@ -846,7 +846,11 @@ function EditMenu({ edits }: { edits: ReturnType<typeof useClipEdits> }) {
         Paste
         <ContextMenuShortcut>{mod}V</ContextMenuShortcut>
       </ContextMenuItem>
-      <ContextMenuItem disabled={!selected} onClick={edits.remove}>
+      <ContextMenuItem
+        data-agent-confirm="Deletes the selected part of the sound"
+        disabled={!selected}
+        onClick={edits.remove}
+      >
         Delete
         <ContextMenuShortcut>⌫</ContextMenuShortcut>
       </ContextMenuItem>

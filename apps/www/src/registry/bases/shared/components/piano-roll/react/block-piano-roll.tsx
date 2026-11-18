@@ -791,6 +791,7 @@ export default function BlockPianoRoll() {
                     Export as MusicXML
                   </DropdownMenuItem>
                   <DropdownMenuItem
+                    data-agent-confirm="Deletes every note of the roll"
                     disabled={notes.length === 0}
                     onClick={clearNotes}
                     variant="destructive"

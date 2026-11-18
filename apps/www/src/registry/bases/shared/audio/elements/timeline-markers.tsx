@@ -175,7 +175,11 @@ function TimelineLocator({
           ) : null}
           <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={handleRemove} variant="destructive">
+          <ContextMenuItem
+            data-agent-confirm={`Deletes the locator ${name}`}
+            onClick={handleRemove}
+            variant="destructive"
+          >
             Delete
           </ContextMenuItem>
         </ContextMenuContent>
@@ -296,7 +300,11 @@ function TimelineSignature({
         <ContextMenuContent className="w-auto min-w-32">
           <ContextMenuItem onClick={startEditing}>Edit</ContextMenuItem>
           <ContextMenuSeparator />
-          <ContextMenuItem onClick={handleRemove} variant="destructive">
+          <ContextMenuItem
+            data-agent-confirm={`Deletes the ${label} time signature`}
+            onClick={handleRemove}
+            variant="destructive"
+          >
             Delete
           </ContextMenuItem>
         </ContextMenuContent>

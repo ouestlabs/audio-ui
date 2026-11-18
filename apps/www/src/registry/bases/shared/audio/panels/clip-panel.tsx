@@ -1463,7 +1463,11 @@ function SourceEditItems({ edits }: { edits: SourceEdits }) {
             Paste
             <DropdownMenuShortcut>{mod}V</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem disabled={!edits.canRewrite} onClick={edits.remove}>
+          <DropdownMenuItem
+            data-agent-confirm="Deletes the selected part of the clip"
+            disabled={!edits.canRewrite}
+            onClick={edits.remove}
+          >
             Delete
             <DropdownMenuShortcut>⌫</DropdownMenuShortcut>
           </DropdownMenuItem>

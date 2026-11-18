@@ -110,7 +110,12 @@ export function SequencerDemo() {
         >
           {isPlaying ? <PauseIcon weight="fill" /> : <PlayIcon weight="fill" />}
         </Button>
-        <Button onClick={clear} size="sm" variant="ghost">
+        <Button
+          data-agent-confirm="Clears every step of the pattern"
+          onClick={clear}
+          size="sm"
+          variant="ghost"
+        >
           Clear
         </Button>
       </div>

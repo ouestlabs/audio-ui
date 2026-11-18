@@ -118,8 +118,18 @@ export default function Vesta16() {
               >
                 Rec
               </Key>
-              <Key onPress={vesta.clearPad}>Clear pad</Key>
-              <Key onPress={vesta.clearAll}>Clear all</Key>
+              <Key
+                confirm={`Clears the steps of ${SAMPLE_NAMES[vesta.selected] ?? "the pad"} in the loop`}
+                onPress={vesta.clearPad}
+              >
+                Clear pad
+              </Key>
+              <Key
+                confirm="Clears every step of the loop"
+                onPress={vesta.clearAll}
+              >
+                Clear all
+              </Key>
             </div>
           </div>
 

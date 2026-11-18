@@ -706,6 +706,7 @@ function ShortcutRow({
         <Button
           aria-label={`Reset ${name}`}
           className="text-muted-foreground"
+          data-agent-confirm={`Puts back the default keys of ${name}`}
           disabled={!custom}
           onClick={reset}
           size="sm"
@@ -753,6 +754,7 @@ function ShortcutsSection({
           it without keys.
         </p>
         <Button
+          data-agent-confirm="Puts back the default keys of every command"
           disabled={Object.keys(customHotkeys).length === 0}
           onClick={resetAll}
           size="sm"

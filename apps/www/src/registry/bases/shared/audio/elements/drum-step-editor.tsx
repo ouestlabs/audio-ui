@@ -255,6 +255,7 @@ function DrumStepEditor({
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem
+                data-agent-confirm={`Clears every step of ${pad.name}`}
                 data-row={row}
                 onClick={clear}
                 variant="destructive"
