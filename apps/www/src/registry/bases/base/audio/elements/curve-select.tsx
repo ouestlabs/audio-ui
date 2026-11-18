@@ -1,10 +1,7 @@
 import { CurveIcon } from "@audio-ui/icons/react";
 import { useCallback, useMemo } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 interface CurveOption {
   label: string;

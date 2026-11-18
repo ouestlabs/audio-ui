@@ -16,6 +16,12 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
+      "@/registry/bases/base/audio/elements/parameter-field": [
+        "./src/registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+      ],
+      "@/registry/bases/base/audio/elements/rocker-switch": [
+        "./src/registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+      ],
       "@/primitives/envelope": [
         "./src/registry/bases/base/primitives/envelope/envelope.ts"
       ],

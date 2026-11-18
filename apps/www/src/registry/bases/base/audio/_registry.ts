@@ -1065,6 +1065,7 @@ export const audio: RegistryItem[] = [
     name: "transport",
     dependencies: ["@audio-ui/icons"],
     registryDependencies: [
+      "@audio-ui/toolbar",
       "@audio-ui/bpm-control",
       "@shadcn/button",
       "@shadcn/button-group",

@@ -23,7 +23,6 @@ export function CodeCollapsibleWrapper({
       {...props}
     >
       <CollapsibleTrigger
-        nativeButton={false}
         render={
           <div
             className={cn(
@@ -57,7 +56,6 @@ export function CodeCollapsibleWrapper({
         {children}
       </CollapsibleContent>
       <CollapsibleTrigger
-        nativeButton={false}
         render={
           <div
             className={cn(

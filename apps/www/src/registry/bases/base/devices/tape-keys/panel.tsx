@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
 import {
@@ -14,10 +15,6 @@ import {
   tapeKeysDevice,
 } from "@/registry/bases/base/devices/tape-keys/device";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 /** The controls by what they do. */
 const GROUPS = [

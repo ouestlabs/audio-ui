@@ -11,6 +11,15 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenuCheckboxItem,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+} from "@/components/ui/dropdown-menu";
 import {
   downloadMidiFile,
   downloadMusicXmlFile,
@@ -94,15 +103,6 @@ import {
   toggleMuted,
 } from "@/registry/bases/base/primitives/piano-roll/edits";
 import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import { ButtonGroup } from "@/registry/bases/ui-sdk/ui/button-group";
-import {
-  DropdownMenuCheckboxItem,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;

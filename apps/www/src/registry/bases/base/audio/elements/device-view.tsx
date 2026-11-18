@@ -7,6 +7,21 @@ import {
   useSyncExternalStore,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   Device,
   ParameterDescriptor,
@@ -52,21 +67,6 @@ import { libraryDevice } from "@/registry/bases/base/lib/device-library";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
 import { DRUM_KIT_PADS, drumKit } from "@/registry/bases/base/lib/drum-kit";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

@@ -22,6 +22,8 @@ const deploymentId =
   process.env.WORKERS_CI_COMMIT_SHA ??
   Date.now().toString(36);
 
+const SDK_VARIANTS = ["parameter-field", "rocker-switch"];
+
 export default defineConfig({
   define: {
     "import.meta.env.VITE_DEPLOYMENT_ID": JSON.stringify(deploymentId),
@@ -59,9 +61,22 @@ export default defineConfig({
   },
   resolve: {
     // The demos of Vue and Svelte are not read by the TypeScript paths the dependency scan uses.
-    alias: {
-      "@/registry": fileURLToPath(new URL("./src/registry", import.meta.url)),
-    },
+    alias: [
+      // The site is built on ui-sdk: the items that name a behavior library resolve to its variants.
+      ...SDK_VARIANTS.map((name) => ({
+        find: `@/registry/bases/base/audio/elements/${name}`,
+        replacement: fileURLToPath(
+          new URL(
+            `./src/registry/bases/ui-sdk/audio/elements/${name}.tsx`,
+            import.meta.url
+          )
+        ),
+      })),
+      {
+        find: "@/registry",
+        replacement: fileURLToPath(new URL("./src/registry", import.meta.url)),
+      },
+    ],
     dedupe: ["react", "react-dom"],
     tsconfigPaths: true,
   },

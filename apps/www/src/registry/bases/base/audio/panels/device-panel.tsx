@@ -1,5 +1,14 @@
 import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
 import type {
   ChoiceParameter,
   Device,
@@ -20,15 +29,6 @@ import {
 } from "@/registry/bases/base/audio/elements/waveform-select";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
-import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;

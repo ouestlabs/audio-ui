@@ -1,5 +1,18 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   type BiquadType,
   bandGainForHandle,
   bandHandleDb,
@@ -22,19 +35,6 @@ import {
 } from "@/registry/bases/base/audio/elements/plot";
 import { useNoiseThroughEq } from "@/registry/bases/base/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry/bases/base/hooks/use-spectrum";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/registry/bases/ui-sdk/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 type Band = EqBand & { id: number };
 

@@ -1,4 +1,12 @@
 import { type ReactNode, useCallback, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
 import {
@@ -14,14 +22,6 @@ import {
   fmSynthPreset,
 } from "@/registry/bases/base/devices/fm-synth/device";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [

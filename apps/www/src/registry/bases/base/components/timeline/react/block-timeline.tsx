@@ -9,6 +9,22 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { analyzeBeat, computePeaks, normalizePeaks } from "@/engine/analysis";
 import { decodeAudioChannels } from "@/engine/files";
 import {
@@ -84,22 +100,6 @@ import {
 } from "@/registry/bases/base/lib/demo-song";
 import { drumKit } from "@/registry/bases/base/lib/drum-kit";
 import { webAudio } from "@/registry/bases/base/lib/web-audio";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import { ButtonGroup } from "@/registry/bases/ui-sdk/ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
-import { Kbd, KbdGroup } from "@/registry/bases/ui-sdk/ui/kbd";
 
 const BARS = 24;
 

@@ -1,4 +1,12 @@
 import { type ReactNode, useCallback, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
 import {
@@ -14,14 +22,6 @@ import {
   stringMachinePreset,
 } from "@/registry/bases/base/devices/string-machine/device";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [

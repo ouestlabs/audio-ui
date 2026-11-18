@@ -1,5 +1,5 @@
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Button } from "@/components/ui/button";
 
 interface PlayToggleProps {
   className?: string;

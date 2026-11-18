@@ -1,4 +1,5 @@
 import { type ChangeEvent, useCallback, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   downloadMidiFile,
   MIDI_FILE_ACCEPT,
@@ -13,7 +14,6 @@ import {
 } from "@/registry/bases/base/audio/elements/piano-roll";
 import { Timeline } from "@/registry/bases/base/audio/elements/timeline";
 import type { Note } from "@/registry/bases/base/primitives/piano-roll/edits";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
 
 const DURATION = 32;
 const MIN_PITCH = 48;

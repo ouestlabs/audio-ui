@@ -7,9 +7,7 @@ import {
   useMemo,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import type { NoteEdit } from "@/registry/bases/base/lib/note-edits";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +17,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import type { NoteEdit } from "@/registry/bases/base/lib/note-edits";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 interface NoteEditMenuContextValue {
   isDisabled: (edit: NoteEdit) => boolean;

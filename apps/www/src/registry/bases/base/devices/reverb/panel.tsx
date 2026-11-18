@@ -1,5 +1,13 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotArea,
   PlotCursor,
@@ -22,14 +30,6 @@ import {
 } from "@/registry/bases/base/devices/reverb/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 /** How much time the plot shows: the longest decay is 10 s, after the longest pre-delay. */
 const WINDOW_SECONDS = 10.5;

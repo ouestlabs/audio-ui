@@ -240,11 +240,9 @@ async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
 }
 
 async function loadItems(base: string): Promise<Map<string, SourceItem>> {
-  // The ui components are published by the `ui-sdk` base alone: the other base takes its own from shadcn.
+  // Each base publishes its own ui components: a base takes the others from shadcn.
   const folders = await Promise.all(
-    REGISTRY_FOLDERS.filter(
-      (folder) => folder !== "ui" || base === UI_BASE
-    ).map((folder) => loadFolder(base, folder))
+    REGISTRY_FOLDERS.map((folder) => loadFolder(base, folder))
   );
   return new Map(folders.flat().map((item) => [item.name, item]));
 }

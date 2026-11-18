@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { dbToGain, gainToDb, peakDb } from "@/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@/engine/format";
 import { Fader } from "@/registry/bases/base/audio/elements/fader";
@@ -40,10 +41,6 @@ import { startSortableDrag } from "@/registry/bases/base/lib/sortable-drag";
 import { cn } from "@/registry/bases/base/lib/utils";
 import type { MeterFrame } from "@/registry/bases/base/primitives/meter/levels";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

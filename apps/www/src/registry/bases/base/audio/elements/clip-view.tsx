@@ -11,10 +11,10 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { Button } from "@/components/ui/button";
 import { ParameterField } from "@/registry/bases/base/audio/elements/parameter-field";
 import { cn } from "@/registry/bases/base/lib/utils";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
 
 /** Where bars and beats fall, in seconds: what position fields count in. */
 export interface ClipMeter {

@@ -1454,6 +1454,9 @@
   "timeline": [
     "components/audio-ui/timeline.tsx"
   ],
+  "toolbar": [
+    "components/ui/toolbar.tsx"
+  ],
   "track-automation": [
     "components/audio-ui/track-automation.tsx",
     "hooks/use-track-automation.ts"

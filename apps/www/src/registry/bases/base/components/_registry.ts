@@ -971,6 +971,7 @@ export const components: RegistryItem[] = [
     name: "block-audio-editor",
     dependencies: [],
     registryDependencies: [
+      "@audio-ui/toolbar",
       "@audio-ui/arranged-clip",
       "@audio-ui/clip-spectrogram",
       "@audio-ui/sound-lane",

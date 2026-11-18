@@ -11,6 +11,14 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { dbToGain } from "@/engine/analysis";
 import { hasWebGL2 } from "@/gl/lane";
 import type {
@@ -46,14 +54,6 @@ import type {
   ClipValue,
   FadeShape,
 } from "@/registry/bases/base/primitives/timeline/clip";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";

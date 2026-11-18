@@ -61,7 +61,9 @@ bun test
 
 ### `apps/www/src/registry/`: one registry tree
 
-`registry/` holds the design system (`styles/`, `icons/`, `fonts.ts`, `themes.ts`, `config.ts`: started as a fork of shadcn/ui, now audio/ui's own, so edit it freely) and, in `bases/`, everything the registry publishes, **the contribution surface**. A base is a set of components over one behavior library: `bases/base/` holds the audio items, `bases/ui-sdk/` the ui components of the `ui-sdk-<style>` styles (`ui/`, `hooks/`). The style hooks of the ui components are `styles/style-<style>.css`, those of the audio components `styles/audio/style-<style>.css`.
+`registry/` holds the design system (`styles/`, `icons/`, `fonts.ts`, `themes.ts`, `config.ts`: started as a fork of shadcn/ui, now audio/ui's own, so edit it freely) and, in `bases/`, everything the registry publishes, **the contribution surface**.
+
+A shadcn **base** is a complete set over one behavior library, and a user picks one: `bases/base/` is the Base UI base, `bases/ui-sdk/` the ui-sdk base (its styles are `ui-sdk-<style>`). Never use one base's library in the other. Code that names no behavior library is written once, in `bases/base/`, and the ui-sdk base serves it as it is. An item whose files name a library (`@base-ui/*` or `@ui-sdk/*`) has a variant in each base, by the same name and path: `bases/ui-sdk/audio/_registry.ts` lists the ones it overrides. A file imports a ui component as `@/components/ui/<name>`, never from a base's folder: each base's `ui/` provides it (`bases/ui-sdk/ui/`, and for the Base UI base what shadcn ships plus the few components it has none of, in `bases/base/ui/`). In this repo the site is built on ui-sdk, so `components/ui/` is written from `ui-sdk-nova` by `bun run ui:sync`, after `registry:build`. The style hooks of the ui components are `styles/style-<style>.css`, those of the audio components `styles/audio/style-<style>.css`.
 
 ```
 registry/bases/base/

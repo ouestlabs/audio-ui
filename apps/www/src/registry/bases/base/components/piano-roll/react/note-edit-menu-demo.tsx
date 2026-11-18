@@ -1,5 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   NoteEditMenu,
   NoteEditMenuContent,
   NoteEditMenuSub,
@@ -27,10 +31,6 @@ import type {
   Note,
   NoteId,
 } from "@/registry/bases/base/primitives/piano-roll/edits";
-import {
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 60 };
 

@@ -6,11 +6,8 @@ import {
   TriangleIcon,
 } from "@audio-ui/icons/react";
 import { type ComponentType, useCallback } from "react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 const WAVE_ICONS: Record<string, ComponentType<IconProps>> = {
   sawtooth: SawtoothIcon,

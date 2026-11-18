@@ -25,6 +25,30 @@ const ui_ = (
 
 export const ui: Registry["items"] = [
   ui_(
+    "accordion",
+    "Accordion",
+    "Sections that open and close, one at a time or several."
+  ),
+  ui_(
+    "alert-dialog",
+    "Alert dialog",
+    "A question that needs an explicit answer, with a confirming action and a cancel.",
+    { registryDependencies: ["button"] }
+  ),
+  ui_(
+    "badge",
+    "Badge",
+    "A small label for a status or a count, in six variants, that can render another element.",
+    { dependencies: ["class-variance-authority"] }
+  ),
+  ui_("collapsible", "Collapsible", "A panel a trigger opens and closes."),
+  ui_(
+    "sheet",
+    "Sheet",
+    "A panel that opens from an edge of the screen, over the page.",
+    { registryDependencies: ["button", "use-popup-container"] }
+  ),
+  ui_(
     "button-group",
     "Button group",
     "Joins buttons, selects and inputs into one bar, with a separator and a text part.",
@@ -130,6 +154,11 @@ export const ui: Registry["items"] = [
     "Tabs",
     "Switches between related panels, one tab selected at a time, in a default or a line variant.",
     { dependencies: ["class-variance-authority"] }
+  ),
+  ui_(
+    "toolbar",
+    "Toolbar",
+    "Buttons, groups and separators that share one tab stop and move with the arrow keys."
   ),
   ui_(
     "tooltip",

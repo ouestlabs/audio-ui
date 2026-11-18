@@ -1,16 +1,6 @@
 import { type ReactNode, useCallback, useState } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Knob } from "@/registry/bases/base/audio/elements/knob";
-import {
-  type ChainZone,
-  FULL_ZONE,
-  type Rack,
-  type RackChain,
-  type RackMapping,
-} from "@/registry/bases/base/lib/arrangement";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { pitchName } from "@/registry/bases/base/primitives/pitch";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,9 +12,19 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
-import { Slider } from "@/registry/bases/ui-sdk/ui/slider";
-import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
+} from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
+import { Knob } from "@/registry/bases/base/audio/elements/knob";
+import {
+  type ChainZone,
+  FULL_ZONE,
+  type Rack,
+  type RackChain,
+  type RackMapping,
+} from "@/registry/bases/base/lib/arrangement";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { pitchName } from "@/registry/bases/base/primitives/pitch";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {

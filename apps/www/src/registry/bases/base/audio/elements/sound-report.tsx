@@ -1,17 +1,17 @@
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ACX,
   type AcxCheck,
   type SoundReport as Report,
 } from "@/engine/analysis";
 import { formatLevel, formatTempo } from "@/engine/format";
 import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/registry/bases/ui-sdk/ui/dialog";
 
 interface SoundReportProps {
   onOpenChange: (open: boolean) => void;

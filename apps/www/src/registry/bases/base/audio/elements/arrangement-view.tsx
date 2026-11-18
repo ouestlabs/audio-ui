@@ -14,6 +14,20 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   barsBeatsWith,
   secondsPerBar,
@@ -98,20 +112,6 @@ import {
 } from "@/registry/bases/base/lib/arrangement-state";
 import { drumKit } from "@/registry/bases/base/lib/drum-kit";
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

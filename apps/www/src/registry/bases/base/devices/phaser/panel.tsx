@@ -1,4 +1,12 @@
 import { type ReactNode, useCallback, useMemo } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
 import {
   Plot,
@@ -19,14 +27,6 @@ import {
 } from "@/registry/bases/base/devices/phaser/device";
 import type { DeviceSignal } from "@/registry/bases/base/lib/device-signal";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Led } from "@/registry/bases/base/audio/elements/led";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
 
 export default function LedDemo() {
   const [recording, setRecording] = useState(true);

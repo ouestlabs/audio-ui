@@ -1,5 +1,13 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotCurve,
   PlotDot,
@@ -23,14 +31,6 @@ import {
   type DeviceSignal,
 } from "@/registry/bases/base/lib/device-signal";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 const MIN_DB = -80;
 const MAX_IN_DB = 0;

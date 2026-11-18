@@ -13,6 +13,16 @@ const PUBLISHED = `${WEB}/public/r/styles/ui-sdk-nova`;
 
 // What the site draws its chrome with.
 const COMPONENTS = [
+  "toolbar",
+  "toggle-group",
+  "toggle",
+  "slider",
+  "context-menu",
+  "accordion",
+  "alert-dialog",
+  "badge",
+  "collapsible",
+  "sheet",
   "button",
   "button-group",
   "dialog",

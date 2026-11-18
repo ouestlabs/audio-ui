@@ -15,9 +15,7 @@ import {
 } from "react";
 import { createPortal, flushSync } from "react-dom";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { startSortableDrag } from "@/registry/bases/base/lib/sortable-drag";
-import { cn } from "@/registry/bases/base/lib/utils";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -25,8 +23,10 @@ import {
   ContextMenuSeparator,
   ContextMenuShortcut,
   ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
-import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
+} from "@/components/ui/context-menu";
+import { Toggle } from "@/components/ui/toggle";
+import { startSortableDrag } from "@/registry/bases/base/lib/sortable-drag";
+import { cn } from "@/registry/bases/base/lib/utils";
 
 /** The type a dragged device carries, with its id as the data: what a library sets and the chain takes. */
 export const DEVICE_DRAG_TYPE = "application/x-audio-ui-device";

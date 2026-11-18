@@ -1,4 +1,3 @@
-import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
   type KeyboardEvent,
@@ -13,6 +12,33 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ToolbarButton } from "@/components/ui/toolbar";
 import {
   type AudioPeaks,
   computePeaks,
@@ -139,35 +165,6 @@ import {
   createSource,
   type Source,
 } from "@/registry/bases/base/primitives/primitive";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupText,
-} from "@/registry/bases/ui-sdk/ui/button-group";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */
@@ -2059,7 +2056,7 @@ function MoreMenu({
     <DropdownMenu onOpenChange={opened}>
       <DropdownMenuTrigger
         render={
-          <Toolbar.Button
+          <ToolbarButton
             aria-label="More"
             render={<Button size="icon" variant="outline" />}
             title="More"
@@ -2716,7 +2713,7 @@ export default function BlockAudioEditor() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Toolbar.Button
+                  <ToolbarButton
                     aria-label="Sound"
                     render={<Button size="icon" variant="outline" />}
                     title="Sound"
@@ -2774,7 +2771,7 @@ export default function BlockAudioEditor() {
             </DropdownMenu>
           </ButtonGroup>
           <ButtonGroup className="hidden @2xl/transport:flex">
-            <Toolbar.Button
+            <ToolbarButton
               aria-label="Undo"
               disabled={!arrangement.canUndo}
               onClick={edits.undo}
@@ -2788,8 +2785,8 @@ export default function BlockAudioEditor() {
                 remixicon="RiArrowGoBackLine"
                 tabler="IconArrowBackUp"
               />
-            </Toolbar.Button>
-            <Toolbar.Button
+            </ToolbarButton>
+            <ToolbarButton
               aria-label="Redo"
               disabled={!arrangement.canRedo}
               onClick={edits.redo}
@@ -2803,11 +2800,11 @@ export default function BlockAudioEditor() {
                 remixicon="RiArrowGoForwardLine"
                 tabler="IconArrowForwardUp"
               />
-            </Toolbar.Button>
+            </ToolbarButton>
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Toolbar.Button
+                  <ToolbarButton
                     aria-label="History"
                     disabled={!(arrangement.canUndo || arrangement.canRedo)}
                     render={<Button size="icon" variant="outline" />}
@@ -2838,7 +2835,7 @@ export default function BlockAudioEditor() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Toolbar.Button
+                  <ToolbarButton
                     aria-label="Process"
                     disabled={!sound}
                     render={<Button size="icon" variant="outline" />}
@@ -2866,7 +2863,7 @@ export default function BlockAudioEditor() {
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
-                  <Toolbar.Button
+                  <ToolbarButton
                     aria-label="View"
                     disabled={!sound}
                     render={<Button size="icon" variant="outline" />}
@@ -2888,7 +2885,7 @@ export default function BlockAudioEditor() {
             </DropdownMenu>
           </ButtonGroup>
           <ButtonGroup className="hidden @2xl/transport:flex">
-            <Toolbar.Button
+            <ToolbarButton
               aria-label="Before the edits"
               aria-pressed={comparing !== null}
               disabled={!sound}
@@ -2908,10 +2905,10 @@ export default function BlockAudioEditor() {
                 remixicon="RiArrowLeftRightLine"
                 tabler="IconArrowsLeftRight"
               />
-            </Toolbar.Button>
+            </ToolbarButton>
           </ButtonGroup>
           <ButtonGroup className="hidden @2xl/transport:flex">
-            <Toolbar.Button
+            <ToolbarButton
               aria-label="Export"
               disabled={!sound}
               onClick={openExport}
@@ -2925,7 +2922,7 @@ export default function BlockAudioEditor() {
                 remixicon="RiDownloadLine"
                 tabler="IconDownload"
               />
-            </Toolbar.Button>
+            </ToolbarButton>
           </ButtonGroup>
           {/* Narrow, the bar's actions are one menu. */}
           <ButtonGroup className="@2xl/transport:hidden">

@@ -1,5 +1,15 @@
 import { useCallback, useMemo } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Device, ParameterDescriptor } from "@/engine/device";
 import { AutomationEnvelope } from "@/registry/bases/base/audio/elements/automation-envelope";
 import {
@@ -17,16 +27,6 @@ import {
 } from "@/registry/bases/base/lib/arrangement";
 import { cn } from "@/registry/bases/base/lib/utils";
 import type { Breakpoint } from "@/registry/bases/base/primitives/envelope/geometry";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
 
 /** A gain as the decibels it plays at. */
 function formatGain(gain: number) {

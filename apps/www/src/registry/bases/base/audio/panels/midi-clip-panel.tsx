@@ -9,6 +9,23 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { type KeyNote, rollScale, type Scale } from "@/engine/pitch";
 import type {
   RollNoteOffDetails,
@@ -87,23 +104,6 @@ import {
 } from "@/registry/bases/base/primitives/piano-roll/edits";
 import { pitchName } from "@/registry/bases/base/primitives/pitch";
 import type { Source } from "@/registry/bases/base/primitives/primitive";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/dropdown-menu";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;

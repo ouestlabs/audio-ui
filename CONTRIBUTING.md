@@ -112,7 +112,7 @@ import { Knob } from "@/registry/bases/base/audio/elements/knob";
 **shadcn/ui components, from the `base` base of the design-system tree:**
 
 ```tsx
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/registry/bases/base/lib/utils";
 ```
 

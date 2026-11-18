@@ -7,6 +7,13 @@ import {
   useState,
 } from "react";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   barLabelInterval,
   barsOf,
   isSignature,
@@ -15,13 +22,6 @@ import {
   type Tempo,
 } from "@/engine/time";
 import { TimelineMark } from "@/registry/bases/base/audio/elements/timeline";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/registry/bases/ui-sdk/ui/context-menu";
 
 /** A named point of the arrangement, in its time. */
 export interface Locator {

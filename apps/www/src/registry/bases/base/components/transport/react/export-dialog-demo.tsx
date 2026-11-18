@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { downloadFile } from "@/engine/files";
 import { ExportDialog } from "@/registry/bases/base/audio/elements/export-dialog";
 import {
@@ -6,7 +7,6 @@ import {
   type ExportSettings,
   exportSound,
 } from "@/registry/bases/base/lib/audio-export";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
 
 const RATE = 48_000;
 

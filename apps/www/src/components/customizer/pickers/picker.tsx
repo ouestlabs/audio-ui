@@ -1,8 +1,30 @@
-import { Menu as MenuPrimitive } from "@base-ui/react/menu";
-import type * as React from "react";
-import { createContext, use } from "react";
+import {
+  Menu,
+  MenuCheckboxItem,
+  MenuContent,
+  MenuGroup,
+  MenuGroupLabel,
+  MenuItem,
+  MenuItemIndicator,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuSeparator,
+  MenuSub,
+  MenuSubContent,
+  MenuSubTrigger,
+  MenuTrigger,
+} from "@ui-sdk/react/menu";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  type RefObject,
+  use,
+  useId,
+} from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { cn } from "@/lib/utils";
+import { usePopupContainer } from "@/registry/bases/ui-sdk/hooks/use-popup-container";
 
 /** Which side a picker's menu opens on: a panel against the right edge opens them leftwards. */
 const PickerSideContext = createContext<"left" | "right">("right");
@@ -13,22 +35,21 @@ function usePickerSide(isMobile: boolean) {
   return isMobile ? "top" : side;
 }
 
-function Picker({ ...props }: MenuPrimitive.Root.Props) {
-  return <MenuPrimitive.Root data-slot="dropdown-menu" {...props} />;
+function Picker({ container, ...props }: ComponentProps<typeof Menu>) {
+  const popups = usePopupContainer();
+  return <Menu container={container ?? popups} modal="pointer" {...props} />;
 }
 
-function PickerPortal({ ...props }: MenuPrimitive.Portal.Props) {
-  return <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />;
-}
-
-function PickerTrigger({ className, ...props }: MenuPrimitive.Trigger.Props) {
+function PickerTrigger({
+  className,
+  ...props
+}: ComponentProps<typeof MenuTrigger>) {
   return (
-    <MenuPrimitive.Trigger
+    <MenuTrigger
       className={cn(
-        "site-rounded-xl md:site-rounded-lg in-data-[slot=sheet-content]:site-rounded-lg relative w-[160px] shrink-0 touch-manipulation select-none border border-site-foreground/10 bg-site-muted/50 p-2 font-site-sans hover:bg-site-muted disabled:opacity-50 data-popup-open:bg-site-muted md:w-full in-data-[slot=sheet-content]:w-full md:border-transparent in-data-[slot=sheet-content]:border-transparent md:bg-transparent in-data-[slot=sheet-content]:bg-transparent",
+        "site-rounded-xl md:site-rounded-lg in-data-[slot=sheet-content]:site-rounded-lg relative w-[160px] shrink-0 touch-manipulation select-none border border-site-foreground/10 bg-site-muted/50 p-2 font-site-sans hover:bg-site-muted disabled:opacity-50 data-open:bg-site-muted md:w-full in-data-[slot=sheet-content]:w-full md:border-transparent in-data-[slot=sheet-content]:border-transparent md:bg-transparent in-data-[slot=sheet-content]:bg-transparent",
         className
       )}
-      data-slot="dropdown-menu-trigger"
       {...props}
     />
   );
@@ -37,60 +58,51 @@ function PickerTrigger({ className, ...props }: MenuPrimitive.Trigger.Props) {
 function PickerContent({
   align = "start",
   alignOffset = 0,
+  anchor,
   side = "bottom",
   sideOffset = 4,
-  anchor,
   className,
   ...props
-}: MenuPrimitive.Popup.Props &
-  Pick<
-    MenuPrimitive.Positioner.Props,
-    "align" | "alignOffset" | "side" | "sideOffset" | "anchor"
-  >) {
+}: Omit<ComponentProps<typeof MenuContent>, "anchor"> & {
+  anchor?: RefObject<HTMLElement | null>;
+}) {
   return (
-    <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner
-        align={align}
-        alignOffset={alignOffset}
-        anchor={anchor}
-        className="isolate z-50 outline-none"
-        collisionAvoidance={{ fallbackAxisSide: "end" }}
-        side={side}
-        sideOffset={sideOffset}
-      >
-        <MenuPrimitive.Popup
-          className={cn(
-            "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 cn-menu-target no-scrollbar site-rounded-xl z-50 max-h-(--available-height) w-[calc(var(--anchor-width)-(--spacing(3.5)))] min-w-32 origin-(--transform-origin) overflow-y-auto overflow-x-hidden border-0 bg-site-popover p-1 font-site-sans text-site-popover-foreground shadow-md outline-none ring-1 ring-site-foreground/10 duration-100 data-closed:animate-out data-open:animate-in data-closed:overflow-hidden md:w-52",
-            className
-          )}
-          data-slot="dropdown-menu-content"
-          {...props}
-        />
-      </MenuPrimitive.Positioner>
-      <div className="absolute inset-0 z-40 bg-transparent" />
-    </MenuPrimitive.Portal>
+    <MenuContent
+      align={align}
+      alignOffset={alignOffset}
+      anchor={
+        anchor && {
+          getBoundingClientRect: () =>
+            anchor.current?.getBoundingClientRect() ?? new DOMRect(),
+        }
+      }
+      className={cn(
+        "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 cn-menu-target no-scrollbar site-rounded-xl z-50 max-h-(--available-height) w-[calc(var(--anchor-width)-(--spacing(3.5)))] min-w-32 origin-(--transform-origin) overflow-y-auto overflow-x-hidden border-0 bg-site-popover p-1 font-site-sans text-site-popover-foreground shadow-md outline-none ring-1 ring-site-foreground/10 duration-100 data-closed:animate-out data-open:animate-in data-closed:overflow-hidden md:w-52",
+        className
+      )}
+      side={side}
+      sideOffset={sideOffset}
+      {...props}
+    />
   );
 }
 
-function PickerGroup({ ...props }: MenuPrimitive.Group.Props) {
-  return <MenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />;
-}
+const PickerGroup = MenuGroup;
 
 function PickerLabel({
   className,
   inset,
   ...props
-}: MenuPrimitive.GroupLabel.Props & {
+}: ComponentProps<typeof MenuGroupLabel> & {
   inset?: boolean;
 }) {
   return (
-    <MenuPrimitive.GroupLabel
+    <MenuGroupLabel
       className={cn(
         "px-2 py-1.5 font-medium text-site-muted-foreground text-xs data-inset:pl-8",
         className
       )}
       data-inset={inset}
-      data-slot="dropdown-menu-label"
       {...props}
     />
   );
@@ -98,47 +110,48 @@ function PickerLabel({
 
 function PickerItem({
   className,
+  closeOnClick,
   inset,
   variant = "default",
   ...props
-}: MenuPrimitive.Item.Props & {
+}: ComponentProps<typeof MenuItem> & {
+  closeOnClick?: boolean;
   inset?: boolean;
   variant?: "default" | "destructive";
 }) {
   return (
-    <MenuPrimitive.Item
+    <MenuItem
       className={cn(
         "group/dropdown-menu-item site-rounded-sm relative flex cursor-default select-none items-center gap-2 px-2 pointer-coarse:py-2.5 py-1.5 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-inset:pl-8 data-[variant=destructive]:text-site-destructive data-disabled:opacity-50 data-[variant=destructive]:focus:bg-site-destructive/10 data-[variant=destructive]:focus:text-site-destructive dark:data-[variant=destructive]:focus:bg-site-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 data-[variant=destructive]:*:[svg]:text-site-destructive",
         className
       )}
+      closeOnSelect={closeOnClick}
       data-inset={inset}
-      data-slot="dropdown-menu-item"
       data-variant={variant}
       {...props}
     />
   );
 }
 
-function PickerSub({ ...props }: MenuPrimitive.SubmenuRoot.Props) {
-  return <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...props} />;
-}
+const PickerSub = MenuSub;
 
 function PickerSubTrigger({
   className,
   inset,
   children,
   ...props
-}: MenuPrimitive.SubmenuTrigger.Props & {
+}: Omit<ComponentProps<typeof MenuSubTrigger>, "children"> & {
+  children?: ReactNode;
+} & {
   inset?: boolean;
 }) {
   return (
-    <MenuPrimitive.SubmenuTrigger
+    <MenuSubTrigger
       className={cn(
         "site-rounded-sm flex cursor-default select-none items-center gap-2 px-2 py-1.5 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground not-data-[variant=destructive]:focus:**:text-site-accent-foreground data-open:bg-site-accent data-inset:pl-8 data-open:text-site-accent-foreground [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       data-inset={inset}
-      data-slot="dropdown-menu-sub-trigger"
       {...props}
     >
       {children}
@@ -150,7 +163,7 @@ function PickerSubTrigger({
         remixicon="RiArrowRightSLine"
         tabler="IconChevronRight"
       />
-    </MenuPrimitive.SubmenuTrigger>
+    </MenuSubTrigger>
   );
 }
 
@@ -161,16 +174,15 @@ function PickerSubContent({
   sideOffset = 0,
   className,
   ...props
-}: React.ComponentProps<typeof PickerContent>) {
+}: ComponentProps<typeof MenuSubContent>) {
   return (
-    <PickerContent
+    <MenuSubContent
       align={align}
       alignOffset={alignOffset}
       className={cn(
         "data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 site-rounded-md w-auto min-w-[96px] bg-site-popover p-1 font-site-sans text-site-popover-foreground shadow-lg ring-1 ring-site-foreground/10 duration-100 data-closed:animate-out data-open:animate-in",
         className
       )}
-      data-slot="dropdown-menu-sub-content"
       side={side}
       sideOffset={sideOffset}
       {...props}
@@ -182,20 +194,25 @@ function PickerCheckboxItem({
   className,
   children,
   checked,
+  value,
   ...props
-}: MenuPrimitive.CheckboxItem.Props) {
+}: Omit<ComponentProps<typeof MenuCheckboxItem>, "children" | "value"> & {
+  children?: ReactNode;
+  value?: string;
+}) {
+  const id = useId();
   return (
-    <MenuPrimitive.CheckboxItem
+    <MenuCheckboxItem
       checked={checked}
       className={cn(
         "site-rounded-sm relative flex cursor-default select-none items-center gap-2 py-1.5 pr-8 pl-2 text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
-      data-slot="dropdown-menu-checkbox-item"
+      value={value ?? id}
       {...props}
     >
       <span className="pointer-events-none absolute right-2 flex items-center justify-center">
-        <MenuPrimitive.CheckboxItemIndicator>
+        <MenuItemIndicator>
           <IconPlaceholder
             hugeicons="Tick02Icon"
             lucide="CheckIcon"
@@ -203,41 +220,35 @@ function PickerCheckboxItem({
             remixicon="RiCheckLine"
             tabler="IconCheck"
           />
-        </MenuPrimitive.CheckboxItemIndicator>
+        </MenuItemIndicator>
       </span>
       {children}
-    </MenuPrimitive.CheckboxItem>
+    </MenuCheckboxItem>
   );
 }
 
-function PickerRadioGroup({ ...props }: MenuPrimitive.RadioGroup.Props) {
-  return (
-    <MenuPrimitive.RadioGroup
-      data-slot="dropdown-menu-radio-group"
-      {...props}
-    />
-  );
-}
+const PickerRadioGroup = MenuRadioGroup;
 
 function PickerRadioItem({
   className,
   children,
+  closeOnClick,
   ...props
-}: MenuPrimitive.RadioItem.Props) {
+}: Omit<ComponentProps<typeof MenuRadioItem>, "children"> & {
+  children?: ReactNode;
+  closeOnClick?: boolean;
+}) {
   return (
-    <MenuPrimitive.RadioItem
+    <MenuRadioItem
       className={cn(
         "site-rounded-lg relative flex cursor-default select-none items-center gap-2 pointer-coarse:gap-3 pointer-coarse:py-2.5 py-1.5 pr-8 pl-2 pointer-coarse:pl-3 pointer-coarse:text-base text-sm outline-hidden focus:bg-site-accent focus:text-site-accent-foreground focus:**:text-site-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
-      data-slot="dropdown-menu-radio-item"
+      closeOnSelect={closeOnClick}
       {...props}
     >
-      <span
-        className="pointer-events-none absolute right-2 flex items-center justify-center"
-        data-slot="dropdown-menu-radio-item-indicator"
-      >
-        <MenuPrimitive.RadioItemIndicator>
+      <span className="pointer-events-none absolute right-2 flex items-center justify-center">
+        <MenuItemIndicator>
           <IconPlaceholder
             className="pointer-coarse:size-5 size-4"
             hugeicons="Tick02Icon"
@@ -246,34 +257,32 @@ function PickerRadioItem({
             remixicon="RiCheckLine"
             tabler="IconCheck"
           />
-        </MenuPrimitive.RadioItemIndicator>
+        </MenuItemIndicator>
       </span>
       {children}
-    </MenuPrimitive.RadioItem>
+    </MenuRadioItem>
   );
 }
 
 function PickerSeparator({
   className,
   ...props
-}: MenuPrimitive.Separator.Props) {
+}: ComponentProps<typeof MenuSeparator>) {
   return (
-    <MenuPrimitive.Separator
+    <MenuSeparator
       className={cn("-mx-1 my-1 h-px bg-site-border", className)}
-      data-slot="dropdown-menu-separator"
       {...props}
     />
   );
 }
 
-function PickerShortcut({ className, ...props }: React.ComponentProps<"span">) {
+function PickerShortcut({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
         "ml-auto text-site-muted-foreground text-xs tracking-widest group-focus/dropdown-menu-item:text-site-accent-foreground",
         className
       )}
-      data-slot="dropdown-menu-shortcut"
       {...props}
     />
   );
@@ -286,7 +295,6 @@ export {
   PickerGroup,
   PickerItem,
   PickerLabel,
-  PickerPortal,
   PickerRadioGroup,
   PickerRadioItem,
   PickerSeparator,

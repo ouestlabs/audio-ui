@@ -1,6 +1,6 @@
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import { Toggle } from "@/registry/bases/ui-sdk/ui/toggle";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
 import { Fader } from "@/registry/bases/base/audio/elements/fader";
 import { Knob } from "@/registry/bases/base/audio/elements/knob";
 import { Meter } from "@/registry/bases/base/audio/elements/meter";

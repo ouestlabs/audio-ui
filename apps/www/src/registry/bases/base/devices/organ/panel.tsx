@@ -1,4 +1,13 @@
 import { type ReactNode, useCallback, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
 import { Fader } from "@/registry/bases/base/audio/elements/fader";
 import { Piano } from "@/registry/bases/base/audio/elements/piano";
@@ -18,18 +27,6 @@ import {
   organPreset,
 } from "@/registry/bases/base/devices/organ/device";
 import { cn } from "@/registry/bases/base/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/registry/bases/ui-sdk/ui/toggle-group";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [

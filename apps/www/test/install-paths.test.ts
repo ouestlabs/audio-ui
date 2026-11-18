@@ -291,6 +291,16 @@ test("an item's own imports come with it when it is installed", () => {
           continue;
         }
         const [, shadcn] = specifier.match(SHADCN_IMPORT) ?? [];
+        // A ui component the registry has an item for, such as the toolbar, comes from that item.
+        const owned = shadcn && owners.get(`components/ui/${shadcn}`);
+        if (owned) {
+          if (!owned.some((owner) => brought.has(owner))) {
+            problems.push(
+              `${item.name}: ${specifier} (add @audio-ui/${owned[0]})`
+            );
+          }
+          continue;
+        }
         if (shadcn) {
           if (!brought.has(`shadcn:${shadcn}`)) {
             problems.push(`${item.name}: ${specifier} (add @shadcn/${shadcn})`);

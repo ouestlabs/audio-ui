@@ -1,9 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import { useMidiInput } from "@/registry/bases/base/hooks/use-midi-input";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupText,
-} from "@/registry/bases/ui-sdk/ui/button-group";
 
 /**
  * Connects the page's MIDI input, with the device's name or the error beside

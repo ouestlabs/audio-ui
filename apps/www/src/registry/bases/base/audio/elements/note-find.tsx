@@ -6,17 +6,13 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { rollScale, type Scale } from "@/engine/pitch";
-import { cn } from "@/registry/bases/base/lib/utils";
-import type { NoteQuery } from "@/registry/bases/base/primitives/piano-roll/edits";
-import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
-import { Button } from "@/registry/bases/ui-sdk/ui/button";
-import { Input } from "@/registry/bases/ui-sdk/ui/input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/registry/bases/ui-sdk/ui/popover";
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -24,7 +20,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/registry/bases/ui-sdk/ui/select";
+} from "@/components/ui/select";
+import { rollScale, type Scale } from "@/engine/pitch";
+import { cn } from "@/registry/bases/base/lib/utils";
+import type { NoteQuery } from "@/registry/bases/base/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry/bases/base/primitives/pitch";
 
 /** The form's fields, as typed: empty means no limit. */
 const NO_FIND = {
