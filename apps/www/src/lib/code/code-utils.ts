@@ -11,10 +11,13 @@ function pickQuote(dq: string | undefined, sq: string | undefined): string {
   return "`";
 }
 
-/** A string Step 1 emptied of its classes, until its line is dropped: never in a source. */
-const EMPTIED = "\u0000emptied\u0000";
-const EMPTIED_LINE = /^\s*(["'`])\u0000emptied\u0000\1\s*,?\s*\n/gm;
-const EMPTIED_STRING = /\u0000emptied\u0000/g;
+/**
+ * A string Step 1 emptied of its classes, until its line is dropped: never in a
+ * source, since U+FDD0 is a Unicode noncharacter, kept for a program's own use.
+ */
+const EMPTIED = "\uFDD0emptied\uFDD0";
+const EMPTIED_LINE = /^\s*(["'`])\uFDD0emptied\uFDD0\1\s*,?\s*\n/gm;
+const EMPTIED_STRING = /\uFDD0emptied\uFDD0/g;
 
 /**
  * Transforms style-specific class names based on the current style.

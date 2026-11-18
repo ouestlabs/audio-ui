@@ -61,6 +61,26 @@ export interface PrimitiveApi {
 const WHITESPACE = /\s+/g;
 const JSDOC_EDGES = /^\/\*\*|\*\/$/g;
 const JSDOC_LINE = /^\s*\*\s?/gm;
+const JSDOC_DEFAULT = /\s?@default\s+(.+?)(?=\s@\w|$)/;
+const JSDOC_TAGS = /\s?@\w+[\s\S]*$/;
+const INTERFACE_HEADER =
+  /export interface (\w+)(?:<[^{]*?>)?\s*(?:extends ([^{]+))?\{/g;
+const OPTIONS_INTERFACE = /export interface (\w+PrimitiveOptions)/;
+const MEMBER =
+  /^\s*(\/\*\*[\s\S]*?\*\/\s*)?(?:readonly\s+)?(\w+)(\?)?\s*:\s*([\s\S]+?)\s*$/;
+const OMIT = /^Omit<\s*(\w+)\s*,\s*([^>]+)>$/;
+const LEADING_NAME = /^(\w+)/;
+const QUOTES = /["']/g;
+const CALLBACK = /^on[A-Z]/;
+const PARTS_OBJECT_NAME = /export const (\w+) = \{/;
+const PARTS_OBJECT_BODY = /export const \w+ = \{([\s\S]*?)\};/;
+const CREATE_PARTS = /createParts\(\s*\w+,\s*\{([\s\S]*?)\}\s*\)/;
+const EVENTS_BLOCK = /events:\s*\{([^}]*)\}/;
+/** A key and its string: `onValueChange: "input"`, `control: "div"`. */
+const STRING_ENTRY = /(\w+):\s*"([^"]+)"/g;
+const WEB_TAG = /"(audio-ui-[a-z0-9-]+)"/g;
+const AGENT_ACTIONS = /agent:\s*\{\s*actions:\s*\[([^\]]*)\]/;
+const QUOTED = /"([^"]+)"/g;
 const KEBAB = /([a-z0-9])([A-Z])/g;
 const kebab = (name: string) => name.replace(KEBAB, "$1-$2").toLowerCase();
 const pascal = (name: string) =>
@@ -126,11 +146,9 @@ interface Declared {
 /** Every `export interface` of the packages, by name. */
 function interfaces() {
   const found = new Map<string, Declared>();
-  const header =
-    /export interface (\w+)(?:<[^{]*?>)?\s*(?:extends ([^{]+))?\{/g;
   for (const file of sourcesOf(PRIMITIVES)) {
     const text = require("node:fs").readFileSync(file, "utf8") as string;
-    for (const match of text.matchAll(header)) {
+    for (const match of text.matchAll(INTERFACE_HEADER)) {
       const open = (match.index ?? 0) + match[0].length - 1;
       found.set(match[1] ?? "", {
         body: braced(text, open),
@@ -149,8 +167,8 @@ function docOf(jsdoc: string | undefined) {
     .replace(JSDOC_LINE, "")
     .replace(WHITESPACE, " ")
     .trim();
-  const tag = /\s?@default\s+(.+?)(?=\s@\w|$)/.exec(text);
-  const description = text.replace(/\s?@\w+[\s\S]*$/, "").trim();
+  const tag = JSDOC_DEFAULT.exec(text);
+  const description = text.replace(JSDOC_TAGS, "").trim();
   return { default: tag?.[1]?.trim(), description };
 }
 
@@ -158,10 +176,7 @@ function docOf(jsdoc: string | undefined) {
 function membersOf(body: string): ApiOption[] {
   const members: ApiOption[] = [];
   for (const statement of topLevel(body, ";")) {
-    const match =
-      /^\s*(\/\*\*[\s\S]*?\*\/\s*)?(?:readonly\s+)?(\w+)(\?)?\s*:\s*([\s\S]+?)\s*$/.exec(
-        statement
-      );
+    const match = MEMBER.exec(statement);
     if (!match) {
       continue;
     }
@@ -190,10 +205,10 @@ function optionsOf(
   seen.add(name);
   const inherited: ApiOption[] = [];
   for (const parent of declared.extends) {
-    const omit = /^Omit<\s*(\w+)\s*,\s*([^>]+)>$/.exec(parent);
-    const base = omit?.[1] ?? /^(\w+)/.exec(parent)?.[1] ?? "";
+    const omit = OMIT.exec(parent);
+    const base = omit?.[1] ?? LEADING_NAME.exec(parent)?.[1] ?? "";
     const dropped = new Set(
-      (omit?.[2] ?? "").split("|").map((key) => key.trim().replace(/["']/g, ""))
+      (omit?.[2] ?? "").split("|").map((key) => key.trim().replace(QUOTES, ""))
     );
     inherited.push(
       ...optionsOf(base, all, seen).filter(
@@ -211,7 +226,7 @@ function optionsOf(
 
 /** The names the Vue adapter exports in its object of parts: `export const Knob = { Control: parts.Control, … }`. */
 function exportsOf(adapter: string) {
-  const body = /export const \w+ = \{([\s\S]*?)\};/.exec(adapter)?.[1] ?? "";
+  const body = PARTS_OBJECT_BODY.exec(adapter)?.[1] ?? "";
   return topLevel(body, ",")
     .map((entry) => entry.trim().split(":")[0]?.trim() ?? "")
     .filter(Boolean)
@@ -227,81 +242,82 @@ function slotsOf(name: string): Promise<Record<string, any>> {
   });
 }
 
-export async function build(): Promise<PrimitiveApi[]> {
+const read = (file: string) =>
+  Bun.file(file)
+    .text()
+    .catch(() => "");
+
+/** The API of one primitive, from its source and its adapters. */
+async function apiOf(
+  name: string,
+  all: Map<string, Declared>
+): Promise<PrimitiveApi> {
+  const [source, web, vue, slots] = await Promise.all([
+    read(join(PRIMITIVES, name, `${name}.ts`)),
+    read(join(ADAPTERS, name, "web/index.ts")),
+    read(join(ADAPTERS, name, "vue/index.ts")),
+    slotsOf(name),
+  ]);
+  const optionsInterface = OPTIONS_INTERFACE.exec(source)?.[1];
+  const options = optionsInterface ? optionsOf(optionsInterface, all) : [];
+  // The event of the custom elements for each callback of the root: `onValueChange: "input"`.
+  const eventsBlock = EVENTS_BLOCK.exec(web)?.[1] ?? "";
+  const webEvents = new Map(
+    [...eventsBlock.matchAll(STRING_ENTRY)].map((match) => [
+      match[1] ?? "",
+      match[2] ?? "",
+    ])
+  );
+  const callbacks = new Set([
+    ...options
+      .filter((option) => CALLBACK.test(option.name))
+      .map((option) => option.name),
+    ...webEvents.keys(),
+  ]);
+  const events: ApiEvent[] = [...callbacks].sort().map((callback) => ({
+    callback,
+    event: webEvents.get(callback) ?? null,
+    vue: kebab(callback.slice(2)),
+  }));
+  // What each part draws as, from the Vue adapter's `createParts(primitive, { control: "div" })`.
+  const elementsBlock = CREATE_PARTS.exec(vue)?.[1] ?? "";
+  const elements = new Map(
+    [...elementsBlock.matchAll(STRING_ENTRY)].map((match) => [
+      match[1] ?? "",
+      match[2] ?? "",
+    ])
+  );
+  const exported = exportsOf(vue);
+  const parts: ApiPart[] = exported.map((part) => {
+    const slot = slots[part.charAt(0).toLowerCase() + part.slice(1)];
+    const props = Object.fromEntries(
+      Object.entries((slot?.props ?? {}) as Record<string, string>).filter(
+        ([key]) => key !== "data-slot"
+      )
+    );
+    return {
+      element: elements.get(part.charAt(0).toLowerCase() + part.slice(1)),
+      name: part,
+      props,
+    };
+  });
+  const tags = [
+    ...new Set([...web.matchAll(WEB_TAG)].map((match) => match[1] ?? "")),
+  ].sort();
+  const actions = [
+    ...(AGENT_ACTIONS.exec(source)?.[1] ?? "").matchAll(QUOTED),
+  ].map((match) => match[1] ?? "");
+  const component = PARTS_OBJECT_NAME.exec(vue)?.[1] ?? pascal(name);
+  return { actions, component, events, name, options, parts, tags };
+}
+
+export function build(): Promise<PrimitiveApi[]> {
   const all = interfaces();
   const names = readdirSync(PRIMITIVES, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  const read = (file: string) =>
-    Bun.file(file)
-      .text()
-      .catch(() => "");
-  const apis: PrimitiveApi[] = [];
-  for (const name of names) {
-    const source = await read(join(PRIMITIVES, name, `${name}.ts`));
-    const optionsInterface = /export interface (\w+PrimitiveOptions)/.exec(
-      source
-    )?.[1];
-    const options = optionsInterface ? optionsOf(optionsInterface, all) : [];
-    const web = await read(join(ADAPTERS, name, "web/index.ts"));
-    const vue = await read(join(ADAPTERS, name, "vue/index.ts"));
-    // The event of the custom elements for each callback of the root: `onValueChange: "input"`.
-    const eventsBlock = /events:\s*\{([^}]*)\}/.exec(web)?.[1] ?? "";
-    const webEvents = new Map(
-      [...eventsBlock.matchAll(/(\w+):\s*"([^"]+)"/g)].map((match) => [
-        match[1] ?? "",
-        match[2] ?? "",
-      ])
-    );
-    const callbacks = new Set([
-      ...options
-        .filter((option) => /^on[A-Z]/.test(option.name))
-        .map((option) => option.name),
-      ...webEvents.keys(),
-    ]);
-    const events: ApiEvent[] = [...callbacks].sort().map((callback) => ({
-      callback,
-      event: webEvents.get(callback) ?? null,
-      vue: kebab(callback.slice(2)),
-    }));
-    // What each part draws as, from the Vue adapter's `createParts(primitive, { control: "div" })`.
-    const elementsBlock =
-      /createParts\(\s*\w+,\s*\{([\s\S]*?)\}\s*\)/.exec(vue)?.[1] ?? "";
-    const elements = new Map(
-      [...elementsBlock.matchAll(/(\w+):\s*"([^"]+)"/g)].map((match) => [
-        match[1] ?? "",
-        match[2] ?? "",
-      ])
-    );
-    const slots = await slotsOf(name);
-    const exported = exportsOf(vue);
-    const parts: ApiPart[] = exported.map((part) => {
-      const slot = slots[part.charAt(0).toLowerCase() + part.slice(1)];
-      const props = { ...((slot?.props as Record<string, string>) ?? {}) };
-      delete props["data-slot"];
-      return {
-        element: elements.get(part.charAt(0).toLowerCase() + part.slice(1)),
-        name: part,
-        props,
-      };
-    });
-    const tags = [
-      ...new Set(
-        [...web.matchAll(/"(audio-ui-[a-z0-9-]+)"/g)].map(
-          (match) => match[1] ?? ""
-        )
-      ),
-    ].sort();
-    const actions = [
-      ...(
-        /agent:\s*\{\s*actions:\s*\[([^\]]*)\]/.exec(source)?.[1] ?? ""
-      ).matchAll(/"([^"]+)"/g),
-    ].map((match) => match[1] ?? "");
-    const component = /export const (\w+) = \{/.exec(vue)?.[1] ?? pascal(name);
-    apis.push({ actions, component, events, name, options, parts, tags });
-  }
-  return apis;
+  return Promise.all(names.map((name) => apiOf(name, all)));
 }
 
 if (import.meta.main) {

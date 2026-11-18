@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { EqBand } from "@/engine/analysis";
 import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
+import type { EqBand } from "@/engine/analysis";
 
 /** A parameter that keeps the value it was last set to, outright or by a ramp. */
 const param = (value: number) => ({

@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
-import { defineDevice } from "@/engine/device";
 import { fireEvent, render, within } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
+import { defineDevice } from "@/engine/device";
 
 // The list a long choice goes in is the site's own select, which asks the router where it is.
 mock.module("@tanstack/react-router", () => ({
