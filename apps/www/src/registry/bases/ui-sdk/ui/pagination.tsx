@@ -8,7 +8,7 @@ import {
   Pagination as PaginationPrimitive,
 } from "@ui-sdk/react/pagination";
 import type { VariantProps } from "class-variance-authority";
-import type { ComponentProps } from "react";
+import { type ComponentProps, useCallback } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/registry/bases/ui-sdk/ui/button";
@@ -47,20 +47,18 @@ function PaginationLink({
   Pick<VariantProps<typeof buttonVariants>, "size"> & {
     className?: string;
   }) {
-  return (
-    <PaginationLinkPrimitive
-      className={(state) =>
-        cn(
-          buttonVariants({
-            size,
-            variant: state.current ? "outline" : "ghost",
-          }),
-          className
-        )
-      }
-      {...props}
-    />
+  const classes = useCallback(
+    (state: { current: boolean }) =>
+      cn(
+        buttonVariants({
+          size,
+          variant: state.current ? "outline" : "ghost",
+        }),
+        className
+      ),
+    [className, size]
   );
+  return <PaginationLinkPrimitive className={classes} {...props} />;
 }
 
 function PaginationPrevious({
