@@ -18,7 +18,7 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { cn } from "@/registry/bases/shared/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,

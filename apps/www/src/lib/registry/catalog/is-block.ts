@@ -1,8 +1,9 @@
-import { audio } from "../../../registry/bases/base/audio/_registry";
-import { components } from "../../../registry/bases/base/components/_registry";
-import { devices } from "../../../registry/bases/base/devices/_registry";
-import { hooks } from "../../../registry/bases/base/hooks/_registry";
-import { lib } from "../../../registry/bases/base/lib/_registry";
+import { audio } from "../../../registry/bases/shared/audio/_registry";
+import { components } from "../../../registry/bases/shared/components/_registry";
+import { devices } from "../../../registry/bases/shared/devices/_registry";
+import { hooks } from "../../../registry/bases/shared/hooks/_registry";
+import { lib } from "../../../registry/bases/shared/lib/_registry";
+import { audio as sdkAudio } from "../../../registry/bases/ui-sdk/audio/_registry";
 
 /** A block is laid out for a page, not a card: its preview is as tall as it is. */
 export const isBlock = (name: string) => name.startsWith("block-");
@@ -44,10 +45,9 @@ const PLAY_SWITCH = "use-play-switch";
 
 /** Every registry item by name: what a preview installs is what tells how it is played. */
 const ITEMS = new Map(
-  [...audio, ...devices, ...components, ...hooks, ...lib].map((item) => [
-    item.name,
-    item,
-  ])
+  [...audio, ...sdkAudio, ...devices, ...components, ...hooks, ...lib].map(
+    (item) => [item.name, item]
+  )
 );
 
 /** Whether an item, or anything it installs, is `target`. */

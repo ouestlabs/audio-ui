@@ -12,7 +12,7 @@
  * sources cannot.
  */
 
-const ENGINE = `${import.meta.dir}/../../src/registry/bases/base/lib/engine`;
+const ENGINE = `${import.meta.dir}/../../src/registry/bases/shared/lib/engine`;
 const PLAYBACK = `${ENGINE}/playback`;
 
 /** Each bundle: its entry, the file it is written to, the constant that holds it and what that constant says. */

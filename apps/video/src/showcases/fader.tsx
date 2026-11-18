@@ -1,4 +1,4 @@
-import { Fader } from "@/registry/bases/base/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio/elements/fader";
 import { clamp, MOTION, ramp, tw } from "../motion.ts";
 
 const FADERS = [

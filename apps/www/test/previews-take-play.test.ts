@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { takesPlay } from "@/lib/registry/catalog/is-block";
-import { components } from "@/registry/bases/base/components/_registry";
+import { components } from "@/registry/bases/shared/components/_registry";
 
 const DEVICES = components
   .map((item) => item.name)

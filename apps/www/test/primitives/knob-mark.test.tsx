@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Knob } from "@/registry/bases/base/primitives/knob/react/index.tsx";
+import { Knob } from "@/registry/bases/shared/primitives/knob/react/index.tsx";
 
 test("a mark is a layer over the dial, turned to its value", async () => {
   const container = document.body.appendChild(document.createElement("div"));

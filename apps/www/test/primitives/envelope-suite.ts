@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { polylinePoints } from "@/registry/bases/base/primitives/envelope/geometry";
+import { polylinePoints } from "@/registry/bases/shared/primitives/envelope/geometry";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

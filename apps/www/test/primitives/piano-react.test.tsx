@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Piano } from "@/registry/bases/base/primitives/piano/react/index.tsx";
+import { Piano } from "@/registry/bases/shared/primitives/piano/react/index.tsx";
 import { pianoSuite } from "./piano-suite.ts";
 
 pianoSuite("React", async ({ labels, options }) => {

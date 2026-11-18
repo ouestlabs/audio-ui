@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { SHIPPED_PRIMITIVES } from "@/registry/bases/primitives";
 
-const PRIMITIVES = `${import.meta.dir}/../src/registry/bases/base/primitives`;
+const PRIMITIVES = `${import.meta.dir}/../src/registry/bases/shared/primitives`;
 const ALIAS = /"@\/primitives\/([a-z-]+)": \[\s*"([^"]+)"/g;
 
 test("a primitive written in the registry is shipped and aliased, and only those", async () => {
@@ -18,7 +18,7 @@ test("a primitive written in the registry is shipped and aliased, and only those
   expect([...SHIPPED_PRIMITIVES].sort()).toEqual(written.sort());
   for (const name of written) {
     expect(aliased.get(name)).toBe(
-      `./src/registry/bases/base/primitives/${name}/${name}.ts`
+      `./src/registry/bases/shared/primitives/${name}/${name}.ts`
     );
   }
   expect([...aliased.keys()].sort()).toEqual(written.sort());

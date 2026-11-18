@@ -25,8 +25,8 @@ const PROJECT_ROOT = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(
   -1
 );
 
-// Only scan base folder. Catalog blocks: bases/base/components (c-*).
-const TARGET_DIR = "src/registry/bases/base";
+// The audio items: those every base shares, and the Base UI variants. Catalog blocks: bases/shared/components.
+const TARGET_DIRS = ["src/registry/bases/shared", "src/registry/bases/base"];
 const OUTPUT_FILE = "src/registry/icons/scanned-icons.json";
 const UNMAPPED_OUTPUT_FILE = "src/registry/icons/unmapped-icons.json";
 
@@ -201,16 +201,25 @@ function lucideUsages(sourceFile: SourceFile, path: string): UnmappedUsage[] {
 }
 
 async function scanIcons() {
-  console.log("Scanning for IconPlaceholder and Lucide icons in", TARGET_DIR);
+  console.log(
+    "Scanning for IconPlaceholder and Lucide icons in",
+    TARGET_DIRS.join(", ")
+  );
 
   // Sorted, so the reports come out the same on every run.
   const files = (
-    await Array.fromAsync(
-      new Bun.Glob("**/*.tsx").scan({ cwd: `${PROJECT_ROOT}/${TARGET_DIR}` })
+    await Promise.all(
+      TARGET_DIRS.map(async (dir) =>
+        (
+          await Array.fromAsync(
+            new Bun.Glob("**/*.tsx").scan({ cwd: `${PROJECT_ROOT}/${dir}` })
+          )
+        ).map((file) => `${dir}/${file}`)
+      )
     )
   )
-    .sort()
-    .map((file) => `${TARGET_DIR}/${file}`);
+    .flat()
+    .sort();
 
   const sources = await Promise.all(
     files.map(async (path) => ({
