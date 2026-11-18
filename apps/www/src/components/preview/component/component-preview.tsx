@@ -40,7 +40,6 @@ export function ComponentPreview({
     (onCode: (code: string) => void) => (
       <ComponentSource
         code={code}
-        collapsible={false}
         iconLibrary={iconLibrary}
         name={name}
         onCode={onCode}
