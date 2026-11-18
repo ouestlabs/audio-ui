@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 const PRIMITIVES = join(
   import.meta.dir,
-  "../src/registry/bases/base/primitives"
+  "../src/registry/bases/shared/primitives"
 );
 const { version } = (await Bun.file(
   join(import.meta.dir, "../src/registry/web-version.json")

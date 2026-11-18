@@ -7,7 +7,7 @@ import { MODULE_SETS } from "@/registry/bases/modules";
  * added, removed or importing something new shows here first.
  */
 
-const LIB = `${import.meta.dir}/../src/registry/bases/base/lib`;
+const LIB = `${import.meta.dir}/../src/registry/bases/shared/lib`;
 // A static import or export, and a dynamic `import("…")`.
 const SPECIFIER = /(?:from\s+"|import\(\s*")([^"]+)"/g;
 const NOT_SHIPPED = /\.(?:test|bench)\.ts$/;

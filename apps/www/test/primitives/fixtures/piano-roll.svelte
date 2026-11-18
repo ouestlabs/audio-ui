@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PianoRoll } from "@/registry/bases/base/primitives/piano-roll/svelte/index.ts";
+import { PianoRoll } from "@/registry/bases/shared/primitives/piano-roll/svelte/index.ts";
 
 /** The roll the shared suite drives: its options and the parts to draw on it. */
 let { tree }: { tree: Record<string, any> } = $props();

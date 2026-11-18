@@ -1,4 +1,4 @@
-import "@/registry/bases/base/primitives/waveform/web/index.ts";
+import "@/registry/bases/shared/primitives/waveform/web/index.ts";
 import { flush } from "./helpers.ts";
 import { type WaveformTree, waveformSuite } from "./waveform-suite.ts";
 

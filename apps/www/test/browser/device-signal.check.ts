@@ -1,11 +1,11 @@
 import { defineDevice } from "@/engine/device";
-import { compressorDevice } from "@/registry/bases/base/devices/compressor/device";
-import { createCompressorEngine } from "@/registry/bases/base/devices/compressor/engine";
+import { compressorDevice } from "@/registry/bases/shared/devices/compressor/device";
+import { createCompressorEngine } from "@/registry/bases/shared/devices/compressor/engine";
 import {
   createDeviceSignal,
   type SignalTarget,
-} from "@/registry/bases/base/lib/device-signal";
-import type { Source } from "@/registry/bases/base/primitives/primitive";
+} from "@/registry/bases/shared/lib/device-signal";
+import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import { assert, check } from "./harness.ts";
 
 const effect = defineDevice({

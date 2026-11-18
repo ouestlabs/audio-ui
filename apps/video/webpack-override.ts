@@ -6,7 +6,7 @@ import type { WebpackOverrideFn } from "@remotion/bundler";
 // package scripts run from apps/video, so paths start from there.
 const root = path.resolve(process.cwd(), "../..");
 const www = path.join(root, "apps/www/src");
-const primitives = path.join(www, "registry/bases/base/primitives");
+const primitives = path.join(www, "registry/bases/shared/primitives");
 
 /** `@/primitives/<name>` for every primitive, as www's tsconfig `paths` resolve it. */
 const primitiveFiles = Object.fromEntries(
@@ -95,8 +95,17 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       "@/components/icon-placeholder$": path.resolve(
         "src/icon-placeholder.tsx"
       ),
-      "@/engine": path.join(www, "registry/bases/base/lib/engine"),
-      "@/gl": path.join(www, "registry/bases/base/lib/gl"),
+      // The elements that name a behavior library: a video draws the ui-sdk ones, as the site does.
+      "@/components/audio-ui/parameter-field$": path.join(
+        www,
+        "registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+      ),
+      "@/components/audio-ui/rocker-switch$": path.join(
+        www,
+        "registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+      ),
+      "@/engine": path.join(www, "registry/bases/shared/lib/engine"),
+      "@/gl": path.join(www, "registry/bases/shared/lib/gl"),
       "@": www,
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),

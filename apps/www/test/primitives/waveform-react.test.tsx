@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Waveform } from "@/registry/bases/base/primitives/waveform/react/index.tsx";
+import { Waveform } from "@/registry/bases/shared/primitives/waveform/react/index.tsx";
 import { waveformSuite } from "./waveform-suite.ts";
 
 waveformSuite("React", async (tree) => {

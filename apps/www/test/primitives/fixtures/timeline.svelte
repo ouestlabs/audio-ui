@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Timeline } from "@/registry/bases/base/primitives/timeline/svelte/index.ts";
+import { Timeline } from "@/registry/bases/shared/primitives/timeline/svelte/index.ts";
 
 /** The timeline the shared suite drives: its options and the parts to draw on it. */
 let { tree }: { tree: Record<string, any> } = $props();
