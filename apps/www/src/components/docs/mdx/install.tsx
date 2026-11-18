@@ -3,7 +3,7 @@ import * as React from "react";
 import { CodeBlockCommand } from "@/components/code/block/code-block-command";
 import { CodeTabs } from "@/components/code/block/code-tabs";
 import { CopyButton } from "@/components/code/copy/copy-button";
-import { DocsComponentSource } from "@/components/code/source/docs-component-source";
+import { FileStack } from "@/components/code/source/file-stack";
 import { Icons } from "@/components/site/icons";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { packageManagerCommands } from "@/lib/code/highlight-code";
@@ -104,14 +104,7 @@ function Part({ part }: { part: InstallPart }) {
       </p>
     );
   }
-  return (
-    <DocsComponentSource
-      className="not-typeset"
-      name={part.name}
-      styleName="ui-sdk-nova"
-      title={part.title}
-    />
-  );
+  return <FileStack name={part.name} paths={[part.title]} />;
 }
 
 /**
