@@ -401,14 +401,6 @@ export function hasComponent(base: string, name: string): boolean {
 // Category Functions - Use registry.json category manifest
 // ============================================================================
 
-function _fallbackCategoryLabel(category: string) {
-  return category
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 /**
  * Get all categories with full info (name, label, description, count, seo)
  * This is the primary way to get category data
