@@ -94,12 +94,6 @@ export const CATALOG = [
     name: "block-pocket-synth",
     title: "Pocket synth",
   },
-  {
-    categories: ["player"],
-    description: "A waveform player.",
-    name: "block-waveform-player",
-    title: "Waveform player",
-  },
 ];
 
 mock.module("@/lib/docs/content/source", () => ({
