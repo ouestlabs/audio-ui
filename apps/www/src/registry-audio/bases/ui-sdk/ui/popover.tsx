@@ -22,7 +22,7 @@ function PopoverTrigger({
   nativeButton: _nativeButton,
   ...props
 }: ComponentProps<typeof PopoverTriggerPrimitive> & {
-  /** Base UI's flag for a trigger that renders a link: ui-sdk needs none. */
+  // The shadcn flag for a trigger that renders a link: ui-sdk needs none.
   nativeButton?: boolean;
 }) {
   return <PopoverTriggerPrimitive {...props} />;

@@ -9,7 +9,6 @@ import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** How many thumbs the slider has: one per value, or a range of two. */
 function thumbCount(value: unknown, defaultValue: unknown) {
   if (Array.isArray(value)) {
     return value.length;
@@ -29,10 +28,9 @@ function Slider({
   onValueCommitted,
   ...props
 }: ComponentProps<typeof SliderPrimitive> & {
-  /** Base UI's name for `onValueCommit`. */
+  // The shadcn name for `onValueCommit`.
   onValueCommitted?: ComponentProps<typeof SliderPrimitive>["onValueCommit"];
 }) {
-  // A thumb is known by its place: the first, the second.
   const thumbs = Array.from(
     { length: thumbCount(value, defaultValue) },
     (_, index) => index

@@ -133,11 +133,7 @@ function SelectLabel({
   ...props
 }: ComponentProps<typeof SelectGroupLabel>) {
   return (
-    <SelectGroupLabel
-      className={cn("cn-select-label", className)}
-      data-slot="select-label"
-      {...props}
-    />
+    <SelectGroupLabel className={cn("cn-select-label", className)} {...props} />
   );
 }
 

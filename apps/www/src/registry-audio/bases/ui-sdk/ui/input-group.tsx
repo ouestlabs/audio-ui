@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ComponentProps } from "react";
+import type { ComponentProps, MouseEvent } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/registry-audio/bases/ui-sdk/ui/button";
@@ -39,8 +39,8 @@ const inputGroupAddonVariants = cva(
   }
 );
 
-/** A press on an addon's text focuses the group's input, as on a label; its own buttons keep the press. Only the mouse needs it: the keyboard reaches the input directly. */
-function focusGroupInput(event: React.MouseEvent<HTMLDivElement>) {
+// A press on an addon's text focuses the group's input, as on a label; its own buttons keep the press.
+function focusGroupInput(event: MouseEvent<HTMLDivElement>) {
   if ((event.target as HTMLElement).closest("button")) {
     return;
   }

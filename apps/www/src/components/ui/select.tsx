@@ -94,7 +94,6 @@ function SelectLabel({
   return (
     <SelectGroupLabel
       className={cn("px-1.5 py-1 text-xs text-muted-foreground", className)}
-      data-slot="select-label"
       {...props}
     />
   );

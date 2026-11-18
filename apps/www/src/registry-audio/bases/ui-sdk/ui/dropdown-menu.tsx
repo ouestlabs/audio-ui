@@ -24,9 +24,7 @@ function DropdownMenu({ container, ...props }: ComponentProps<typeof Menu>) {
   return <Menu container={container ?? popups} {...props} />;
 }
 
-function DropdownMenuTrigger({ ...props }: ComponentProps<typeof MenuTrigger>) {
-  return <MenuTrigger {...props} />;
-}
+const DropdownMenuTrigger = MenuTrigger;
 
 function DropdownMenuContent({
   align = "start",
@@ -37,7 +35,7 @@ function DropdownMenuContent({
   finalFocus,
   ...props
 }: Omit<ComponentProps<typeof MenuContent>, "finalFocus"> & {
-  /** Base UI takes `false` for "leave focus where it is", ui-sdk `"none"`. */
+  // The shadcn API takes `false` for "leave focus where it is", ui-sdk `"none"`.
   finalFocus?: ComponentProps<typeof MenuContent>["finalFocus"] | boolean;
 }) {
   return (
@@ -60,9 +58,7 @@ function DropdownMenuContent({
   );
 }
 
-function DropdownMenuGroup({ ...props }: ComponentProps<typeof MenuGroup>) {
-  return <MenuGroup data-slot="dropdown-menu-group" {...props} />;
-}
+const DropdownMenuGroup = MenuGroup;
 
 function DropdownMenuLabel({
   className,
@@ -87,7 +83,7 @@ function DropdownMenuItem({
   variant = "default",
   ...props
 }: ComponentProps<typeof MenuItem> & {
-  /** Base UI's name for `closeOnSelect`. */
+  // The shadcn name for `closeOnSelect`.
   closeOnClick?: boolean;
   inset?: boolean;
   variant?: "default" | "destructive";
@@ -201,7 +197,7 @@ function DropdownMenuCheckboxItem({
   );
 }
 
-// Base UI's radio values may be numbers, ui-sdk's are strings: the group and its items convert.
+// Radio values may be numbers in the shadcn API, ui-sdk's are strings: the group and its items convert.
 function DropdownMenuRadioGroup<T extends string | number>({
   defaultValue,
   onValueChange,

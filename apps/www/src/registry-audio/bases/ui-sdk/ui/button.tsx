@@ -43,14 +43,13 @@ function Button({
   ...props
 }: Omit<ComponentProps<typeof ButtonPrimitive>, "children" | "onClick"> & {
   children?: ReactNode;
-  /** Base UI's flag for a button that renders a link: ui-sdk needs none. */
+  // The shadcn flag for a button that renders a link: ui-sdk needs none.
   nativeButton?: boolean;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 } & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       className={cn(buttonVariants({ className, size, variant }))}
-      data-slot="button"
       onClick={onClick as ComponentProps<typeof ButtonPrimitive>["onClick"]}
       {...props}
     />

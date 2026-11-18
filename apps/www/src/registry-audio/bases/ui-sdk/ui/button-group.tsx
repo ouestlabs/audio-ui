@@ -1,10 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import {
-  type ComponentProps,
-  cloneElement,
-  isValidElement,
-  type ReactElement,
-} from "react";
+import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";
 import { Separator } from "@/registry-audio/bases/ui-sdk/ui/separator";
@@ -42,24 +37,17 @@ function ButtonGroup({
   );
 }
 
-function ButtonGroupText({
-  className,
-  render,
-  ...props
-}: ComponentProps<"div"> & { render?: ReactElement<{ className?: string }> }) {
-  const merged = cn(
-    "cn-button-group-text flex items-center [&_svg]:pointer-events-none",
-    className
+function ButtonGroupText({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "cn-button-group-text flex items-center [&_svg]:pointer-events-none",
+        className
+      )}
+      data-slot="button-group-text"
+      {...props}
+    />
   );
-  if (isValidElement(render)) {
-    return cloneElement(render, {
-      ...props,
-      className: cn(merged, render.props.className),
-      // The slot is what the group's own rules read.
-      "data-slot": "button-group-text",
-    } as Record<string, unknown>);
-  }
-  return <div className={merged} data-slot="button-group-text" {...props} />;
 }
 
 function ButtonGroupSeparator({

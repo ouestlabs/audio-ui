@@ -42,7 +42,7 @@ function ContextMenuContent({
   finalFocus,
   ...props
 }: Omit<ComponentProps<typeof MenuContent>, "finalFocus"> & {
-  /** Base UI takes `false` for "leave focus where it is", ui-sdk `"none"`. */
+  // The shadcn API takes `false` for "leave focus where it is", ui-sdk `"none"`.
   finalFocus?: ComponentProps<typeof MenuContent>["finalFocus"] | boolean;
 }) {
   return (
@@ -65,9 +65,7 @@ function ContextMenuContent({
   );
 }
 
-function ContextMenuGroup({ ...props }: ComponentProps<typeof MenuGroup>) {
-  return <MenuGroup data-slot="context-menu-group" {...props} />;
-}
+const ContextMenuGroup = MenuGroup;
 
 function ContextMenuLabel({
   className,
@@ -92,7 +90,7 @@ function ContextMenuItem({
   variant = "default",
   ...props
 }: ComponentProps<typeof MenuItem> & {
-  /** Base UI's name for `closeOnSelect`. */
+  // The shadcn name for `closeOnSelect`.
   closeOnClick?: boolean;
   inset?: boolean;
   variant?: "default" | "destructive";
@@ -206,7 +204,7 @@ function ContextMenuCheckboxItem({
   );
 }
 
-// Base UI's radio values may be numbers, ui-sdk's are strings: the group and its items convert.
+// Radio values may be numbers in the shadcn API, ui-sdk's are strings: the group and its items convert.
 function ContextMenuRadioGroup<T extends string | number>({
   defaultValue,
   onValueChange,

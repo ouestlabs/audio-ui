@@ -1,3 +1,4 @@
+@layer ui-sdk;
 @import "tailwindcss";
 @import "./typeset.css";
 @import "tw-animate-css";
