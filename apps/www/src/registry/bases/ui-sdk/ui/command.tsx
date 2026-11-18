@@ -140,7 +140,10 @@ function CommandGroup({
 }) {
   return (
     <CommandGroupPrimitive
-      className={cn("cn-command-group", className)}
+      className={cn(
+        "cn-command-group **:data-[slot=command-group-label]:px-2 **:data-[slot=command-group-label]:py-1.5 **:data-[slot=command-group-label]:font-medium **:data-[slot=command-group-label]:text-muted-foreground **:data-[slot=command-group-label]:text-xs",
+        className
+      )}
       {...props}
     >
       {heading ? <CommandGroupLabel>{heading}</CommandGroupLabel> : null}
@@ -168,7 +171,7 @@ function CommandItem({
   return (
     <CommandItemPrimitive
       className={cn(
-        "cn-command-item group/command-item data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        "cn-command-item group/command-item data-highlighted:bg-muted data-highlighted:text-foreground data-highlighted:*:[svg]:text-foreground data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className
       )}
       {...props}
@@ -182,7 +185,10 @@ function CommandShortcut({
 }: ComponentProps<typeof CommandShortcutPrimitive>) {
   return (
     <CommandShortcutPrimitive
-      className={cn("cn-command-shortcut", className)}
+      className={cn(
+        "cn-command-shortcut group-data-highlighted/command-item:text-foreground",
+        className
+      )}
       {...props}
     />
   );

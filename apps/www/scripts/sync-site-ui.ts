@@ -38,6 +38,17 @@ const COMPONENTS = [
   "tabs",
   "textarea",
   "tooltip",
+  "calendar",
+  "carousel",
+  "combobox",
+  "command",
+  "drawer",
+  "input-otp",
+  "menubar",
+  "navigation-menu",
+  "pagination",
+  "resizable",
+  "toast",
 ];
 
 const OWN = "@audio-ui/";
