@@ -95,6 +95,11 @@ const APPLY_RULE = /\.([a-zA-Z0-9_-]+)\s*\{\s*@apply\s+([^;]+);\s*\}/g;
 const CN_CLASS = /\bcn-[a-zA-Z0-9_-]+\b/;
 const CN_CLASSES = new RegExp(CN_CLASS.source, "g");
 const EXPORT_DEFAULT = /export default/g;
+// The state attributes the style hooks are written against, and the ones ui-sdk's parts carry instead.
+const GROUP_ORIENTATION = /group-data-(horizontal|vertical)\//g;
+const ORIENTATION = /(?<![\w\]-])data-(horizontal|vertical):/g;
+const ACTIVE = /(?<![\w-])data-active\b/g;
+const POPUP_OPEN = /\bdata-popup-open\b/g;
 const DEMO_METADATA =
   /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm;
 
@@ -199,6 +204,15 @@ async function readCnClasses(style: string): Promise<Map<string, string>> {
     }
   }
   return classes;
+}
+
+/** The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others. */
+function toUiSdkAttributes(content: string): string {
+  return content
+    .replace(GROUP_ORIENTATION, "group-data-[orientation=$1]/")
+    .replace(ORIENTATION, "data-[orientation=$1]:")
+    .replace(ACTIVE, "data-selected")
+    .replace(POPUP_OPEN, "data-open");
 }
 
 function expandCnClasses(
@@ -371,6 +385,9 @@ async function buildFile(
   content = transformStyleClassNames(content, build.name);
   // 2. cn-* placeholder classes become their utility classes
   content = expandCnClasses(content, build.cnClasses);
+  if (build.base === UI_BASE) {
+    content = toUiSdkAttributes(content);
+  }
   // 3. Import paths become the paths the files land at
   content = transformImportPaths(content);
   // 4. export default becomes a named export
