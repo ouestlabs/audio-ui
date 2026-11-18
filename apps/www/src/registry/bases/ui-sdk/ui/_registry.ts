@@ -25,6 +25,79 @@ const ui_ = (
 
 export const ui: Registry["items"] = [
   ui_(
+    "calendar",
+    "Calendar",
+    "Chooses a date, several dates or a range from a month grid, with one or more months.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["button"],
+    }
+  ),
+  ui_(
+    "carousel",
+    "Carousel",
+    "Pages through slides with native scrolling, swipes, arrow keys and previous and next buttons.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["button"],
+    }
+  ),
+  ui_(
+    "combobox",
+    "Combobox",
+    "Searches a list and chooses one or several values, with chips, a clear button and groups.",
+    {
+      registryDependencies: ["button", "input-group", "use-popup-container"],
+    }
+  ),
+  ui_(
+    "drawer",
+    "Drawer",
+    "A sheet that opens from an edge, can be dragged to dismiss, and rests on snap points.",
+    { registryDependencies: ["use-popup-container"] }
+  ),
+  ui_(
+    "input-otp",
+    "Input OTP",
+    "Enters a one-time code in slots, with paste, autofill and a separator.",
+    {}
+  ),
+  ui_(
+    "menubar",
+    "Menubar",
+    "A bar of menus with one tab stop, arrow keys between menus, checkboxes, radios and submenus.",
+    { registryDependencies: ["dropdown-menu"] }
+  ),
+  ui_(
+    "navigation-menu",
+    "Navigation menu",
+    "Groups site links into panels that open from a row of triggers, in a shared viewport.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["use-popup-container"],
+    }
+  ),
+  ui_(
+    "pagination",
+    "Pagination",
+    "Navigates pages with buttons or links, with previous and next and an ellipsis for gaps.",
+    {
+      dependencies: ["class-variance-authority"],
+      registryDependencies: ["button"],
+    }
+  ),
+  ui_(
+    "resizable",
+    "Resizable",
+    "Panels the user resizes by dragging a handle or with the keyboard, in a row or a column."
+  ),
+  ui_(
+    "toast",
+    "Toast",
+    "Notifications that stack, time out, take an action and are announced to screen readers.",
+    { registryDependencies: ["button"] }
+  ),
+  ui_(
     "avatar",
     "Avatar",
     "A user's image with a fallback, in three sizes, with a badge and a group."

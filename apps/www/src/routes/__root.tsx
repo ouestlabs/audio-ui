@@ -21,7 +21,7 @@ import { JsonLd } from "@/components/site/json-ld";
 import { QueryProvider } from "@/components/site/providers/query-provider";
 import { ThemeProvider } from "@/components/site/providers/theme-provider";
 import { TailwindIndicator } from "@/components/site/tailwind-indicator";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/toast";
 import { keptBase } from "@/hooks/use-config";
 import { keptFramework } from "@/hooks/use-framework";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";

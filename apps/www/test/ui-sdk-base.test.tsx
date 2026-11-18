@@ -48,6 +48,24 @@ const { RadioGroup, RadioGroupItem } = await import(
   "@/registry/bases/ui-sdk/ui/radio-group"
 );
 const { ScrollArea } = await import("@/registry/bases/ui-sdk/ui/scroll-area");
+const { Calendar } = await import("@/registry/bases/ui-sdk/ui/calendar");
+const { Carousel, CarouselContent, CarouselItem, CarouselNext } = await import(
+  "@/registry/bases/ui-sdk/ui/carousel"
+);
+const { InputOTP, InputOTPGroup, InputOTPSlot } = await import(
+  "@/registry/bases/ui-sdk/ui/input-otp"
+);
+const { Pagination, PaginationContent, PaginationItem, PaginationLink } =
+  await import("@/registry/bases/ui-sdk/ui/pagination");
+const { ResizableHandle, ResizablePanel, ResizablePanelGroup } = await import(
+  "@/registry/bases/ui-sdk/ui/resizable"
+);
+const { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarTrigger } =
+  await import("@/registry/bases/ui-sdk/ui/menubar");
+const { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } =
+  await import("@/registry/bases/ui-sdk/ui/combobox");
+const { Drawer, DrawerContent, DrawerDescription, DrawerTitle, DrawerTrigger } =
+  await import("@/registry/bases/ui-sdk/ui/drawer");
 const { Accordion, AccordionContent, AccordionItem, AccordionTrigger } =
   await import("@/registry/bases/ui-sdk/ui/accordion");
 const { Collapsible, CollapsibleContent, CollapsibleTrigger } = await import(
@@ -362,5 +380,113 @@ describe("the choices and the readouts", () => {
     );
     expect(screen.getByText("LL")).toBeTruthy();
     expect(screen.getByText("Long content")).toBeTruthy();
+  });
+});
+
+describe("the dates, pages and codes", () => {
+  test("a calendar picks a date, a pagination changes page, an OTP input shows its code", async () => {
+    render(
+      <>
+        <Calendar aria-label="Day" defaultValue="2026-10-16" />
+        <Pagination pageCount={3}>
+          <PaginationContent>
+            {({ items }: { items: (number | string)[] }) =>
+              items.map((item) => (
+                <PaginationItem key={item}>
+                  {typeof item === "number" ? (
+                    <PaginationLink page={item} />
+                  ) : null}
+                </PaginationItem>
+              ))
+            }
+          </PaginationContent>
+        </Pagination>
+        <InputOTP aria-label="Code" defaultValue="12" maxLength={4}>
+          <InputOTPGroup>
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+            <InputOTPSlot index={3} />
+          </InputOTPGroup>
+        </InputOTP>
+      </>
+    );
+    await settled();
+    const day = document.querySelector("[data-value='2026-10-16']");
+    expect(day?.hasAttribute("data-selected")).toBe(true);
+    act(() => {
+      fireEvent.click(
+        document.querySelector("[data-value='2026-10-20']") as Element
+      );
+    });
+    await settled();
+    expect(
+      document
+        .querySelector("[data-value='2026-10-20']")
+        ?.hasAttribute("data-selected")
+    ).toBe(true);
+
+    const two = screen.getByRole("button", { name: "2" });
+    act(() => {
+      fireEvent.click(two);
+    });
+    await settled();
+    expect(two.getAttribute("aria-current")).toBe("page");
+
+    expect(screen.getByLabelText<HTMLInputElement>("Code").value).toBe("12");
+  });
+});
+
+describe("the layouts and the pickers", () => {
+  test("a resizable group names its handle, a carousel pages, a combobox and a menubar and a drawer open", async () => {
+    render(
+      <>
+        <ResizablePanelGroup>
+          <ResizablePanel defaultSize={40}>A</ResizablePanel>
+          <ResizableHandle aria-label="Resize A" />
+          <ResizablePanel defaultSize={60}>B</ResizablePanel>
+        </ResizablePanelGroup>
+        <Carousel aria-label="Slides">
+          <CarouselContent>
+            <CarouselItem>One</CarouselItem>
+            <CarouselItem>Two</CarouselItem>
+          </CarouselContent>
+          <CarouselNext />
+        </Carousel>
+        <Combobox>
+          <ComboboxInput aria-label="Fruit" />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxItem label="Apple" value="apple">
+                Apple
+              </ComboboxItem>
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        <Menubar aria-label="App">
+          <MenubarMenu>
+            <MenubarTrigger>File</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>New</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+        <Drawer defaultOpen>
+          <DrawerTrigger>Filters</DrawerTrigger>
+          <DrawerContent>
+            <DrawerTitle>Filters</DrawerTitle>
+            <DrawerDescription>Narrow the results.</DrawerDescription>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+    await settled();
+    expect(screen.getByRole("separator", { name: "Resize A" })).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Slides" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "Fruit" })).toBeTruthy();
+    expect(screen.getByRole("menubar", { name: "App" })).toBeTruthy();
+    expect(
+      screen.getByRole("dialog", { name: "Filters" }).getAttribute("aria-modal")
+    ).toBe("true");
   });
 });
