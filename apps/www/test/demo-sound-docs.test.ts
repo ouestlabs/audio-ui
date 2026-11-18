@@ -3,7 +3,7 @@ import {
   demoSoundsTable,
   expandDemoSounds,
 } from "@/lib/docs/content/demo-sound-docs";
-import { DEMO_SOURCES } from "@/registry-audio/bases/base/lib/demo-sound";
+import { DEMO_SOURCES } from "@/registry/bases/base/lib/demo-sound";
 
 describe("expandDemoSounds", () => {
   test("turns the tag into a table with every sound of the library", () => {

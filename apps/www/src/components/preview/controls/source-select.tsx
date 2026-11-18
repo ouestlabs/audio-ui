@@ -9,12 +9,12 @@ import {
 import {
   silentSource,
   useAudioSession,
-} from "@/registry-audio/bases/base/hooks/use-audio-session";
+} from "@/registry/bases/base/hooks/use-audio-session";
 import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
-} from "@/registry-audio/bases/base/lib/demo-sound";
+} from "@/registry/bases/base/lib/demo-sound";
 
 const NONE = { chosen: null, fallback: null };
 

@@ -1,11 +1,11 @@
 ---
 name: add-registry-item
-description: Add, change, rename or remove an item of the audio/ui shadcn registry in apps/www/src/registry-audio (a block, a demo, a styled element over a primitive, a hook or a lib), and wire it into _registry.ts, categories, the generated manifests and the docs. Use for any work under registry-audio/, even a one-line change to a block, because the generated JSON goes stale otherwise.
+description: Add, change, rename or remove an item of the audio/ui shadcn registry in apps/www/src/registry (a block, a demo, a styled element over a primitive, a hook or a lib), and wire it into _registry.ts, categories, the generated manifests and the docs. Use for any work under registry/, even a one-line change to a block, because the generated JSON goes stale otherwise.
 ---
 
 # Add or change a registry item
 
-All paths below are under `apps/www/src/registry-audio/bases/base/` unless they start with `apps/`. The rules for file names, exports, icons and colors are in `AGENTS.md` ("Registry items"); [CONTRIBUTING.md](../../../CONTRIBUTING.md) has the long version with a full `_registry.ts` example.
+All paths below are under `apps/www/src/registry/bases/base/` unless they start with `apps/`. The rules for file names, exports, icons and colors are in `AGENTS.md` ("Registry items"); [CONTRIBUTING.md](../../../CONTRIBUTING.md) has the long version with a full `_registry.ts` example.
 
 ## 1. Pick the place and the type
 
@@ -23,7 +23,7 @@ Before writing, open the closest existing item of the same kind and copy its sha
 ## 2. Write it
 
 - Elements add appearance only. Behavior (pointer, keyboard, ARIA, value logic) belongs in the primitive: if you need new behavior, switch to the `change-primitive` skill.
-- Import audio elements from `@/registry-audio/bases/base/audio/elements/...` and shadcn parts from `@/registry/bases/base/ui/...`.
+- Import audio elements from `@/registry/bases/base/audio/elements/...` and shadcn parts from `@/registry/bases/base/ui/...`.
 - Live signals (playheads, meters, spectra) go through a source or a ref, never a `setState` per frame.
 - Set a Web Audio parameter with `setTargetAtTime`, not `.value =`, so a drag never clicks.
 - Reuse the shared audio glue listed in `AGENTS.md` ("Shared audio glue"): an engine loads its worklet with `loadWorklet` (`lib/audio-worklet`), an instrument block plays chords with `usePolyphony`. Add the item to `registryDependencies`.

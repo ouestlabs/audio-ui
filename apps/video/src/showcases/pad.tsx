@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
+import { Pad, PadItem } from "@/registry/bases/base/audio/elements/pad";
 import { ramp } from "../motion.ts";
 
 const LABELS = [

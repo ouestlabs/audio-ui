@@ -60,9 +60,7 @@ export default defineConfig({
   resolve: {
     // The demos of Vue and Svelte are not read by the TypeScript paths the dependency scan uses.
     alias: {
-      "@/registry-audio": fileURLToPath(
-        new URL("./src/registry-audio", import.meta.url)
-      ),
+      "@/registry": fileURLToPath(new URL("./src/registry", import.meta.url)),
     },
     dedupe: ["react", "react-dom"],
     tsconfigPaths: true,

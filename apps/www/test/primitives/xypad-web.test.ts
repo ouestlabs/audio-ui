@@ -1,4 +1,4 @@
-import "@/registry-audio/bases/base/primitives/xypad/web/index.ts";
+import "@/registry/bases/base/primitives/xypad/web/index.ts";
 import { type XYPadTree, xypadSuite } from "./xypad-suite.ts";
 
 type PadEvent = CustomEvent<{

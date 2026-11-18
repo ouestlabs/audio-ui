@@ -11,7 +11,7 @@ import {
 import type { ComponentProps, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+import { usePopupContainer } from "@/registry/bases/ui-sdk/hooks/use-popup-container";
 
 function Dialog({
   container,

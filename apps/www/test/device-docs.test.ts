@@ -52,7 +52,7 @@ describe("the device pages", () => {
 describe("the catalog sidebar", () => {
   test("puts every category in one section, and only categories", async () => {
     const { categories, categoryGroups } = await import(
-      "@/registry-audio/bases/categories"
+      "@/registry/bases/categories"
     );
     const grouped = categoryGroups.flatMap((group) => group.names);
     expect([...grouped].sort()).toEqual(

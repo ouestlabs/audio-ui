@@ -6,7 +6,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
-} from "@/registry-audio/bases/base/audio/elements/plot";
+} from "@/registry/bases/base/audio/elements/plot";
 import { MOTION, ramp, tw } from "../motion.ts";
 
 const MIN_HZ = 20;

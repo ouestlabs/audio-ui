@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-const STYLES = `${import.meta.dir}/../src/registry-audio/styles`;
+const STYLES = `${import.meta.dir}/../src/registry/styles/audio`;
 const SERVED = `${import.meta.dir}/../public/r/styles/base-nova`;
 const COMMENT = /\/\*[\s\S]*?\*\//g;
 const APPLIED_SELECTOR = /([^{};]+)\{\s*@apply\b/g;

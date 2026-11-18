@@ -13,7 +13,7 @@ import {
 } from "@ui-sdk/react/select";
 import { cn } from "cn";
 import type { ComponentProps, ReactNode } from "react";
-import { usePopupContainer } from "@/registry-audio/bases/ui-sdk/hooks/use-popup-container";
+import { usePopupContainer } from "@/registry/bases/ui-sdk/hooks/use-popup-container";
 
 function Select<T = string>({ container, ...props }: SelectProps<T, false>) {
   const popups = usePopupContainer();

@@ -4,7 +4,7 @@
  * Syncs upstream shadcn registry sources from a fresh shallow clone of
  * shadcn-ui/ui (`apps/v4/registry`) → `src/registry/` (shared primitives,
  * hooks, UI, styles). Audio catalog items (`block-*` / `*-demo` under
- * `registry-audio/bases/* /components`) are **not** copied from here, they
+ * `registry/bases/* /components`) are **not** copied from here, they
  * are ported from apps/www's registry, see plans/002.
  *
  * Usage (from apps/www):

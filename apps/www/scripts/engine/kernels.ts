@@ -547,7 +547,7 @@ export const KERNEL_SETS: readonly KernelSet[] = [
 /** A file name's extension, left out of an import. */
 const TS_EXTENSION = /\.ts$/;
 
-export const KERNELS_DIR = `${import.meta.dir}/../../src/registry-audio/bases/base/lib/engine/kernels`;
+export const KERNELS_DIR = `${import.meta.dir}/../../src/registry/bases/base/lib/engine/kernels`;
 
 const PACKAGE_JSON = /package\.json$/;
 const IMPORT = /^\s*import\s/m;

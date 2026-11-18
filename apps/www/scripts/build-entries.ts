@@ -10,10 +10,10 @@
  */
 
 import type { RegistryItem } from "shadcn/schema";
-import { MODULE_SETS } from "../src/registry-audio/bases/modules.ts";
+import { MODULE_SETS } from "../src/registry/bases/modules.ts";
 
 const WEB = `${import.meta.dir}/..`;
-const BASE = `${WEB}/src/registry-audio/bases/base`;
+const BASE = `${WEB}/src/registry/bases/base`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
 const FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
 

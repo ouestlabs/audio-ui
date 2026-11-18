@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Pad } from "@/registry-audio/bases/base/primitives/pad/svelte/index.ts";
+import { Pad } from "@/registry/bases/base/primitives/pad/svelte/index.ts";
 
 /** The grid the shared suite drives: its options and its pads. */
 let {

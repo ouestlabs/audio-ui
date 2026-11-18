@@ -3,7 +3,7 @@
  * Writes one barrel of icons per icon library (`src/registry/icons/__lucide__.ts`
  * and the rest) from the icons the registry uses: the `<IconPlaceholder>`
  * usages in the shadcn bases and in the audio catalog and elements under
- * `registry-audio/bases/base`, the icon arrays in `src/app`, and the Lucide
+ * `registry/bases/base`, the icon arrays in `src/app`, and the Lucide
  * icons `scan-icons.ts` reported as unmapped.
  *
  * Run: bun run icons:build [--watch]
@@ -23,8 +23,8 @@ const UNMAPPED_FILE = `${ICONS_DIR}/unmapped-icons.json`;
 // Where `<IconPlaceholder>` is used. Only the `base` base is scanned.
 const PLACEHOLDER_DIRS = [
   "src/registry/bases",
-  "src/registry-audio/bases/base/components",
-  "src/registry-audio/bases/base/audio",
+  "src/registry/bases/base/components",
+  "src/registry/bases/base/audio",
 ].map((dir) => `${PROJECT_ROOT}/${dir}`);
 // Where plain icon arrays (`PREVIEW_ICONS`) live.
 const APP_DIR = `${PROJECT_ROOT}/src/app`;

@@ -1,4 +1,4 @@
-import { DEMO_SOURCES } from "@/registry-audio/bases/base/lib/demo-sound";
+import { DEMO_SOURCES } from "@/registry/bases/base/lib/demo-sound";
 
 const DEMO_SOUNDS_TAG = /<DemoSounds\s*\/>/g;
 

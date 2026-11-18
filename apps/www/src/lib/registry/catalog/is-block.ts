@@ -1,8 +1,8 @@
-import { audio } from "../../../registry-audio/bases/base/audio/_registry";
-import { components } from "../../../registry-audio/bases/base/components/_registry";
-import { devices } from "../../../registry-audio/bases/base/devices/_registry";
-import { hooks } from "../../../registry-audio/bases/base/hooks/_registry";
-import { lib } from "../../../registry-audio/bases/base/lib/_registry";
+import { audio } from "../../../registry/bases/base/audio/_registry";
+import { components } from "../../../registry/bases/base/components/_registry";
+import { devices } from "../../../registry/bases/base/devices/_registry";
+import { hooks } from "../../../registry/bases/base/hooks/_registry";
+import { lib } from "../../../registry/bases/base/lib/_registry";
 
 /** A block is laid out for a page, not a card: its preview is as tall as it is. */
 export const isBlock = (name: string) => name.startsWith("block-");

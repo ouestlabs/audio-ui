@@ -11,9 +11,9 @@ mock.module("@/lib/utils", () => ({
   cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
 }));
 
-const { Button } = await import("@/registry-audio/bases/ui-sdk/ui/button");
+const { Button } = await import("@/registry/bases/ui-sdk/ui/button");
 const { ButtonGroup, ButtonGroupText } = await import(
-  "@/registry-audio/bases/ui-sdk/ui/button-group"
+  "@/registry/bases/ui-sdk/ui/button-group"
 );
 const {
   DropdownMenu,
@@ -22,8 +22,8 @@ const {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
-} = await import("@/registry-audio/bases/ui-sdk/ui/dropdown-menu");
-const { Input } = await import("@/registry-audio/bases/ui-sdk/ui/input");
+} = await import("@/registry/bases/ui-sdk/ui/dropdown-menu");
+const { Input } = await import("@/registry/bases/ui-sdk/ui/input");
 const {
   Select,
   SelectContent,
@@ -31,12 +31,12 @@ const {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} = await import("@/registry-audio/bases/ui-sdk/ui/select");
-const { Slider } = await import("@/registry-audio/bases/ui-sdk/ui/slider");
+} = await import("@/registry/bases/ui-sdk/ui/select");
+const { Slider } = await import("@/registry/bases/ui-sdk/ui/slider");
 const { Tabs, TabsContent, TabsList, TabsTrigger } = await import(
-  "@/registry-audio/bases/ui-sdk/ui/tabs"
+  "@/registry/bases/ui-sdk/ui/tabs"
 );
-const { Toggle } = await import("@/registry-audio/bases/ui-sdk/ui/toggle");
+const { Toggle } = await import("@/registry/bases/ui-sdk/ui/toggle");
 
 // What ui-sdk expects of a DOM, and happy-dom leaves out.
 HTMLElement.prototype.showPopover = () => undefined;

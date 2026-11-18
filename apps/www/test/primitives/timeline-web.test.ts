@@ -1,4 +1,4 @@
-import "@/registry-audio/bases/base/primitives/timeline/web/index.ts";
+import "@/registry/bases/base/primitives/timeline/web/index.ts";
 import { flush } from "./helpers.ts";
 import { type TimelineTree, timelineSuite } from "./timeline-suite.ts";
 

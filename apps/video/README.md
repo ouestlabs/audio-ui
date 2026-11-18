@@ -16,7 +16,7 @@ The component playing in the site's own frame, as the docs show it: its name and
 
 Before the first render, give the component a showcase:
 
-1. Add `src/showcases/<name>.tsx`: a component that takes `{ t }` (seconds since it came on screen) and renders the registry component from `@/registry-audio/...`, with every value computed from `t`. No state, no effects that animate: a frame is a pure function of `t`.
+1. Add `src/showcases/<name>.tsx`: a component that takes `{ t }` (seconds since it came on screen) and renders the registry component from `@/registry/...`, with every value computed from `t`. No state, no effects that animate: a frame is a pure function of `t`.
 2. List it in `src/showcases/index.ts` with its title and its size alone on screen.
 3. Check it in `bun run studio`, under **Showcases**.
 

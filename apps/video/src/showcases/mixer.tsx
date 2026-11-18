@@ -1,9 +1,9 @@
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
-import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
-import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
-import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { Fader } from "@/registry/bases/base/audio/elements/fader";
+import { Knob } from "@/registry/bases/base/audio/elements/knob";
+import { Meter } from "@/registry/bases/base/audio/elements/meter";
 import { clamp, MOTION, ramp, tw } from "../motion.ts";
 
 const FLOOR = -60;

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Waveform } from "@/registry-audio/bases/base/primitives/waveform/svelte/index.ts";
+import { Waveform } from "@/registry/bases/base/primitives/waveform/svelte/index.ts";
 
 /** The waveform the shared suite drives: its options and the parts to draw on it. */
 let { tree }: { tree: Record<string, any> } = $props();

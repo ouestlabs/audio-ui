@@ -2,7 +2,7 @@
  * Build Static Registry
  *
  * Pre-compiles every registry item (the audio components, hooks and lib items,
- * and the catalog blocks and demos under `registry-audio/bases/{base}`) into
+ * and the catalog blocks and demos under `registry/bases/{base}`) into
  * static JSON in `public/r/styles/`, so the registry is served from the CDN
  * edge with no serverless function in between.
  *
@@ -19,27 +19,27 @@
 import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
-import { BASES as ALL_BASES } from "../src/registry/bases.ts";
-import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
+import { categories, rootSeo } from "../src/registry/bases/categories.ts";
 import {
   moduleDependencies,
   rewriteModuleImports,
-} from "../src/registry-audio/bases/modules.ts";
+} from "../src/registry/bases/modules.ts";
 import {
   rewriteAdapter,
   rewritePrimitiveImports,
   SHARED_ITEMS,
   SHIPPED_PRIMITIVES,
   sharedDependencies,
-} from "../src/registry-audio/bases/primitives.ts";
+} from "../src/registry/bases/primitives.ts";
+import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
 // ---------------------------------------------------------------------------
 
 const PROJECT_ROOT = `${import.meta.dir}/..`;
-const REGISTRY_AUDIO = `${PROJECT_ROOT}/src/registry-audio`;
-const BASES_DIR = `${REGISTRY_AUDIO}/bases`;
+const REGISTRY = `${PROJECT_ROOT}/src/registry`;
+const BASES_DIR = `${REGISTRY}/bases`;
 const OUTPUT_ROOT = `${PROJECT_ROOT}/public/r/styles`;
 
 const NAMESPACE = "@audio-ui";
@@ -49,6 +49,7 @@ const DEFAULT_STYLE = "base-nova";
 // Only the `base` base ships audio items and drives the manifests: the others (`ui-sdk`) ship the `ui/` components their style is made of.
 const BASES = ALL_BASES;
 const MANIFEST_BASE = "base";
+const UI_BASE = "ui-sdk";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
 // can't be evaluated here, and the set is `registry/styles/style-*.css`.
@@ -78,7 +79,7 @@ const INSTALL_FOLDERS: [folder: string, installed: string][] = [
 // The module roots those folders sit under: the per-style copies the design
 // system generates, and the base itself.
 const SOURCE_ROOTS = [
-  `@/registry-audio/bases/__generated/base-(?:${STYLES.join("|")})/`,
+  `@/registry/bases/__generated/base-(?:${STYLES.join("|")})/`,
   "@/registry(?:-audio)?/bases/(?:base|ui-sdk)/",
 ];
 
@@ -109,7 +110,7 @@ const SVG_PATH_DATA = /^\s*d ?=/;
 // A bundle the engine ships as a string (`bun run engine:worklet` writes it): one long line by design.
 const BUNDLED_SOURCE = /-source\.ts$/;
 const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
-const REGISTRY_IMPORT = /@\/registry-audio\/|@\/registry\/bases\//;
+const REGISTRY_IMPORT = /@\/registry\/bases\//;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -175,7 +176,7 @@ interface Problem {
 // ---------------------------------------------------------------------------
 // cn-* class expansion, mirrors how ui.shadcn.com serves its own registry:
 // components reference placeholder classes like `cn-fader-track`, defined in
-// registry-audio/styles/style-{style}.css (a `.style-{name} { .cn-x { @apply
+// registry/styles/audio/style-{style}.css (a `.style-{name} { .cn-x { @apply
 // ...; } }` block). The official registry never ships that placeholder text,
 // it's resolved to real utility classes before the JSON is served, so the
 // shadcn CLI never meets a `cn-*` token it has no definition for and would
@@ -187,8 +188,8 @@ async function readCnClasses(style: string): Promise<Map<string, string>> {
   // The hooks of the audio components, then those of the ui components: `registry/styles` is the shadcn-derived set the `ui-sdk` base's own components use.
   const files = await Promise.all(
     [
-      `${REGISTRY_AUDIO}/styles/style-${style}.css`,
-      `${PROJECT_ROOT}/src/registry/styles/style-${style}.css`,
+      `${REGISTRY}/styles/audio/style-${style}.css`,
+      `${REGISTRY}/styles/style-${style}.css`,
     ].map(async (path) => {
       const css = Bun.file(path);
       return (await css.exists()) ? await css.text() : "";
@@ -239,8 +240,11 @@ async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
 }
 
 async function loadItems(base: string): Promise<Map<string, SourceItem>> {
+  // The ui components are published by the `ui-sdk` base alone: the other base takes its own from shadcn.
   const folders = await Promise.all(
-    REGISTRY_FOLDERS.map((folder) => loadFolder(base, folder))
+    REGISTRY_FOLDERS.filter(
+      (folder) => folder !== "ui" || base === UI_BASE
+    ).map((folder) => loadFolder(base, folder))
   );
   return new Map(folders.flat().map((item) => [item.name, item]));
 }
@@ -322,7 +326,7 @@ async function buildManifests(): Promise<void> {
 
   // Normalize to the repo's Biome formatting so build then lint is idempotent.
   try {
-    await $`bunx biome check --write ${Object.keys(manifests).map((file) => `src/registry-audio/bases/${file}`)}`
+    await $`bunx biome check --write ${Object.keys(manifests).map((file) => `src/registry/bases/${file}`)}`
       .cwd(PROJECT_ROOT)
       .quiet();
   } catch {
@@ -372,7 +376,7 @@ async function buildFile(
   item: SourceItem,
   build: StyleBuild
 ): Promise<BuiltFile | null> {
-  const source = `src/registry-audio/bases/${item.origin ?? build.base}/${file.path}`;
+  const source = `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
   let content: string;
   try {
     content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();
@@ -740,7 +744,6 @@ const itemNames = new Set(
 );
 
 // The `ui-sdk` base serves its own ui components and, beside them, every item of `base`, whose `@shadcn/<name>` dependencies it answers with its own components.
-const UI_BASE = "ui-sdk";
 const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
 const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
 function itemOf(name: string, base: string): SourceItem | undefined {

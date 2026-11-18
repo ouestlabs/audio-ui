@@ -13,7 +13,7 @@ Test: apps/daw/test/browser/run.ts "EXP-002"
 ### EXP-003 The file
 Export… (Cmd+Shift+R) opens a dialog: WAV at 16 or 24 bits or 32-bit floats, FLAC at 16 or 24 bits, or MP3 at 128 to 320 kbps, at the project's sample rate; the dialog keeps the last settings. An MP3 of a project at a rate MP3 does not have comes out at the nearest one it has (48 kHz for 96 kHz). A format's encoder is loaded the first time it is asked for, and the file is encoded in chunks with a paint between two, so the page keeps answering.
 Status: partial: the reference's dialog (OBS-009, version 10.1) also has the track to render, loop and mono switches, the sample rate, AIFF and a dither.
-Test: apps/www/test/registry-audio/base/lib/audio-encode.test.ts "EXP-003", apps/www/test/registry-audio/base/audio/export-dialog.test.tsx "EXP-003", apps/daw/test/browser/run.ts "EXP-003"
+Test: apps/www/test/registry/base/lib/audio-encode.test.ts "EXP-003", apps/www/test/registry/base/audio/export-dialog.test.tsx "EXP-003", apps/daw/test/browser/run.ts "EXP-003"
 
 ### EXP-004 Dither
 Rendered below 32 bits, the samples are dithered with triangular noise by default; dither can be turned off. It is applied once, at the very end.
@@ -21,7 +21,7 @@ Status: open: the export rounds each sample to the nearest step and dithers noth
 
 ### EXP-005 Normalize
 When asked, the render's loudest sample is brought to 0 dBFS, or its loudness to a target, -14 LUFS for streaming, -16 for podcasts or -23 for broadcast, as far as its true peak stays at or under -1 dBTP: a render that would pass the ceiling lands under its target, and nothing is limited.
-Test: apps/www/test/registry-audio/base/lib/audio-export.test.ts "EXP-005", apps/daw/test/browser/run.ts "EXP-005"
+Test: apps/www/test/registry/base/lib/audio-export.test.ts "EXP-005", apps/daw/test/browser/run.ts "EXP-005"
 
 ### EXP-006 The render is what plays
 An offline render and playback of the same arrangement give the same frames: the same engine runs on an offline context.

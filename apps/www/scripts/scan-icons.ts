@@ -26,7 +26,7 @@ const PROJECT_ROOT = Bun.fileURLToPath(new URL("..", import.meta.url)).slice(
 );
 
 // Only scan base folder. Catalog blocks: bases/base/components (c-*).
-const TARGET_DIR = "src/registry-audio/bases/base";
+const TARGET_DIR = "src/registry/bases/base";
 const OUTPUT_FILE = "src/registry/icons/scanned-icons.json";
 const UNMAPPED_OUTPUT_FILE = "src/registry/icons/unmapped-icons.json";
 

@@ -21,7 +21,7 @@ Add `--theme dark` for the dark theme.
 
 ## A component without a showcase
 
-1. `src/showcases/<name>.tsx`: a component taking `{ t }` (seconds on screen) that renders the **real** registry element from `@/registry-audio/...`. Every value is computed from `t`: no state, no effects that animate. A frame is a pure function of `t`.
+1. `src/showcases/<name>.tsx`: a component taking `{ t }` (seconds on screen) that renders the **real** registry element from `@/registry/...`. Every value is computed from `t`: no state, no effects that animate. A frame is a pure function of `t`.
 2. List it in `src/showcases/index.ts` with its title and its size alone on screen.
 3. Check it in `bun run studio` before rendering.
 

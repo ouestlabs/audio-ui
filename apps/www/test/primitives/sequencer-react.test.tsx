@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react/index.tsx";
+import { Sequencer } from "@/registry/bases/base/primitives/sequencer/react/index.tsx";
 import { range } from "./helpers.ts";
 import { sequencerSuite } from "./sequencer-suite.ts";
 

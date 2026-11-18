@@ -16,4 +16,4 @@ Test: apps/daw/test/engine.test.ts "ENG-003"
 
 ### ENG-004 One clock
 The audio clock is the only clock of playback: the playhead, the notes and the clips all read it, never a timer of the page.
-Test: apps/www/src/registry-audio/bases/base/lib/engine/playback/transport.test.ts "ENG-004"
+Test: apps/www/src/registry/bases/base/lib/engine/playback/transport.test.ts "ENG-004"

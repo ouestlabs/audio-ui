@@ -4,10 +4,10 @@ import { join } from "node:path";
 
 const PRIMITIVES = join(
   import.meta.dir,
-  "../src/registry-audio/bases/base/primitives"
+  "../src/registry/bases/base/primitives"
 );
 const { version } = (await Bun.file(
-  join(import.meta.dir, "../src/registry-audio/web-version.json")
+  join(import.meta.dir, "../src/registry/web-version.json")
 ).json()) as { version: string };
 const WEB = join(import.meta.dir, "../public/web", version);
 

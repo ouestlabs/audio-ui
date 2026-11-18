@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { audio } from "@/registry-audio/bases/base/audio/_registry";
-import { components } from "@/registry-audio/bases/base/components/_registry";
-import { devices } from "@/registry-audio/bases/base/devices/_registry";
-import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
-import { lib } from "@/registry-audio/bases/base/lib/_registry";
-import { primitives } from "@/registry-audio/bases/base/primitives/_registry";
-import { ENGINE_MODULES } from "@/registry-audio/bases/modules";
+import { audio } from "@/registry/bases/base/audio/_registry";
+import { components } from "@/registry/bases/base/components/_registry";
+import { devices } from "@/registry/bases/base/devices/_registry";
+import { hooks } from "@/registry/bases/base/hooks/_registry";
+import { lib } from "@/registry/bases/base/lib/_registry";
+import { primitives } from "@/registry/bases/base/primitives/_registry";
+import { ENGINE_MODULES } from "@/registry/bases/modules";
 import {
   compileSkill,
   readRules,
@@ -83,7 +83,7 @@ const registryNames = new Set(
 const engineModules = Object.keys(ENGINE_MODULES);
 const uiSource = (
   await Promise.all(
-    [`${ROOT}/apps/www/src/registry-audio/bases/base/primitives`].map(
+    [`${ROOT}/apps/www/src/registry/bases/base/primitives`].map(
       (folder) => read("**/*.{ts,tsx}", folder)
     )
   )
@@ -258,11 +258,11 @@ describe("skills/design styles", () => {
         .replace(
           INSTALLED_PRIMITIVE,
           (_, name) =>
-            `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react/index.tsx"`
+            `"${ROOT}/apps/www/src/registry/bases/base/primitives/${name}/react/index.tsx"`
         )
         .replace(
           INSTALLED_SHARED,
-          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/primitive.ts"`
+          `"${ROOT}/apps/www/src/registry/bases/base/primitives/primitive.ts"`
         )
     );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());

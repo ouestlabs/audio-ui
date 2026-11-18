@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { SHARED_ITEMS } from "@/registry-audio/bases/primitives";
+import { SHARED_ITEMS } from "@/registry/bases/primitives";
 
 /**
  * A shared file is installed under the same path by every primitive that
@@ -11,7 +11,7 @@ import { SHARED_ITEMS } from "@/registry-audio/bases/primitives";
  * run `UPDATE_SHARED_EXPORTS=1 bun test test/shared-files.test.ts`.
  */
 
-const PRIMITIVES = `${import.meta.dir}/../src/registry-audio/bases/base/primitives`;
+const PRIMITIVES = `${import.meta.dir}/../src/registry/bases/base/primitives`;
 const BASELINE = `${import.meta.dir}/fixtures/shared-exports.json`;
 const DECLARATION =
   /^export\s+(?:declare\s+)?(?:abstract\s+)?(?:const|let|function\*?|async function|class|interface|type|enum)\s+([A-Za-z_$][\w$]*)/gm;

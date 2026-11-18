@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Pad } from "@/registry-audio/bases/base/primitives/pad/react/index.tsx";
+import { Pad } from "@/registry/bases/base/primitives/pad/react/index.tsx";
 import { padSuite } from "./pad-suite.ts";
 
 padSuite("React", async ({ options, pads }) => {

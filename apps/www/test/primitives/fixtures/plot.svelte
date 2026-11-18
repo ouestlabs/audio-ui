@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Plot } from "@/registry-audio/bases/base/primitives/plot/svelte/index.ts";
+import { Plot } from "@/registry/bases/base/primitives/plot/svelte/index.ts";
 
 /** The plot the shared suite drives: its options and the parts to draw on it. */
 let { tree }: { tree: Record<string, any> } = $props();

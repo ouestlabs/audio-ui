@@ -12,7 +12,7 @@ import {
   importLine,
   moduleOf,
 } from "@/lib/docs/content/entries";
-import { MODULE_SETS } from "@/registry-audio/bases/modules";
+import { MODULE_SETS } from "@/registry/bases/modules";
 
 /** A line of TypeScript as the page's fences draw it. */
 function Code({ code }: { code: string }) {

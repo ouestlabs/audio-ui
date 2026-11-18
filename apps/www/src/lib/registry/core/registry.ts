@@ -12,13 +12,13 @@
  */
 
 import * as React from "react";
-import { audio } from "../../../registry-audio/bases/base/audio/_registry";
-import { components } from "../../../registry-audio/bases/base/components/_registry";
-import { devices } from "../../../registry-audio/bases/base/devices/_registry";
-import { lib } from "../../../registry-audio/bases/base/lib/_registry";
-import componentsManifest from "../../../registry-audio/bases/components.json";
-import registryStats from "../../../registry-audio/bases/registry.json";
-import registrySeo from "../../../registry-audio/bases/seo.json";
+import { audio } from "../../../registry/bases/base/audio/_registry";
+import { components } from "../../../registry/bases/base/components/_registry";
+import { devices } from "../../../registry/bases/base/devices/_registry";
+import { lib } from "../../../registry/bases/base/lib/_registry";
+import componentsManifest from "../../../registry/bases/components.json";
+import registryStats from "../../../registry/bases/registry.json";
+import registrySeo from "../../../registry/bases/seo.json";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -292,13 +292,13 @@ const componentCache = new Map<string, React.LazyExoticComponent<any>>();
 
 /** Every registry component a demo or a block can be loaded from, each its own chunk, by its path. */
 const componentModules = import.meta.glob<{ default: React.ComponentType }>([
-  "../../../registry-audio/bases/*/**/*.tsx",
+  "../../../registry/bases/*/**/*.tsx",
 ]);
 
 /** The demos of the other frameworks, by their files: a Vue or Svelte component, or a web function that draws into an element. */
 const frameworkModules = import.meta.glob<{ default: unknown }>([
-  "../../../registry-audio/bases/*/components/**/*-demo.{vue,svelte}",
-  "../../../registry-audio/bases/*/components/**/*-demo.js",
+  "../../../registry/bases/*/components/**/*-demo.{vue,svelte}",
+  "../../../registry/bases/*/components/**/*-demo.js",
 ]);
 
 function FrameworkDemo({
@@ -356,7 +356,7 @@ export function getComponent(
   }
 
   // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
-  const path = `../../../registry-audio/bases/${base}/${item.files[0].path}`;
+  const path = `../../../registry/bases/${base}/${item.files[0].path}`;
   const loadFramework = frameworkModules[path];
   const load = loadFramework
     ? () => frameworkDemo(loadFramework, path)

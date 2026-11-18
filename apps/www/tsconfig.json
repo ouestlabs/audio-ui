@@ -17,85 +17,85 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/registry/bases/base/ui/toggle": [
-        "./src/registry-audio/bases/ui-sdk/ui/toggle.tsx"
+        "./src/registry/bases/ui-sdk/ui/toggle.tsx"
       ],
       "@/registry/bases/base/ui/toggle-group": [
-        "./src/registry-audio/bases/ui-sdk/ui/toggle-group.tsx"
+        "./src/registry/bases/ui-sdk/ui/toggle-group.tsx"
       ],
       "@/registry/bases/base/ui/input": [
-        "./src/registry-audio/bases/ui-sdk/ui/input.tsx"
+        "./src/registry/bases/ui-sdk/ui/input.tsx"
       ],
       "@/registry/bases/base/ui/slider": [
-        "./src/registry-audio/bases/ui-sdk/ui/slider.tsx"
+        "./src/registry/bases/ui-sdk/ui/slider.tsx"
       ],
       "@/registry/bases/base/ui/kbd": [
-        "./src/registry-audio/bases/ui-sdk/ui/kbd.tsx"
+        "./src/registry/bases/ui-sdk/ui/kbd.tsx"
       ],
       "@/registry/bases/base/ui/button-group": [
-        "./src/registry-audio/bases/ui-sdk/ui/button-group.tsx"
+        "./src/registry/bases/ui-sdk/ui/button-group.tsx"
       ],
       "@/registry/bases/base/ui/input-group": [
-        "./src/registry-audio/bases/ui-sdk/ui/input-group.tsx"
+        "./src/registry/bases/ui-sdk/ui/input-group.tsx"
       ],
       "@/registry/bases/base/ui/textarea": [
-        "./src/registry-audio/bases/ui-sdk/ui/textarea.tsx"
+        "./src/registry/bases/ui-sdk/ui/textarea.tsx"
       ],
       "@/registry/bases/base/ui/dialog": [
-        "./src/registry-audio/bases/ui-sdk/ui/dialog.tsx"
+        "./src/registry/bases/ui-sdk/ui/dialog.tsx"
       ],
       "@/registry/bases/base/ui/button": [
-        "./src/registry-audio/bases/ui-sdk/ui/button.tsx"
+        "./src/registry/bases/ui-sdk/ui/button.tsx"
       ],
       "@/registry/bases/base/ui/select": [
-        "./src/registry-audio/bases/ui-sdk/ui/select.tsx"
+        "./src/registry/bases/ui-sdk/ui/select.tsx"
       ],
       "@/registry/bases/base/ui/dropdown-menu": [
-        "./src/registry-audio/bases/ui-sdk/ui/dropdown-menu.tsx"
+        "./src/registry/bases/ui-sdk/ui/dropdown-menu.tsx"
       ],
       "@/registry/bases/base/ui/context-menu": [
-        "./src/registry-audio/bases/ui-sdk/ui/context-menu.tsx"
+        "./src/registry/bases/ui-sdk/ui/context-menu.tsx"
       ],
       "@/registry/bases/base/ui/popover": [
-        "./src/registry-audio/bases/ui-sdk/ui/popover.tsx"
+        "./src/registry/bases/ui-sdk/ui/popover.tsx"
       ],
       "@/primitives/envelope": [
-        "./src/registry-audio/bases/base/primitives/envelope/envelope.ts"
+        "./src/registry/bases/base/primitives/envelope/envelope.ts"
       ],
       "@/primitives/fader": [
-        "./src/registry-audio/bases/base/primitives/fader/fader.ts"
+        "./src/registry/bases/base/primitives/fader/fader.ts"
       ],
       "@/primitives/knob": [
-        "./src/registry-audio/bases/base/primitives/knob/knob.ts"
+        "./src/registry/bases/base/primitives/knob/knob.ts"
       ],
       "@/primitives/meter": [
-        "./src/registry-audio/bases/base/primitives/meter/meter.ts"
+        "./src/registry/bases/base/primitives/meter/meter.ts"
       ],
       "@/primitives/pad": [
-        "./src/registry-audio/bases/base/primitives/pad/pad.ts"
+        "./src/registry/bases/base/primitives/pad/pad.ts"
       ],
       "@/primitives/piano": [
-        "./src/registry-audio/bases/base/primitives/piano/piano.ts"
+        "./src/registry/bases/base/primitives/piano/piano.ts"
       ],
       "@/primitives/piano-roll": [
-        "./src/registry-audio/bases/base/primitives/piano-roll/piano-roll.ts"
+        "./src/registry/bases/base/primitives/piano-roll/piano-roll.ts"
       ],
       "@/primitives/plot": [
-        "./src/registry-audio/bases/base/primitives/plot/plot.ts"
+        "./src/registry/bases/base/primitives/plot/plot.ts"
       ],
       "@/primitives/sequencer": [
-        "./src/registry-audio/bases/base/primitives/sequencer/sequencer.ts"
+        "./src/registry/bases/base/primitives/sequencer/sequencer.ts"
       ],
       "@/primitives/timeline": [
-        "./src/registry-audio/bases/base/primitives/timeline/timeline.ts"
+        "./src/registry/bases/base/primitives/timeline/timeline.ts"
       ],
       "@/primitives/waveform": [
-        "./src/registry-audio/bases/base/primitives/waveform/waveform.ts"
+        "./src/registry/bases/base/primitives/waveform/waveform.ts"
       ],
       "@/primitives/xypad": [
-        "./src/registry-audio/bases/base/primitives/xypad/xypad.ts"
+        "./src/registry/bases/base/primitives/xypad/xypad.ts"
       ],
-      "@/engine/*": ["./src/registry-audio/bases/base/lib/engine/*/index.ts"],
-      "@/gl/*": ["./src/registry-audio/bases/base/lib/gl/*/index.ts"],
+      "@/engine/*": ["./src/registry/bases/base/lib/engine/*/index.ts"],
+      "@/gl/*": ["./src/registry/bases/base/lib/gl/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [
         "../../packages/icons/src/providers/react/index.tsx"

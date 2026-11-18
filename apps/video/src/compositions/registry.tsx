@@ -1,5 +1,5 @@
 import { cn } from "@/registry/bases/base/lib/utils";
-import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
+import { Knob } from "@/registry/bases/base/audio/elements/knob";
 import { glyphEntrance, Lockup, LockupUrl, Typed } from "../brand.tsx";
 import {
   activeRing,
