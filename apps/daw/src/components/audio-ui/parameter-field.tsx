@@ -1,4 +1,11 @@
-import { NumberField } from "@base-ui/react/number-field";
+import {
+  NumberInput,
+  NumberInputControl,
+  NumberInputDecrement,
+  NumberInputIncrement,
+  NumberInputScrubArea,
+  NumberInputScrubAreaCursor,
+} from "@ui-sdk/react/number-input";
 import { cva } from "class-variance-authority";
 import {
   type ChangeEvent,
@@ -29,13 +36,6 @@ const parameterFieldVariants = cva("w-auto min-w-0", {
     },
   },
 });
-
-/** Enter commits what is typed: the field commits when it loses focus. */
-function commitOnEnter(event: KeyboardEvent<HTMLInputElement>) {
-  if (event.key === "Enter") {
-    event.currentTarget.blur();
-  }
-}
 
 /** How many digits after the point a step needs: 0.01 needs two. */
 function decimalsOf(step: number) {
@@ -106,9 +106,9 @@ export interface ParameterFieldProps {
 }
 
 const SCRUB_CURSOR = (
-  <NumberField.ScrubAreaCursor className="drop-shadow-sm">
+  <NumberInputScrubAreaCursor className="drop-shadow-sm">
     <ArrowsHorizontalIcon className="size-5" />
-  </NumberField.ScrubAreaCursor>
+  </NumberInputScrubAreaCursor>
 );
 
 /**
@@ -132,7 +132,7 @@ export function ParameterField(props: ParameterFieldProps) {
   );
 }
 
-/** The field of a number, through the number field underneath. */
+/** The field of a number, through the number input underneath. */
 function NumberParameterField({
   className,
   defaultValue,
@@ -173,15 +173,13 @@ function NumberParameterField({
     }),
     [digits, format, precision]
   );
-  // The latest value, since a scrub sends several moves before the field re-renders.
-  const latest = useRef(value);
-  latest.current = value;
-  // The part of a step the drag has moved but not yet completed.
-  const remainder = useRef(0);
 
-  const set = useCallback(
-    (next: number) => {
-      latest.current = next;
+  const handleValueChange = useCallback(
+    (next: number | null, details: { reason: string }) => {
+      // While it is being typed the field keeps its own text.
+      if (next === null || details.reason === "input-change") {
+        return;
+      }
       if (valueProp === undefined) {
         setOwn(next);
       }
@@ -190,86 +188,28 @@ function NumberParameterField({
     [onValueChange, valueProp]
   );
 
-  const clamp = useCallback(
-    (next: number) =>
-      Math.min(
-        max ?? Number.POSITIVE_INFINITY,
-        Math.max(min ?? Number.NEGATIVE_INFINITY, next)
-      ),
-    [max, min]
-  );
-
-  const handleScrub = useCallback(
-    (event: PointerEvent) => {
-      // The field steps once per pixel moved, too fast to aim with: count the
-      // pointer's own movement, one step per `scrubSensitivity` pixels.
-      const moved = scrub === "vertical" ? -event.movementY : event.movementX;
-      remainder.current += moved / scrubSensitivity;
-      const whole = Math.trunc(remainder.current);
-      if (whole === 0) {
-        return;
-      }
-      remainder.current -= whole;
-      let by = step;
-      if (event.shiftKey) {
-        by = largeStep;
-      } else if (event.altKey) {
-        by = smallStep;
-      }
-      const next = clamp(
-        Number((latest.current + whole * by).toFixed(Math.max(digits, 6)))
-      );
-      if (next !== latest.current) {
-        set(next);
+  const handleCommit = useCallback(
+    (next: number | null) => {
+      if (next !== null) {
+        onValueCommitted?.(next);
       }
     },
-    [clamp, digits, largeStep, scrub, scrubSensitivity, set, smallStep, step]
+    [onValueCommitted]
   );
-
-  const handleValueChange = useCallback(
-    (
-      next: number | null,
-      eventDetails: NumberField.Root.ChangeEventDetails
-    ) => {
-      // While it is being typed the field keeps its own text.
-      if (
-        next === null ||
-        eventDetails.reason === "input-change" ||
-        eventDetails.reason === "input-clear"
-      ) {
-        return;
-      }
-      if (eventDetails.reason === "scrub") {
-        handleScrub(eventDetails.event as PointerEvent);
-        return;
-      }
-      remainder.current = 0;
-      if (next !== latest.current) {
-        set(next);
-      }
-    },
-    [handleScrub, set]
-  );
-
-  // The field's own value is not the scrubbed one: what is committed is the latest.
-  const handleCommitted = useCallback(() => {
-    remainder.current = 0;
-    onValueCommitted?.(latest.current);
-  }, [onValueCommitted]);
 
   const scrubbing = (content: ReactNode) =>
     scrub && !disabled ? (
-      <NumberField.ScrubArea
+      <NumberInputScrubArea
         className={cn(
           "select-none",
           scrub === "vertical" ? "cursor-ns-resize" : "cursor-ew-resize"
         )}
-        direction={scrub}
-        pixelSensitivity={1}
+        orientation={scrub}
+        pixelsPerStep={scrubSensitivity}
       >
         {content}
         {SCRUB_CURSOR}
-      </NumberField.ScrubArea>
+      </NumberInputScrubArea>
     ) : (
       content
     );
@@ -282,8 +222,7 @@ function NumberParameterField({
   const stepperIcons =
     typeof steppers === "object" ? steppers.icons : undefined;
   return (
-    <NumberField.Root
-      allowWheelScrub={false}
+    <NumberInput
       data-size={size}
       data-slot="parameter-field"
       disabled={disabled}
@@ -292,7 +231,7 @@ function NumberParameterField({
       max={max}
       min={min}
       onValueChange={handleValueChange}
-      onValueCommitted={handleCommitted}
+      onValueCommit={handleCommit}
       render={
         <InputGroup
           className={cn(parameterFieldVariants({ size }), className)}
@@ -301,6 +240,7 @@ function NumberParameterField({
       smallStep={smallStep}
       step={step}
       value={value}
+      wheel={false}
     >
       {hideLabel ? null : (
         <InputGroupAddon align="inline-start">
@@ -318,7 +258,7 @@ function NumberParameterField({
       )}
       {steppers ? (
         <InputGroupAddon align="inline-start">
-          <NumberField.Decrement
+          <NumberInputDecrement
             render={
               <InputGroupButton
                 aria-label={stepperNames.decrement}
@@ -330,17 +270,13 @@ function NumberParameterField({
               <MinusIcon
               />
             )}
-          </NumberField.Decrement>
+          </NumberInputDecrement>
         </InputGroupAddon>
       ) : null}
-      <NumberField.Input
-        render={
-          <InputGroupInput
-            aria-label={label}
-            className="min-w-0 text-end font-mono tabular-nums"
-            onKeyDown={commitOnEnter}
-          />
-        }
+      <NumberInputControl
+        aria-label={label}
+        className="min-w-0 text-end font-mono tabular-nums"
+        render={<InputGroupInput />}
       />
       {unit === undefined && !steppers ? null : (
         <InputGroupAddon align="inline-end">
@@ -352,7 +288,7 @@ function NumberParameterField({
                 </InputGroupText>
               )}
           {steppers ? (
-            <NumberField.Increment
+            <NumberInputIncrement
               render={
                 <InputGroupButton
                   aria-label={stepperNames.increment}
@@ -364,11 +300,11 @@ function NumberParameterField({
                 <PlusIcon
                 />
               )}
-            </NumberField.Increment>
+            </NumberInputIncrement>
           ) : null}
         </InputGroupAddon>
       )}
-    </NumberField.Root>
+    </NumberInput>
   );
 }
 

@@ -21,7 +21,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { SITE } from "../lib/seo";
 
 import appCss from "../styles/globals.css?url";
@@ -105,9 +104,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           enableColorScheme
           enableSystem
         >
-          <TooltipProvider>
-            <LabShell>{children}</LabShell>
-          </TooltipProvider>
+          <LabShell>{children}</LabShell>
         </ThemeProvider>
         <TanStackDevtools
           config={{

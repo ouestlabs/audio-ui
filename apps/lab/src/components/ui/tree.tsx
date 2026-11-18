@@ -1,5 +1,8 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
+import {
+  mergeProps,
+  type RenderProp,
+  renderElement,
+} from "@ui-sdk/react/primitive";
 import type { ItemInstance } from "@headless-tree/core";
 import { CaretDownIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 
@@ -67,9 +70,10 @@ function Tree({
 }
 
 interface TreeItemProps<T = any>
-  extends Omit<useRender.ComponentProps<"button">, "indent"> {
+  extends Omit<React.ComponentProps<"button">, "indent"> {
   indent?: number;
   item: ItemInstance<T>;
+  render?: RenderProp;
 }
 
 function TreeItem<T = any>({
@@ -126,11 +130,7 @@ function TreeItem<T = any>({
 
   return (
     <TreeContext.Provider value={{ ...parentContext, currentItem: item }}>
-      {useRender({
-        defaultTagName: "button",
-        render,
-        props: mergeProps<"button">(defaultProps, otherProps),
-      })}
+      {renderElement("button", mergeProps(defaultProps, otherProps), render)}
     </TreeContext.Provider>
   );
 }

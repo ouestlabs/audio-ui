@@ -7,6 +7,7 @@ const BASE_LOGOS: Record<
   (props: React.SVGProps<SVGSVGElement>) => React.ReactNode
 > = {
   base: Icons.base,
+  "ui-sdk": Icons.uiSdk,
 };
 
 export function BaseLogo({

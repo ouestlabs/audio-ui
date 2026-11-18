@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/resizable";
 import { Toaster } from "@/components/ui/sonner";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useTimeSelection } from "@/hooks/use-time-selection";
@@ -1614,7 +1613,7 @@ export function Daw({
   }
 
   return (
-    <TooltipProvider>
+    <>
       <input
         accept={DAWPROJECT_ACCEPT}
         aria-label="DAWproject file to open"
@@ -1821,6 +1820,6 @@ export function Daw({
         settings={exportSettings}
       />
       <Toaster />
-    </TooltipProvider>
+    </>
   );
 }

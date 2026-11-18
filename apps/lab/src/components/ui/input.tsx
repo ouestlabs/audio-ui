@@ -1,16 +1,29 @@
-import { Input as InputPrimitive } from "@base-ui/react/input";
-import { cn } from "cn";
-import type * as React from "react";
+import { Input as InputPrimitive } from "@ui-sdk/react/input";
+import type { ComponentProps } from "react";
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+import { cn } from "@/lib/utils";
+
+// A number or a list is a valid value of a native input: ui-sdk's holds text.
+const text = (value: string | number | readonly string[] | undefined) =>
+  Array.isArray(value) ? value.join(",") : value?.toString();
+
+function Input({
+  className,
+  defaultValue,
+  value,
+  ...props
+}: Omit<ComponentProps<typeof InputPrimitive>, "defaultValue" | "value"> & {
+  defaultValue?: string | number | readonly string[];
+  value?: string | number | readonly string[];
+}) {
   return (
     <InputPrimitive
       className={cn(
-        "h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none transition-colors file:inline-flex file:h-6 file:border-0 file:bg-transparent file:font-medium file:text-foreground file:text-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 dark:disabled:bg-input/80",
+        "dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-3 aria-invalid:ring-3 md:text-sm w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
-      data-slot="input"
-      type={type}
+      defaultValue={text(defaultValue)}
+      value={text(value)}
       {...props}
     />
   );

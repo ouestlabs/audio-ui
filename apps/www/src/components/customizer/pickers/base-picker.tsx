@@ -12,10 +12,7 @@ import { BaseLogo } from "@/components/site/built-on";
 import { useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
-import { BASES as ALL_BASES } from "@/registry/config";
-
-// Base-only launch: audio components only exist for the Base UI base.
-const BASES = ALL_BASES.filter((base) => base.name === "base");
+import { BASES } from "@/registry/config";
 
 export function BasePicker({
   isMobile,
@@ -48,11 +45,7 @@ export function BasePicker({
 
   return (
     <Picker>
-      <PickerTrigger
-        className="disabled:cursor-not-allowed"
-        disabled
-        title="Only Base UI is available for now"
-      >
+      <PickerTrigger>
         <div className="flex flex-col justify-start text-left">
           <div className="text-site-muted-foreground text-xs">
             Component Library

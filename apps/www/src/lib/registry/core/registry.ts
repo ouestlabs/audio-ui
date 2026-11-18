@@ -19,6 +19,7 @@ import { lib } from "../../../registry/bases/base/lib/_registry";
 import componentsManifest from "../../../registry/bases/components.json";
 import registryStats from "../../../registry/bases/registry.json";
 import registrySeo from "../../../registry/bases/seo.json";
+import { audio as sdkAudio } from "../../../registry/bases/ui-sdk/audio/_registry";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -234,7 +235,12 @@ function getStats(): StatsData {
 /** The sub-registries of each base, which `getMetadata` merges by item name. */
 const SUB_REGISTRIES: Record<string, unknown[][]> = {
   base: [audio, devices, components, lib],
+  // The items a base overrides: the others are the `base` base's, as the build serves them.
+  "ui-sdk": [sdkAudio],
 };
+
+/** Which base's folder holds an item's files, by the base asked for. */
+const ORIGINS: Record<string, Record<string, string>> = {};
 
 /** Merges one sub-registry's items into `metadata` by name. */
 function mergeSubRegistry(
@@ -250,12 +256,26 @@ function getMetadata(base = "base"): MetadataData {
   if (!_metadataCache[base]) {
     try {
       const metadata: Record<string, RegistryItem> = {};
+      const origins: Record<string, string> = {};
 
       // Directly load audio, devices, catalog, and lib registries for reliability and
       // performance. This avoids potential issues with the aggregate registry.ts file
+      if (base !== "base") {
+        mergeSubRegistry(
+          metadata,
+          Object.values(getMetadata("base").Metadata.base ?? {})
+        );
+        for (const name of Object.keys(metadata)) {
+          origins[name] = "base";
+        }
+      }
       for (const items of SUB_REGISTRIES[base] ?? []) {
         mergeSubRegistry(metadata, items);
+        for (const item of items as RegistryItem[]) {
+          origins[item.name] = base;
+        }
       }
+      ORIGINS[base] = origins;
 
       _metadataCache[base] = { Metadata: { [base]: metadata } };
     } catch (e) {
@@ -356,7 +376,8 @@ export function getComponent(
   }
 
   // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
-  const path = `../../../registry/bases/${base}/${item.files[0].path}`;
+  const origin = ORIGINS[base]?.[name] ?? base;
+  const path = `../../../registry/bases/${origin}/${item.files[0].path}`;
   const loadFramework = frameworkModules[path];
   const load = loadFramework
     ? () => frameworkDemo(loadFramework, path)
