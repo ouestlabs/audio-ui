@@ -46,9 +46,9 @@ const NAMESPACE = "@audio-ui";
 const HOMEPAGE = "https://www.audio-ui.dev";
 const DEFAULT_STYLE = "base-nova";
 
-// Only the `base` base ships audio items and drives the manifests: the others (`ui-sdk`) ship the `ui/` components their style is made of.
+// Every base serves the items of `bases/shared/`, which name no behavior library and drive the manifests, beside its own: the `ui/` components its style is made of and the variants of the items that name its library.
 const BASES = ALL_BASES;
-const MANIFEST_BASE = "base";
+const SHARED = "shared";
 const UI_BASE = "ui-sdk";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
@@ -80,7 +80,7 @@ const INSTALL_FOLDERS: [folder: string, installed: string][] = [
 // system generates, and the base itself.
 const SOURCE_ROOTS = [
   `@/registry/bases/__generated/base-(?:${STYLES.join("|")})/`,
-  "@/registry(?:-audio)?/bases/(?:base|ui-sdk)/",
+  "@/registry/bases/(?:shared|base|ui-sdk)/",
 ];
 
 const IMPORT_REWRITES = SOURCE_ROOTS.flatMap((root) =>
@@ -132,7 +132,7 @@ interface SourceItem {
   devDependencies?: string[];
   files?: SourceFile[];
   name: string;
-  /** The base whose folder holds the item's files, when the style built is another's. */
+  /** The folder of `bases/` that holds the item's files, when it is not the base built. */
   origin?: string;
   registryDependencies?: string[];
   title?: string;
@@ -262,7 +262,7 @@ function readableTitle(name: string) {
 }
 
 async function buildManifests(): Promise<void> {
-  const items = await loadFolder(MANIFEST_BASE, "components");
+  const items = await loadFolder(SHARED, "components");
 
   const catalog = items.map((item) => ({
     categories: item.categories ?? [],
@@ -693,9 +693,12 @@ async function verifyStyle(styleName: string) {
 // Main
 // ---------------------------------------------------------------------------
 
+// The items of `bases/shared/` first, then each base's own.
 const itemsByBase = new Map(
   await Promise.all(
-    BASES.map(async ({ name }) => [name, await loadItems(name)] as const)
+    [SHARED, ...BASES.map(({ name }) => name)].map(
+      async (name) => [name, await loadItems(name)] as const
+    )
   )
 );
 // A file that says where it installs (`target`) is imported from there: its
@@ -741,16 +744,16 @@ const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
 );
 
-// The `ui-sdk` base serves its own ui components and, beside them, every item of `base`, whose `@shadcn/<name>` dependencies it answers with its own components.
+// A base serves its own items and, beside them, every item of `bases/shared/`. The `ui-sdk` base answers their `@shadcn/<name>` dependencies with its own components.
 const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
 const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
 function itemOf(name: string, base: string): SourceItem | undefined {
   const own = itemsByBase.get(base)?.get(name);
-  if (own || base !== UI_BASE) {
+  if (own) {
     return own;
   }
-  const shared = itemsByBase.get(MANIFEST_BASE)?.get(name);
-  return shared && { ...shared, origin: MANIFEST_BASE };
+  const shared = itemsByBase.get(SHARED)?.get(name);
+  return shared && { ...shared, origin: SHARED };
 }
 
 const startedAt = Date.now();

@@ -6,18 +6,18 @@ import {
   type DrumSound,
   INSTRUMENT_RACK_DEVICE,
   type TrackDevice,
-} from "@/registry/bases/base/lib/arrangement";
+} from "@/registry/bases/shared/lib/arrangement";
 import {
   createArrangementEngine,
   type MetronomeSettings,
   renderArrangement,
   renderTrackClips,
-} from "@/registry/bases/base/lib/arrangement-engine";
+} from "@/registry/bases/shared/lib/arrangement-engine";
 import {
   type ArrangementDoc,
   createArrangementState,
-} from "@/registry/bases/base/lib/arrangement-state";
-import { libraryDevice } from "@/registry/bases/base/lib/device-library";
+} from "@/registry/bases/shared/lib/arrangement-state";
+import { libraryDevice } from "@/registry/bases/shared/lib/device-library";
 import { assert, check, firstDifference } from "./harness.ts";
 
 const RATE = 48_000;

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from "react";
-import { Scrubber } from "@/registry/bases/base/audio/elements/scrubber";
-import { createSource } from "@/registry/bases/base/primitives/primitive";
+import { Scrubber } from "@/registry/bases/shared/audio/elements/scrubber";
+import { createSource } from "@/registry/bases/shared/primitives/primitive";
 import { MOTION, tw } from "../motion.ts";
 
 const DURATION = 215;

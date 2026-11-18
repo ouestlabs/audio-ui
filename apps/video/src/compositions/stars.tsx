@@ -1,6 +1,6 @@
 import { StarIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { cn } from "@/registry/bases/shared/lib/utils";
 import { glyphEntrance, Lockup, LockupUrl } from "../brand.tsx";
 import { MOTION, ramp, useSeconds } from "../motion.ts";
 

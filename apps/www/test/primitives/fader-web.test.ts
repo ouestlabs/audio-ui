@@ -1,4 +1,4 @@
-import "@/registry/bases/base/primitives/fader/web/index.ts";
+import "@/registry/bases/shared/primitives/fader/web/index.ts";
 import { type FaderTree, faderSuite } from "./fader-suite.ts";
 
 type FaderEvent = CustomEvent<{ reason: string; value: number }>;

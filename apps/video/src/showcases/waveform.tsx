@@ -1,4 +1,4 @@
-import { Waveform } from "@/registry/bases/base/audio/elements/waveform";
+import { Waveform } from "@/registry/bases/shared/audio/elements/waveform";
 import { MOTION, noise, ramp } from "../motion.ts";
 
 const BARS = 120;

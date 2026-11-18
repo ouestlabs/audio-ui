@@ -13,8 +13,8 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const WEB = join(import.meta.dir, "..");
-const PRIMITIVES = join(WEB, "src/registry/bases/base/primitives");
-const ADAPTERS = join(WEB, "src/registry/bases/base/primitives");
+const PRIMITIVES = join(WEB, "src/registry/bases/shared/primitives");
+const ADAPTERS = join(WEB, "src/registry/bases/shared/primitives");
 export const MANIFEST = join(
   WEB,
   "src/lib/docs/content/primitive-api.generated.json"
@@ -279,7 +279,7 @@ export async function build(): Promise<PrimitiveApi[]> {
     const parts: ApiPart[] = exported.map((part) => {
       const slot = slots[part.charAt(0).toLowerCase() + part.slice(1)];
       const props = { ...((slot?.props as Record<string, string>) ?? {}) };
-      delete props["data-slot"];
+      props["data-slot"] = undefined;
       return {
         element: elements.get(part.charAt(0).toLowerCase() + part.slice(1)),
         name: part,

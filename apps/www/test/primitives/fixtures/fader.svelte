@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Fader } from "@/registry/bases/base/primitives/fader/svelte/index.ts";
+import { Fader } from "@/registry/bases/shared/primitives/fader/svelte/index.ts";
 
 /** The fader the shared suite drives: its options, its marks and how it is named. */
 let {
