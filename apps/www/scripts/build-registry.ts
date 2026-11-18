@@ -101,6 +101,12 @@ const GROUP_ORIENTATION = /group-data-(horizontal|vertical)\//g;
 const ORIENTATION = /(?<![\w\]-])data-(horizontal|vertical):/g;
 const ACTIVE = /(?<![\w-])data-active\b/g;
 const POPUP_OPEN = /\bdata-popup-open\b/g;
+// input-otp marks its active slot `data-active="true"`, ui-sdk with a bare `data-active`.
+const ACTIVE_TRUE = /\bdata-\[active=true\]/g;
+// vaul names a drawer's edge `data-vaul-drawer-direction`, ui-sdk `data-side`.
+const DRAWER_DIRECTION = /\bdata-\[vaul-drawer-direction=/g;
+// A ui-sdk part keeps its own `data-slot`: an input group's control is an input, a textarea or a combobox's input.
+const INPUT_GROUP_CONTROL = /\[data-slot=input-group-control\]/g;
 const DEMO_METADATA =
   /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm;
 
@@ -213,7 +219,13 @@ function toUiSdkAttributes(content: string): string {
     .replace(GROUP_ORIENTATION, "group-data-[orientation=$1]/")
     .replace(ORIENTATION, "data-[orientation=$1]:")
     .replace(ACTIVE, "data-selected")
-    .replace(POPUP_OPEN, "data-open");
+    .replace(POPUP_OPEN, "data-open")
+    .replace(ACTIVE_TRUE, "data-[active]")
+    .replace(DRAWER_DIRECTION, "data-[side=")
+    .replace(
+      INPUT_GROUP_CONTROL,
+      ":is([data-slot=input],[data-slot=textarea],[data-slot=combobox-input])"
+    );
 }
 
 function expandCnClasses(
