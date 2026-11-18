@@ -1,11 +1,13 @@
 import { expect, test } from "bun:test";
 import { runInNewContext } from "node:vm";
 import {
+  FRAMEWORK_CLASS_SCRIPT,
   FRAMEWORK_REDIRECT_SCRIPT,
   frameworkAddresses,
   frameworkAddressOf,
   pageOfFrameworkAddress,
 } from "@/lib/docs/content/framework-paths";
+import { frameworkOfPage } from "@/lib/docs/content/frameworks";
 import { docsPages } from "../scripts/site-paths.mts";
 
 test("a framework address is the page of the primitive, read for the framework", () => {
@@ -123,4 +125,39 @@ test("the redirect script goes where frameworkAddressOf does, for every page", (
       expect(run(id, page)).toEqual(address ? `${address}?x=1#a` : null);
     }
   }
+});
+
+test("a page that has nothing for the framework kept is read as React", () => {
+  expect(frameworkOfPage("/docs/components/base/knob", "vue")).toBe("vue");
+  expect(frameworkOfPage("/docs", "web")).toBe("web");
+  expect(frameworkOfPage("/docs/components/base/mixer", "web")).toBe("react");
+  expect(frameworkOfPage("/docs/guides/output", "svelte")).toBe("react");
+  expect(frameworkOfPage("/docs/guides/output", "react")).toBe("react");
+});
+
+/** The class the document gets before its first paint, for a framework kept and a page. */
+const classFor = (kept: string | null, path: string) => {
+  const classes = new Set<string>();
+  const window = {
+    document: {
+      documentElement: {
+        classList: { add: (name: string) => classes.add(name) },
+      },
+    },
+    localStorage: kept ? { "audio-ui-framework": kept } : {},
+    location: { pathname: path },
+  };
+  runInNewContext(FRAMEWORK_CLASS_SCRIPT, window);
+  return [...classes];
+};
+
+test("the class before the first paint names the framework the page is read in", () => {
+  expect(classFor("web", "/docs/components/base/knob")).toEqual([
+    "framework-web",
+  ]);
+  expect(classFor("web", "/docs/components/base/mixer")).toEqual([
+    "framework-react",
+  ]);
+  expect(classFor("vue", "/docs/guides/output/")).toEqual(["framework-react"]);
+  expect(classFor(null, "/docs/components/base/knob")).toEqual([]);
 });

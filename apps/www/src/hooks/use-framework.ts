@@ -4,7 +4,12 @@ import { keptBase } from "@/hooks/use-config";
 import { createKeptChoice } from "@/hooks/use-kept-choice";
 import { baseAddressOf } from "@/lib/docs/content/base-paths";
 import { frameworkAddressOf } from "@/lib/docs/content/framework-paths";
-import { type FrameworkId, isFramework } from "@/lib/docs/content/frameworks";
+import {
+  type FrameworkId,
+  frameworkOfPage,
+  isFramework,
+  shownTo,
+} from "@/lib/docs/content/frameworks";
 
 /** Read from the router's address: a framework address (`/docs/vue/knob`) is rewritten to its page's own with `?framework=`, which the router alone sees. */
 const framework = createKeptChoice<FrameworkId>({
@@ -45,11 +50,23 @@ export function useFramework() {
     select: (location) =>
       (location.search as { framework?: unknown }).framework,
   });
-  const value: FrameworkId = isFramework(named) ? named : (kept ?? "react");
   const pathname = useLocation({ select: (location) => location.pathname });
+  // A page that has nothing for the framework kept is read as React.
+  const value = frameworkOfPage(
+    pathname,
+    isFramework(named) ? named : (kept ?? "react")
+  );
   const choose = useCallback(
     (next: FrameworkId) => {
       framework.remember(next);
+      // A page the framework chosen has no word for leaves for the docs' first page, which every framework has.
+      if (!shownTo(pathname, next) && frameworkAddressOf("/docs", next)) {
+        navigate({
+          search: { framework: next } as never,
+          to: "/docs" as never,
+        });
+        return;
+      }
       // The base kept goes with it, or a component page would read as the default base's and replace the choice.
       const base = keptBase();
       const search: Record<string, string> = {};

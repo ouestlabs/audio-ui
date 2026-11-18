@@ -52,6 +52,16 @@ export function shownTo(url: string, framework: FrameworkId): boolean {
   );
 }
 
+/**
+ * The framework a page is read in: the one the reader keeps, or React when the
+ * page has nothing for it. A reader of Vue who opens a page of the styled
+ * catalog, which only a React app uses, reads it as React, so the switch, the
+ * tabs and the code of the page never name a framework the page has no word for.
+ */
+export function frameworkOfPage(url: string, wanted: FrameworkId): FrameworkId {
+  return shownTo(url, wanted) ? wanted : "react";
+}
+
 /** A section as the switcher lists it. */
 export type FrameworkSection = DocsSection;
 
