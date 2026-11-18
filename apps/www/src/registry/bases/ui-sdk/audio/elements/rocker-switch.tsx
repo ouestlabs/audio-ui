@@ -1,7 +1,7 @@
 import { Switch } from "@ui-sdk/react/switch";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, ReactNode } from "react";
-import { cn } from "@/registry/bases/base/lib/utils";
+import { cn } from "@/registry/bases/shared/lib/utils";
 
 const rockerSwitchVariants = cva(
   "cn-rocker-switch group/rocker inline-flex shrink-0",

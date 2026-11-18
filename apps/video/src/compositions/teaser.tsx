@@ -1,4 +1,4 @@
-import { Knob } from "@/registry/bases/base/audio/elements/knob";
+import { Knob } from "@/registry/bases/shared/audio/elements/knob";
 import {
   glyphEntrance,
   LOGO_PATH,

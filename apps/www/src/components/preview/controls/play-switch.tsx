@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePlaySwitch } from "@/registry/bases/base/hooks/use-play-switch";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 
 /**
  * Plays and stops the sound of a preview from its bar, for the previews that

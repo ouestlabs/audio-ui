@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Plot } from "@/registry/bases/base/primitives/plot/vue/index.ts";
+import { Plot } from "@/registry/bases/shared/primitives/plot/vue/index.ts";
 import { plotSuite } from "./plot-suite.ts";
 
 plotSuite("Vue", async (tree) => {

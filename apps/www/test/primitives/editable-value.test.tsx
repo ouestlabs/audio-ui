@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Fader } from "@/registry/bases/base/primitives/fader/react/index.tsx";
-import { Knob } from "@/registry/bases/base/primitives/knob/react/index.tsx";
+import { Fader } from "@/registry/bases/shared/primitives/fader/react/index.tsx";
+import { Knob } from "@/registry/bases/shared/primitives/knob/react/index.tsx";
 
 async function mount(ui: React.ReactNode) {
   const container = document.body.appendChild(document.createElement("div"));

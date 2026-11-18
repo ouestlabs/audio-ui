@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { pitchName } from "@/registry/bases/base/primitives/pitch";
+import { pitchName } from "@/registry/bases/shared/primitives/pitch";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

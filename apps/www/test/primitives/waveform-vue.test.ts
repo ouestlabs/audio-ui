@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Waveform } from "@/registry/bases/base/primitives/waveform/vue/index.ts";
+import { Waveform } from "@/registry/bases/shared/primitives/waveform/vue/index.ts";
 import { waveformSuite } from "./waveform-suite.ts";
 
 waveformSuite("Vue", async (tree) => {

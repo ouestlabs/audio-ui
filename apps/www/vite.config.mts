@@ -64,7 +64,7 @@ export default defineConfig({
     alias: [
       // The site is built on ui-sdk: the items that name a behavior library resolve to its variants.
       ...SDK_VARIANTS.map((name) => ({
-        find: `@/registry/bases/base/audio/elements/${name}`,
+        find: `@/components/audio-ui/${name}`,
         replacement: fileURLToPath(
           new URL(
             `./src/registry/bases/ui-sdk/audio/elements/${name}.tsx`,
