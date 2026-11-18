@@ -31,6 +31,18 @@ export const Icons = {
       <path d="M13.799 11.884L18.243 4.188A10 10 0 1 1 15.645 2.688L11.201 10.384Z" />
     </svg>
   ),
+  uiSdk: (props: IconProps) => (
+    <svg
+      aria-hidden="true"
+      fill="currentcolor"
+      height="24"
+      viewBox="0 0 115 100"
+      width="28"
+      {...props}
+    >
+      <path d="M57.5 0 115 100H0z" />
+    </svg>
+  ),
   base: (props: IconProps) => (
     <svg
       aria-hidden="true"

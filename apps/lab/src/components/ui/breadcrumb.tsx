@@ -1,8 +1,27 @@
-import { mergeProps } from "@base-ui/react/merge-props";
-import { useRender } from "@base-ui/react/use-render";
+import {
+  mergeProps,
+  type RenderProp,
+  renderElement,
+} from "@ui-sdk/react/primitive";
 import { CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import { cn } from "cn";
 import type * as React from "react";
+
+/** What a part's state says, as the data attributes the styles read: `slot` is `data-slot`. */
+function part(
+  tag: string,
+  defaults: Record<string, unknown>,
+  props: Record<string, unknown>,
+  render: RenderProp | undefined,
+  state: Record<string, unknown>
+) {
+  const data = Object.fromEntries(
+    Object.entries(state)
+      .filter(([, value]) => value !== false && value !== null && value !== undefined)
+      .map(([key, value]) => [`data-${key}`, value === true ? "" : value])
+  );
+  return renderElement(tag, mergeProps(defaults, data, props), render, state);
+}
 
 function Breadcrumb({ className, ...props }: React.ComponentProps<"nav">) {
   return (
@@ -42,20 +61,18 @@ function BreadcrumbLink({
   className,
   render,
   ...props
-}: useRender.ComponentProps<"a">) {
-  return useRender({
-    defaultTagName: "a",
-    props: mergeProps<"a">(
+}: React.ComponentProps<"a"> & { render?: RenderProp }) {
+  return part(
+    "a",
       {
         className: cn("transition-colors hover:text-foreground", className),
       },
-      props
-    ),
+    props,
     render,
-    state: {
+    {
       slot: "breadcrumb-link",
-    },
-  });
+    }
+  );
 }
 
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {

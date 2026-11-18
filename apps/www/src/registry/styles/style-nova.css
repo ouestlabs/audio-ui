@@ -212,11 +212,11 @@
   }
 
   .cn-button-group-orientation-horizontal {
-    @apply [&>[data-slot]:not(:has(~[data-slot]))]:rounded-r-lg!;
+    @apply [&>[data-slot]:not([data-slot=select-form-input]):not(:has(~[data-slot]:not([data-slot=select-form-input])))]:rounded-r-lg!;
   }
 
   .cn-button-group-orientation-vertical {
-    @apply [&>[data-slot]:not(:has(~[data-slot]))]:rounded-b-lg!;
+    @apply [&>[data-slot]:not([data-slot=select-form-input]):not(:has(~[data-slot]:not([data-slot=select-form-input])))]:rounded-b-lg!;
   }
 
   .cn-button-group-text {
