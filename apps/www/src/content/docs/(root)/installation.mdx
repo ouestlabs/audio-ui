@@ -115,6 +115,38 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 </ForFrameworks>
 
+<ForFrameworks only="react">
+
+## Choose a base
+
+A base is a complete set of components over one library of behaviors: focus, keys, popups. audio/ui ships two, as styles of the registry, each in the eight looks (`nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `rhea`, `sera`):
+
+| Base | Style in `components.json` | Behaviors from |
+| --- | --- | --- |
+| `base` | `base-nova` | The components shadcn ships for your project |
+| `ui-sdk` | `ui-sdk-nova` | `@ui-sdk/react` |
+
+The style you set chooses. Every item installs the same way, `npx shadcn@latest add @audio-ui/knob`, and the base decides what comes with it: the ui components an item uses (button, select, dialog, menus) and the items that name a library, such as the rocker switch and the parameter field, which have a variant in each base. Pick one base for a project: files of the other bring their own library along.
+
+```json title="components.json"
+{
+  "style": "ui-sdk-nova"
+}
+```
+
+The `ui-sdk` base publishes these ui components itself: accordion, alert dialog, badge, button, button group, collapsible, context menu, dialog, dropdown menu, empty, input, input group, item, kbd, popover, select, separator, sheet, slider, switch, tabs, textarea, toggle, toggle group, toolbar and tooltip. Any other component you add comes from shadcn, over the library of your project.
+
+On `ui-sdk`, declare its layer first in your global stylesheet, above Tailwind's import, so your own styles win over its behavior CSS:
+
+```css title="src/styles/globals.css"
+@layer ui-sdk;
+@import "tailwindcss";
+```
+
+In the customizer of this site, the Component Library picker switches the base the previews and the code shown are for.
+
+</ForFrameworks>
+
 ## Shared files
 
 `primitive.ts`, `grid.ts`, `frame.ts` and `pitch.ts` are shared: every primitive that reads one installs it at the same path. The CLI skips a file your project already holds, so you keep the copy you installed first. These files only gain exports, never lose one, so a primitive installed later still finds what it reads. To pick up an addition, ask the CLI to overwrite (`npx shadcn@latest add <item> --overwrite`), or copy the file from its item by hand.

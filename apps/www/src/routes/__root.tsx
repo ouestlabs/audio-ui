@@ -22,14 +22,13 @@ import { QueryProvider } from "@/components/site/providers/query-provider";
 import { ThemeProvider } from "@/components/site/providers/theme-provider";
 import { TailwindIndicator } from "@/components/site/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
+import { keptBase } from "@/hooks/use-config";
 import { keptFramework } from "@/hooks/use-framework";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import { watchStyleCss } from "@/lib/design-system/style-css";
-import {
-  FRAMEWORK_REDIRECT_SCRIPT,
-  frameworkAddressOf,
-} from "@/lib/docs/content/framework-paths";
+import { FRAMEWORK_REDIRECT_SCRIPT } from "@/lib/docs/content/framework-paths";
+import { keptRedirectSearch } from "@/lib/docs/content/kept-redirect";
 import { watchPreloadErrors } from "@/lib/load-failure";
 import {
   buildAuthorJsonLd,
@@ -149,15 +148,27 @@ const siteHead = buildPageMetadata({
   title: siteConfig.name,
 });
 
+/** Whether a page has been loaded: the address of the first one is the reader's choice, a link followed after it goes to their base. */
+let arrived = false;
+
 export const Route = createRootRoute({
   // A link to a page that has an address for the framework kept goes to it, as a page loaded whole does (FRAMEWORK_REDIRECT_SCRIPT).
-  beforeLoad: ({ location }) => {
-    const kept = keptFramework();
-    const named = (location.search as { framework?: unknown }).framework;
-    if (kept && !named && frameworkAddressOf(location.pathname, kept)) {
+  beforeLoad: ({ cause, location }) => {
+    const inSite = arrived;
+    if (cause !== "preload") {
+      arrived = true;
+    }
+    const search = keptRedirectSearch({
+      base: keptBase(),
+      framework: keptFramework(),
+      inSite,
+      pathname: location.pathname,
+      search: location.search as { base?: unknown; framework?: unknown },
+    });
+    if (search) {
       throw redirect({
         replace: true,
-        search: { framework: kept } as never,
+        search: search as never,
         to: location.pathname as never,
       });
     }

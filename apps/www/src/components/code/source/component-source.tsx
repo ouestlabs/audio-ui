@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { IconLibraryName } from "@/registry/config";
 
-const DEFAULT_STYLE_NAME = "base-nova";
+const DEFAULT_STYLE_NAME = "ui-sdk-nova";
 
 const COLLAPSIBLE_COPY_BUTTON_CLASS_NAME =
   "pointer-events-none invisible opacity-0 transition-opacity group-data-open/collapsible:pointer-events-auto group-data-open/collapsible:visible group-data-open/collapsible:opacity-100";

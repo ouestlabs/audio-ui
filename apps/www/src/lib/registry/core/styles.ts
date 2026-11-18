@@ -8,7 +8,7 @@ export const BUILT_STYLES = [
   "luma",
   "rhea",
   "sera",
-].map((name) => `base-${name}`);
+].flatMap((name) => [`base-${name}`, `ui-sdk-${name}`]);
 
 /** What a project that names a style we do not build installs. */
 export const DEFAULT_STYLE = "base-nova";

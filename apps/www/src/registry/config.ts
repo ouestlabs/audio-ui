@@ -178,7 +178,7 @@ export const designSystemConfigSchema = z
 export type DesignSystemConfig = z.infer<typeof designSystemConfigSchema>;
 
 export const DEFAULT_CONFIG: DesignSystemConfig = {
-  base: "base",
+  base: "ui-sdk",
   baseColor: "neutral",
   chartColor: "neutral",
   font: "geist",
@@ -204,7 +204,7 @@ export type Preset = {
 export const PRESETS: Preset[] = [
   // Base.
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Vega / Lucide / Inter",
@@ -222,7 +222,7 @@ export const PRESETS: Preset[] = [
     title: "Vega (Base)",
   },
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Nova / Lucide / Geist",
@@ -240,7 +240,7 @@ export const PRESETS: Preset[] = [
     title: "Nova (Base)",
   },
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Maia / Hugeicons / Figtree",
@@ -258,7 +258,7 @@ export const PRESETS: Preset[] = [
     title: "Maia (Base)",
   },
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Lyra / Tabler / JetBrains Mono",
@@ -276,7 +276,7 @@ export const PRESETS: Preset[] = [
     title: "Lyra (Base)",
   },
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Mira / Hugeicons / Inter",
@@ -295,7 +295,7 @@ export const PRESETS: Preset[] = [
   },
   // Luma.
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Luma / Lucide / Inter",
@@ -314,7 +314,7 @@ export const PRESETS: Preset[] = [
   },
   // Rhea.
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "neutral",
     chartColor: "neutral",
     description: "Rhea / Lucide / Inter",
@@ -333,7 +333,7 @@ export const PRESETS: Preset[] = [
   },
   // Sera.
   {
-    base: "base",
+    base: "ui-sdk",
     baseColor: "taupe",
     chartColor: "taupe",
     description: "Sera / Lucide / Noto Sans + Playfair Display",

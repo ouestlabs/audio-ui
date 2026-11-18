@@ -27,7 +27,7 @@ function StackedFile({
         name={name}
         onCode={onCode}
         showCopyButton={false}
-        styleName="base-nova"
+        styleName="ui-sdk-nova"
       />
     ),
     [index, name, path]
