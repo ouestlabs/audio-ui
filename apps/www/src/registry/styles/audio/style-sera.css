@@ -334,7 +334,7 @@
 
   /* MARK: Scrubber */
   .cn-scrubber-track {
-    @apply rounded-none bg-muted has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+    @apply rounded-none bg-muted;
   }
 
   .cn-scrubber-fill {

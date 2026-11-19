@@ -111,7 +111,7 @@ function Scrubber({
       >
         <TimelinePrimitive.Ruler
           aria-label={ariaLabel}
-          className="cn-scrubber-track relative h-1.5 cursor-pointer touch-none"
+          className="cn-scrubber-track group/scrubber relative h-1.5 cursor-pointer touch-none"
           getAriaValueText={formatClock}
         >
           <TimelinePrimitive.Playhead
@@ -121,7 +121,7 @@ function Scrubber({
             }}
           />
           <TimelinePrimitive.Playhead
-            className="cn-scrubber-thumb pointer-events-none absolute top-1/2 -translate-y-1/2"
+            className="cn-scrubber-thumb pointer-events-none absolute top-1/2 -translate-y-1/2 ring-ring/50 transition-shadow group-has-focus-visible/scrubber:ring-3"
             style={{
               height: THUMB_SIZE,
               marginLeft: `calc(${THUMB_SIZE} * var(--timeline-offset) / ${duration} * -1)`,
