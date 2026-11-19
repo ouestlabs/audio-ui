@@ -21,7 +21,7 @@ Changes to the published package (`packages/icons`) require a changeset (`bun ru
 
 ## The Two Registry Trees
 
-`apps/www/src/registry/` is the one registry tree: the design system (styles, icons, fonts, themes, started from shadcn/ui and now audio/ui's own) and, in `bases/`, the audio components, blocks, demos, hooks and lib, plus the ui components of the `ui-sdk` base. It is all editable, and `bases/` is where contributions go.
+`apps/www/src/registry/` is the one registry tree: the design system (styles, icons, fonts, themes, started from shadcn/ui and now audio/ui's own) and, in `bases/`, the audio components, blocks, demos, hooks and lib, plus the ui components of each base. It is all editable, and `bases/` is where contributions go.
 
 ### `src/registry/bases/` layout
 
@@ -260,7 +260,7 @@ Every registry item is declared in the `_registry.ts` of its folder. Blocks and 
 ```ts
 registryDependencies: [
   "@audio-ui/{name}",  // audio/ui item (component, hook, or lib) → @audio-ui/name
-  "@shadcn/{name}", // official shadcn/ui component            → @shadcn/name
+  "@shadcn/{name}", // shadcn/ui component, each base answers with its own → @audio-ui/name
 ]
 ```
 

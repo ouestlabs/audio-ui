@@ -545,7 +545,7 @@ async function buildItem(
     // Our own items are served under the @audio-ui namespace.
     registryDependencies: withSharedItems(item, files)?.map((dependency) => {
       const shadcn = SHADCN_DEPENDENCY.exec(dependency)?.[1];
-      if (shadcn && build.base === UI_BASE && uiNames.has(shadcn)) {
+      if (shadcn && itemsByBase.get(build.base)?.has(shadcn)) {
         return `${NAMESPACE}/${shadcn}`;
       }
       return itemNames.has(dependency)
@@ -760,9 +760,8 @@ const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
 );
 
-// A base serves its own items and, beside them, every item of `bases/shared/`. The `ui-sdk` base answers their `@shadcn/<name>` dependencies with its own components.
+// A base serves its own items and, beside them, every item of `bases/shared/`. Each base answers their `@shadcn/<name>` dependencies with its own components, and leaves to shadcn the ones it has none of.
 const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
-const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
 function itemOf(name: string, base: string): SourceItem | undefined {
   const own = itemsByBase.get(base)?.get(name);
   if (own) {

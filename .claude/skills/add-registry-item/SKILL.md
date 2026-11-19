@@ -23,7 +23,7 @@ Before writing, open the closest existing item of the same kind and copy its sha
 ## 2. Write it
 
 - Elements add appearance only. Behavior (pointer, keyboard, ARIA, value logic) belongs in the primitive: if you need new behavior, switch to the `change-primitive` skill.
-- Import audio elements from `@/registry/bases/shared/audio/elements/...` and ui parts from `@/components/ui/<name>` (each base provides them). An element whose file names a behavior library has a variant in `bases/base/` and `bases/ui-sdk/`, imported as `@/components/audio-ui/<name>`.
+- Import audio elements from `@/registry/bases/shared/audio/elements/...` and ui parts from `@/components/ui/<name>` (each base provides them: a new ui component is written in both `bases/base/ui/` and `bases/ui-sdk/ui/`). An element whose file names a behavior library has a variant in `bases/base/` and `bases/ui-sdk/`, imported as `@/components/audio-ui/<name>`.
 - Live signals (playheads, meters, spectra) go through a source or a ref, never a `setState` per frame.
 - Set a Web Audio parameter with `setTargetAtTime`, not `.value =`, so a drag never clicks.
 - Reuse the shared audio glue listed in `AGENTS.md` ("Shared audio glue"): an engine loads its worklet with `loadWorklet` (`lib/audio-worklet`), an instrument block plays chords with `usePolyphony`. Add the item to `registryDependencies`.
