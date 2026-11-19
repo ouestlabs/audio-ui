@@ -122,7 +122,7 @@ function CommandEmpty({
 }: ComponentProps<typeof CommandEmptyPrimitive>) {
   return (
     <CommandEmptyPrimitive
-      className={cn("cn-command-empty", className)}
+      className={cn("cn-command-empty not-data-empty:py-0", className)}
       {...props}
     />
   );
