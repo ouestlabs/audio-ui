@@ -73,7 +73,7 @@ registry/bases/shared/
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
 └── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
 
-registry/lib/        # web-audio, musical-time, waveform-dsp, lookahead-scheduler…: at the registry root, served by every base
+registry/lib/        # at the registry root, served by every base: engine/ and gl/ (modules), then arrangement/, drums/, devices/, notes/, input/, demo/ (by use, `LIB_GROUPS` in `bases/items.ts`) and web-audio, zip, sortable-drag at the root; a lib installs to `lib/<name>.ts` whichever folder it is written in
 ```
 
 Each of `audio-ui/`, `devices/`, `components/`, `hooks/`, `lib/`, `primitives/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/shared/`, except those of `lib/`, which start at `registry/` (`lib/web-audio.ts`). Items are declared through the factories of `registry/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js a device runs is the engine's: its worklet's kernels come from `@/lib/engine/kernels` (listed in `apps/www/scripts/engine/kernels.ts`, written by `bun run engine:kernels` there, checked by its `kernels.test.ts`) and the processors its description uses from `@/lib/engine/dsp`; a registry file never imports an `@audio/*` atom.

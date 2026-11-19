@@ -2,7 +2,7 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/lib/drum-synthesis";
+} from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";
 import "@/registry/bases/shared/primitives/pad/web";
 

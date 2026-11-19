@@ -1,5 +1,5 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
-import { oversamplingSeconds } from "@/registry/lib/oversampling";
+import { oversamplingSeconds } from "@/registry/lib/devices/oversampling";
 
 const TABLE_SAMPLES = 4096;
 const CURVES = ["soft", "hard", "fold", "tube"] as const;

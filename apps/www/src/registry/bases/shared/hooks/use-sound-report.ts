@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { reportSound, type SoundReport } from "@/engine/analysis";
 import { renderEdited } from "@/registry/bases/shared/hooks/use-bake";
-import type { ArrangementDoc } from "@/registry/lib/arrangement-state";
-import type { RecordingSource } from "@/registry/lib/clip-player";
+import type { ArrangementDoc } from "@/registry/lib/arrangement/arrangement-state";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
 
 interface SoundReportOptions {
   doc: ArrangementDoc;

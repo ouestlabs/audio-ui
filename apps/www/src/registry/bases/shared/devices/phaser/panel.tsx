@@ -25,7 +25,7 @@ import {
   phaserDevice,
   phaserSweep,
 } from "@/registry/bases/shared/devices/phaser/device";
-import type { DeviceSignal } from "@/registry/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */

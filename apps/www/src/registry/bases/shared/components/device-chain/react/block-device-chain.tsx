@@ -4,14 +4,14 @@ import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
 import { useDemoSource } from "@/registry/bases/shared/hooks/use-demo-source";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
-import type { Arranged } from "@/registry/lib/arrangement";
-import type { RecordingSource } from "@/registry/lib/clip-player";
+import type { Arranged } from "@/registry/lib/arrangement/arrangement";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
 import {
   DEMO_TEMPO,
   demoTempo,
   renderDemoSource,
-} from "@/registry/lib/demo-sound";
-import { libraryDevice } from "@/registry/lib/device-library";
+} from "@/registry/lib/demo/demo-sound";
+import { libraryDevice } from "@/registry/lib/devices/device-library";
 import { webAudio } from "@/registry/lib/web-audio";
 
 const TRACK = "track-1";

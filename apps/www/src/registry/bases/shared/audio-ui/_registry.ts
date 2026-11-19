@@ -411,7 +411,7 @@ export const audioUi: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "lib/note-edits.ts",
+        path: "lib/notes/note-edits.ts",
         type: "registry:lib",
       },
     ],

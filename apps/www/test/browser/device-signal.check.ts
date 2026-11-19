@@ -5,7 +5,7 @@ import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   createDeviceSignal,
   type SignalTarget,
-} from "@/registry/lib/device-signal";
+} from "@/registry/lib/devices/device-signal";
 import { assert, check } from "./harness.ts";
 
 const effect = defineDevice({

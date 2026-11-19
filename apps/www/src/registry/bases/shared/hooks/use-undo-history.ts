@@ -9,7 +9,7 @@ import {
   redo,
   settleChange,
   undo,
-} from "@/registry/lib/undo-history";
+} from "@/registry/lib/arrangement/undo-history";
 
 /**
  * Undo and redo over a value you own, such as a clip's notes or an envelope's

@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
 import { useTrackAutomation } from "@/registry/bases/shared/hooks/use-track-automation";
-import type { ArrangementTrack } from "@/registry/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
+import type { ArrangementTrack } from "@/registry/lib/arrangement/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 
 const POINTS = [
   { x: 0, y: 0.5 },

@@ -46,7 +46,7 @@ import {
   type Rack,
   type RackChain,
   type RackMapping,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 /** How many pads a bank shows, four by four. */

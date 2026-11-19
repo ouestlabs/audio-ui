@@ -11,8 +11,8 @@ import type {
   Arranged,
   ArrangementTrack,
   ClipAction,
-} from "@/registry/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 
 /** The track of those given whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
 function nearestTrack(

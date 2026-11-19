@@ -5,7 +5,7 @@ import {
   SUSTAIN_SPLIT_X,
   scheduleEnvelopeRamp,
   sliceEnvelope,
-} from "@/registry/lib/envelope-ramp";
+} from "@/registry/lib/devices/envelope-ramp";
 
 const SEMITONES_PER_OCTAVE = 12;
 const DEFAULT_ATTACK_DECAY_SECONDS = 0.4;

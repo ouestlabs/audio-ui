@@ -100,7 +100,7 @@ import {
   PLAY_EDITS,
   TIME_EDITS,
   VELOCITY_EDITS,
-} from "@/registry/lib/note-edits";
+} from "@/registry/lib/notes/note-edits";
 import { cn } from "@/registry/lib/utils";
 import { webAudio } from "@/registry/lib/web-audio";
 

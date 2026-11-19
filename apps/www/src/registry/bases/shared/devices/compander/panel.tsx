@@ -19,7 +19,10 @@ import {
   companderCurve,
   companderDevice,
 } from "@/registry/bases/shared/devices/compander/device";
-import { curveDot, type DeviceSignal } from "@/registry/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -90;

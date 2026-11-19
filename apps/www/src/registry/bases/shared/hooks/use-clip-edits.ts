@@ -8,8 +8,11 @@ import {
 } from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import type { createSource } from "@/registry/bases/shared/primitives/primitive";
-import type { Clipping, TimeSelection } from "@/registry/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
+import type {
+  Clipping,
+  TimeSelection,
+} from "@/registry/lib/arrangement/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 import {
   EDGE_EPS,
   removing,
@@ -18,7 +21,7 @@ import {
   shapeStretch,
   splice,
   typing,
-} from "@/registry/lib/clip-edits";
+} from "@/registry/lib/arrangement/clip-edits";
 
 /**
  * The edits of the sound, as an audio editor makes them, each one step of

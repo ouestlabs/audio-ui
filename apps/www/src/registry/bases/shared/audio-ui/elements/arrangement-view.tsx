@@ -104,13 +104,13 @@ import {
   mixOf,
   NEW_TRACK,
   type TrackDevice,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import {
   type ArrangementDoc,
   trackBlock,
   trackDepth,
-} from "@/registry/lib/arrangement-state";
-import { drumKit } from "@/registry/lib/drum-kit";
+} from "@/registry/lib/arrangement/arrangement-state";
+import { drumKit } from "@/registry/lib/drums/drum-kit";
 import { cn } from "@/registry/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;

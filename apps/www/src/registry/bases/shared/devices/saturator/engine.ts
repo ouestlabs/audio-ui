@@ -4,7 +4,7 @@ import {
   saturatorSettings,
   saturatorTable,
 } from "@/registry/bases/shared/devices/saturator/device";
-import { createOversamplingDelay } from "@/registry/lib/oversampling";
+import { createOversamplingDelay } from "@/registry/lib/devices/oversampling";
 
 const RAMP_SECONDS = 0.015;
 

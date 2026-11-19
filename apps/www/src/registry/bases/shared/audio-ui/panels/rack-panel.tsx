@@ -23,7 +23,7 @@ import {
   type Rack,
   type RackChain,
   type RackMapping,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 /** A parameter of a device inside the rack that a macro can turn. */

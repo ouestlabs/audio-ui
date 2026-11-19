@@ -25,7 +25,7 @@ import {
   stepsOf,
   withStep,
   withStepRepeats,
-} from "@/registry/lib/drum-steps";
+} from "@/registry/lib/drums/drum-steps";
 import { cn } from "@/registry/lib/utils";
 
 /** A pad of the drum rack that plays the clip: the note it answers and its name. */

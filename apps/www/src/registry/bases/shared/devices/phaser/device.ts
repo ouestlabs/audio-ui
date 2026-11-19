@@ -2,7 +2,10 @@ import { type DeviceState, defineDevice } from "@/engine/device";
 import { formatFrequency } from "@/engine/format";
 import { PHASER_KERNELS } from "@/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
-import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/registry/lib/synced-rate";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry/lib/devices/synced-rate";
 
 /** The all-pass stages of the phaser: each pair makes one notch. */
 export const PHASER_STAGES = 4;

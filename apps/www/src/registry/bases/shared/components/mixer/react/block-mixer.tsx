@@ -8,14 +8,14 @@ import {
   type Arranged,
   type ArrangementTrack,
   UNITY_MIX,
-} from "@/registry/lib/arrangement";
-import type { RecordingSource } from "@/registry/lib/clip-player";
+} from "@/registry/lib/arrangement/arrangement";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
 import {
   DEMO_TEMPO,
   type DemoSourceName,
   renderDemoSource,
-} from "@/registry/lib/demo-sound";
-import { libraryDevice } from "@/registry/lib/device-library";
+} from "@/registry/lib/demo/demo-sound";
+import { libraryDevice } from "@/registry/lib/devices/device-library";
 import { webAudio } from "@/registry/lib/web-audio";
 
 /** The tracks, each playing one of the demo's sounds round and round, at a level that leaves the main track under 0 dB. */

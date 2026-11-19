@@ -2,8 +2,8 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/lib/drum-synthesis";
-import { createStepPlayer } from "@/registry/lib/step-player";
+} from "@/registry/lib/drums/drum-synthesis";
+import { createStepPlayer } from "@/registry/lib/drums/step-player";
 import { webAudio } from "@/registry/lib/web-audio";
 import "@/registry/bases/shared/primitives/sequencer/web";
 

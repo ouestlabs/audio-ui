@@ -33,7 +33,10 @@ import {
   nearestDivision,
 } from "@/registry/bases/shared/devices/delay/device";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
-import { type DeviceSignal, deriveSource } from "@/registry/lib/device-signal";
+import {
+  type DeviceSignal,
+  deriveSource,
+} from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */

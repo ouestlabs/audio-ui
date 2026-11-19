@@ -5,7 +5,7 @@ import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 import { useSpectrum } from "@/registry/bases/shared/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { EnvelopePoint } from "@/registry/lib/envelope-ramp";
+import type { EnvelopePoint } from "@/registry/lib/devices/envelope-ramp";
 import { webAudio } from "@/registry/lib/web-audio";
 
 const VOLUME = 0.4;

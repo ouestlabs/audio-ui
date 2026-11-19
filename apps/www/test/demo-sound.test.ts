@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { DEMO_SOURCES } from "@/registry/lib/demo-sound";
+import { DEMO_SOURCES } from "@/registry/lib/demo/demo-sound";
 
 /** The part of a context that draws a buffer: a rate and `createBuffer`, enough for the sounds made of noise. */
 function _drawingContext(sampleRate: number) {

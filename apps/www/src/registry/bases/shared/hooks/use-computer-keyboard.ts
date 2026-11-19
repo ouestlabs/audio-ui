@@ -4,7 +4,7 @@ import {
   COMPUTER_KEYBOARD_VELOCITIES,
   controlOfKey,
   noteOfKey,
-} from "@/registry/lib/computer-keyboard";
+} from "@/registry/lib/input/computer-keyboard";
 
 const OCTAVES = [
   -COMPUTER_KEYBOARD_OCTAVES,

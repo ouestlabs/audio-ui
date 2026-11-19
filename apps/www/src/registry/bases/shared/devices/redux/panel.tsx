@@ -16,7 +16,10 @@ import {
   reduxCurve,
   reduxDevice,
 } from "@/registry/bases/shared/devices/redux/device";
-import { type DeviceSignal, peakDots } from "@/registry/lib/device-signal";
+import {
+  type DeviceSignal,
+  peakDots,
+} from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];

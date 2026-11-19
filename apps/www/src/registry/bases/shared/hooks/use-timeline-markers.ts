@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import type {
   ArrangementCommand,
   ArrangementState,
-} from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement-state";
 
 export interface UseTimelineMarkersOptions {
   /** The arrangement's commands, from `useArrangement`. */

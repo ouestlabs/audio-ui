@@ -9,7 +9,7 @@ import {
   type UtilityState,
   utilityDevice,
 } from "@/registry/bases/shared/devices/utility/device";
-import type { DeviceSignal } from "@/registry/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const KNOBS = ["gainDb", "pan", "width"] as const;

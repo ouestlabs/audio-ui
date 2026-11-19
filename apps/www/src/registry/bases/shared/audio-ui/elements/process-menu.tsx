@@ -13,7 +13,7 @@ import type { Repair } from "@/engine/repair";
 import {
   REPAIR_NAMES,
   type SoundOperation,
-} from "@/registry/lib/sound-operations";
+} from "@/registry/lib/arrangement/sound-operations";
 
 /** One operation as the menu offers it: what it says, with a note at its end. */
 interface OperationEntry {

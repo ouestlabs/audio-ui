@@ -15,8 +15,8 @@ import {
   type Rack,
   rackWithMacros,
   type TrackDevice,
-} from "@/registry/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 
 /** What a control needs to follow its envelope as the arrangement plays. */
 export interface AutomationFollowing {

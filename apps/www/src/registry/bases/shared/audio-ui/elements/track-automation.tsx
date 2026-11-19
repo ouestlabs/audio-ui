@@ -25,7 +25,7 @@ import {
   type TrackDevice,
   volumeGain,
   volumeValue,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 /** A gain as the decibels it plays at. */

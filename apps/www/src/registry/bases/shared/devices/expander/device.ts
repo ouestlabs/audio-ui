@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { expander, expanderGain, upwardExpanderGain } from "@/engine/dsp";
 import { EXPANDER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
 
 /**
  * An expander as a device: the expander of `@audio/dynamics-expander`, its

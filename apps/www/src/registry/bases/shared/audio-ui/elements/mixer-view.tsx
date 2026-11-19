@@ -34,8 +34,11 @@ import {
   type AutomatedParameter,
   hasOutput,
   type Mix,
-} from "@/registry/lib/arrangement";
-import { trackBlock, trackOf } from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement";
+import {
+  trackBlock,
+  trackOf,
+} from "@/registry/lib/arrangement/arrangement-state";
 import { startSortableDrag } from "@/registry/lib/sortable-drag";
 import { cn } from "@/registry/lib/utils";
 

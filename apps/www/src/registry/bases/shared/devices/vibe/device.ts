@@ -1,5 +1,5 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
-import { oversamplingSeconds } from "@/registry/lib/oversampling";
+import { oversamplingSeconds } from "@/registry/lib/devices/oversampling";
 
 /** Where each of the four stages turns the phase with the lamp dark, in hertz: spread wide, as the circuit's four capacitors are. */
 export const VIBE_STAGES = [90, 480, 1900, 5200] as const;

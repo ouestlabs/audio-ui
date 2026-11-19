@@ -1,6 +1,9 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
-import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/registry/lib/synced-rate";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry/lib/devices/synced-rate";
 
 /**
  * An auto pan and tremolo as a device: a slow oscillator moves the sound

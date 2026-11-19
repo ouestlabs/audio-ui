@@ -20,7 +20,7 @@ import {
   tiltEqCurve,
   tiltEqDevice,
 } from "@/registry/bases/shared/devices/tilt-eq/device";
-import type { DeviceSignal } from "@/registry/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const MIN_HZ = 20;

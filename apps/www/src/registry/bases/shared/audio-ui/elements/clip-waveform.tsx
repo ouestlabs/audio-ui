@@ -8,7 +8,7 @@ import {
   framesToRead,
   sampleBands,
   sampleLine,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 /**

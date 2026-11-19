@@ -20,6 +20,7 @@ import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { categories, rootSeo } from "../src/registry/bases/categories.ts";
+import { LIB_GROUPS } from "../src/registry/bases/items.ts";
 import {
   moduleDependencies,
   rewriteModuleImports,
@@ -84,6 +85,11 @@ const INSTALL_PREFIXES: [prefix: string, installed: string][] = [
 const SOURCE_MODULE = new RegExp(
   `@/registry/(?:bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/|(?=lib/))([^"'\`\\s]*)`,
   "g"
+);
+
+// A lib written in a group folder installs beside the others: `lib/notes/note-edits` is `@/lib/note-edits`.
+const LIB_GROUP_MODULE = new RegExp(
+  `^lib/(?:${Object.keys(LIB_GROUPS).join("|")})/([^/]+)$`
 );
 
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
@@ -370,6 +376,10 @@ function rewriteSourceImports(code: string): string {
           : undefined;
       if (installed !== undefined) {
         return installed;
+      }
+      const flat = LIB_GROUP_MODULE.exec(path);
+      if (flat) {
+        return `@/lib/${flat[1]}`;
       }
       for (const [prefix, folder] of INSTALL_PREFIXES) {
         if (path.startsWith(prefix)) {

@@ -2,7 +2,7 @@ import { useEffect, useMemo } from "react";
 import {
   createSimulatedLevels,
   type SimulatedFrame,
-} from "@/registry/lib/simulated-levels";
+} from "@/registry/lib/devices/simulated-levels";
 
 export type { SimulatedFrame };
 

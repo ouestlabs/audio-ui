@@ -5,7 +5,7 @@ import {
   distortionTable,
   TABLE_DOMAIN,
 } from "@/registry/bases/shared/devices/distortion/device";
-import { createOversamplingDelay } from "@/registry/lib/oversampling";
+import { createOversamplingDelay } from "@/registry/lib/devices/oversampling";
 
 const RAMP_SECONDS = 0.015;
 

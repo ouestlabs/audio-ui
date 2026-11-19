@@ -9,7 +9,7 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/lib/drum-synthesis";
+} from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";
 
 const VOLUME = 0.7;

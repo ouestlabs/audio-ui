@@ -49,7 +49,7 @@ import {
   fadeGain,
 } from "@/registry/bases/shared/primitives/timeline/clip";
 import { Timeline as TimelinePrimitive } from "@/registry/bases/shared/primitives/timeline/react";
-import type { Mix, TrackColor } from "@/registry/lib/arrangement";
+import type { Mix, TrackColor } from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;

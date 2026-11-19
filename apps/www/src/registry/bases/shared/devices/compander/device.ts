@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { compandStream } from "@/engine/dsp";
 import { COMPANDER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
 
 /** The levels in, in dB, whose levels out the compander's points set: the manifest's own. */
 export const COMPANDER_POINTS_DB = [-90, -60, -20, 0] as const;

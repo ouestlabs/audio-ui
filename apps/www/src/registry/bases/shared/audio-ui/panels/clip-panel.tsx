@@ -90,12 +90,12 @@ import {
   type ClipReading,
   clipPeakCount,
   clipSegments,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import {
   type SoundOperation,
   type SoundRange,
   soundOperationTiming,
-} from "@/registry/lib/sound-operations";
+} from "@/registry/lib/arrangement/sound-operations";
 import { cn } from "@/registry/lib/utils";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */

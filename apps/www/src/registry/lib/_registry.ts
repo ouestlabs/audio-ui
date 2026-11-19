@@ -156,7 +156,7 @@ const items: RegistryItem[] = [
     dependencies: ["fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
-    files: ["lib/dawproject.ts", "lib/zip.ts"],
+    files: ["lib/arrangement/dawproject.ts", "lib/zip.ts"],
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
@@ -171,7 +171,7 @@ const items: RegistryItem[] = [
     dependencies: [],
     description:
       "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
-    files: ["lib/recording.ts", "lib/input-recorder.ts"],
+    files: ["lib/input/recording.ts", "lib/input/input-recorder.ts"],
     registryDependencies: ["@audio-ui/arrangement"],
   }),
   libItem("clip-player", {
@@ -296,7 +296,7 @@ const items: RegistryItem[] = [
       "Plays an arrangement on the audio clock: its audio clips, its notes through each track's instrument, its device chains, sends and returns, and an offline render to a buffer, with a hook for the transport, the playhead and the meters",
     files: [
       {
-        path: "lib/arrangement-engine.ts",
+        path: "lib/arrangement/arrangement-engine.ts",
         type: "registry:lib",
       },
       {

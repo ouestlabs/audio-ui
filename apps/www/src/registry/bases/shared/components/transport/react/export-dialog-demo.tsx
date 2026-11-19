@@ -6,7 +6,7 @@ import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
   exportSound,
-} from "@/registry/lib/audio-export";
+} from "@/registry/lib/arrangement/audio-export";
 
 const RATE = 48_000;
 

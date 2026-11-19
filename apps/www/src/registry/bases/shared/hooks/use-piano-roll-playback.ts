@@ -8,8 +8,8 @@ import {
 } from "@/registry/bases/shared/hooks/use-transport-clock";
 import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
 import { createSource } from "@/registry/bases/shared/primitives/primitive";
-import { triggerClick } from "@/registry/lib/drum-synthesis";
-import type { EnvelopePoint } from "@/registry/lib/envelope-ramp";
+import type { EnvelopePoint } from "@/registry/lib/devices/envelope-ramp";
+import { triggerClick } from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";
 
 /** A step is a sixteenth note whatever the signature: BPM counts quarter notes. */

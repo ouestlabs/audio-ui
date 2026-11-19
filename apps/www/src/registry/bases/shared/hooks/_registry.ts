@@ -43,7 +43,7 @@ export const hooks: RegistryItem[] = [
         type: "registry:hook",
       },
       {
-        path: "lib/arrangement-state.ts",
+        path: "lib/arrangement/arrangement-state.ts",
         type: "registry:lib",
       },
     ],
@@ -243,7 +243,7 @@ export const hooks: RegistryItem[] = [
         type: "registry:hook",
       },
       {
-        path: "lib/computer-keyboard.ts",
+        path: "lib/input/computer-keyboard.ts",
         type: "registry:lib",
       },
     ],

@@ -1,7 +1,7 @@
 import { type DragEvent, useCallback, useState } from "react";
 import { DeviceBrowser } from "@/registry/bases/shared/audio-ui/elements/device-browser";
 import { DEVICE_DRAG_TYPE } from "@/registry/bases/shared/audio-ui/elements/device-chain";
-import { DEVICE_SHELVES } from "@/registry/lib/device-library";
+import { DEVICE_SHELVES } from "@/registry/lib/devices/device-library";
 import { cn } from "@/registry/lib/utils";
 
 const SHELVES = DEVICE_SHELVES.map((shelf) => ({

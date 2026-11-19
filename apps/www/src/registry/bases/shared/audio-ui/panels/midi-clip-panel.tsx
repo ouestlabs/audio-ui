@@ -90,7 +90,10 @@ import {
 } from "@/registry/bases/shared/primitives/piano-roll/edits";
 import { pitchName } from "@/registry/bases/shared/primitives/pitch";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
-import type { ClipScale, ClipSwing } from "@/registry/lib/arrangement";
+import type {
+  ClipScale,
+  ClipSwing,
+} from "@/registry/lib/arrangement/arrangement";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -100,7 +103,7 @@ import {
   PLAY_EDITS,
   TIME_EDITS,
   VELOCITY_EDITS,
-} from "@/registry/lib/note-edits";
+} from "@/registry/lib/notes/note-edits";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;

@@ -6,7 +6,7 @@ import {
   DEMO_SOURCES,
   type DemoSourceName,
   renderDemoSource,
-} from "@/registry/lib/demo-sound";
+} from "@/registry/lib/demo/demo-sound";
 import { webAudio } from "@/registry/lib/web-audio";
 
 const NAMES = Object.keys(DEMO_SOURCES) as DemoSourceName[];

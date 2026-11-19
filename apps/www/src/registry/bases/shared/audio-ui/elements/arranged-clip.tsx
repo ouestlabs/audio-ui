@@ -52,7 +52,7 @@ import {
   clipSegments,
   playedNotes,
   type TrackColor,
-} from "@/registry/lib/arrangement";
+} from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */

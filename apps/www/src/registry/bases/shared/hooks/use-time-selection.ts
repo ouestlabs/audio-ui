@@ -4,8 +4,8 @@ import type {
   ArrangementTrack,
   Clipping,
   TimeSelection,
-} from "@/registry/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 
 /** The part of a key press the commands read: a native event or React's. */
 type KeyPress = Pick<

@@ -18,7 +18,7 @@ import {
   binauralPlace,
   binauralPoint,
 } from "@/registry/bases/shared/devices/binaural-panner/device";
-import type { DeviceSignal } from "@/registry/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const SWITCHES = ["enabled"] as const;

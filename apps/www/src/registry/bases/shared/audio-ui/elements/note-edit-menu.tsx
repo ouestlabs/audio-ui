@@ -18,7 +18,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { NoteEdit } from "@/registry/lib/note-edits";
+import type { NoteEdit } from "@/registry/lib/notes/note-edits";
 import { cn } from "@/registry/lib/utils";
 
 interface NoteEditMenuContextValue {

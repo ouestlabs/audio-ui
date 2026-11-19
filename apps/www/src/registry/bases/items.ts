@@ -50,11 +50,58 @@ function flat(
   };
 }
 
-/** A lib: framework-free logic in `lib/<name>.ts`, installed to `lib/`. */
+/** The folders of `registry/lib/` that group its files by use, with the libs each holds. A lib installs to `lib/<name>.ts` whichever folder it is written in; those left out sit at the root of `lib/`. */
+export const LIB_GROUPS = {
+  arrangement: [
+    "arrangement",
+    "arrangement-state",
+    "arrangement-engine",
+    "clip-edits",
+    "clip-player",
+    "undo-history",
+    "mixer-engine",
+    "dawproject",
+    "audio-export",
+    "sound-operations",
+  ],
+  demo: ["demo-song", "demo-sound"],
+  devices: [
+    "device-library",
+    "device-signal",
+    "rack",
+    "instrument-rack",
+    "voice-pool",
+    "polyphony",
+    "manifest-worklet",
+    "oversampling",
+    "synced-rate",
+    "envelope-ramp",
+    "simulated-levels",
+  ],
+  drums: [
+    "drum-kit",
+    "drum-rack",
+    "drum-steps",
+    "drum-synthesis",
+    "step-player",
+  ],
+  input: ["input-recorder", "recording", "computer-keyboard"],
+  notes: ["note-edits", "piano-roll-tools"],
+} as const satisfies Record<string, readonly string[]>;
+
+const libGroupOf = (name: string) =>
+  Object.entries(LIB_GROUPS).find(([, names]) =>
+    (names as readonly string[]).includes(name)
+  )?.[0];
+
+/** A lib: framework-free logic in `lib/<name>.ts` (or `lib/<group>/<name>.ts`), installed to `lib/`. */
 export const libItem = (
   name: string,
   spec: ItemSpec & { files?: string[] }
-): RegistryItem => flat("registry:lib", "lib", "ts", name, spec);
+): RegistryItem => {
+  const group = libGroupOf(name);
+  return flat("registry:lib", group ? `lib/${group}` : "lib", "ts", name, spec);
+};
 
 /** A hook: React integration in `hooks/<name>.ts`, installed to `hooks/`. */
 export const hookItem = (

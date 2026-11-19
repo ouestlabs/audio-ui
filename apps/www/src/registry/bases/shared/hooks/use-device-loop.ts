@@ -12,7 +12,7 @@ import {
   demoKey,
   demoTempo,
   renderDemoSource,
-} from "@/registry/lib/demo-sound";
+} from "@/registry/lib/demo/demo-sound";
 import { webAudio } from "@/registry/lib/web-audio";
 
 const SIGNAL_LEVEL = 0.8;

@@ -123,39 +123,46 @@ import {
   clipSegments,
   type TimeSelection,
   type TrackDevice,
-} from "@/registry/lib/arrangement";
-import { renderArrangement } from "@/registry/lib/arrangement-engine";
+} from "@/registry/lib/arrangement/arrangement";
+import { renderArrangement } from "@/registry/lib/arrangement/arrangement-engine";
 import type {
   ArrangementCommand,
   ArrangementDoc,
   ArrangementLocator,
-} from "@/registry/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement-state";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
   exportSound,
-} from "@/registry/lib/audio-export";
-import { near, SHRINK_GAPS, typing } from "@/registry/lib/clip-edits";
-import type { RecordingSource } from "@/registry/lib/clip-player";
+} from "@/registry/lib/arrangement/audio-export";
+import {
+  near,
+  SHRINK_GAPS,
+  typing,
+} from "@/registry/lib/arrangement/clip-edits";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
+import type { SoundOperation } from "@/registry/lib/arrangement/sound-operations";
 import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
   demoTempo,
   renderDemoSource,
-} from "@/registry/lib/demo-sound";
-import { DEVICE_SHELVES, libraryDevice } from "@/registry/lib/device-library";
+} from "@/registry/lib/demo/demo-sound";
+import {
+  DEVICE_SHELVES,
+  libraryDevice,
+} from "@/registry/lib/devices/device-library";
 import {
   createInputRecorder,
   type InputRecorder,
   playCountIn,
-} from "@/registry/lib/input-recorder";
+} from "@/registry/lib/input/input-recorder";
 import {
   blockPeak,
   type RecordedBlock,
   sliceBlocks,
-} from "@/registry/lib/recording";
-import type { SoundOperation } from "@/registry/lib/sound-operations";
+} from "@/registry/lib/input/recording";
 import { cn } from "@/registry/lib/utils";
 import { webAudio } from "@/registry/lib/web-audio";
 

@@ -2,7 +2,10 @@ import { type DeviceState, defineDevice } from "@/engine/device";
 import { formatFrequency } from "@/engine/format";
 import { WAH_KERNELS } from "@/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
-import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/registry/lib/synced-rate";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry/lib/devices/synced-rate";
 
 /**
  * A wah as a device: a resonant band-pass whose frequency an envelope of the

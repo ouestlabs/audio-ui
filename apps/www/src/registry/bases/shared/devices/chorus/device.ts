@@ -1,7 +1,10 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { CHORUS_KERNELS } from "@/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@/engine/time";
-import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/registry/lib/synced-rate";
+import {
+  lfoRate,
+  SYNCED_RATE_PARAMETERS,
+} from "@/registry/lib/devices/synced-rate";
 
 /**
  * A chorus as a device: a short delay swept by a slow oscillator, or up to

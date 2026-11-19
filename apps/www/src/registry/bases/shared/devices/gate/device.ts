@@ -1,6 +1,6 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { GATE_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
 
 /**
  * A gate as a device: it lets a signal through above a threshold and turns it

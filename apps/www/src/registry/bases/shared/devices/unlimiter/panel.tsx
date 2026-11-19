@@ -19,7 +19,7 @@ import {
   unlimiterLift,
   unlimiterUnused,
 } from "@/registry/bases/shared/devices/unlimiter/device";
-import type { DeviceSignal } from "@/registry/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
 const MAX_SIZE_DB = 30;

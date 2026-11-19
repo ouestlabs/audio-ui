@@ -1,7 +1,7 @@
 import { type BiquadType, biquadResponse } from "@/engine/analysis";
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { formatFrequency } from "@/engine/format";
-import { oversamplingSeconds } from "@/registry/lib/oversampling";
+import { oversamplingSeconds } from "@/registry/lib/devices/oversampling";
 
 const TABLE_SAMPLES = 4096;
 

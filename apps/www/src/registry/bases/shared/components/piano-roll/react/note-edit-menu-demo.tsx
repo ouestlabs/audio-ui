@@ -30,7 +30,7 @@ import {
   PITCH_EDITS,
   TIME_EDITS,
   VELOCITY_EDITS,
-} from "@/registry/lib/note-edits";
+} from "@/registry/lib/notes/note-edits";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 60 };
 
