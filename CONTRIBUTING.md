@@ -62,7 +62,7 @@ The audio items live in `bases/shared/`, served by every base; `bases/base/` and
 | `registry:block`     | Pre-assembled patterns (`block-*.tsx`)          | `bases/shared/components/{category}/react/` |
 | `registry:example`   | Focused demos (`*-demo.tsx`)                    | `bases/shared/components/{category}/react/` |
 | `registry:hook`      | Hooks (`use-audio`, `use-sound`)                | `bases/shared/hooks/`            |
-| `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `bases/shared/lib/`              |
+| `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `registry/lib/`                  |
 
 Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`). Components land in the user's `components/audio-ui/` and are imported as `@/components/audio-ui/{name}`; hooks go to `hooks/`, libs to `lib/`, blocks to `components/examples/`.
 
@@ -113,7 +113,7 @@ import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 
 ```tsx
 import { Button } from "@/components/ui/button";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 ```
 
 **React, named imports only, never the namespace:**

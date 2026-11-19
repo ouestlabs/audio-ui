@@ -12,8 +12,8 @@ import {
   type PitchReading,
   usePitch,
 } from "@/registry/bases/shared/hooks/use-pitch";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
+import { cn } from "@/registry/lib/utils";
 
 /** Cents from the note to either end of the gauge: half a semitone, where the next note begins. */
 const RANGE_CENTS = 50;

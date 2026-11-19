@@ -9,12 +9,12 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import {
   type PlotAxis,
   valueOn,
 } from "@/registry/bases/shared/primitives/plot/plot";
 import { Plot as PlotPrimitive } from "@/registry/bases/shared/primitives/plot/react";
+import { cn } from "@/registry/lib/utils";
 
 type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
 type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;

@@ -1,7 +1,7 @@
 import { type ComponentType, lazy, type ReactNode } from "react";
 import type { ParameterValue } from "@/engine/device";
 import type { Tempo } from "@/engine/time";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {

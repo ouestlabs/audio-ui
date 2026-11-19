@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { compressorGain } from "@/engine/dsp";
 import { DUCKER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/manifest-worklet";
 
 /**
  * A ducker as a device: the ducker of `@audio/dynamics-ducker`, its

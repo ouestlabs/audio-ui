@@ -37,6 +37,8 @@ import {
   RackMacros,
   type RackParameter,
 } from "@/registry/bases/shared/audio-ui/panels/rack-panel";
+import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
+import { pitchName } from "@/registry/bases/shared/primitives/pitch";
 import {
   DRUM_DECAYS,
   type DrumSound,
@@ -44,10 +46,8 @@ import {
   type Rack,
   type RackChain,
   type RackMapping,
-} from "@/registry/bases/shared/lib/arrangement";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
-import { pitchName } from "@/registry/bases/shared/primitives/pitch";
+} from "@/registry/lib/arrangement";
+import { cn } from "@/registry/lib/utils";
 
 /** How many pads a bank shows, four by four. */
 const BANK = 16;

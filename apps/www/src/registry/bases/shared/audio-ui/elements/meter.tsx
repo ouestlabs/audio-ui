@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import { Meter as MeterPrimitive } from "@/registry/bases/shared/primitives/meter/react";
+import { cn } from "@/registry/lib/utils";
 
 const meterVariants = cva("", {
   defaultVariants: {

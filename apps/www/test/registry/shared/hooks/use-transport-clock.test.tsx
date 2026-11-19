@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 
 // The shared audio context, with a clock the test moves by hand.
 const context = { currentTime: 0 };
-mock.module("@/registry/bases/shared/lib/web-audio", () => ({
+mock.module("@/registry/lib/web-audio", () => ({
   webAudio: { getContext: () => context },
 }));
 

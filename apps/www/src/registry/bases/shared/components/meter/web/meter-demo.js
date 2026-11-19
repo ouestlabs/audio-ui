@@ -1,5 +1,5 @@
 import "@/registry/bases/shared/primitives/meter/web";
-import { createSimulatedLevels } from "@/registry/bases/shared/lib/simulated-levels";
+import { createSimulatedLevels } from "@/registry/lib/simulated-levels";
 
 /** Draws the meter into `element`, and returns what takes it away. */
 export default function meterWebDemo(element) {

@@ -17,8 +17,8 @@ import {
   chorusDevice,
   chorusSweep,
 } from "@/registry/bases/shared/devices/chorus/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

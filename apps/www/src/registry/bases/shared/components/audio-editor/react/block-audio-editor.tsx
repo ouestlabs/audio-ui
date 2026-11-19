@@ -114,57 +114,50 @@ import { useSilenceHover } from "@/registry/bases/shared/hooks/use-silence-hover
 import { useSoundReport } from "@/registry/bases/shared/hooks/use-sound-report";
 import { useStatusLine } from "@/registry/bases/shared/hooks/use-status-line";
 import {
+  createSource,
+  type Source,
+} from "@/registry/bases/shared/primitives/primitive";
+import {
   type Arranged,
   type ArrangementTrack,
   clipSegments,
   type TimeSelection,
   type TrackDevice,
-} from "@/registry/bases/shared/lib/arrangement";
-import { renderArrangement } from "@/registry/bases/shared/lib/arrangement-engine";
+} from "@/registry/lib/arrangement";
+import { renderArrangement } from "@/registry/lib/arrangement-engine";
 import type {
   ArrangementCommand,
   ArrangementDoc,
   ArrangementLocator,
-} from "@/registry/bases/shared/lib/arrangement-state";
+} from "@/registry/lib/arrangement-state";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
   exportSound,
-} from "@/registry/bases/shared/lib/audio-export";
-import {
-  near,
-  SHRINK_GAPS,
-  typing,
-} from "@/registry/bases/shared/lib/clip-edits";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
+} from "@/registry/lib/audio-export";
+import { near, SHRINK_GAPS, typing } from "@/registry/lib/clip-edits";
+import type { RecordingSource } from "@/registry/lib/clip-player";
 import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
   demoTempo,
   renderDemoSource,
-} from "@/registry/bases/shared/lib/demo-sound";
-import {
-  DEVICE_SHELVES,
-  libraryDevice,
-} from "@/registry/bases/shared/lib/device-library";
+} from "@/registry/lib/demo-sound";
+import { DEVICE_SHELVES, libraryDevice } from "@/registry/lib/device-library";
 import {
   createInputRecorder,
   type InputRecorder,
   playCountIn,
-} from "@/registry/bases/shared/lib/input-recorder";
+} from "@/registry/lib/input-recorder";
 import {
   blockPeak,
   type RecordedBlock,
   sliceBlocks,
-} from "@/registry/bases/shared/lib/recording";
-import type { SoundOperation } from "@/registry/bases/shared/lib/sound-operations";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/recording";
+import type { SoundOperation } from "@/registry/lib/sound-operations";
+import { cn } from "@/registry/lib/utils";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */

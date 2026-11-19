@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Sequencer } from "@/registry/bases/shared/audio-ui/elements/sequencer";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import { useTransportClock } from "@/registry/bases/shared/hooks/use-transport-clock";
+import { createSource } from "@/registry/bases/shared/primitives/primitive";
 import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/drum-synthesis";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const STEPS = 16;
 const STEPS_PER_BEAT = 4;

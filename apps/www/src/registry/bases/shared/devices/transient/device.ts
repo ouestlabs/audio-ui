@@ -1,6 +1,6 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { TRANSIENT_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/manifest-worklet";
 
 /**
  * A transient shaper as a device: it turns the attack of a sound up or down

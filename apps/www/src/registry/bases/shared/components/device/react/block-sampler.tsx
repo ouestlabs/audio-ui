@@ -10,7 +10,7 @@ import { SamplerPanel } from "@/registry/bases/shared/devices/sampler/panel";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
 import { usePolyphony } from "@/registry/bases/shared/hooks/use-polyphony";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { webAudio } from "@/registry/lib/web-audio";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */
 const PANEL_NOTE = "panel";

@@ -14,7 +14,7 @@ import {
   type TapeKeysState,
   tapeKeysDevice,
 } from "@/registry/bases/shared/devices/tape-keys/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

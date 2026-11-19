@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AutomatedParameter } from "@/registry/bases/shared/lib/arrangement";
+import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import type { AutomatedParameter } from "@/registry/lib/arrangement";
 import {
   type ArrangementEngine,
   createArrangementEngine,
   type MetronomeSettings,
-} from "@/registry/bases/shared/lib/arrangement-engine";
-import type { ArrangementDoc } from "@/registry/bases/shared/lib/arrangement-state";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/arrangement-engine";
+import type { ArrangementDoc } from "@/registry/lib/arrangement-state";
+import type { RecordingSource } from "@/registry/lib/clip-player";
+import { webAudio } from "@/registry/lib/web-audio";
 
 /** What the engine line shows: the context's rate, how late its sound is, and whether it runs. */
 export interface EngineStatus {

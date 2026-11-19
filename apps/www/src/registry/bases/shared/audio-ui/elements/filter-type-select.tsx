@@ -10,7 +10,7 @@ import {
 } from "@audio-ui/icons/react";
 import { type ComponentType, useCallback } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The response of each filter type, as the curve a plot draws: gain up the page, frequency across. */
 const FILTER_ICONS: Record<string, ComponentType<IconProps>> = {

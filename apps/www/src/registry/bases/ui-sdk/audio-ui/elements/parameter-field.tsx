@@ -18,7 +18,6 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,
@@ -26,6 +25,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/registry/bases/ui-sdk/ui/input-group";
+import { cn } from "@/registry/lib/utils";
 
 const parameterFieldVariants = cva("cn-parameter-field", {
   defaultVariants: { size: "default" },

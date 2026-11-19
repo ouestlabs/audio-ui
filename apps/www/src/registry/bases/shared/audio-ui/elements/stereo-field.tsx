@@ -1,6 +1,6 @@
 import { type ComponentProps, type RefObject, useEffect, useRef } from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
+import { cn } from "@/registry/lib/utils";
 
 /** The two channels of a sound, their latest samples from -1 to 1, and how alike they are: what the field is drawn from. */
 export interface StereoFieldFrame {

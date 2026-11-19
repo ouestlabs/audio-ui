@@ -16,7 +16,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { DEVICE_DRAG_TYPE } from "@/registry/bases/shared/audio-ui/elements/device-chain";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** A device as the library lists it: a device definition is one. */
 export interface DeviceBrowserItem {

@@ -50,7 +50,7 @@ const context = {
   resume: () => Promise.resolve(),
   sampleRate: 100,
 };
-mock.module("@/registry/bases/shared/lib/web-audio", () => ({
+mock.module("@/registry/lib/web-audio", () => ({
   webAudio: { getContext: () => context, resume: () => context },
 }));
 

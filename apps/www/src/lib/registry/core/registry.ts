@@ -19,8 +19,8 @@ import registrySeo from "../../../registry/bases/seo.json";
 import { audioUi } from "../../../registry/bases/shared/audio-ui/_registry";
 import { components } from "../../../registry/bases/shared/components/_registry";
 import { devices } from "../../../registry/bases/shared/devices/_registry";
-import { lib } from "../../../registry/bases/shared/lib/_registry";
 import { audioUi as sdkAudio } from "../../../registry/bases/ui-sdk/audio-ui/_registry";
+import { lib } from "../../../registry/lib/_registry";
 
 const WHITESPACE_REGEX = /\s+/;
 

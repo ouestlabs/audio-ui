@@ -25,8 +25,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Toggle } from "@/components/ui/toggle";
-import { startSortableDrag } from "@/registry/bases/shared/lib/sortable-drag";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { startSortableDrag } from "@/registry/lib/sortable-drag";
+import { cn } from "@/registry/lib/utils";
 
 /** The type a dragged device carries, with its id as the data: what a library sets and the chain takes. */
 export const DEVICE_DRAG_TYPE = "application/x-audio-ui-device";

@@ -15,7 +15,7 @@ import {
   waveShaperPosition,
   waveShaperResonance,
 } from "@/registry/bases/shared/devices/wave-shaper/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 const PAD_MAX = 100;
 /** The knobs under the pad: the wave is the row of buttons. */

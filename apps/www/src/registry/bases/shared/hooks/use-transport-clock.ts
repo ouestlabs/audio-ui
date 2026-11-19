@@ -9,7 +9,7 @@ import {
   type SchedulerConfig,
   type SchedulerCursor,
 } from "@/engine/time";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const DEFAULT_BPM = 120;
 const DEFAULT_STEPS_PER_BEAT = 4;

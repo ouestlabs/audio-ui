@@ -26,11 +26,8 @@ import {
   expanderCurve,
   expanderDevice,
 } from "@/registry/bases/shared/devices/expander/device";
-import {
-  curveDot,
-  type DeviceSignal,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { curveDot, type DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -80;
 const MAX_IN_DB = 0;

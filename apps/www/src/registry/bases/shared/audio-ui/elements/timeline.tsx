@@ -43,14 +43,14 @@ import { dbToGain, gainToDb } from "@/engine/analysis";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
-import type { Mix, TrackColor } from "@/registry/bases/shared/lib/arrangement";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import {
   FADE_SHAPES,
   type FadeShape,
   fadeGain,
 } from "@/registry/bases/shared/primitives/timeline/clip";
 import { Timeline as TimelinePrimitive } from "@/registry/bases/shared/primitives/timeline/react";
+import type { Mix, TrackColor } from "@/registry/lib/arrangement";
+import { cn } from "@/registry/lib/utils";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;
 

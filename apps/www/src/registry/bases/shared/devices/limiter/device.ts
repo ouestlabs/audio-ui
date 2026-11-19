@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { limiterLatency as lookaheadLatency } from "@/engine/dsp";
 import { LIMITER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/manifest-worklet";
 
 /**
  * A limiter as a device: an input gain pushed against a ceiling, with a

@@ -17,8 +17,8 @@ import {
   autoPanDevice,
   autoPanSweep,
 } from "@/registry/bases/shared/devices/auto-pan/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

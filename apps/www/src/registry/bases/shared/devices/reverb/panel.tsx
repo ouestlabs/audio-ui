@@ -28,8 +28,8 @@ import {
   reverbDecay,
   reverbDevice,
 } from "@/registry/bases/shared/devices/reverb/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** How much time the plot shows: the longest decay is 10 s, after the longest pre-delay. */
 const WINDOW_SECONDS = 10.5;

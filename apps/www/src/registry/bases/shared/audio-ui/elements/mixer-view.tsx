@@ -27,20 +27,17 @@ import {
   type AutomationFollowing,
   useAutomatedMix,
 } from "@/registry/bases/shared/hooks/use-track-automation";
+import type { MeterFrame } from "@/registry/bases/shared/primitives/meter/levels";
+import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
   hasOutput,
   type Mix,
-} from "@/registry/bases/shared/lib/arrangement";
-import {
-  trackBlock,
-  trackOf,
-} from "@/registry/bases/shared/lib/arrangement-state";
-import { startSortableDrag } from "@/registry/bases/shared/lib/sortable-drag";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { MeterFrame } from "@/registry/bases/shared/primitives/meter/levels";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/arrangement";
+import { trackBlock, trackOf } from "@/registry/lib/arrangement-state";
+import { startSortableDrag } from "@/registry/lib/sortable-drag";
+import { cn } from "@/registry/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

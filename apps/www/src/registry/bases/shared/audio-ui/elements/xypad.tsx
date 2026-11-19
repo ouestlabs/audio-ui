@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import { XYPad as XYPadPrimitive } from "@/registry/bases/shared/primitives/xypad/react";
+import { cn } from "@/registry/lib/utils";
 
 const xypadVariants = cva("", {
   defaultVariants: {

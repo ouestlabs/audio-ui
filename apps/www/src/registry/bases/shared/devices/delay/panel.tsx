@@ -32,12 +32,9 @@ import {
   GRAIN_PARAMETERS,
   nearestDivision,
 } from "@/registry/bases/shared/devices/delay/device";
-import {
-  type DeviceSignal,
-  deriveSource,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
+import { type DeviceSignal, deriveSource } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

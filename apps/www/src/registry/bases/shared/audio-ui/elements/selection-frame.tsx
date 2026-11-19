@@ -13,12 +13,12 @@ import {
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import {
   type ClipValue,
   type FadeShape,
   fadeGain,
 } from "@/registry/bases/shared/primitives/timeline/clip";
+import { cn } from "@/registry/lib/utils";
 
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
 export interface SelectionShape {

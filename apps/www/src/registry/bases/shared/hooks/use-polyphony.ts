@@ -4,7 +4,7 @@ import {
   type DeviceEngineLike,
   useDeviceEngines,
 } from "@/registry/bases/shared/hooks/use-device-engines";
-import { createPolyphony } from "@/registry/bases/shared/lib/polyphony";
+import { createPolyphony } from "@/registry/lib/polyphony";
 
 /** What a voice needs of an instrument's engine: it plays one note at a time. */
 export type PolyphonyEngine<State> = DeviceEngineLike<State> &

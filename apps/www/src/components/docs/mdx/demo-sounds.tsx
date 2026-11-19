@@ -6,8 +6,8 @@ import {
   DEMO_SOURCES,
   type DemoSourceName,
   renderDemoSource,
-} from "@/registry/bases/shared/lib/demo-sound";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/demo-sound";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const NAMES = Object.keys(DEMO_SOURCES) as DemoSourceName[];
 

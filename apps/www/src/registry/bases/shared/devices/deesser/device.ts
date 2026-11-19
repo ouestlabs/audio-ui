@@ -3,7 +3,7 @@ import { type DeviceState, defineDevice } from "@/engine/device";
 import { deesser } from "@/engine/dsp";
 import { formatFrequency } from "@/engine/format";
 import { DEESSER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/manifest-worklet";
 
 /** The Q of each biquad of the crossover the panel's curve draws: two of them in a row are a Linkwitz-Riley filter, whose low and high halves add back to a flat response. */
 export const CROSSOVER_Q = Math.SQRT1_2;

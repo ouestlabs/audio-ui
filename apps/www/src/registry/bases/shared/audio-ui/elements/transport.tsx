@@ -45,8 +45,8 @@ import {
   type Tempo,
 } from "@/engine/time";
 import { BpmControl } from "@/registry/bases/shared/audio-ui/elements/bpm-control";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
+import { cn } from "@/registry/lib/utils";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 

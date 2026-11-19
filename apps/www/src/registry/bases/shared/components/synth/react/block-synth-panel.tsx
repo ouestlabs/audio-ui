@@ -8,7 +8,7 @@ import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
 import { ValueDisplay } from "@/registry/bases/shared/audio-ui/elements/value-display";
 import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const WAVEFORMS = [
   { label: "Sine", value: "sine" },

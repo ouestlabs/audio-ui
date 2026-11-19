@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatLevel, formatSampleRate } from "@/engine/format";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The layouts a sound can be mixed to, each with what it is. */
 export const LAYOUTS = [

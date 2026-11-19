@@ -6,7 +6,7 @@ import {
   type Clipping,
   mixOf,
   type TimeSelection,
-} from "@/registry/bases/shared/lib/arrangement";
+} from "@/registry/lib/arrangement";
 import {
   type ArrangementCommand,
   type ArrangementLocator,
@@ -17,12 +17,12 @@ import {
   createArrangementState,
   trackOf,
   unfoldedTracks,
-} from "@/registry/bases/shared/lib/arrangement-state";
-import { canRedo, canUndo } from "@/registry/bases/shared/lib/undo-history";
+} from "@/registry/lib/arrangement-state";
+import { canRedo, canUndo } from "@/registry/lib/undo-history";
 
 /** What a clip's menu can do: renaming is the clip's own, in place, and editing opens the app's clip panel. */
-export type { ClipAction } from "@/registry/bases/shared/lib/arrangement";
-export type { ArrangementSelection } from "@/registry/bases/shared/lib/arrangement-state";
+export type { ClipAction } from "@/registry/lib/arrangement";
+export type { ArrangementSelection } from "@/registry/lib/arrangement-state";
 
 const NO_IDS: string[] = [];
 const NO_COPIES: Arranged[] = [];

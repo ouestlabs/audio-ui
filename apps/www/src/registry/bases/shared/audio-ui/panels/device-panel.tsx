@@ -27,8 +27,8 @@ import {
   isWaveform,
   WaveformSelect,
 } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;

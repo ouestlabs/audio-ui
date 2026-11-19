@@ -7,11 +7,9 @@ import {
   type SelectionShape,
 } from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import type {
-  Clipping,
-  TimeSelection,
-} from "@/registry/bases/shared/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/bases/shared/lib/arrangement-state";
+import type { createSource } from "@/registry/bases/shared/primitives/primitive";
+import type { Clipping, TimeSelection } from "@/registry/lib/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
 import {
   EDGE_EPS,
   removing,
@@ -20,8 +18,7 @@ import {
   shapeStretch,
   splice,
   typing,
-} from "@/registry/bases/shared/lib/clip-edits";
-import type { createSource } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/clip-edits";
 
 /**
  * The edits of the sound, as an audio editor makes them, each one step of

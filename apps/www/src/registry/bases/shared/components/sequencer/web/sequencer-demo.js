@@ -2,9 +2,9 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { createStepPlayer } from "@/registry/bases/shared/lib/step-player";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/drum-synthesis";
+import { createStepPlayer } from "@/registry/lib/step-player";
+import { webAudio } from "@/registry/lib/web-audio";
 import "@/registry/bases/shared/primitives/sequencer/web";
 
 const STEPS = 16;

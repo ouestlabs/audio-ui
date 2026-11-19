@@ -25,8 +25,8 @@ import {
   frequencyShifterDevice,
   frequencyShifterPartials,
 } from "@/registry/bases/shared/devices/frequency-shifter/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

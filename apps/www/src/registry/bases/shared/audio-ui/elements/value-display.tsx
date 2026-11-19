@@ -5,7 +5,7 @@ import {
   formatPan,
   formatTime,
 } from "@/engine/format";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** What a value is, which says how it reads. */
 export type ValueKind =

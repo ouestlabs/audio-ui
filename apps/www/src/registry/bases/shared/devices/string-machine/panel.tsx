@@ -21,7 +21,7 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry/bases/shared/devices/string-machine/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [

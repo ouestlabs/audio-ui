@@ -22,7 +22,7 @@ import {
   spectrogramAxis,
   zoomBand,
 } from "@/gl/spectrogram";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** A frequency held where the lane and the axis both reach it: the lane says it, the axis reads it. */
 export interface PointerHertz {

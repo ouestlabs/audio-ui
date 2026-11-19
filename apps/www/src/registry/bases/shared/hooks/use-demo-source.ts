@@ -3,10 +3,7 @@ import {
   silentSource,
   useAudioSession,
 } from "@/registry/bases/shared/hooks/use-audio-session";
-import {
-  DEMO_SOURCES,
-  type DemoSourceName,
-} from "@/registry/bases/shared/lib/demo-sound";
+import { DEMO_SOURCES, type DemoSourceName } from "@/registry/lib/demo-sound";
 
 const NONE = { chosen: null, fallback: null };
 

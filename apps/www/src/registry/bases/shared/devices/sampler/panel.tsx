@@ -22,8 +22,8 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry/bases/shared/devices/sampler/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
+import { cn } from "@/registry/lib/utils";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;

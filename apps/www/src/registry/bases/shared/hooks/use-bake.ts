@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from "react";
-import { renderTrackClips } from "@/registry/bases/shared/lib/arrangement-engine";
-import type { ArrangementDoc } from "@/registry/bases/shared/lib/arrangement-state";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
+import { renderTrackClips } from "@/registry/lib/arrangement-engine";
+import type { ArrangementDoc } from "@/registry/lib/arrangement-state";
+import type { RecordingSource } from "@/registry/lib/clip-player";
 import {
   applySoundOperation,
   type SoundOperation,
   type SoundSamples,
   soundOperationName,
-} from "@/registry/bases/shared/lib/sound-operations";
+} from "@/registry/lib/sound-operations";
 
 interface BakeOptions {
   doc: ArrangementDoc;

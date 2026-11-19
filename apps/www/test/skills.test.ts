@@ -5,8 +5,8 @@ import { audioUi } from "@/registry/bases/shared/audio-ui/_registry";
 import { components } from "@/registry/bases/shared/components/_registry";
 import { devices } from "@/registry/bases/shared/devices/_registry";
 import { hooks } from "@/registry/bases/shared/hooks/_registry";
-import { lib } from "@/registry/bases/shared/lib/_registry";
 import { primitives } from "@/registry/bases/shared/primitives/_registry";
+import { lib } from "@/registry/lib/_registry";
 import {
   compileSkill,
   readRules,

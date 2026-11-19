@@ -49,6 +49,8 @@ const DEFAULT_STYLE = "base-nova";
 // Every base serves the items of `bases/shared/`, which name no behavior library and drive the manifests, beside its own: the `ui/` components its style is made of and the variants of the items that name its library.
 const BASES = ALL_BASES;
 const SHARED = "shared";
+/** The folder at the registry root that every base serves: a file path that starts with it is read from there, the others from `bases/`. */
+const ROOT_FOLDER = "lib";
 const UI_BASE = "ui-sdk";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
@@ -78,9 +80,9 @@ const INSTALL_PREFIXES: [prefix: string, installed: string][] = [
   ["components/", "@/components/examples/"],
 ];
 
-// A module of a source tree, by what follows its root: the per-style copies the design system generates, and the bases themselves. One pass finds every import of a file, where a pattern for each file of the registry read it a thousand times over.
+// A module of a source tree, by what follows its root: the per-style copies the design system generates, the bases themselves, and `lib/` at the registry root. One pass finds every import of a file, where a pattern for each file of the registry read it a thousand times over.
 const SOURCE_MODULE = new RegExp(
-  `@/registry/bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/([^"'\`\\s]*)`,
+  `@/registry/(?:bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/|(?=lib/))([^"'\`\\s]*)`,
   "g"
 );
 
@@ -110,7 +112,7 @@ const SVG_PATH_DATA = /^\s*d ?=/;
 // A bundle the engine ships as a string (`bun run engine:worklet` writes it): one long line by design.
 const BUNDLED_SOURCE = /-source\.ts$/;
 const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
-const REGISTRY_IMPORT = /@\/registry\/bases\//;
+const REGISTRY_IMPORT = /@\/registry\/(?:bases|lib)\//;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -242,7 +244,12 @@ const camelCase = (name: string) =>
   name.replace(DASH_LETTER, (_, letter: string) => letter.toUpperCase());
 
 async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
-  const path = `${BASES_DIR}/${base}/${folder}/_registry.ts`;
+  // `lib/` is the registry's own, at its root: every base serves it.
+  const root = folder === ROOT_FOLDER;
+  if (root && base !== SHARED) {
+    return [];
+  }
+  const path = `${root ? REGISTRY : `${BASES_DIR}/${base}`}/${folder}/_registry.ts`;
   if (!(await Bun.file(path).exists())) {
     return [];
   }
@@ -402,7 +409,9 @@ async function buildFile(
   item: SourceItem,
   build: StyleBuild
 ): Promise<BuiltFile | null> {
-  const source = `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
+  const source = file.path.startsWith(`${ROOT_FOLDER}/`)
+    ? `src/registry/${file.path}`
+    : `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
   let content: string;
   try {
     content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();

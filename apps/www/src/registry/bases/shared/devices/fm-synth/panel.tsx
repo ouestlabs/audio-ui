@@ -21,7 +21,7 @@ import {
   fmSynthDevice,
   fmSynthPreset,
 } from "@/registry/bases/shared/devices/fm-synth/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [

@@ -7,7 +7,7 @@ import {
   type WaveformLayout,
   type WaveformLook,
 } from "@/gl/waveform";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /**
  * The waveforms of a lane's clips on one canvas and one WebGL context, drawn

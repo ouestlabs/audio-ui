@@ -7,7 +7,7 @@ const context = {
   createMediaStreamSource: () => ({ connect: () => undefined }),
   state: "running",
 };
-mock.module("@/registry/bases/shared/lib/web-audio", () => ({
+mock.module("@/registry/lib/web-audio", () => ({
   webAudio: { getContext: () => context, resume: () => context },
 }));
 

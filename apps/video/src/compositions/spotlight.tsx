@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 import { glyphEntrance, Lockup, LockupUrl } from "../brand.tsx";
 import { lerp, MOTION, ramp, tw, useSeconds } from "../motion.ts";
 import { SHOWCASES } from "../showcases/index.ts";

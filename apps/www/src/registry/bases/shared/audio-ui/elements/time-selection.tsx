@@ -1,4 +1,4 @@
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** A stretch of time selected on a track, drawn over its lane: put it inside a `TimelineLane`. */
 function TimelineTimeSelection({

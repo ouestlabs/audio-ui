@@ -4,15 +4,15 @@ import type {
   ClipCommitDetails,
 } from "@/primitives/timeline";
 import type {
-  Arranged,
-  ArrangementTrack,
-  ClipAction,
-} from "@/registry/bases/shared/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/bases/shared/lib/arrangement-state";
-import type {
   ClipValue,
   FadeShape,
 } from "@/registry/bases/shared/primitives/timeline/clip";
+import type {
+  Arranged,
+  ArrangementTrack,
+  ClipAction,
+} from "@/registry/lib/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
 
 /** The track of those given whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
 function nearestTrack(

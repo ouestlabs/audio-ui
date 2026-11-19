@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
-import { startSortableDrag } from "@/registry/bases/shared/lib/sortable-drag";
+import { startSortableDrag } from "@/registry/lib/sortable-drag";
 
 /** The nearest ancestor that scrolls vertically, or null for the page. */
 function verticalScroller(node: HTMLElement): HTMLElement | null {

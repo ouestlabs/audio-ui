@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import type { Device, ParameterDescriptor } from "@/engine/device";
 import { AutomationEnvelope } from "@/registry/bases/shared/audio-ui/elements/automation-envelope";
+import type { Breakpoint } from "@/registry/bases/shared/primitives/envelope/geometry";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
@@ -24,9 +25,8 @@ import {
   type TrackDevice,
   volumeGain,
   volumeValue,
-} from "@/registry/bases/shared/lib/arrangement";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { Breakpoint } from "@/registry/bases/shared/primitives/envelope/geometry";
+} from "@/registry/lib/arrangement";
+import { cn } from "@/registry/lib/utils";
 
 /** A gain as the decibels it plays at. */
 function formatGain(gain: number) {

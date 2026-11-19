@@ -21,7 +21,7 @@ import {
   electricPianoDevice,
   electricPianoPreset,
 } from "@/registry/bases/shared/devices/electric-piano/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, as the piano's panel lays them out. */
 const GROUPS = [

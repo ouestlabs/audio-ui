@@ -14,6 +14,11 @@ import { MODULE_SETS } from "../src/registry/bases/modules.ts";
 
 const WEB = `${import.meta.dir}/..`;
 const SHARED = `${WEB}/src/registry/bases/shared`;
+const REGISTRY = `${WEB}/src/registry`;
+
+/** A registry file by its path: `lib/` is at the registry root, the rest in `bases/shared/`. */
+const sourceOf = (path: string) =>
+  path.startsWith("lib/") ? `${REGISTRY}/${path}` : `${SHARED}/${path}`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
 const FOLDERS = ["audio-ui", "devices", "hooks", "components", "lib"];
 
@@ -87,7 +92,7 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
   const loaded = await Promise.all(
     folders.map(async (folder) => {
       const module = (await import(
-        `${SHARED}/${folder}/_registry.ts`
+        `${folder === "lib" ? REGISTRY : SHARED}/${folder}/_registry.ts`
       )) as Record<string, RegistryItem[] | undefined>;
       return (
         module[
@@ -112,7 +117,7 @@ export async function buildEntries(): Promise<Entry[]> {
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
       const files = (item.files ?? []).map((file) => file.path);
-      const main = await Bun.file(`${SHARED}/${files[0]}`).text();
+      const main = await Bun.file(sourceOf(files[0] ?? "")).text();
       return {
         dependencies: item.dependencies ?? [],
         description: item.description ?? "",
@@ -151,7 +156,7 @@ const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const SOURCE_FILE = /\.tsx?$/;
 
 /** Where the modules of the engine and of gl are, in the registry. */
-const LIB = `${SHARED}/lib`;
+const LIB = `${REGISTRY}/lib`;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
@@ -366,7 +371,7 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
     items.map(async (item) => ({
       name: item.name,
       sources: await Promise.all(
-        (item.files ?? []).map((file) => read(`${SHARED}/${file.path}`))
+        (item.files ?? []).map((file) => read(sourceOf(file.path)))
       ),
     }))
   );

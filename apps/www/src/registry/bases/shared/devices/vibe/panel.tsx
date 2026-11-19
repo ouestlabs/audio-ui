@@ -16,8 +16,8 @@ import {
   vibeDevice,
   vibeLight,
 } from "@/registry/bases/shared/devices/vibe/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the lamp, whatever its speed: the plot shows how it pulses meanwhile. */
 const WINDOW_SECONDS = 2;

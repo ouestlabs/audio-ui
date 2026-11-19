@@ -19,8 +19,8 @@ import {
   unlimiterLift,
   unlimiterUnused,
 } from "@/registry/bases/shared/devices/unlimiter/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MAX_SIZE_DB = 30;
 const MAX_LIFT_DB = 18;

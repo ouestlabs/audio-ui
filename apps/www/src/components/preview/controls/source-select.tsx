@@ -14,7 +14,7 @@ import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
-} from "@/registry/bases/shared/lib/demo-sound";
+} from "@/registry/lib/demo-sound";
 
 const NONE = { chosen: null, fallback: null };
 

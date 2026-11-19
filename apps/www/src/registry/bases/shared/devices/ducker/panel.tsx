@@ -18,11 +18,8 @@ import {
   duckerCurve,
   duckerDevice,
 } from "@/registry/bases/shared/devices/ducker/device";
-import {
-  curveDot,
-  type DeviceSignal,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { curveDot, type DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_KEY_DB = -60;
 const MAX_KEY_DB = 0;

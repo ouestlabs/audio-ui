@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const VOLUME_RAMP_SECONDS = 0.01;
 

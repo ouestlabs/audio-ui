@@ -18,8 +18,8 @@ import {
   type TransientState,
   transientDevice,
 } from "@/registry/bases/shared/devices/transient/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const LIMIT_DB = 12;
 const TICKS = [-12, 0, 12];

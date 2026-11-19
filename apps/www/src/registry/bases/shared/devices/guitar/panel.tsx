@@ -13,7 +13,7 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/registry/bases/shared/devices/guitar/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

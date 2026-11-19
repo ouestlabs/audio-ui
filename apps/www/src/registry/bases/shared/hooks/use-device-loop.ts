@@ -12,8 +12,8 @@ import {
   demoKey,
   demoTempo,
   renderDemoSource,
-} from "@/registry/bases/shared/lib/demo-sound";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/demo-sound";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const SIGNAL_LEVEL = 0.8;
 /** How far ahead of now the loop starts, in seconds: room for the first block. */

@@ -47,7 +47,7 @@ bun test
 
 ## Where things live
 
-### The engine (`apps/www/src/registry/bases/shared/lib/engine/`)
+### The engine (`apps/www/src/registry/lib/engine/`)
 
 - `device/` (descriptions, engine contracts, worklet stages, feeds, noise, measuring an engine), `time/`, `analysis/` (levels, curves, peaks, loudness, pitch, beat and chroma), `midi/`, `pitch/` (scales, keys, note frequencies), `files/` (audio, MIDI and MusicXML files), `playback/`, `worklet/`: one module each, a registry item `engine-<module>` (listed in `registry/bases/modules.ts`, checked by `test/lib-modules.test.ts`) that installs to `lib/engine/<module>/`. The registry's files import a module as `@/engine/<module>` (a tsconfig path); the build rewrites it to `@/lib/engine/<module>` and adds the item. Its own files import each other by relative path, with no extension, and never an app alias (`imports.test.ts`)
 - It is the one place that imports `@audio/*` atoms, so the registry builds on it rather than on the atoms. Its tests run with `bun test` in `apps/www`
@@ -71,11 +71,12 @@ registry/bases/shared/
 ├── audio-ui/panels/    # Panels that are no device's own: clip, rack, drum rack, the generic device-panel
 ├── devices/<name>/  # A device, named as it installs: device.ts, engine.ts, panel.tsx
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
-├── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
-└── lib/             # web-audio, musical-time, waveform-dsp, lookahead-scheduler…
+└── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
+
+registry/lib/        # web-audio, musical-time, waveform-dsp, lookahead-scheduler…: at the registry root, served by every base
 ```
 
-Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/`, `primitives/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/shared/`. Items are declared through the factories of `registry/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js a device runs is the engine's: its worklet's kernels come from `@/lib/engine/kernels` (listed in `apps/www/scripts/engine/kernels.ts`, written by `bun run engine:kernels` there, checked by its `kernels.test.ts`) and the processors its description uses from `@/lib/engine/dsp`; a registry file never imports an `@audio/*` atom.
+Each of `audio-ui/`, `devices/`, `components/`, `hooks/`, `lib/`, `primitives/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/shared/`, except those of `lib/`, which start at `registry/` (`lib/web-audio.ts`). Items are declared through the factories of `registry/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js a device runs is the engine's: its worklet's kernels come from `@/lib/engine/kernels` (listed in `apps/www/scripts/engine/kernels.ts`, written by `bun run engine:kernels` there, checked by its `kernels.test.ts`) and the processors its description uses from `@/lib/engine/dsp`; a registry file never imports an `@audio/*` atom.
 
 Shared audio glue has one home each. Use it rather than writing a copy into a block or an engine:
 
@@ -163,7 +164,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 2. After a registry change: `bun run registry:build` from `apps/www/`, **after** the last lint fix, so the generated JSON matches the formatted source
 3. The checks CI runs on every PR:
    ```sh
-   bunx biome ci packages/icons apps/www/src/registry/bases/shared/lib/engine apps/www/src/registry/bases/shared/lib/gl
+   bunx biome ci packages/icons apps/www/src/registry/lib/engine apps/www/src/registry/lib/gl
    bun run build:pkg
    (cd packages/icons && bunx tsc --noEmit && bun test)
    ```

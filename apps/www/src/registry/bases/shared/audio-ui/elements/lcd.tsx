@@ -1,6 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ReactNode } from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 const lcdVariants = cva("cn-lcd inline-flex min-w-0 flex-col justify-center", {
   defaultVariants: { size: "default" },

@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
 import { useArrangedClips } from "@/registry/bases/shared/hooks/use-arranged-clips";
-import type { Arranged } from "@/registry/bases/shared/lib/arrangement";
-import type { ArrangementCommand } from "@/registry/bases/shared/lib/arrangement-state";
+import type { Arranged } from "@/registry/lib/arrangement";
+import type { ArrangementCommand } from "@/registry/lib/arrangement-state";
 
 const clip = (id: string, track: string, notes?: Arranged["notes"]) =>
   ({

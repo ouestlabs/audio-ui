@@ -1,8 +1,5 @@
 import { type PlaybackState, playedClip } from "@/engine/playback";
-import {
-  createClipPlayer,
-  loadClipPlayer,
-} from "@/registry/bases/shared/lib/clip-player";
+import { createClipPlayer, loadClipPlayer } from "@/registry/lib/clip-player";
 import { assert, check, firstDifference } from "./harness.ts";
 
 const RATE = 48_000;

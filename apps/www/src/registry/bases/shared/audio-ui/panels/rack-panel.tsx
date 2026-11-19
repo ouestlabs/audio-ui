@@ -16,15 +16,15 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
+import { pitchName } from "@/registry/bases/shared/primitives/pitch";
 import {
   type ChainZone,
   FULL_ZONE,
   type Rack,
   type RackChain,
   type RackMapping,
-} from "@/registry/bases/shared/lib/arrangement";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import { pitchName } from "@/registry/bases/shared/primitives/pitch";
+} from "@/registry/lib/arrangement";
+import { cn } from "@/registry/lib/utils";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {

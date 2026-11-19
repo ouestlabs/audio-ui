@@ -16,7 +16,7 @@ import {
   pocketSynthPitch,
   pocketSynthPosition,
 } from "@/registry/bases/shared/devices/pocket-synth/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];

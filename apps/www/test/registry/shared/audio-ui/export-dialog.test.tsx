@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
-} from "@/registry/bases/shared/lib/audio-export";
+} from "@/registry/lib/audio-export";
 
 // The site's icons load their library through the bundler, which a test has not: the close button's icon draws nothing.
 mock.module("@/components/icon-placeholder", () => ({

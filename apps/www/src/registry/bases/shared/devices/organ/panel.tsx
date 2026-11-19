@@ -26,7 +26,7 @@ import {
   organDevice,
   organPreset,
 } from "@/registry/bases/shared/devices/organ/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [

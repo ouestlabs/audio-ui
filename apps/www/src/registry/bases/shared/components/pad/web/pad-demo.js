@@ -2,8 +2,8 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/drum-synthesis";
+import { webAudio } from "@/registry/lib/web-audio";
 import "@/registry/bases/shared/primitives/pad/web";
 
 const VOLUME = 0.7;

@@ -85,21 +85,18 @@ import {
   type TrackKind,
   UNITY_MIX,
   warpOnImport,
-} from "@/registry/bases/shared/lib/arrangement";
-import { renderTrackClips } from "@/registry/bases/shared/lib/arrangement-engine";
-import {
-  audioClipsIn,
-  MAIN_TRACK,
-} from "@/registry/bases/shared/lib/arrangement-state";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
+} from "@/registry/lib/arrangement";
+import { renderTrackClips } from "@/registry/lib/arrangement-engine";
+import { audioClipsIn, MAIN_TRACK } from "@/registry/lib/arrangement-state";
+import type { RecordingSource } from "@/registry/lib/clip-player";
 import {
   SONG_SCORE,
   SONG_TEMPO,
   type SongNote,
   type SongScorePart,
-} from "@/registry/bases/shared/lib/demo-song";
-import { drumKit } from "@/registry/bases/shared/lib/drum-kit";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/demo-song";
+import { drumKit } from "@/registry/lib/drum-kit";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const BARS = 24;
 

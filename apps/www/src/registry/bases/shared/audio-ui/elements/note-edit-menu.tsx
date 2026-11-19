@@ -18,8 +18,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { NoteEdit } from "@/registry/bases/shared/lib/note-edits";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { NoteEdit } from "@/registry/lib/note-edits";
+import { cn } from "@/registry/lib/utils";
 
 interface NoteEditMenuContextValue {
   isDisabled: (edit: NoteEdit) => boolean;

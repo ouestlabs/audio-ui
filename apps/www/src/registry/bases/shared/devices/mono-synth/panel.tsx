@@ -23,7 +23,7 @@ import {
   monoSynthDevice,
   monoSynthPreset,
 } from "@/registry/bases/shared/devices/mono-synth/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [

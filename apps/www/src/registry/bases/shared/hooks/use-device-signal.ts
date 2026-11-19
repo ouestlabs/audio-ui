@@ -4,7 +4,7 @@ import {
   createDeviceSignal,
   type DeviceSignal,
   type SignalTarget,
-} from "@/registry/bases/shared/lib/device-signal";
+} from "@/registry/lib/device-signal";
 
 /**
  * The live signal of a device's engine, for its panel's `signal`: what goes

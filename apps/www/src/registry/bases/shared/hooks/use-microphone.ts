@@ -9,7 +9,7 @@ import {
   silentMicrophone,
   useAudioSession,
 } from "@/registry/bases/shared/hooks/use-audio-session";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const ANALYSER_FFT_SIZE = 4096;
 

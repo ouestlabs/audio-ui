@@ -25,8 +25,8 @@ import {
   type MidSideState,
   midSideDevice,
 } from "@/registry/bases/shared/devices/mid-side/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -24;
 const MAX_DB = 12;

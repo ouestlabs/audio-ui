@@ -56,7 +56,7 @@
       "@/primitives/xypad": [
         "../www/src/registry/bases/shared/primitives/xypad/xypad.ts"
       ],
-      "@/engine/*": ["../www/src/registry/bases/shared/lib/engine/*/index.ts"]
+      "@/engine/*": ["../www/src/registry/lib/engine/*/index.ts"]
     },
     "types": ["bun", "react", "react-dom"]
   },

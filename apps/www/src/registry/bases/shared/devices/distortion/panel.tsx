@@ -18,11 +18,8 @@ import {
   distortionDevice,
   distortionShape,
 } from "@/registry/bases/shared/devices/distortion/device";
-import {
-  type DeviceSignal,
-  peakDots,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { type DeviceSignal, peakDots } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;

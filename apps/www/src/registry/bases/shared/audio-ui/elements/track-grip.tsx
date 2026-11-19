@@ -1,7 +1,7 @@
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
 import type { TrackGhost } from "@/registry/bases/shared/hooks/use-track-reorder";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /**
  * The grip a track is moved by, down the left edge of its header: give it

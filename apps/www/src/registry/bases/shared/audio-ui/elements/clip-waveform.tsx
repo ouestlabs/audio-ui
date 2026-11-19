@@ -8,8 +8,8 @@ import {
   framesToRead,
   sampleBands,
   sampleLine,
-} from "@/registry/bases/shared/lib/arrangement";
-import { cn } from "@/registry/bases/shared/lib/utils";
+} from "@/registry/lib/arrangement";
+import { cn } from "@/registry/lib/utils";
 
 /**
  * A recording's samples, for a waveform drawn closer than its peaks allow:

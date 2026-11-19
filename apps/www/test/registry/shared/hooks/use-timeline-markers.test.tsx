@@ -5,7 +5,7 @@ import {
   type ArrangementCommand,
   apply,
   createArrangementState,
-} from "@/registry/bases/shared/lib/arrangement-state";
+} from "@/registry/lib/arrangement-state";
 
 function setup(position = 4) {
   let state = createArrangementState({

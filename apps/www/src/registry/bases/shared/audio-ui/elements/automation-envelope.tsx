@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import { Envelope as EnvelopePrimitive } from "@/registry/bases/shared/primitives/envelope/react";
+import { cn } from "@/registry/lib/utils";
 
 /** The numbers 0 to length - 1: a point has no name but its place. */
 const indexes = (length: number) =>

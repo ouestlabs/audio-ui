@@ -28,7 +28,7 @@ import type { AudioFileFormat } from "@/engine/files";
 import type {
   ExportNormalize,
   ExportSettings,
-} from "@/registry/bases/shared/lib/audio-export";
+} from "@/registry/lib/audio-export";
 
 interface SettingItem {
   label: string;

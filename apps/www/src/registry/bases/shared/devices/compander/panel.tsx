@@ -19,11 +19,8 @@ import {
   companderCurve,
   companderDevice,
 } from "@/registry/bases/shared/devices/compander/device";
-import {
-  curveDot,
-  type DeviceSignal,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { curveDot, type DeviceSignal } from "@/registry/lib/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -90;
 const MAX_DB = 0;

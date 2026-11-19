@@ -11,10 +11,10 @@ import {
   useState,
 } from "react";
 import { useTimelineValues } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import { Piano as PianoPrimitive } from "@/registry/bases/shared/primitives/piano/react";
 import { PianoRoll as PianoRollPrimitive } from "@/registry/bases/shared/primitives/piano-roll/react";
 import { Timeline as TimelinePrimitive } from "@/registry/bases/shared/primitives/timeline/react";
+import { cn } from "@/registry/lib/utils";
 
 const pianoRollVariants = cva("", {
   defaultVariants: {

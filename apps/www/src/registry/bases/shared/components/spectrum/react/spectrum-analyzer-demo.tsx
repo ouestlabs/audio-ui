@@ -5,8 +5,8 @@ import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 import { useSpectrum } from "@/registry/bases/shared/hooks/use-spectrum";
 import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { EnvelopePoint } from "@/registry/bases/shared/lib/envelope-ramp";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import type { EnvelopePoint } from "@/registry/lib/envelope-ramp";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const VOLUME = 0.4;
 /** A, E, A and E again: a fifth, so the harmonics of the notes meet on the spectrum. */

@@ -84,19 +84,19 @@ import {
   TimelineViewport,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { useLoudest } from "@/registry/bases/shared/hooks/use-loudest";
+import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   type ClipPeaks,
   type ClipReading,
   clipPeakCount,
   clipSegments,
-} from "@/registry/bases/shared/lib/arrangement";
+} from "@/registry/lib/arrangement";
 import {
   type SoundOperation,
   type SoundRange,
   soundOperationTiming,
-} from "@/registry/bases/shared/lib/sound-operations";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/sound-operations";
+import { cn } from "@/registry/lib/utils";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {

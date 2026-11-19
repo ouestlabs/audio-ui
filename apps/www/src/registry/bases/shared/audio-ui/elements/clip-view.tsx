@@ -13,8 +13,8 @@ import {
 } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/registry/bases/shared/lib/utils";
 import type { Source } from "@/registry/bases/shared/primitives/primitive";
+import { cn } from "@/registry/lib/utils";
 
 /** Where bars and beats fall, in seconds: what position fields count in. */
 export interface ClipMeter {
