@@ -1,12 +1,12 @@
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { midiToHz } from "@/engine/pitch";
-import { WaveformSelect } from "@/registry/bases/shared/audio/elements/waveform-select";
-import { XYPad } from "@/registry/bases/shared/audio/elements/xypad";
+import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
+import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type WaveShaperNote,
   type WaveShaperState,

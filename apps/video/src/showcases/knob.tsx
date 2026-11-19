@@ -1,4 +1,4 @@
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import {
   START_ANGLE,
   SWEEP_ANGLE,

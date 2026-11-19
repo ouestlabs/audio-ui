@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from "react";
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
-import { Pad, PadItem } from "@/registry/bases/shared/audio/elements/pad";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
+import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import {
   type DrumOptions,

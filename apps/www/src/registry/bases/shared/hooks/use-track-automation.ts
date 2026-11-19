@@ -1,6 +1,6 @@
 import { useCallback, useState, useSyncExternalStore } from "react";
 import type { ParameterValue } from "@/engine/device";
-import { AUTOMATED_PARAMETERS } from "@/registry/bases/shared/audio/elements/track-automation";
+import { AUTOMATED_PARAMETERS } from "@/registry/bases/shared/audio-ui/elements/track-automation";
 import {
   type ArrangementTrack,
   type AutomatedParameter,

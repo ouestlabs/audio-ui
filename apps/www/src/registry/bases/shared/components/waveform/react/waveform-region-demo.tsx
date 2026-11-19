@@ -5,7 +5,7 @@ import {
   WaveformMarker,
   WaveformRegion,
   WaveformRegionHandle,
-} from "@/registry/bases/shared/audio/elements/waveform";
+} from "@/registry/bases/shared/audio-ui/elements/waveform";
 
 const DURATION_SECONDS = 180;
 

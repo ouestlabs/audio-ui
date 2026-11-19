@@ -1,6 +1,6 @@
 import { type DragEvent, useCallback, useState } from "react";
-import { DeviceBrowser } from "@/registry/bases/shared/audio/elements/device-browser";
-import { DEVICE_DRAG_TYPE } from "@/registry/bases/shared/audio/elements/device-chain";
+import { DeviceBrowser } from "@/registry/bases/shared/audio-ui/elements/device-browser";
+import { DEVICE_DRAG_TYPE } from "@/registry/bases/shared/audio-ui/elements/device-chain";
 import { DEVICE_SHELVES } from "@/registry/bases/shared/lib/device-library";
 import { cn } from "@/registry/bases/shared/lib/utils";
 

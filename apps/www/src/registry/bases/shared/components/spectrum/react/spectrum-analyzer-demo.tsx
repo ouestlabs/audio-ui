@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { SpectrumAnalyzer } from "@/registry/bases/shared/audio/elements/spectrum-analyzer";
+import { SpectrumAnalyzer } from "@/registry/bases/shared/audio-ui/elements/spectrum-analyzer";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";

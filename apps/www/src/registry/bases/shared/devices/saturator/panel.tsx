@@ -1,17 +1,17 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import { CurveSelect } from "@/registry/bases/shared/audio/elements/curve-select";
+import { CurveSelect } from "@/registry/bases/shared/audio-ui/elements/curve-select";
 import {
   Plot,
   PlotCurve,
   PlotDot,
   PlotGraph,
   PlotGrid,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type SaturatorState,
   saturate,

@@ -1,4 +1,4 @@
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 
 const MARKS = [
   { label: "0", value: 0 },

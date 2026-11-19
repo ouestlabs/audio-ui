@@ -1,5 +1,5 @@
 import { type CSSProperties, useLayoutEffect, useState } from "react";
-import { TunerDisplay } from "@/registry/bases/shared/audio/elements/tuner";
+import { TunerDisplay } from "@/registry/bases/shared/audio-ui/elements/tuner";
 import type { PitchReading } from "@/registry/bases/shared/hooks/use-pitch";
 import { createSource } from "@/registry/bases/shared/primitives/primitive";
 import { MOTION, ramp, tw } from "../motion.ts";

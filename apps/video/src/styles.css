@@ -3,7 +3,7 @@
 @import "../../www/src/registry/styles/style-vega.css" layer(base);
 @import "../../www/src/registry/styles/audio/style-vega.css" layer(base);
 
-@source "../../www/src/registry/bases/shared/audio";
+@source "../../www/src/registry/bases/shared/audio-ui";
 @source "../../www/src/components/ui";
 
 /* Frames are seeked, not played: a transition would show each value halfway. */

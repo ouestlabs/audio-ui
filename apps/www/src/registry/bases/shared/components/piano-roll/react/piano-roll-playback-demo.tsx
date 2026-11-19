@@ -6,11 +6,11 @@ import {
   PianoRollKeys,
   PianoRollStrip,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
 import {
   Timeline,
   TimelinePlayhead,
-} from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import {
   meterOf,

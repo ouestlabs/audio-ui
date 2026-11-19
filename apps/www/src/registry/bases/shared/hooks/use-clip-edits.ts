@@ -5,7 +5,7 @@ import {
   MAX_DB,
   MIN_DB,
   type SelectionShape,
-} from "@/registry/bases/shared/audio/elements/selection-frame";
+} from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import type {
   Clipping,

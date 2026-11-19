@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
-import { Lcd } from "@/registry/bases/shared/audio/elements/lcd";
-import { ValueDisplay } from "@/registry/bases/shared/audio/elements/value-display";
+import { Lcd } from "@/registry/bases/shared/audio-ui/elements/lcd";
+import { ValueDisplay } from "@/registry/bases/shared/audio-ui/elements/value-display";
 
 export default function LcdDemo() {
   const [cutoff, setCutoff] = useState(1200);

@@ -14,13 +14,13 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
-} from "@/registry/bases/shared/audio/elements/plot";
-import { StereoFieldLayer } from "@/registry/bases/shared/audio/elements/stereo-field";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
+import { StereoFieldLayer } from "@/registry/bases/shared/audio-ui/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type MidSideState,
   midSideDevice,

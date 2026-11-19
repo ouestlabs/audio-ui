@@ -8,12 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
-import { Pad, PadItem } from "@/registry/bases/shared/audio/elements/pad";
+import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   SAMPLER_FIRST_NOTE,
   SAMPLER_SLICES,

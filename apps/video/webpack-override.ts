@@ -98,11 +98,11 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       // The elements that name a behavior library: a video draws the ui-sdk ones, as the site does.
       "@/components/audio-ui/parameter-field$": path.join(
         www,
-        "registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+        "registry/bases/ui-sdk/audio-ui/elements/parameter-field.tsx"
       ),
       "@/components/audio-ui/rocker-switch$": path.join(
         www,
-        "registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+        "registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ),
       "@/engine": path.join(www, "registry/bases/shared/lib/engine"),
       "@/gl": path.join(www, "registry/bases/shared/lib/gl"),

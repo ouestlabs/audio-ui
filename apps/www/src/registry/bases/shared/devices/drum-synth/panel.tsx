@@ -1,10 +1,10 @@
 import { type ReactNode, useCallback } from "react";
-import { Pad, PadItem } from "@/registry/bases/shared/audio/elements/pad";
+import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type DrumSynthNote,
   type DrumSynthState,

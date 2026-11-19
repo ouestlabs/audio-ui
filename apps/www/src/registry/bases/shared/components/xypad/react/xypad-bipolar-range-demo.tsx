@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { XYPad } from "@/registry/bases/shared/audio/elements/xypad";
+import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
 
 const formatPanMix = (next: { x: number; y: number }) =>
   `Pan ${next.x} | Mix ${next.y.toFixed(2)}`;

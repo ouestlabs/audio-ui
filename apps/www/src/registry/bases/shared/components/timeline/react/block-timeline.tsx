@@ -37,18 +37,18 @@ import {
 import {
   ArrangementView,
   shownLength,
-} from "@/registry/bases/shared/audio/elements/arrangement-view";
-import { Meter } from "@/registry/bases/shared/audio/elements/meter";
-import { TRACK_COLORS } from "@/registry/bases/shared/audio/elements/timeline";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
+} from "@/registry/bases/shared/audio-ui/elements/arrangement-view";
+import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
+import { TRACK_COLORS } from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
 import {
   ClipPanel,
   type ClipSettings,
-} from "@/registry/bases/shared/audio/panels/clip-panel";
+} from "@/registry/bases/shared/audio-ui/panels/clip-panel";
 import {
   MidiClipPanel,
   type MidiClipRegion,
-} from "@/registry/bases/shared/audio/panels/midi-clip-panel";
+} from "@/registry/bases/shared/audio-ui/panels/midi-clip-panel";
 import { channelEqDevice } from "@/registry/bases/shared/devices/channel-eq/device";
 import { compressorDevice } from "@/registry/bases/shared/devices/compressor/device";
 import { limiterDevice } from "@/registry/bases/shared/devices/limiter/device";

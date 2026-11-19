@@ -8,7 +8,7 @@ import {
   NoteEditMenuContent,
   NoteEditMenuSub,
   NoteEditMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/note-edit-menu";
+} from "@/registry/bases/shared/audio-ui/elements/note-edit-menu";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -17,8 +17,8 @@ import {
   PianoRollVelocity,
   PianoRollVelocityScale,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
-import { Timeline } from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
+import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import {
   applyNoteEdit,
   canApplyNoteEdit,

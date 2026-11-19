@@ -1,5 +1,5 @@
 import { useLayoutEffect, useState } from "react";
-import { Scrubber } from "@/registry/bases/shared/audio/elements/scrubber";
+import { Scrubber } from "@/registry/bases/shared/audio-ui/elements/scrubber";
 import { createSource } from "@/registry/bases/shared/primitives/primitive";
 import { MOTION, tw } from "../motion.ts";
 

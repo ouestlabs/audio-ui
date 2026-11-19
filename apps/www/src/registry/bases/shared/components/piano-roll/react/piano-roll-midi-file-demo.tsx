@@ -11,8 +11,8 @@ import {
   PianoRollKeys,
   PianoRollStrip,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
-import { Timeline } from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
+import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
 
 const DURATION = 32;

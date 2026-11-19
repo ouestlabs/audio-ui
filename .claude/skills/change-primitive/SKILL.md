@@ -26,7 +26,7 @@ The primitives, their adapters and the engine's modules are not packages: they a
 2. **Change the code**: the primitive first, then the adapters. A file the worklet bundles (`lib/engine/playback/`) needs `bun run engine:worklet` in `apps/www` afterwards, and a kernel added or bumped `bun run engine:kernels`.
 3. **Docs.** The primitive's docs are the "Headless primitive" section of the component's page, `apps/www/src/content/docs/components/base/(elements|workstation)/<name>.mdx` (the timeline's is `arrangement.mdx`): its install in each framework, options, parts and what a change reports. A change to an engine module also shows on its page, `apps/www/src/content/docs/engine/<module>.mdx`: its head (exports and their JSDoc's first sentence, sources) is generated, so run `bun run registry:build` in `apps/www` (`test/entries.test.ts` and `test/package-modules-docs.test.ts` fail on a page that lags).
 4. **Shipped skill.** If a prop, part, data attribute or CSS variable that `skills/audio-ui/` names changed, update it; `bun test test/skills.test.ts` in `apps/www` checks the names.
-5. **Registry element.** If the styled element in `apps/www/src/registry/bases/shared/audio/elements/<name>.tsx` should use the new prop or part, update it and follow the `add-registry-item` skill's build step.
+5. **Registry element.** If the styled element in `apps/www/src/registry/bases/shared/audio-ui/elements/<name>.tsx` should use the new prop or part, update it and follow the `add-registry-item` skill's build step.
 6. **Check like CI** (from the repo root):
    ```sh
    bun run lint:fix

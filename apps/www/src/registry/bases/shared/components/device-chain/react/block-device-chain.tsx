@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { DeviceView } from "@/registry/bases/shared/audio/elements/device-view";
+import { DeviceView } from "@/registry/bases/shared/audio-ui/elements/device-view";
 import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
 import { useDemoSource } from "@/registry/bases/shared/hooks/use-demo-source";

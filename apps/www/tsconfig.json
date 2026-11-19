@@ -17,10 +17,10 @@
     "paths": {
       "@/*": ["./src/*"],
       "@/components/audio-ui/parameter-field": [
-        "./src/registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+        "./src/registry/bases/ui-sdk/audio-ui/elements/parameter-field.tsx"
       ],
       "@/components/audio-ui/rocker-switch": [
-        "./src/registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+        "./src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
       "@/primitives/envelope": [
         "./src/registry/bases/shared/primitives/envelope/envelope.ts"

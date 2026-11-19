@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { StereoField } from "@/registry/bases/shared/audio/elements/stereo-field";
+import { StereoField } from "@/registry/bases/shared/audio-ui/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type UtilityState,
   utilityDevice,

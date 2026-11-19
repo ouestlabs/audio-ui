@@ -1,4 +1,4 @@
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { cn } from "@/registry/bases/shared/lib/utils";
 import { glyphEntrance, Lockup, LockupUrl, Typed } from "../brand.tsx";
 import {

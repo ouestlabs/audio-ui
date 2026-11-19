@@ -1,13 +1,13 @@
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
-import { WaveformSelect } from "@/registry/bases/shared/audio/elements/waveform-select";
-import { XYPad } from "@/registry/bases/shared/audio/elements/xypad";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
+import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
+import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
 import {
   DeviceFrame,
   DeviceHeader,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type PocketSynthNote,
   type PocketSynthState,

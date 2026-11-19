@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { downloadFile } from "@/engine/files";
-import { ExportDialog } from "@/registry/bases/shared/audio/elements/export-dialog";
+import { ExportDialog } from "@/registry/bases/shared/audio-ui/elements/export-dialog";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,

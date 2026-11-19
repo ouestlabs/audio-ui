@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { NeedleMeter } from "@/registry/bases/shared/audio/elements/needle-meter";
+import { NeedleMeter } from "@/registry/bases/shared/audio-ui/elements/needle-meter";
 import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
 import { usePageMicrophone } from "@/registry/bases/shared/hooks/use-microphone";
 import { useSimulatedLevels } from "@/registry/bases/shared/hooks/use-simulated-levels";

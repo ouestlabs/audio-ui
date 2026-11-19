@@ -69,7 +69,7 @@ export const hooks: RegistryItem[] = [
         type: "registry:hook",
       },
       {
-        path: "audio/elements/track-grip.tsx",
+        path: "audio-ui/elements/track-grip.tsx",
         type: "registry:ui",
       },
     ],

@@ -6,7 +6,7 @@ import {
   SoundRate,
   SoundReadout,
   SoundReadouts,
-} from "@/registry/bases/shared/audio/elements/sound-readouts";
+} from "@/registry/bases/shared/audio-ui/elements/sound-readouts";
 
 const LAYOUT_CHANNELS: Record<SoundLayout, number> = {
   "5.1": 6,

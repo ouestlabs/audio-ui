@@ -1,7 +1,7 @@
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Sequencer } from "@/registry/bases/shared/audio/elements/sequencer";
+import { Sequencer } from "@/registry/bases/shared/audio-ui/elements/sequencer";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import { useTransportClock } from "@/registry/bases/shared/hooks/use-transport-clock";
 import {

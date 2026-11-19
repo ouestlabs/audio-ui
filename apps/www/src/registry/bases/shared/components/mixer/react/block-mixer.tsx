@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MixerView } from "@/registry/bases/shared/audio/elements/mixer-view";
+import { MixerView } from "@/registry/bases/shared/audio-ui/elements/mixer-view";
 import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";

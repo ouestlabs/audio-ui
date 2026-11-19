@@ -1,7 +1,7 @@
 import {
   FLAT,
   type SelectionShape,
-} from "@/registry/bases/shared/audio/elements/selection-frame";
+} from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import type { Arranged } from "@/registry/bases/shared/lib/arrangement";
 import type { ArrangementCommand } from "@/registry/bases/shared/lib/arrangement-state";
 

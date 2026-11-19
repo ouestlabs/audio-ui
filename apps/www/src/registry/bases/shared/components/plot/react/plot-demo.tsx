@@ -21,7 +21,7 @@ import {
   eqResponse,
 } from "@/engine/analysis";
 import { formatFrequency, formatLevel } from "@/engine/format";
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import {
   Plot,
   PlotArea,
@@ -32,7 +32,7 @@ import {
   PlotHandle,
   PlotTraceArea,
   useValueAtPointer,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import { useNoiseThroughEq } from "@/registry/bases/shared/hooks/use-noise-through-eq";
 import { useSpectrum } from "@/registry/bases/shared/hooks/use-spectrum";
 

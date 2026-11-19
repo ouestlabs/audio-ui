@@ -30,15 +30,15 @@ import {
 } from "@/engine/files";
 import { rollScale, type Scale } from "@/engine/pitch";
 import type { Tempo } from "@/engine/time";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import {
   NoteEditMenu,
   NoteEditMenuContent,
   NoteEditMenuItems,
   NoteEditMenuSub,
   NoteEditMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/note-edit-menu";
-import { NoteFind } from "@/registry/bases/shared/audio/elements/note-find";
+} from "@/registry/bases/shared/audio-ui/elements/note-edit-menu";
+import { NoteFind } from "@/registry/bases/shared/audio-ui/elements/note-find";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -49,7 +49,7 @@ import {
   PianoRollVelocity,
   PianoRollVelocityScale,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
 import {
   ScaleMenu,
   ScaleMenuContent,
@@ -58,7 +58,7 @@ import {
   ScaleMenuRoot,
   ScaleMenuToggle,
   ScaleMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/scale-menu";
+} from "@/registry/bases/shared/audio-ui/elements/scale-menu";
 import {
   Timeline,
   TimelineLane,
@@ -68,8 +68,8 @@ import {
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
-} from "@/registry/bases/shared/audio/elements/timeline";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
 import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
 import {

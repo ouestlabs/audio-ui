@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { inScale, type Scale } from "@/engine/pitch";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   ScaleMenu,
   ScaleMenuContent,
@@ -9,7 +9,7 @@ import {
   ScaleMenuRoot,
   ScaleMenuToggle,
   ScaleMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/scale-menu";
+} from "@/registry/bases/shared/audio-ui/elements/scale-menu";
 
 const MIN_PITCH = 48;
 const MAX_PITCH = 72;

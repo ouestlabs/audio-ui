@@ -62,37 +62,37 @@ import {
 import { formatLevel, formatSampleRate, formatTime } from "@/engine/format";
 import { secondsPerBeat, type Tempo } from "@/engine/time";
 import { hasWebGL2 } from "@/gl/lane";
-import { ArrangedTake } from "@/registry/bases/shared/audio/elements/arranged-clip";
-import type { SpectrogramBand } from "@/registry/bases/shared/audio/elements/clip-spectrogram";
+import { ArrangedTake } from "@/registry/bases/shared/audio-ui/elements/arranged-clip";
+import type { SpectrogramBand } from "@/registry/bases/shared/audio-ui/elements/clip-spectrogram";
 import {
   type ClipSamples,
   ClipWaveform,
-} from "@/registry/bases/shared/audio/elements/clip-waveform";
-import { DeviceBrowser } from "@/registry/bases/shared/audio/elements/device-browser";
-import { DeviceView } from "@/registry/bases/shared/audio/elements/device-view";
-import { ExportDialog } from "@/registry/bases/shared/audio/elements/export-dialog";
-import { Meter } from "@/registry/bases/shared/audio/elements/meter";
-import { ProcessMenuItems } from "@/registry/bases/shared/audio/elements/process-menu";
+} from "@/registry/bases/shared/audio-ui/elements/clip-waveform";
+import { DeviceBrowser } from "@/registry/bases/shared/audio-ui/elements/device-browser";
+import { DeviceView } from "@/registry/bases/shared/audio-ui/elements/device-view";
+import { ExportDialog } from "@/registry/bases/shared/audio-ui/elements/export-dialog";
+import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
+import { ProcessMenuItems } from "@/registry/bases/shared/audio-ui/elements/process-menu";
 import {
   FadeShade,
   formatDb,
   SelectionFrame,
-} from "@/registry/bases/shared/audio/elements/selection-frame";
+} from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import {
   isSoundView,
   isSpectrogramView,
   SOUND_VIEWS,
   SoundLane,
   type SoundView,
-} from "@/registry/bases/shared/audio/elements/sound-lane";
+} from "@/registry/bases/shared/audio-ui/elements/sound-lane";
 import {
   SoundChannels,
   SoundLevel,
   SoundRate,
   SoundReadout,
   SoundReadouts,
-} from "@/registry/bases/shared/audio/elements/sound-readouts";
-import { SoundReport } from "@/registry/bases/shared/audio/elements/sound-report";
+} from "@/registry/bases/shared/audio-ui/elements/sound-readouts";
+import { SoundReport } from "@/registry/bases/shared/audio-ui/elements/sound-report";
 import {
   Timeline,
   TimelineLane,
@@ -101,10 +101,10 @@ import {
   TimelinePlayhead,
   TimelineRuler,
   TimelineViewport,
-} from "@/registry/bases/shared/audio/elements/timeline";
-import { TimelineLocator } from "@/registry/bases/shared/audio/elements/timeline-markers";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
-import type { WaveformClip } from "@/registry/bases/shared/audio/elements/waveform-lane";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { TimelineLocator } from "@/registry/bases/shared/audio-ui/elements/timeline-markers";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
+import type { WaveformClip } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
 import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";

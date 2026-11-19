@@ -15,10 +15,10 @@
       "@/components/icon-placeholder": ["./src/icon-placeholder.tsx"],
       "@/*": ["../www/src/*"],
       "@/components/audio-ui/parameter-field": [
-        "../www/src/registry/bases/ui-sdk/audio/elements/parameter-field.tsx"
+        "../www/src/registry/bases/ui-sdk/audio-ui/elements/parameter-field.tsx"
       ],
       "@/components/audio-ui/rocker-switch": [
-        "../www/src/registry/bases/ui-sdk/audio/elements/rocker-switch.tsx"
+        "../www/src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
       "@/primitives/envelope": [
         "../www/src/registry/bases/shared/primitives/envelope/envelope.ts"

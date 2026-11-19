@@ -56,9 +56,9 @@ const UI_BASE = "ui-sdk";
 const STYLES = ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"];
 
 // The folders of a base that hold registry items. Each `_registry.ts` exports
-// an array named after its folder; a later folder wins on a repeated name.
+// an array named after its folder, in camel case (`audioUi` for `audio-ui`); a later folder wins on a repeated name.
 const REGISTRY_FOLDERS = [
-  "audio",
+  "audio-ui",
   "devices",
   "hooks",
   "components",
@@ -67,11 +67,11 @@ const REGISTRY_FOLDERS = [
   "ui",
 ];
 
-// A folder a registry file imports from, and where it lands in a project. The longest first: `audio/` is every folder of audio.
+// A folder a registry file imports from, and where it lands in a project. The longest first: `audio-ui/` is every folder of audio.
 const INSTALL_PREFIXES: [prefix: string, installed: string][] = [
-  ["audio/elements/", "@/components/audio-ui/"],
-  ["audio/panels/", "@/components/audio-ui/"],
-  ["audio/", "@/components/audio-ui/"],
+  ["audio-ui/elements/", "@/components/audio-ui/"],
+  ["audio-ui/panels/", "@/components/audio-ui/"],
+  ["audio-ui/", "@/components/audio-ui/"],
   ["ui/", "@/components/ui/"],
   ["hooks/", "@/hooks/"],
   ["lib/", "@/lib/"],
@@ -168,6 +168,8 @@ interface StyleBuild {
   name: string;
 }
 
+const DASH_LETTER = /-([a-z])/g;
+
 interface Problem {
   detail: string;
   kind: string;
@@ -236,13 +238,16 @@ function expandCnClasses(
 // Items of a base
 // ---------------------------------------------------------------------------
 
+const camelCase = (name: string) =>
+  name.replace(DASH_LETTER, (_, letter: string) => letter.toUpperCase());
+
 async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
   const path = `${BASES_DIR}/${base}/${folder}/_registry.ts`;
   if (!(await Bun.file(path).exists())) {
     return [];
   }
   const registry: Record<string, SourceItem[] | undefined> = await import(path);
-  return registry[folder] ?? [];
+  return registry[camelCase(folder)] ?? [];
 }
 
 async function loadItems(base: string): Promise<Map<string, SourceItem>> {

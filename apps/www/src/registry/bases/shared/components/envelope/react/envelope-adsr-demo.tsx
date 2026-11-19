@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Envelope } from "@/registry/bases/shared/audio/elements/envelope";
+import { Envelope } from "@/registry/bases/shared/audio-ui/elements/envelope";
 
 /** The span the envelope's x axis stands for, in milliseconds. */
 const SPAN_MS = 2000;

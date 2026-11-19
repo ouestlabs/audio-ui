@@ -15,7 +15,7 @@ import { MODULE_SETS } from "../src/registry/bases/modules.ts";
 const WEB = `${import.meta.dir}/..`;
 const SHARED = `${WEB}/src/registry/bases/shared`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
-const FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
+const FOLDERS = ["audio-ui", "devices", "hooks", "components", "lib"];
 
 const EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export (?:declare )?(?:async )?(function|const|interface|type|class) (\w+)/g;
@@ -71,7 +71,7 @@ export function exportsOf(source: string): EntryExport[] {
 /** Where a registry file installs in a project: an element to `components/audio-ui/`, a hook to `hooks/`, a lib to `lib/`. */
 export function installedPath(path: string) {
   const file = path.split("/").at(-1) ?? path;
-  if (path.startsWith("audio/")) {
+  if (path.startsWith("audio-ui/")) {
     return `components/audio-ui/${file}`;
   }
   return `${path.split("/")[0]}/${file}`;
@@ -81,13 +81,21 @@ export function installedPath(path: string) {
 const importOf = (path: string) =>
   `@/${installedPath(path).replace(EXTENSION, "")}`;
 
+const DASH_LETTER = /-([a-z])/g;
+
 async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
   const loaded = await Promise.all(
     folders.map(async (folder) => {
       const module = (await import(
         `${SHARED}/${folder}/_registry.ts`
       )) as Record<string, RegistryItem[] | undefined>;
-      return module[folder] ?? [];
+      return (
+        module[
+          folder.replace(DASH_LETTER, (_, letter: string) =>
+            letter.toUpperCase()
+          )
+        ] ?? []
+      );
     })
   );
   return loaded.flat();
