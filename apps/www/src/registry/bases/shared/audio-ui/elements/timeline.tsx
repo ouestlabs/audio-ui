@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { dbToGain, gainToDb } from "@/engine/analysis";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
+import { BareInput } from "@/registry/bases/shared/audio-ui/elements/bare-input";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
@@ -1332,7 +1334,7 @@ function TimelineTrackControls({
             </Button>
           ) : null}
           {renaming ? (
-            <input
+            <BareInput
               aria-label="Track name"
               autoFocus
               className="min-w-0 flex-1 bg-transparent font-medium outline-none"
@@ -1342,7 +1344,7 @@ function TimelineTrackControls({
               ref={selectText}
             />
           ) : (
-            <button
+            <BareButton
               aria-pressed={selected}
               className={cn(
                 "min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline",
@@ -1353,7 +1355,7 @@ function TimelineTrackControls({
               type="button"
             >
               {name}
-            </button>
+            </BareButton>
           )}
           {/* Its switches, one stop of Tab and the arrows between them: each holds its state, pressed or not. */}
           {switches ? (

@@ -21,6 +21,8 @@ import {
   secondsPerBar,
   type Tempo,
 } from "@/engine/time";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
+import { BareInput } from "@/registry/bases/shared/audio-ui/elements/bare-input";
 import { TimelineMark } from "@/registry/bases/shared/audio-ui/elements/timeline";
 
 /** A named point of the arrangement, in its time. */
@@ -131,7 +133,7 @@ function TimelineLocator({
   if (editing) {
     return (
       <TimelineMark className={ON_ITS_TIME} value={at}>
-        <input
+        <BareInput
           aria-label="Locator name"
           autoFocus
           className="h-full w-24 border-primary border-s-2 bg-background px-1 text-primary text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -154,7 +156,7 @@ function TimelineLocator({
       <ContextMenu onOpenChangeComplete={handleMenuClosed}>
         <ContextMenuTrigger
           render={
-            <button
+            <BareButton
               aria-label={`Locator ${name}`}
               className="pointer-events-auto flex h-full cursor-grab touch-none items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
               data-slot="timeline-locator"
@@ -261,7 +263,7 @@ function TimelineSignature({
   if (editing) {
     return (
       <TimelineMark className={ON_ITS_TIME} value={at}>
-        <input
+        <BareInput
           aria-label="Time signature, such as 7/8"
           autoFocus
           className="h-full w-14 border-primary border-s-2 bg-background px-1 text-primary text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -284,7 +286,7 @@ function TimelineSignature({
       <ContextMenu>
         <ContextMenuTrigger
           render={
-            <button
+            <BareButton
               aria-label={`Time signature ${label}`}
               className="pointer-events-auto flex h-full cursor-grab touch-none items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
               data-slot="timeline-signature"

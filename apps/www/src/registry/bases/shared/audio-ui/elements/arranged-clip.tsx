@@ -24,6 +24,7 @@ import type {
   ClipChangeDetails,
   ClipCommitDetails,
 } from "@/primitives/timeline";
+import { BareInput } from "@/registry/bases/shared/audio-ui/elements/bare-input";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -125,7 +126,7 @@ function RenameField({
     []
   );
   return (
-    <input
+    <BareInput
       aria-label="Clip name"
       className="min-w-0 flex-1 bg-transparent outline-none"
       defaultValue={name}

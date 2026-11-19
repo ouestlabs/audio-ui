@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import {
   type ChainZone,
@@ -131,7 +132,7 @@ function Macro({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <button
+            <BareButton
               aria-label={`${name}: ${mappings.length} mapped`}
               className={cn(
                 "max-w-16 truncate rounded px-1 text-[10px] text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
@@ -256,14 +257,14 @@ function RackChainRow({
       )}
       data-slot="rack-chain"
     >
-      <button
+      <BareButton
         aria-pressed={selected}
         className="min-w-0 flex-1 truncate rounded px-1 text-start text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={select}
         type="button"
       >
         {chain.name}
-      </button>
+      </BareButton>
       <Knob
         aria-label={`${chain.name} volume`}
         formatValue={decibels}

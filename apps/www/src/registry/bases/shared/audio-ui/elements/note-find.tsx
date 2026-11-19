@@ -7,6 +7,7 @@ import {
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -217,6 +218,11 @@ function NoteFindForm({
       [name]: type === "checkbox" ? checked : value,
     }));
   }, []);
+  const handleRest = useCallback(
+    (checked: unknown) =>
+      setFields((current) => ({ ...current, rest: checked === true })),
+    []
+  );
   const find = useCallback(
     () => onFind(findQuery(fields, scale)),
     [fields, onFind, scale]
@@ -286,13 +292,11 @@ function NoteFindForm({
         onChange={handleChange}
       />
       <div className="flex items-center gap-2 text-xs">
-        <input
+        <Checkbox
           checked={fields.rest}
-          className="accent-primary"
           id={`${id}-rest`}
           name="rest"
-          onChange={handleChange}
-          type="checkbox"
+          onCheckedChange={handleRest}
         />
         <label htmlFor={`${id}-rest`}>The notes that do not match</label>
       </div>

@@ -40,6 +40,12 @@
   "badge": [
     "components/ui/badge.tsx"
   ],
+  "bare-button": [
+    "components/audio-ui/bare-button.tsx"
+  ],
+  "bare-input": [
+    "components/audio-ui/bare-input.tsx"
+  ],
   "bass-enhancer-device": [
     "components/audio-ui/devices/bass-enhancer/device.ts"
   ],

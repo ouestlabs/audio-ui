@@ -11,6 +11,7 @@ import { createPortal, flushSync } from "react-dom";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { dbToGain, gainToDb, peakDb } from "@/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@/engine/format";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
@@ -151,7 +152,7 @@ function PeakReadout({
     paint();
   }, [paint]);
   return (
-    <button
+    <BareButton
       aria-label={`${name} peak -∞ dB, click to clear`}
       className={cn(
         "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive",
@@ -162,7 +163,7 @@ function PeakReadout({
       type="button"
     >
       -∞
-    </button>
+    </BareButton>
   );
 }
 
@@ -204,7 +205,7 @@ function LoudnessReadout({
     return source.subscribe(paint);
   }, [source]);
   return (
-    <button
+    <BareButton
       aria-label="Main loudness -∞ LUFS, click to clear"
       className={cn(
         "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
@@ -215,7 +216,7 @@ function LoudnessReadout({
       type="button"
     >
       -∞ LUFS
-    </button>
+    </BareButton>
   );
 }
 
@@ -435,7 +436,7 @@ function Strip({
           style={swatch.style}
         />
         {grip ? (
-          <button
+          <BareButton
             aria-label={`Move ${track.name}`}
             className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
             data-mixer-grip={track.id}
@@ -443,7 +444,7 @@ function Strip({
             {...grip}
           >
             {track.name}
-          </button>
+          </BareButton>
         ) : (
           <span className="min-h-4 w-full truncate text-center font-medium text-xs">
             {track.name}

@@ -74,7 +74,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-track-reorder",
-    registryDependencies: ["@audio-ui/sortable-drag"],
+    registryDependencies: ["@audio-ui/sortable-drag", "@audio-ui/bare-button"],
     type: "registry:hook",
   },
   hookItem("use-timeline-zoom", {

@@ -13,6 +13,8 @@ import {
 } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { Button } from "@/components/ui/button";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
+import { BareInput } from "@/registry/bases/shared/audio-ui/elements/bare-input";
 import { cn } from "@/registry/lib/utils";
 import type { Source } from "@/registry/primitives/primitive";
 
@@ -183,7 +185,7 @@ function ClipView({
         )}
         data-slot="clip-view-strip"
       >
-        <button
+        <BareButton
           aria-expanded={!collapsed}
           aria-label={
             collapsed ? "Open the clip view" : "Roll the clip view up"
@@ -193,9 +195,9 @@ function ClipView({
           type="button"
         >
           <Caret className={collapsed ? "-rotate-90" : undefined} />
-        </button>
+        </BareButton>
         {onActiveChange ? (
-          <button
+          <BareButton
             aria-label={active ? "Switch the clip off" : "Switch the clip on"}
             aria-pressed={active}
             className="relative z-10 size-3 shrink-0 rounded-[2px] border border-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:border-primary aria-pressed:bg-primary"
@@ -266,7 +268,7 @@ function ClipBox({
   const folded = Boolean(foldable && boxes?.folded.includes(key));
   const toggle = useCallback(() => boxes?.toggle(key), [boxes, key]);
   const caret = foldable ? (
-    <button
+    <BareButton
       aria-expanded={!folded}
       aria-label={folded ? `Unfold ${title}` : `Fold ${title}`}
       className="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-sm text-muted-foreground outline-none after:absolute after:inset-0 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
@@ -274,7 +276,7 @@ function ClipBox({
       type="button"
     >
       <Caret className={folded ? "-rotate-90" : "rotate-90 @3xl:rotate-0"} />
-    </button>
+    </BareButton>
   ) : null;
   if (folded) {
     return (
@@ -354,7 +356,7 @@ function ClipNameField({
     [name]
   );
   return (
-    <input
+    <BareInput
       aria-label="Clip name"
       className="relative z-10 h-6 w-40 min-w-0 rounded-md border border-transparent bg-transparent px-1.5 font-medium text-sm outline-none hover:border-border focus-visible:border-border focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring read-only:hover:border-transparent"
       onBlur={commit}

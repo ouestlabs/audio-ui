@@ -25,6 +25,7 @@ const COMPONENTS = [
   "sheet",
   "button",
   "button-group",
+  "checkbox",
   "dialog",
   "dropdown-menu",
   "empty",

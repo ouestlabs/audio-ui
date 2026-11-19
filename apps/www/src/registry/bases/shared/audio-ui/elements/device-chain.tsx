@@ -25,6 +25,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Toggle } from "@/components/ui/toggle";
+import { BareButton } from "@/registry/bases/shared/audio-ui/elements/bare-button";
 import { startSortableDrag } from "@/registry/lib/sortable-drag";
 import { cn } from "@/registry/lib/utils";
 
@@ -529,7 +530,7 @@ function SlotFold() {
   // Folded, the whole strip is what is pressed: this only says so, and is how the keyboard unfolds it.
   if (folded) {
     return (
-      <button
+      <BareButton
         aria-expanded={false}
         aria-keyshortcuts={keys || undefined}
         aria-label={`Unfold ${title}`}
@@ -541,7 +542,7 @@ function SlotFold() {
         type="button"
       >
         {arrow}
-      </button>
+      </BareButton>
     );
   }
   return (
@@ -822,7 +823,7 @@ function DeviceChainAdd({
 }: ComponentProps<"button">) {
   const { dropIndex, order } = useDeviceChain();
   return (
-    <button
+    <BareButton
       className={cn(
         "cn-audio-device flex w-36 shrink-0 flex-col items-center justify-center gap-1 border border-dashed px-3 text-center text-muted-foreground text-xs transition-colors hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-over:border-primary data-over:bg-primary/10",
         className
@@ -838,7 +839,7 @@ function DeviceChainAdd({
           <span>Drop one here, or open the library</span>
         </>
       )}
-    </button>
+    </BareButton>
   );
 }
 

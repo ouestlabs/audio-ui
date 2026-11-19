@@ -3085,7 +3085,8 @@
     "kind": "hook",
     "name": "use-track-reorder",
     "registryDependencies": [
-      "sortable-drag"
+      "sortable-drag",
+      "bare-button"
     ],
     "usedBy": [
       "arrangement-editor",
