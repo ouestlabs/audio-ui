@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/registry/lib/utils";
 
 const lcdVariants = cva("cn-lcd inline-flex min-w-0 flex-col justify-center", {
@@ -13,9 +13,10 @@ const lcdVariants = cva("cn-lcd inline-flex min-w-0 flex-col justify-center", {
   },
 });
 
-export interface LcdProps extends VariantProps<typeof lcdVariants> {
+export interface LcdProps
+  extends ComponentProps<"div">,
+    VariantProps<typeof lcdVariants> {
   children: ReactNode;
-  className?: string;
   /** A small caption over the reading: the parameter's or the preset's name. */
   label?: ReactNode;
   /** Announces changes politely, for a reading that matters as it changes. @default false */
@@ -34,6 +35,7 @@ export function Lcd({
   label,
   live = false,
   size,
+  ...props
 }: LcdProps) {
   return (
     <div
@@ -41,6 +43,7 @@ export function Lcd({
       className={cn(lcdVariants({ size }), className)}
       data-size={size ?? "default"}
       data-slot="lcd"
+      {...props}
     >
       {label ? (
         <span className="cn-lcd-label truncate" data-slot="lcd-label">

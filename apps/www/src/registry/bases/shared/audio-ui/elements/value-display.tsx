@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentProps } from "react";
 import {
   formatFrequency,
   formatLevel,
@@ -55,8 +56,8 @@ const valueDisplayVariants = cva("cn-value-display inline-block", {
 });
 
 export interface ValueDisplayProps
-  extends VariantProps<typeof valueDisplayVariants> {
-  className?: string;
+  extends Omit<ComponentProps<"output">, "children">,
+    VariantProps<typeof valueDisplayVariants> {
   /** How it reads: a tempo, a level, a frequency, a pan, a share, a pitch, a time. */
   kind: ValueKind;
   /** Names it for assistive technology, which reads it with its value: "Cutoff". */
@@ -75,6 +76,7 @@ export function ValueDisplay({
   label,
   size,
   value,
+  ...props
 }: ValueDisplayProps) {
   const text = formatValue(value, kind);
   return (
@@ -84,6 +86,7 @@ export function ValueDisplay({
       data-kind={kind}
       data-size={size ?? "default"}
       data-slot="value-display"
+      {...props}
     >
       {text}
     </output>
