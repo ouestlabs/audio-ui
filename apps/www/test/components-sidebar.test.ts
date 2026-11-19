@@ -33,9 +33,15 @@ const components = {
       type: "folder",
     },
   ],
-  index: page("Components", "/docs/components"),
   name: "Components",
   type: "folder",
+} as unknown as PageTreeFolder;
+
+/** The same folder when the tree names its page as its index. */
+const withIndex = {
+  ...components,
+  children: (components.children as unknown[]).slice(1),
+  index: page("Components", "/docs/components"),
 } as unknown as PageTreeFolder;
 
 test("an address with no base in it reads the folder of the components' pages", () => {
@@ -64,6 +70,13 @@ test("the components section lists its own page first, as Overview, then its spa
   expect(urls).toEqual([
     "/docs/components/base/knob",
     "/docs/components/base/mixer",
+  ]);
+});
+
+test("the same when the folder names its page as its index", () => {
+  const [first] = getGroupsFromFolder(withIndex, "base");
+  expect(first?.sections.flatMap((section) => section.pages)).toEqual([
+    expect.objectContaining({ name: "Overview", url: "/docs/components" }),
   ]);
 });
 
