@@ -132,6 +132,24 @@ export function frameworkAddresses(pages: readonly string[]): string[] {
 }
 
 /**
+ * The class the document gets before its first paint, `framework-<id>`, which
+ * the framework switch reads until the page is hydrated: the framework kept,
+ * or React on a page that has nothing for it (`frameworkOfPage`), written for a
+ * document with no module, from the same lists. In a function, as the script
+ * below: a `var` at the top of a page would be a property of `window`.
+ */
+export const FRAMEWORK_CLASS_SCRIPT = `
+  (function () {
+    var kept = localStorage['audio-ui-framework'];
+    if (!/^(react|vue|svelte|web)$/.test(kept)) return;
+    var path = location.pathname.replace(/\\/$/, '');
+    var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
+    var shown = kept === 'react' || ${JSON.stringify(PRIMITIVE_PATHS)}.indexOf(path) >= 0 || !${JSON.stringify(REACT_ADDRESSES)}.some(under);
+    document.documentElement.classList.add('framework-' + (shown ? kept : 'react'));
+  })();
+`;
+
+/**
  * Runs in the head, before the first paint: a page that has an address for the
  * framework the reader kept (`/docs/components/base/knob` for Vue) goes to it, so the
  * page is drawn for their framework from the start. It is `frameworkAddressOf`

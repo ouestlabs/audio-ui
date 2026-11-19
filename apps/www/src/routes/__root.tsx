@@ -27,7 +27,10 @@ import { keptFramework } from "@/hooks/use-framework";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import { watchStyleCss } from "@/lib/design-system/style-css";
-import { FRAMEWORK_REDIRECT_SCRIPT } from "@/lib/docs/content/framework-paths";
+import {
+  FRAMEWORK_CLASS_SCRIPT,
+  FRAMEWORK_REDIRECT_SCRIPT,
+} from "@/lib/docs/content/framework-paths";
 import { keptRedirectSearch } from "@/lib/docs/content/kept-redirect";
 import { watchPreloadErrors } from "@/lib/load-failure";
 import {
@@ -124,9 +127,7 @@ const THEME_SCRIPT = `
     if (localStorage.theme === 'dark' || ((!('theme' in localStorage) || localStorage.theme === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '${META_THEME_COLORS.dark}')
     }
-    if (/^(react|vue|svelte|web)$/.test(localStorage['audio-ui-framework'])) {
-      document.documentElement.classList.add('framework-' + localStorage['audio-ui-framework'])
-    }
+    ${FRAMEWORK_CLASS_SCRIPT}
     if (localStorage.layout) {
       document.documentElement.classList.add('layout-' + localStorage.layout)
     }
