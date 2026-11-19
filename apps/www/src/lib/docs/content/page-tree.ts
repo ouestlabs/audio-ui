@@ -1,5 +1,4 @@
 import { isValidElement, type ReactNode } from "react";
-import { DEFAULT_CONFIG } from "@/hooks/use-config";
 import type { source } from "@/lib/docs/content/source";
 
 export type PageTreeNode = (typeof source.pageTree)["children"][number];
@@ -8,6 +7,9 @@ export type PageTreePage = Extract<PageTreeNode, { type: "page" }>;
 
 const COMPONENTS_BASE_PATH_REGEX = /\/docs\/components\/(base)(?:\/|$)/;
 const DOCS_BASE_PATH_REGEX = /\/docs\/(base)(?:\/|$)/;
+
+/** The folder of the content that holds the components' pages. */
+const DOCS_BASE_FOLDER = "base";
 
 // Recursively find all pages in a folder tree.
 export function getAllPagesFromFolder(folder: PageTreeFolder): PageTreePage[] {
@@ -150,11 +152,22 @@ export function getGroupsFromFolder(
       )
     : undefined;
   if (spaces?.length) {
-    return spaces.map((space) => ({
-      collapsible: true,
-      sections: sectionsOf(space.children),
-      title: nodeText(space.name),
-    }));
+    return [
+      // The section's own page, which lists every component, comes first as its Overview.
+      ...(folder.index
+        ? [
+            {
+              collapsible: false,
+              sections: [{ pages: [{ ...folder.index, name: "Overview" }] }],
+            },
+          ]
+        : []),
+      ...spaces.map((space) => ({
+        collapsible: true,
+        sections: sectionsOf(space.children),
+        title: nodeText(space.name),
+      })),
+    ];
   }
   // Any other folder but the root one (Get started) is a space of its own, such as the Audio engine.
   return [
@@ -197,11 +210,11 @@ function sectionsOf(children: PageTreeFolder["children"]): PageTreeSection[] {
   return sections.filter((section) => section.pages.length > 0);
 }
 
-// Get the current base from pathname.
-// Component docs: /docs/components/base/alert
+// The folder of the components' docs the address is in: `/docs/components/base/alert`.
+// One folder serves the pages of both bases (the address of a page for the ui-sdk base is a rewrite of it), so an address with no base in it, such as `/docs/components` itself, reads that folder too, not the style's default base, which has no folder of its own.
 export function getCurrentBase(pathname: string): string {
   const baseMatch =
     pathname.match(COMPONENTS_BASE_PATH_REGEX) ??
     pathname.match(DOCS_BASE_PATH_REGEX);
-  return baseMatch ? baseMatch[1] : DEFAULT_CONFIG.base;
+  return baseMatch ? baseMatch[1] : DOCS_BASE_FOLDER;
 }

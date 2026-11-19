@@ -104,7 +104,7 @@ export function DocsNavigation({
     >
       <div className="h-(--top-spacing) shrink-0" />
       {groups.map((group) => (
-        <SidebarGroup key={group.title}>
+        <SidebarGroup key={group.title ?? "overview"}>
           {group.titled ? (
             <GroupLabel
               collapsible={group.collapsible}
