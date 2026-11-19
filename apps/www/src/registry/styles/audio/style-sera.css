@@ -292,7 +292,7 @@
   }
 
   .cn-piano-key {
-    @apply top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-[color:color-mix(in_oklab,var(--piano-key-black)_30%,transparent)] data-[color=white]:border-x data-[color=white]:bg-(--piano-key-white) data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-none data-[color=black]:bg-(--piano-key-black) data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
+    @apply top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-[color:color-mix(in_oklab,var(--piano-key-black)_30%,transparent)] data-[color=white]:border-x data-[color=white]:bg-(--piano-key-white) data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-none data-[color=black]:bg-(--piano-key-black) data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
   }
 
   /* MARK: Envelope (container ← cn-xypad, path/point ← cn-fader-range/thumb) */
@@ -321,11 +321,11 @@
   }
 
   .cn-envelope-point {
-    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none;
+    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-3 focus-within:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none;
   }
 
   .cn-envelope-curve {
-    @apply size-3 rounded-none border border-primary bg-background shadow-xs transition-[box-shadow,opacity] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 data-flat:hidden motion-reduce:transition-none;
+    @apply size-3 rounded-none border border-primary bg-background shadow-xs transition-[box-shadow,opacity] hover:ring-4 hover:ring-ring/30 focus-visible:ring-3 focus-visible:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 data-flat:hidden motion-reduce:transition-none;
   }
 
   .cn-envelope-point-value {
@@ -351,7 +351,7 @@
   }
 
   .cn-sequencer-cell {
-    @apply rounded-none border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100;
+    @apply rounded-none border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:border-ring;
   }
 
   .cn-sequencer-cell-beat {
@@ -359,7 +359,7 @@
   }
 
   .cn-sequencer-velocity {
-    @apply overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-2 focus-within:ring-ring/50 data-disabled:pointer-events-none;
+    @apply overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-3 focus-within:ring-ring/50 data-disabled:pointer-events-none;
   }
 
   .cn-sequencer-velocity-fill {
@@ -368,7 +368,7 @@
 
   /* MARK: Pad (pad ← cn-sequencer-cell, flash mixes primary by --pad-velocity) */
   .cn-pad-item {
-    @apply rounded-none border bg-muted/60 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-100 ease-out hover:not-data-active:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 data-active:scale-[0.97] data-active:border-primary data-active:bg-[color-mix(in_oklab,var(--primary)_calc(55%_+_var(--pad-velocity,1)*45%),var(--muted))] data-active:text-primary-foreground data-active:duration-0 motion-reduce:transition-none motion-reduce:data-active:scale-100;
+    @apply rounded-none border bg-muted/60 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-100 ease-out hover:not-data-active:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 data-active:scale-[0.97] data-active:border-primary data-active:bg-[color-mix(in_oklab,var(--primary)_calc(55%_+_var(--pad-velocity,1)*45%),var(--muted))] data-active:text-primary-foreground data-active:duration-0 motion-reduce:transition-none motion-reduce:data-active:scale-100 focus-visible:border-ring;
   }
 
   /* MARK: Plot */
@@ -425,7 +425,7 @@
   }
 
   .cn-plot-handle {
-    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
+    @apply rounded-none border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-3 focus-within:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
   }
 
   /* MARK: Piano Roll */
@@ -434,7 +434,7 @@
   }
 
   .cn-piano-roll-grid {
-    @apply focus-visible:outline-2 focus-visible:outline-ring/60 focus-visible:-outline-offset-2;
+    @apply focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2;
   }
 
   .cn-piano-roll-keys {
@@ -462,7 +462,7 @@
   }
 
   .cn-piano-roll-velocity-bar {
-    @apply rounded-none bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none;
+    @apply rounded-none bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none;
   }
 
   .cn-piano-roll-selection {
@@ -478,7 +478,7 @@
   }
 
   .cn-piano-roll-note {
-    @apply rounded-none transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-2 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none;
+    @apply rounded-none transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none;
   }
 
   .cn-piano-roll-note-handle {
@@ -486,7 +486,7 @@
   }
 
   .cn-piano-roll-key {
-    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground;
+    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground;
   }
 
   /* MARK: Timeline */
@@ -523,7 +523,7 @@
   }
 
   .cn-timeline-range {
-    @apply bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+    @apply bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-3 has-focus-visible:ring-ring/50;
   }
 
   .cn-timeline-range-extent {
@@ -559,7 +559,7 @@
   }
 
   .cn-timeline-navigator-window {
-    @apply bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
+    @apply bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-3 has-focus-visible:ring-ring/50;
   }
 
   .cn-timeline-navigator-handle {
