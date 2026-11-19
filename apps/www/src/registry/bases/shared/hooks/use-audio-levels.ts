@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { peakDb, rmsDb } from "@/engine/analysis";
-import type { MeterFrame } from "@/registry/bases/shared/primitives/meter/levels";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import type { MeterFrame } from "@/registry/primitives/meter/levels";
+import { createSource } from "@/registry/primitives/primitive";
 
 /** Below what a Meter draws: the level of digital silence. */
 const SILENCE_DB = -100;

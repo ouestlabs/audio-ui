@@ -21,7 +21,7 @@ import {
   splitNotes,
   stretchNotes,
   toggleMuted,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
+} from "@/registry/primitives/piano-roll/edits";
 
 /** What an edit knows of the editor it runs in. */
 export interface NoteEditContext {

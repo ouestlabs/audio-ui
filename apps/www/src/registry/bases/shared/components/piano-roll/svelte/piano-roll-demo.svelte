@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Note } from "@/primitives/piano-roll";
-import { PianoRoll } from "@/registry/bases/shared/primitives/piano-roll/svelte/index";
+import { PianoRoll } from "@/registry/primitives/piano-roll/svelte/index";
 
 const NOTES: Note[] = [
   { id: "1", length: 1, pitch: 60, start: 0 },

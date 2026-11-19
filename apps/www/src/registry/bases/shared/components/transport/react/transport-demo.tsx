@@ -6,7 +6,7 @@ import {
   type Tempo,
 } from "@/engine/time";
 import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import { createSource } from "@/registry/primitives/primitive";
 
 const LOOP_BARS = 4;
 

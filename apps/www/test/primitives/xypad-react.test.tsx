@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { XYPad } from "@/registry/bases/shared/primitives/xypad/react/index.tsx";
+import { XYPad } from "@/registry/primitives/xypad/react/index.tsx";
 import { xypadSuite } from "./xypad-suite.ts";
 
 xypadSuite("React", async ({ label, options, thumbLabel }) => {

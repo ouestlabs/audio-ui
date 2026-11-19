@@ -1,5 +1,5 @@
 <script lang="ts">
-import { XYPad } from "@/registry/bases/shared/primitives/xypad/svelte/index";
+import { XYPad } from "@/registry/primitives/xypad/svelte/index";
 
 let value = $state({ x: 50, y: 50 });
 </script>

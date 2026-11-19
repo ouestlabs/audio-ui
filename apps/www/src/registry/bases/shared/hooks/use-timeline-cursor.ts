@@ -1,10 +1,10 @@
 import { useCallback } from "react";
-import { snapMove } from "@/registry/bases/shared/primitives/grid";
-import { adjacentPoint } from "@/registry/bases/shared/primitives/timeline/locators";
 import type {
   Arranged,
   ArrangementTrack,
 } from "@/registry/lib/arrangement/arrangement";
+import { snapMove } from "@/registry/primitives/grid";
+import { adjacentPoint } from "@/registry/primitives/timeline/locators";
 
 /** The part of a key press the cursor reads: a native event or React's. */
 type KeyPress = Pick<

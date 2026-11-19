@@ -11,7 +11,7 @@ import {
   type SoundReport as Report,
 } from "@/engine/analysis";
 import { formatLevel, formatTempo } from "@/engine/format";
-import { pitchClassName } from "@/registry/bases/shared/primitives/pitch";
+import { pitchClassName } from "@/registry/primitives/pitch";
 
 interface SoundReportProps {
   onOpenChange: (open: boolean) => void;

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { XYPad } from "@/registry/bases/shared/primitives/xypad/vue";
+import { XYPad } from "@/registry/primitives/xypad/vue";
 
 const value = ref({ x: 50, y: 50 });
 </script>

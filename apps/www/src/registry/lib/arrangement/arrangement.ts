@@ -6,9 +6,9 @@ import { unwarpedTime, type WarpMarker, warpedTime } from "@/engine/time";
 import {
   type Breakpoint,
   levelAt,
-} from "@/registry/bases/shared/primitives/envelope/geometry";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
-import type { ClipValue } from "@/registry/bases/shared/primitives/timeline/clip";
+} from "@/registry/primitives/envelope/geometry";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
+import type { ClipValue } from "@/registry/primitives/timeline/clip";
 
 /** What a clip's menu does to it. */
 export type ClipAction =

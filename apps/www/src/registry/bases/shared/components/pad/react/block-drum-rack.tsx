@@ -2,10 +2,6 @@ import { useCallback, useRef, useState } from "react";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import type {
-  PadOffDetails,
-  PadOnDetails,
-} from "@/registry/bases/shared/primitives/pad/pad";
 import {
   type DrumOptions,
   triggerHihat,
@@ -13,6 +9,10 @@ import {
   triggerSnare,
 } from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";
+import type {
+  PadOffDetails,
+  PadOnDetails,
+} from "@/registry/primitives/pad/pad";
 
 const VOLUME = 0.7;
 /** How fast a choked sound fades out, as a time constant in seconds. */

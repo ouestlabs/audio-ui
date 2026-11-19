@@ -16,9 +16,14 @@ const WEB = `${import.meta.dir}/..`;
 const SHARED = `${WEB}/src/registry/bases/shared`;
 const REGISTRY = `${WEB}/src/registry`;
 
-/** A registry file by its path: `lib/` is at the registry root, the rest in `bases/shared/`. */
+/** The folders at the registry root, which every base serves. */
+const ROOT_FOLDERS = ["lib", "primitives"];
+
+/** A registry file by its path: `lib/` and `primitives/` are at the registry root, the rest in `bases/shared/`. */
 const sourceOf = (path: string) =>
-  path.startsWith("lib/") ? `${REGISTRY}/${path}` : `${SHARED}/${path}`;
+  ROOT_FOLDERS.some((folder) => path.startsWith(`${folder}/`))
+    ? `${REGISTRY}/${path}`
+    : `${SHARED}/${path}`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
 const FOLDERS = ["audio-ui", "devices", "hooks", "components", "lib"];
 
@@ -92,7 +97,7 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
   const loaded = await Promise.all(
     folders.map(async (folder) => {
       const module = (await import(
-        `${folder === "lib" ? REGISTRY : SHARED}/${folder}/_registry.ts`
+        `${ROOT_FOLDERS.includes(folder) ? REGISTRY : SHARED}/${folder}/_registry.ts`
       )) as Record<string, RegistryItem[] | undefined>;
       return (
         module[

@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/xypad/web";
+import "@/registry/primitives/xypad/web";
 
 /** Draws the pad into `element`, and returns what takes it away. */
 export default function xypadWebDemo(element) {

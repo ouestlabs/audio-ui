@@ -16,8 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sequencer } from "@/registry/bases/shared/audio-ui/elements/sequencer";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   filledEvery,
   MAX_REPEATS,
@@ -27,6 +25,8 @@ import {
   withStepRepeats,
 } from "@/registry/lib/drums/drum-steps";
 import { cn } from "@/registry/lib/utils";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
+import type { Source } from "@/registry/primitives/primitive";
 
 /** A pad of the drum rack that plays the clip: the note it answers and its name. */
 export interface DrumStepPad {

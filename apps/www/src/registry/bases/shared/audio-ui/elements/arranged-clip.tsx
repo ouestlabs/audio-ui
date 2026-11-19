@@ -37,11 +37,6 @@ import {
   trackSwatch,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { WaveformLane } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
-import type {
-  ClipValue,
-  FadeShape,
-} from "@/registry/bases/shared/primitives/timeline/clip";
 import {
   type Arranged,
   type ClipAction,
@@ -53,6 +48,8 @@ import {
   type TrackColor,
 } from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
+import type { Source } from "@/registry/primitives/primitive";
+import type { ClipValue, FadeShape } from "@/registry/primitives/timeline/clip";
 import { hasWebGL2 } from "@/webgl/lane";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */

@@ -14,7 +14,7 @@ import {
   type Note,
   type NoteId,
   type NoteQuery,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
+} from "@/registry/primitives/piano-roll/edits";
 
 const SCALE: Scale = { name: "major", root: 0 };
 const ROLL_SCALE = rollScale(SCALE);

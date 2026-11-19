@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, ReactNode } from "react";
-import { Fader as FaderPrimitive } from "@/registry/bases/shared/primitives/fader/react";
 import { cn } from "@/registry/lib/utils";
+import { Fader as FaderPrimitive } from "@/registry/primitives/fader/react";
 
 const faderVariants = cva("", {
   defaultVariants: {

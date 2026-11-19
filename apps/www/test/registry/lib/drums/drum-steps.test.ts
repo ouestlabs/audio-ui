@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
 import {
   filledEvery,
   type StepGrid,
@@ -8,6 +7,7 @@ import {
   withStepLevel,
   withStepRepeats,
 } from "@/registry/lib/drums/drum-steps";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 /** A kick on 36 and a snare on 38, sixteen sixteenths of a beat of 0.5 s. */
 const grid: StepGrid = { notes: [36, 38], step: 0.125, steps: 16 };

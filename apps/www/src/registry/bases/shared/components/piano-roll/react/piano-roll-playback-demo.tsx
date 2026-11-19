@@ -18,7 +18,7 @@ import {
 } from "@/registry/bases/shared/hooks/use-piano-roll-playback";
 import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 const TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 110 };
 const METER = meterOf(TEMPO, 1);

@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { type ComponentProps, type CSSProperties, useCallback } from "react";
-import { Envelope as EnvelopePrimitive } from "@/registry/bases/shared/primitives/envelope/react";
 import { cn } from "@/registry/lib/utils";
+import { Envelope as EnvelopePrimitive } from "@/registry/primitives/envelope/react";
 
 const envelopeVariants = cva("", {
   defaultVariants: {

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Waveform } from "@/registry/bases/shared/primitives/waveform/svelte/index";
+import { Waveform } from "@/registry/primitives/waveform/svelte/index";
 
 const DURATION_SECONDS = 180;
 

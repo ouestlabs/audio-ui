@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Sequencer } from "@/registry/bases/shared/primitives/sequencer/svelte/index.ts";
+import { Sequencer } from "@/registry/primitives/sequencer/svelte/index.ts";
 
 /** The sequencer the shared suite drives: its options, its velocity bars and its source. */
 let {

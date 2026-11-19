@@ -27,10 +27,7 @@ import {
 } from "@/engine/files";
 import { formatFrequency, formatLevel, formatPan } from "@/engine/format";
 import { type Repair, repairChannels } from "@/engine/repair";
-import {
-  type FadeShape,
-  fadeGain,
-} from "@/registry/bases/shared/primitives/timeline/clip";
+import { type FadeShape, fadeGain } from "@/registry/primitives/timeline/clip";
 
 /** A sound as plain samples: what an operation reads and writes. */
 export interface SoundSamples {

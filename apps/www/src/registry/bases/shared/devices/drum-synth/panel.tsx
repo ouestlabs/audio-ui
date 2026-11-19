@@ -10,8 +10,8 @@ import {
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry/bases/shared/devices/drum-synth/device";
-import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
 import { cn } from "@/registry/lib/utils";
+import type { PadOnDetails } from "@/registry/primitives/pad/pad";
 
 /** The controls by what they do. */
 const GROUPS = [

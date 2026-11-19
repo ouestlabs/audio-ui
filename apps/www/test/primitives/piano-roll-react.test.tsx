@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { PianoRoll } from "@/registry/bases/shared/primitives/piano-roll/react/index.tsx";
+import { PianoRoll } from "@/registry/primitives/piano-roll/react/index.tsx";
 import { pianoRollSuite } from "./piano-roll-suite.ts";
 
 pianoRollSuite("React", async (tree) => {

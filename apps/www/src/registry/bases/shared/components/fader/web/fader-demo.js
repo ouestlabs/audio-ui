@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/fader/web";
+import "@/registry/primitives/fader/web";
 
 /** Draws the demo into `element`, and returns what takes it away. */
 export default function faderWebDemo(element) {

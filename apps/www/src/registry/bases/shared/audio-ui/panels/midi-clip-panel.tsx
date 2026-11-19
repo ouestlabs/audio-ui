@@ -82,14 +82,6 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import {
-  duplicateTime,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
-import { pitchName } from "@/registry/bases/shared/primitives/pitch";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import type {
   ClipScale,
   ClipSwing,
@@ -104,6 +96,14 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/registry/lib/notes/note-edits";
+import {
+  duplicateTime,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+} from "@/registry/primitives/piano-roll/edits";
+import { pitchName } from "@/registry/primitives/pitch";
+import type { Source } from "@/registry/primitives/primitive";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;

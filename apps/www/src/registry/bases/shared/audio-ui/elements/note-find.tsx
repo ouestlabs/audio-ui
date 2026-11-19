@@ -22,9 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { rollScale, type Scale } from "@/engine/pitch";
-import type { NoteQuery } from "@/registry/bases/shared/primitives/piano-roll/edits";
-import { pitchClassName } from "@/registry/bases/shared/primitives/pitch";
 import { cn } from "@/registry/lib/utils";
+import type { NoteQuery } from "@/registry/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry/primitives/pitch";
 
 /** The form's fields, as typed: empty means no limit. */
 const NO_FIND = {

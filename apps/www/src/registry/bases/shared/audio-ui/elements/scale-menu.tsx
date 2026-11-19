@@ -28,8 +28,8 @@ import {
   type Scale,
   type ScaleName,
 } from "@/engine/pitch";
-import { pitchClassName } from "@/registry/bases/shared/primitives/pitch";
 import { cn } from "@/registry/lib/utils";
+import { pitchClassName } from "@/registry/primitives/pitch";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

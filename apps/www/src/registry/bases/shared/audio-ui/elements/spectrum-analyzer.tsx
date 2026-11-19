@@ -9,8 +9,8 @@ import {
   PlotTraceArea,
 } from "@/registry/bases/shared/audio-ui/elements/plot";
 import { useSpectrumPeaks } from "@/registry/bases/shared/hooks/use-spectrum";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import { cn } from "@/registry/lib/utils";
+import type { Source } from "@/registry/primitives/primitive";
 
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */
 const dbTicks = (min: number, max: number) => {

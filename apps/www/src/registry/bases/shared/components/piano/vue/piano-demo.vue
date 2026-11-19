@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Piano } from "@/registry/bases/shared/primitives/piano/vue";
+import { Piano } from "@/registry/primitives/piano/vue";
 </script>
 
 <template>

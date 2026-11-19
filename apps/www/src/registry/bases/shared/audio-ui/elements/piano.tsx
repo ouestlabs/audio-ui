@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
-import { Piano as PianoPrimitive } from "@/registry/bases/shared/primitives/piano/react";
 import { cn } from "@/registry/lib/utils";
+import { Piano as PianoPrimitive } from "@/registry/primitives/piano/react";
 
 const pianoVariants = cva("", {
   defaultVariants: {

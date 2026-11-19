@@ -1,5 +1,5 @@
 <script lang="ts">
-import { XYPad } from "@/registry/bases/shared/primitives/xypad/svelte/index.ts";
+import { XYPad } from "@/registry/primitives/xypad/svelte/index.ts";
 
 /** The pad the shared suite drives: its options and how it is named. */
 let {

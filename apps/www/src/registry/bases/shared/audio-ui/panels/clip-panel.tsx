@@ -82,7 +82,6 @@ import {
   TimelineViewport,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { useLoudest } from "@/registry/bases/shared/hooks/use-loudest";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   type ClipPeaks,
   type ClipReading,
@@ -95,6 +94,7 @@ import {
   soundOperationTiming,
 } from "@/registry/lib/arrangement/sound-operations";
 import { cn } from "@/registry/lib/utils";
+import type { Source } from "@/registry/primitives/primitive";
 import { hasWebGL2 } from "@/webgl/lane";
 import type { WaveformBands } from "@/webgl/waveform";
 

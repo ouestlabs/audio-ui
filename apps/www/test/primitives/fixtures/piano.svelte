@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Piano } from "@/registry/bases/shared/primitives/piano/svelte/index.ts";
+import { Piano } from "@/registry/primitives/piano/svelte/index.ts";
 
 /** The keyboard the shared suite drives: its options and whether its keys have labels. */
 let {

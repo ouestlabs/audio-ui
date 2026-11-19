@@ -19,8 +19,6 @@ import {
 } from "@/registry/bases/shared/devices/equalizer/device";
 import { gateDevice } from "@/registry/bases/shared/devices/gate/device";
 import { limiterDevice } from "@/registry/bases/shared/devices/limiter/device";
-import type { Breakpoint } from "@/registry/bases/shared/primitives/envelope/geometry";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -38,6 +36,8 @@ import {
   createArrangementState,
 } from "@/registry/lib/arrangement/arrangement-state";
 import { createZip, readZip } from "@/registry/lib/zip";
+import type { Breakpoint } from "@/registry/primitives/envelope/geometry";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */
 export interface DawprojectRecording {

@@ -13,7 +13,7 @@ import {
   PianoRollViewport,
 } from "@/registry/bases/shared/audio-ui/elements/piano-roll";
 import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 const DURATION = 32;
 const MIN_PITCH = 48;

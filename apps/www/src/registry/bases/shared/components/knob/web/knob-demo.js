@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/knob/web";
+import "@/registry/primitives/knob/web";
 
 /** Draws the knob into `element`, and returns what takes it away. */
 export default function knobWebDemo(element) {

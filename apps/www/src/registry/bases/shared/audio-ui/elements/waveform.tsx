@@ -9,8 +9,8 @@ import {
   useId,
   useRef,
 } from "react";
-import { Waveform as WaveformPrimitive } from "@/registry/bases/shared/primitives/waveform/react";
 import { cn } from "@/registry/lib/utils";
+import { Waveform as WaveformPrimitive } from "@/registry/primitives/waveform/react";
 
 /** Fades the canvas out at both ends, so bars don't stop on a hard edge. */
 const EDGE_FADE =

@@ -6,7 +6,7 @@ import type { WebpackOverrideFn } from "@remotion/bundler";
 // package scripts run from apps/video, so paths start from there.
 const root = path.resolve(process.cwd(), "../..");
 const www = path.join(root, "apps/www/src");
-const primitives = path.join(www, "registry/bases/shared/primitives");
+const primitives = path.join(www, "registry/primitives");
 
 /** `@/primitives/<name>` for every primitive, as www's tsconfig `paths` resolve it. */
 const primitiveFiles = Object.fromEntries(

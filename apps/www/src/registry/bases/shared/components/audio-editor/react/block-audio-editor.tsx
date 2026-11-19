@@ -113,10 +113,6 @@ import { useSilenceHover } from "@/registry/bases/shared/hooks/use-silence-hover
 import { useSoundReport } from "@/registry/bases/shared/hooks/use-sound-report";
 import { useStatusLine } from "@/registry/bases/shared/hooks/use-status-line";
 import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
-import {
   type Arranged,
   type ArrangementTrack,
   clipSegments,
@@ -164,6 +160,7 @@ import {
 } from "@/registry/lib/input/recording";
 import { cn } from "@/registry/lib/utils";
 import { webAudio } from "@/registry/lib/web-audio";
+import { createSource, type Source } from "@/registry/primitives/primitive";
 import { hasWebGL2 } from "@/webgl/lane";
 
 const TRACK = "track-1";

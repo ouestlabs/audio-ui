@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { detectPitch, type PitchEstimate } from "@/engine/analysis";
 import { cents } from "@/engine/pitch";
-import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
+import { createSource, type Source } from "@/registry/primitives/primitive";
 
 /** What a tuner shows: the note nearest the sound, and how far from it the sound is. */
 export interface PitchReading {

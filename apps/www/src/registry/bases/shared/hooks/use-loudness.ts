@@ -4,7 +4,7 @@ import {
   type LiveLoudness,
   type LoudnessMeter,
 } from "@/engine/analysis";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import { createSource } from "@/registry/primitives/primitive";
 
 const UNMEASURED: LiveLoudness = {
   integrated: Number.NEGATIVE_INFINITY,

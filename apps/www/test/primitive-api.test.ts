@@ -24,10 +24,7 @@ const PAGES: Record<string, string> = {
 const EXPORTED_OBJECT = /export const \w+ = \{([\s\S]*?)\};/;
 const EXPORTED_NAME = /(?:^|,)\s*(\w+)/g;
 
-const ADAPTERS = join(
-  import.meta.dir,
-  "../src/registry/bases/shared/primitives"
-);
+const ADAPTERS = join(import.meta.dir, "../src/registry/primitives");
 
 const apis = await build();
 

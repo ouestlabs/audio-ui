@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/waveform/web";
+import "@/registry/primitives/waveform/web";
 
 const DURATION_SECONDS = 180;
 

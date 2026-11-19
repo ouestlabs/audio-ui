@@ -7,7 +7,6 @@ import {
   type SelectionShape,
 } from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import type { createSource } from "@/registry/bases/shared/primitives/primitive";
 import type {
   Clipping,
   TimeSelection,
@@ -22,6 +21,7 @@ import {
   splice,
   typing,
 } from "@/registry/lib/arrangement/clip-edits";
+import type { createSource } from "@/registry/primitives/primitive";
 
 /**
  * The edits of the sound, as an audio editor makes them, each one step of

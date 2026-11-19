@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/meter/web";
+import "@/registry/primitives/meter/web";
 import { createSimulatedLevels } from "@/registry/lib/devices/simulated-levels";
 
 /** Draws the meter into `element`, and returns what takes it away. */

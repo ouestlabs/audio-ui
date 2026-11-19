@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
-import { Sequencer as SequencerPrimitive } from "@/registry/bases/shared/primitives/sequencer/react";
 import { cn } from "@/registry/lib/utils";
+import { Sequencer as SequencerPrimitive } from "@/registry/primitives/sequencer/react";
 
 /** The numbers 0 to length - 1, to make a part of each row or step from. */
 const indexes = (length: number) => Array.from({ length }, (_, index) => index);

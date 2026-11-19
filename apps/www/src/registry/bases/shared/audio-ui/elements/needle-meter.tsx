@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
+import { cn } from "@/registry/lib/utils";
 import {
   createVuBallistics,
   FLOOR_DB,
-} from "@/registry/bases/shared/primitives/meter/ballistics";
+} from "@/registry/primitives/meter/ballistics";
 import {
   levelPosition,
   vuDeflection,
-} from "@/registry/bases/shared/primitives/meter/levels";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
-import { cn } from "@/registry/lib/utils";
+} from "@/registry/primitives/meter/levels";
+import type { Source } from "@/registry/primitives/primitive";
 
 /** The reading a needle meter follows: the levels of its channels, in dB. */
 export interface NeedleMeterFrame {

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Knob } from "@/registry/bases/shared/primitives/knob/svelte/index";
+import { Knob } from "@/registry/primitives/knob/svelte/index";
 </script>
 
 <Knob.Root

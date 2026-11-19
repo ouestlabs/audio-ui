@@ -23,38 +23,38 @@
         "./src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
       "@/primitives/envelope": [
-        "./src/registry/bases/shared/primitives/envelope/envelope.ts"
+        "./src/registry/primitives/envelope/envelope.ts"
       ],
       "@/primitives/fader": [
-        "./src/registry/bases/shared/primitives/fader/fader.ts"
+        "./src/registry/primitives/fader/fader.ts"
       ],
       "@/primitives/knob": [
-        "./src/registry/bases/shared/primitives/knob/knob.ts"
+        "./src/registry/primitives/knob/knob.ts"
       ],
       "@/primitives/meter": [
-        "./src/registry/bases/shared/primitives/meter/meter.ts"
+        "./src/registry/primitives/meter/meter.ts"
       ],
-      "@/primitives/pad": ["./src/registry/bases/shared/primitives/pad/pad.ts"],
+      "@/primitives/pad": ["./src/registry/primitives/pad/pad.ts"],
       "@/primitives/piano": [
-        "./src/registry/bases/shared/primitives/piano/piano.ts"
+        "./src/registry/primitives/piano/piano.ts"
       ],
       "@/primitives/piano-roll": [
-        "./src/registry/bases/shared/primitives/piano-roll/piano-roll.ts"
+        "./src/registry/primitives/piano-roll/piano-roll.ts"
       ],
       "@/primitives/plot": [
-        "./src/registry/bases/shared/primitives/plot/plot.ts"
+        "./src/registry/primitives/plot/plot.ts"
       ],
       "@/primitives/sequencer": [
-        "./src/registry/bases/shared/primitives/sequencer/sequencer.ts"
+        "./src/registry/primitives/sequencer/sequencer.ts"
       ],
       "@/primitives/timeline": [
-        "./src/registry/bases/shared/primitives/timeline/timeline.ts"
+        "./src/registry/primitives/timeline/timeline.ts"
       ],
       "@/primitives/waveform": [
-        "./src/registry/bases/shared/primitives/waveform/waveform.ts"
+        "./src/registry/primitives/waveform/waveform.ts"
       ],
       "@/primitives/xypad": [
-        "./src/registry/bases/shared/primitives/xypad/xypad.ts"
+        "./src/registry/primitives/xypad/xypad.ts"
       ],
       "@/engine/*": ["./src/registry/lib/engine/*/index.ts"],
       "@/webgl/*": ["./src/registry/lib/webgl/*/index.ts"],

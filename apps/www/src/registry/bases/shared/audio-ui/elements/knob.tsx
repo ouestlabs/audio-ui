@@ -1,7 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps, ReactNode } from "react";
-import { Knob as KnobPrimitive } from "@/registry/bases/shared/primitives/knob/react";
 import { cn } from "@/registry/lib/utils";
+import { Knob as KnobPrimitive } from "@/registry/primitives/knob/react";
 
 const knobVariants = cva(
   "cn-knob relative inline-flex outline-none data-disabled:cursor-not-allowed",

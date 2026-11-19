@@ -6,10 +6,7 @@ import {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "@/engine/analysis";
-import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
+import { createSource, type Source } from "@/registry/primitives/primitive";
 
 export interface UseSpectrumOptions extends LogSpectrumOptions {
   /** How many points the spectrum has, spread along a log frequency axis. @default 160 */

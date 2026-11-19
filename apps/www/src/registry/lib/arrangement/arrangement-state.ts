@@ -1,19 +1,4 @@
 import { type SignatureChange, secondsPerBar, type Tempo } from "@/engine/time";
-import type { Breakpoint } from "@/registry/bases/shared/primitives/envelope/geometry";
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
-import {
-  type ClipValue,
-  copyRange,
-  coverClips,
-  duplicateClip,
-  type FadeShape,
-  insertTime,
-  moveClip,
-  removeTime,
-  setClipFadeShape,
-  splitClip,
-  trimClipEnd,
-} from "@/registry/bases/shared/primitives/timeline/clip";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -57,6 +42,21 @@ import {
   settleChange,
   undo,
 } from "@/registry/lib/arrangement/undo-history";
+import type { Breakpoint } from "@/registry/primitives/envelope/geometry";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
+import {
+  type ClipValue,
+  copyRange,
+  coverClips,
+  duplicateClip,
+  type FadeShape,
+  insertTime,
+  moveClip,
+  removeTime,
+  setClipFadeShape,
+  splitClip,
+  trimClipEnd,
+} from "@/registry/primitives/timeline/clip";
 
 /**
  * A new id for a piece of the clip `id`: the first `-n` after it that no clip

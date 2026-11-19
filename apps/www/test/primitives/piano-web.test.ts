@@ -1,5 +1,5 @@
-import { pitchName } from "@/registry/bases/shared/primitives/pitch";
-import "@/registry/bases/shared/primitives/piano/web/index.ts";
+import { pitchName } from "@/registry/primitives/pitch";
+import "@/registry/primitives/piano/web/index.ts";
 import { type PianoTree, pianoSuite } from "./piano-suite.ts";
 
 const kebab = (name: string) =>

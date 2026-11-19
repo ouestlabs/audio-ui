@@ -5,7 +5,7 @@
  * lights its step, with how late it is, and the piano roll shows the same
  * notes.
  */
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 /** A row and a step of a grid. */
 export interface StepCell {

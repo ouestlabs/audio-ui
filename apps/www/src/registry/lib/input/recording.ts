@@ -5,11 +5,11 @@
  * undo takes the whole take away (REC-007, REC-009, REC-010).
  */
 
-import type { Note } from "@/registry/bases/shared/primitives/piano-roll/edits";
 import {
   type Arranged,
   withEdgeFades,
 } from "@/registry/lib/arrangement/arrangement";
+import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 /** What came in from an input, block by block: each block's first frame on the audio clock, and its channels. */
 export interface RecordedBlock {

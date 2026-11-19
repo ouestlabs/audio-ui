@@ -82,16 +82,6 @@ import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
 import type { TransportRegion } from "@/registry/bases/shared/hooks/use-transport-clock";
 import { useUndoHistory } from "@/registry/bases/shared/hooks/use-undo-history";
 import {
-  findNotes,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-  type NoteQuery,
-  selectionSpan,
-  toggleMuted,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
-import { pitchClassName } from "@/registry/bases/shared/primitives/pitch";
-import {
   applyNoteEdit,
   canApplyNoteEdit,
   type NoteEdit,
@@ -103,6 +93,16 @@ import {
 } from "@/registry/lib/notes/note-edits";
 import { cn } from "@/registry/lib/utils";
 import { webAudio } from "@/registry/lib/web-audio";
+import {
+  findNotes,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+  type NoteQuery,
+  selectionSpan,
+  toggleMuted,
+} from "@/registry/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry/primitives/pitch";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;

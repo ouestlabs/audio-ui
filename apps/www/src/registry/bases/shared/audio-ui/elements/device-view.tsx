@@ -46,7 +46,6 @@ import {
   useAutomatedDevice,
   useAutomatedRack,
 } from "@/registry/bases/shared/hooks/use-track-automation";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -67,6 +66,7 @@ import { trackOf } from "@/registry/lib/arrangement/arrangement-state";
 import { libraryDevice } from "@/registry/lib/devices/device-library";
 import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { DRUM_KIT_PADS, drumKit } from "@/registry/lib/drums/drum-kit";
+import type { Source } from "@/registry/primitives/primitive";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

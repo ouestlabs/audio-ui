@@ -12,15 +12,9 @@ import type {
   DeviceTaps,
   ParameterDescriptor,
 } from "@/engine/device";
-import {
-  createFrameTask,
-  type FrameTask,
-} from "@/registry/bases/shared/primitives/frame";
-import type { MeterFrame } from "@/registry/bases/shared/primitives/meter/levels";
-import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
+import { createFrameTask, type FrameTask } from "@/registry/primitives/frame";
+import type { MeterFrame } from "@/registry/primitives/meter/levels";
+import { createSource, type Source } from "@/registry/primitives/primitive";
 
 /** The level a meter of silence reads, in dB. */
 const SILENCE_DB = -100;

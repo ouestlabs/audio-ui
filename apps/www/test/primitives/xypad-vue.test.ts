@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { XYPad } from "@/registry/bases/shared/primitives/xypad/vue/index.ts";
+import { XYPad } from "@/registry/primitives/xypad/vue/index.ts";
 import { xypadSuite } from "./xypad-suite.ts";
 
 xypadSuite("Vue", async ({ label, options, thumbLabel }) => {

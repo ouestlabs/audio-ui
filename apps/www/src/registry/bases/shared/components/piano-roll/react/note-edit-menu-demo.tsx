@@ -19,10 +19,6 @@ import {
   PianoRollViewport,
 } from "@/registry/bases/shared/audio-ui/elements/piano-roll";
 import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import type {
-  Note,
-  NoteId,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -31,6 +27,7 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/registry/lib/notes/note-edits";
+import type { Note, NoteId } from "@/registry/primitives/piano-roll/edits";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 60 };
 

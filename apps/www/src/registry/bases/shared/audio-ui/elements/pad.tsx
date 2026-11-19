@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties } from "react";
-import { Pad as PadPrimitive } from "@/registry/bases/shared/primitives/pad/react";
 import { cn } from "@/registry/lib/utils";
+import { Pad as PadPrimitive } from "@/registry/primitives/pad/react";
 
 type PadProps = Omit<
   ComponentProps<typeof PadPrimitive.Root>,

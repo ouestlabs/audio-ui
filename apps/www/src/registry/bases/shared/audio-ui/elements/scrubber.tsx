@@ -2,9 +2,9 @@ import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/engine/format";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
-import { Timeline as TimelinePrimitive } from "@/registry/bases/shared/primitives/timeline/react";
 import { cn } from "@/registry/lib/utils";
+import type { Source } from "@/registry/primitives/primitive";
+import { Timeline as TimelinePrimitive } from "@/registry/primitives/timeline/react";
 
 /** The thumb stays inside the bar, as a slider's does: at either end its edge meets the bar's. */
 const THUMB_SIZE = "0.875rem";

@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/timeline/web";
+import "@/registry/primitives/timeline/web";
 
 /** Draws the timeline into `element`, and returns what takes it away. */
 export default function timelineWebDemo(element) {

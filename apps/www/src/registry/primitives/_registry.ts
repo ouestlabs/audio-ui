@@ -1,5 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
-import { primitiveItems, sharedItems } from "../../items";
+import { primitiveItems, sharedItems } from "../bases/items";
 
 export const primitives: RegistryItem[] = [
   ...primitiveItems(

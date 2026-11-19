@@ -7,7 +7,7 @@ import {
 } from "@/registry/bases/shared/lib/drum-synthesis";
 import { createStepPlayer } from "@/registry/bases/shared/lib/step-player";
 import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import { Sequencer } from "@/registry/bases/shared/primitives/sequencer/vue";
+import { Sequencer } from "@/registry/primitives/sequencer/vue";
 
 const STEPS = 16;
 const BPM = 112;

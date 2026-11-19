@@ -5,7 +5,7 @@ import {
   SpectrogramLane,
 } from "@/registry/bases/shared/audio-ui/elements/clip-spectrogram";
 import { WaveformLane } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import { createSource } from "@/registry/primitives/primitive";
 import type { SpectrogramScale } from "@/webgl/spectrogram";
 import type { WaveformClip, WaveformLayout } from "@/webgl/waveform";
 

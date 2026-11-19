@@ -5,8 +5,8 @@ import { audioUi } from "@/registry/bases/shared/audio-ui/_registry";
 import { components } from "@/registry/bases/shared/components/_registry";
 import { devices } from "@/registry/bases/shared/devices/_registry";
 import { hooks } from "@/registry/bases/shared/hooks/_registry";
-import { primitives } from "@/registry/bases/shared/primitives/_registry";
 import { lib } from "@/registry/lib/_registry";
+import { primitives } from "@/registry/primitives/_registry";
 import {
   compileSkill,
   readRules,
@@ -90,7 +90,7 @@ const registryNames = new Set(
 const engineModules = Object.keys(ENGINE_MODULES);
 const uiSource = (
   await Promise.all(
-    [`${ROOT}/apps/www/src/registry/bases/shared/primitives`].map((folder) =>
+    [`${ROOT}/apps/www/src/registry/primitives`].map((folder) =>
       read("**/*.{ts,tsx}", folder)
     )
   )
@@ -265,11 +265,11 @@ describe("skills/design styles", () => {
         .replace(
           INSTALLED_PRIMITIVE,
           (_, name) =>
-            `"${ROOT}/apps/www/src/registry/bases/shared/primitives/${name}/react/index.tsx"`
+            `"${ROOT}/apps/www/src/registry/primitives/${name}/react/index.tsx"`
         )
         .replace(
           INSTALLED_SHARED,
-          `"${ROOT}/apps/www/src/registry/bases/shared/primitives/primitive.ts"`
+          `"${ROOT}/apps/www/src/registry/primitives/primitive.ts"`
         )
     );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());
