@@ -123,7 +123,7 @@ A base is a complete set of components over one library of behaviors: focus, key
 
 | Base | Style in `components.json` | Behaviors from |
 | --- | --- | --- |
-| `base` | `base-nova` | The components shadcn ships for your project |
+| `base` | `base-nova` | `@base-ui/react` |
 | `ui-sdk` | `ui-sdk-nova` | `@ui-sdk/react` |
 
 The style you set chooses. Every item installs the same way, `npx shadcn@latest add @audio-ui/knob`, and the base decides what comes with it: the ui components an item uses (button, select, dialog, menus) and the items that name a library, such as the rocker switch and the parameter field, which have a variant in each base. Pick one base for a project: files of the other bring their own library along.
@@ -134,7 +134,7 @@ The style you set chooses. Every item installs the same way, `npx shadcn@latest 
 }
 ```
 
-The `ui-sdk` base publishes these ui components itself: accordion, alert dialog, avatar, badge, button, button group, calendar, carousel, checkbox, collapsible, combobox, command, context menu, dialog, drawer, dropdown menu, empty, hover card, input, input group, input OTP, item, kbd, menubar, navigation menu, pagination, popover, progress, radio group, resizable, scroll area, select, separator, sheet, slider, switch, tabs, textarea, toast (shadcn's sonner), toggle, toggle group, toolbar and tooltip. Those with no behavior library of their own (alert, card, field, label, skeleton, table…) come from shadcn. Any other component you add comes from shadcn, over the library of your project.
+Each base publishes these ui components itself, over its own library: accordion, alert dialog, avatar, badge, button, button group, calendar, carousel, checkbox, collapsible, combobox, command, context menu, dialog, drawer, dropdown menu, empty, hover card, input, input group, input OTP, item, kbd, menubar, navigation menu, pagination, popover, progress, radio group, resizable, scroll area, select, separator, sheet, slider, switch, tabs, textarea, toast (sonner on `base`), toggle, toggle group, toolbar and tooltip. Those with no behavior library of their own (alert, card, field, label, skeleton, table…) come from shadcn. Any other component you add comes from shadcn, over the library of your project.
 
 On `ui-sdk`, declare its layer first in your global stylesheet, above Tailwind's import, so your own styles win over its behavior CSS:
 

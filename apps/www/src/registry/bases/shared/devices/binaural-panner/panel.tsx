@@ -5,21 +5,21 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
-} from "@/registry/bases/shared/audio/elements/plot";
-import { StereoFieldLayer } from "@/registry/bases/shared/audio/elements/stereo-field";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
+import { StereoFieldLayer } from "@/registry/bases/shared/audio-ui/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type BinauralPannerState,
   binauralPannerDevice,
   binauralPlace,
   binauralPoint,
 } from "@/registry/bases/shared/devices/binaural-panner/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = binauralPannerDevice.parameters

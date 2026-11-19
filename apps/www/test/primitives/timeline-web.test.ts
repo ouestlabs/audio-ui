@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/timeline/web/index.ts";
+import "@/registry/primitives/timeline/web/index.ts";
 import { flush } from "./helpers.ts";
 import { type TimelineTree, timelineSuite } from "./timeline-suite.ts";
 

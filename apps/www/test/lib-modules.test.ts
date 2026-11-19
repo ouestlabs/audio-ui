@@ -2,12 +2,12 @@ import { expect, test } from "bun:test";
 import { MODULE_SETS } from "@/registry/bases/modules";
 
 /**
- * The items of the engine and of gl list each module's files, the npm packages
+ * The items of the engine and of webgl list each module's files, the npm packages
  * they import and the other modules they reach: the folders decide, so a file
  * added, removed or importing something new shows here first.
  */
 
-const LIB = `${import.meta.dir}/../src/registry/bases/shared/lib`;
+const LIB = `${import.meta.dir}/../src/registry/lib`;
 // A static import or export, and a dynamic `import("…")`.
 const SPECIFIER = /(?:from\s+"|import\(\s*")([^"]+)"/g;
 const NOT_SHIPPED = /\.(?:test|bench)\.ts$/;

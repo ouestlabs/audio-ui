@@ -11,7 +11,7 @@ All paths below are under `apps/www/src/registry/bases/shared/` unless they star
 
 | You are adding | File | `_registry.ts` | Item `type` |
 | --- | --- | --- | --- |
-| A styled element over a primitive | `audio/elements/<name>.tsx` | `audio/_registry.ts` | `registry:ui` |
+| A styled element over a primitive | `audio-ui/elements/<name>.tsx` | `audio-ui/_registry.ts` | `registry:ui` |
 | A device: its state, its engine, its face (controlled, no audio) | `devices/<name>/device.ts`, `engine.ts`, `panel.tsx` | `devices/_registry.ts` | `registry:lib`, `registry:lib`, `registry:ui` |
 | A composed screen | `components/<category>/react/block-<component>-<variant>.tsx` | `components/_registry.ts` | `registry:block` |
 | A focused example for the docs | `components/<category>/react/<component>-<feature>-demo.tsx` (the Vue, Svelte and web ones are `<component>-demo.vue`, `.svelte` and `.ts` in `vue/`, `svelte/` and `web/`) | `components/_registry.ts` | `registry:example` |
@@ -23,7 +23,7 @@ Before writing, open the closest existing item of the same kind and copy its sha
 ## 2. Write it
 
 - Elements add appearance only. Behavior (pointer, keyboard, ARIA, value logic) belongs in the primitive: if you need new behavior, switch to the `change-primitive` skill.
-- Import audio elements from `@/registry/bases/shared/audio/elements/...` and ui parts from `@/components/ui/<name>` (each base provides them). An element whose file names a behavior library has a variant in `bases/base/` and `bases/ui-sdk/`, imported as `@/components/audio-ui/<name>`.
+- Import audio elements from `@/registry/bases/shared/audio-ui/elements/...` and ui parts from `@/components/ui/<name>` (each base provides them: a new ui component is written in both `bases/base/ui/` and `bases/ui-sdk/ui/`). An element whose file names a behavior library has a variant in `bases/base/` and `bases/ui-sdk/`, imported as `@/components/audio-ui/<name>`.
 - Live signals (playheads, meters, spectra) go through a source or a ref, never a `setState` per frame.
 - Set a Web Audio parameter with `setTargetAtTime`, not `.value =`, so a drag never clicks.
 - Reuse the shared audio glue listed in `AGENTS.md` ("Shared audio glue"): an engine loads its worklet with `loadWorklet` (`lib/audio-worklet`), an instrument block plays chords with `usePolyphony`. Add the item to `registryDependencies`.
@@ -37,7 +37,7 @@ Add the entry to the matching `_registry.ts`, through the factories of `bases/it
 - `files[].path` is relative to `bases/shared/`
 - `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's files (`device.ts`, `engine.ts`, `panel.tsx`; the audio.js its worklet runs comes from `@/lib/engine/kernels`, listed in `packages/engine/scripts/kernels.ts` and written by `bun run kernels:build` there, and the processors its description uses from `@/lib/engine/dsp`: never import an `@audio/*` atom in the registry) sit in `devices/<name>/` and install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Declare a device with one `deviceItems("<name>", { device, engine, panel })` in `devices/_registry.ts`: it makes the `<name>-device`, `<name>-engine` and `<name>-panel` items, their paths and targets, the dependencies every part has (the state, `device-panel`, `@audio-ui/react`) and the `<name>` item that installs all three. Everything else installs flat by its type.
 - `registryDependencies`: `"@audio-ui/<name>"` for our items, `"@shadcn/<name>"` for shadcn's
-- `dependencies`: the npm packages the file imports (`"zod"`; a module of the engine or of gl is imported as `@/engine/<module>` or `@/gl/<module>`, and the build adds its item)
+- `dependencies`: the npm packages the file imports (`"zod"`; a module of the engine or of webgl is imported as `@/engine/<module>` or `@/webgl/<module>`, and the build adds its item)
 - `categories` (blocks and demos): the category folder at least. A new category also goes in `bases/categories.ts` (label + description); a category with no items fails the build.
 
 Renaming or removing an item: also search for its old name in `apps/www/src/content/docs`, `skills/audio-ui/` and `apps/video/src/showcases`, since docs install commands and the shipped skill name items directly (`bun test test/skills.test.ts` catches the skill).

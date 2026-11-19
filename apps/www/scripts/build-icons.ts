@@ -24,7 +24,7 @@ const UNMAPPED_FILE = `${ICONS_DIR}/unmapped-icons.json`;
 const PLACEHOLDER_DIRS = [
   "src/registry/bases",
   "src/registry/bases/shared/components",
-  "src/registry/bases/shared/audio",
+  "src/registry/bases/shared/audio-ui",
 ].map((dir) => `${PROJECT_ROOT}/${dir}`);
 // Where plain icon arrays (`PREVIEW_ICONS`) live.
 const APP_DIR = `${PROJECT_ROOT}/src/components`;

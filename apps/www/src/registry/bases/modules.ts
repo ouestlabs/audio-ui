@@ -1,15 +1,15 @@
 /**
  * The engine and the GPU drawing as the registry ships them: one item per
- * module, `<set>-<module>` (`engine-time`, `gl-waveform`), from
- * `base/lib/<set>/<module>/`, installed to `lib/<set>/<module>/`. A file of the
+ * module, `<set>-<module>` (`engine-time`, `webgl-waveform`), from
+ * `registry/lib/<set>/<module>/`, installed to `lib/<set>/<module>/`. A file of the
  * registry imports a module as `@/<set>/<module>` (a tsconfig path), which the
  * build rewrites to `@/lib/<set>/<module>`, and the item that imports it gets
  * the module's item. `test/lib-modules.test.ts` keeps the lists below in step
  * with the folders.
  */
 
-const MODULE_IMPORT = /(["'])@\/(engine|gl)\/([a-z-]+)\1/g;
-const INSTALLED_MODULE_IMPORT = /["']@\/lib\/(engine|gl)\/([a-z-]+)["']/g;
+const MODULE_IMPORT = /(["'])@\/(engine|webgl)\/([a-z-]+)\1/g;
+const INSTALLED_MODULE_IMPORT = /["']@\/lib\/(engine|webgl)\/([a-z-]+)["']/g;
 
 /** A file of the registry imports a module where it installs: `@/engine/time` becomes `@/lib/engine/time`. */
 export function rewriteModuleImports(content: string) {
@@ -33,7 +33,7 @@ export interface LibModule {
   /** The npm packages its files import. */
   dependencies: string[];
   description: string;
-  /** Its files, by path from `base/lib/<set>/<module>/`. */
+  /** Its files, by path from `registry/lib/<set>/<module>/`. */
   files: string[];
   /** The other modules its files import. */
   modules: string[];
@@ -257,7 +257,7 @@ export const ENGINE_MODULES: Record<string, LibModule> = {
   },
 };
 
-export const GL_MODULES: Record<string, LibModule> = {
+export const WEBGL_MODULES: Record<string, LibModule> = {
   lane: {
     dependencies: [],
     description:
@@ -282,4 +282,7 @@ export const GL_MODULES: Record<string, LibModule> = {
 };
 
 /** Each set of modules, by the folder it is in and the prefix of its items. */
-export const MODULE_SETS = { engine: ENGINE_MODULES, gl: GL_MODULES } as const;
+export const MODULE_SETS = {
+  engine: ENGINE_MODULES,
+  webgl: WEBGL_MODULES,
+} as const;

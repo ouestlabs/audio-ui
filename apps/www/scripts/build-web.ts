@@ -15,7 +15,7 @@ import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dir, "..");
-const PRIMITIVES = join(ROOT, "src/registry/bases/shared/primitives");
+const PRIMITIVES = join(ROOT, "src/registry/primitives");
 const { version } = (await Bun.file(
   join(ROOT, "src/registry/web-version.json")
 ).json()) as { version: string };

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { SpectrumAnalyzer } from "@/registry/bases/shared/audio/elements/spectrum-analyzer";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
-import { useSpectrum } from "@/registry/bases/shared/hooks/use-spectrum";
-import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { EnvelopePoint } from "@/registry/bases/shared/lib/envelope-ramp";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { SpectrumAnalyzer } from "@/registry/bases/shared/audio-ui/elements/spectrum-analyzer";
+import { useSpectrum } from "@/registry/bases/shared/hooks/analysis/use-spectrum";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
+import { useSynthVoices } from "@/registry/bases/shared/hooks/devices/use-synth-voices";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
+import type { EnvelopePoint } from "@/registry/lib/devices/envelope-ramp";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const VOLUME = 0.4;
 /** A, E, A and E again: a fifth, so the harmonics of the notes meet on the spectrum. */

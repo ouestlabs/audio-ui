@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/envelope/web";
+import "@/registry/primitives/envelope/web";
 
 /** Draws the envelope into `element`, and returns what takes it away. The points and the curve handles are made for you: styled here from their tags. */
 export default function envelopeWebDemo(element) {

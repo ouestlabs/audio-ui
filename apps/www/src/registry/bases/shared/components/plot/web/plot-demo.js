@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/plot/web";
+import "@/registry/primitives/plot/web";
 
 const response = (hz, point) =>
   point.y * Math.exp(-(Math.log2(hz / point.x) ** 2));

@@ -21,7 +21,7 @@ Changes to the published package (`packages/icons`) require a changeset (`bun ru
 
 ## The Two Registry Trees
 
-`apps/www/src/registry/` is the one registry tree: the design system (styles, icons, fonts, themes, started from shadcn/ui and now audio/ui's own) and, in `bases/`, the audio components, blocks, demos, hooks and lib, plus the ui components of the `ui-sdk` base. It is all editable, and `bases/` is where contributions go.
+`apps/www/src/registry/` is the one registry tree: the design system (styles, icons, fonts, themes, started from shadcn/ui and now audio/ui's own) and, in `bases/`, the audio components, blocks, demos, hooks and lib, plus the ui components of each base. It is all editable, and `bases/` is where contributions go.
 
 ### `src/registry/bases/` layout
 
@@ -29,11 +29,11 @@ Changes to the published package (`packages/icons`) require a changeset (`bun ru
 apps/www/src/registry/bases/
 ├── bases/
 │   ├── base/
-│   │   ├── audio/               # Styled audio components
+│   │   ├── audio-ui/            # Styled audio components
 │   │   │   ├── player.tsx       # AudioPlayer, AudioQueue, AudioTrack... (composable subcomponents)
 │   │   │   ├── sortable-list.tsx
 │   │   │   ├── elements/        # transport, fader, knob, xypad, channel-strip
-│   │   │   └── _registry.ts     # export const audio: RegistryItem[]
+│   │   │   └── _registry.ts     # export const audioUi: RegistryItem[]
 │   │   ├── components/          # Catalog: blocks + demos, grouped by category folder
 │   │   │   ├── player/          #   block-player.tsx, player-demo.tsx, ...
 │   │   │   ├── knob/            #   knob-demo.tsx, knob-size-variants-demo.tsx, ...
@@ -51,18 +51,18 @@ apps/www/src/registry/bases/
 └── (the style hooks of the audio components: styles/audio/style-{vega,nova,maia,lyra,mira,luma,rhea,sera}.css)
 ```
 
-The audio items live in `bases/shared/`, served by every base; `bases/base/` and `bases/ui-sdk/` hold only what names their behavior library. File paths inside each `_registry.ts` are **relative to its base folder** (`bases/shared/` for the audio items) (e.g. `components/knob/knob-demo.tsx`, `audio/elements/fader.tsx`).
+The audio items live in `bases/shared/`, served by every base; `bases/base/` and `bases/ui-sdk/` hold only what names their behavior library. File paths inside each `_registry.ts` are **relative to its base folder** (`bases/shared/` for the audio items) (e.g. `components/knob/knob-demo.tsx`, `audio-ui/elements/fader.tsx`).
 
 ### Registry item types
 
 | Type                 | What                                            | Where                          |
 | -------------------- | ----------------------------------------------- | ------------------------------ |
-| `registry:ui`        | Styled element wrappers (fader, knob, transport, xypad, sortable-list) | `bases/shared/audio/`            |
-| `registry:component` | Larger assemblies (player, channel-strip)       | `bases/shared/audio/`            |
+| `registry:ui`        | Styled element wrappers (fader, knob, transport, xypad, sortable-list) | `bases/shared/audio-ui/`            |
+| `registry:component` | Larger assemblies (player, channel-strip)       | `bases/shared/audio-ui/`            |
 | `registry:block`     | Pre-assembled patterns (`block-*.tsx`)          | `bases/shared/components/{category}/react/` |
 | `registry:example`   | Focused demos (`*-demo.tsx`)                    | `bases/shared/components/{category}/react/` |
 | `registry:hook`      | Hooks (`use-audio`, `use-sound`)                | `bases/shared/hooks/`            |
-| `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `bases/shared/lib/`              |
+| `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `registry/lib/`                  |
 
 Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `name` in `_registry.ts` is the install name and doesn't have to match the file name (e.g. `store` → `lib/audio-store.ts`, `html` → `lib/html-audio.ts`). Components land in the user's `components/audio-ui/` and are imported as `@/components/audio-ui/{name}`; hooks go to `hooks/`, libs to `lib/`, blocks to `components/examples/`.
 
@@ -105,15 +105,15 @@ The site is TanStack Start, where the directive means nothing: leave it out of e
 **Audio components, from `registry`:**
 
 ```tsx
-import { AudioPlayer, AudioPlayerPlay } from "@/registry/bases/shared/audio/player";
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
+import { AudioPlayer, AudioPlayerPlay } from "@/registry/bases/shared/audio-ui/player";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 ```
 
 **ui components, by where they install (each base provides them):**
 
 ```tsx
 import { Button } from "@/components/ui/button";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 ```
 
 **React, named imports only, never the namespace:**
@@ -260,7 +260,7 @@ Every registry item is declared in the `_registry.ts` of its folder. Blocks and 
 ```ts
 registryDependencies: [
   "@audio-ui/{name}",  // audio/ui item (component, hook, or lib) → @audio-ui/name
-  "@shadcn/{name}", // official shadcn/ui component            → @shadcn/name
+  "@shadcn/{name}", // shadcn/ui component, each base answers with its own → @audio-ui/name
 ]
 ```
 
@@ -328,7 +328,7 @@ bun run lint:fix
 
 - File at `src/registry/bases/shared/components/{category}/react/block-{component}-{variant}.tsx`
 - Default export named `Block{ComponentVariant}` matching the filename
-- Audio components imported from `@/registry/bases/shared/audio/...`
+- Audio components imported from `@/registry/bases/shared/audio-ui/...`
 - ui components imported from `@/components/ui/<name>`
 - Icons via `IconPlaceholder` with all five library props, sized with `className`
 - `aria-label` on all icon-only interactive elements

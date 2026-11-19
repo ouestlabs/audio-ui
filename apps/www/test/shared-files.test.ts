@@ -11,7 +11,7 @@ import { SHARED_ITEMS } from "@/registry/bases/primitives";
  * run `UPDATE_SHARED_EXPORTS=1 bun test test/shared-files.test.ts`.
  */
 
-const PRIMITIVES = `${import.meta.dir}/../src/registry/bases/shared/primitives`;
+const PRIMITIVES = `${import.meta.dir}/../src/registry/primitives`;
 const BASELINE = `${import.meta.dir}/fixtures/shared-exports.json`;
 const DECLARATION =
   /^export\s+(?:declare\s+)?(?:abstract\s+)?(?:const|let|function\*?|async function|class|interface|type|enum)\s+([A-Za-z_$][\w$]*)/gm;

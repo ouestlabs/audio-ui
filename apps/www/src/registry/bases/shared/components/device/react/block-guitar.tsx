@@ -7,9 +7,9 @@ import {
 } from "@/registry/bases/shared/devices/guitar/device";
 import { createGuitarEngine } from "@/registry/bases/shared/devices/guitar/engine";
 import { GuitarPanel } from "@/registry/bases/shared/devices/guitar/panel";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
-import { usePolyphony } from "@/registry/bases/shared/hooks/use-polyphony";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { usePolyphony } from "@/registry/bases/shared/hooks/devices/use-polyphony";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */
 const PANEL_NOTE = "panel";

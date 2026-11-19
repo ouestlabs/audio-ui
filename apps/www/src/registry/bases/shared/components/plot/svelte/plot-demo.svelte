@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Plot } from "@/registry/bases/shared/primitives/plot/svelte/index";
+import { Plot } from "@/registry/primitives/plot/svelte/index";
 
 let peak = $state({ x: 1000, y: 6 });
 const response = (hz: number, point: { x: number; y: number }) =>

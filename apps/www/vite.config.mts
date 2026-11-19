@@ -71,7 +71,7 @@ export default defineConfig({
         find: `@/components/audio-ui/${name}`,
         replacement: fileURLToPath(
           new URL(
-            `./src/registry/bases/ui-sdk/audio/elements/${name}.tsx`,
+            `./src/registry/bases/ui-sdk/audio-ui/elements/${name}.tsx`,
             import.meta.url
           )
         ),

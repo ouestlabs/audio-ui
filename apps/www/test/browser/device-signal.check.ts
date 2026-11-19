@@ -4,8 +4,8 @@ import { createCompressorEngine } from "@/registry/bases/shared/devices/compress
 import {
   createDeviceSignal,
   type SignalTarget,
-} from "@/registry/bases/shared/lib/device-signal";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/devices/device-signal";
+import type { Source } from "@/registry/primitives/primitive";
 import { assert, check } from "./harness.ts";
 
 const effect = defineDevice({

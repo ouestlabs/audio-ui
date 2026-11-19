@@ -13,8 +13,8 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
 const WEB = join(import.meta.dir, "..");
-const PRIMITIVES = join(WEB, "src/registry/bases/shared/primitives");
-const ADAPTERS = join(WEB, "src/registry/bases/shared/primitives");
+const PRIMITIVES = join(WEB, "src/registry/primitives");
+const ADAPTERS = join(WEB, "src/registry/primitives");
 export const MANIFEST = join(
   WEB,
   "src/lib/docs/content/primitive-api.generated.json"

@@ -1,6 +1,6 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import { formatFrequency, formatLevel } from "@/engine/format";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import {
   Plot,
   PlotArea,
@@ -9,20 +9,20 @@ import {
   PlotGraph,
   PlotGrid,
   PlotTraceArea,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   GRAPHIC_EQ_BANDS,
   type GraphicEqState,
   graphicEqCurve,
   graphicEqDevice,
 } from "@/registry/bases/shared/devices/graphic-eq/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

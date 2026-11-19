@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { Envelope } from "@/registry/bases/shared/primitives/envelope/vue";
+import { Envelope } from "@/registry/primitives/envelope/vue";
 
 const points = ref([
   { x: 0, y: 0 },

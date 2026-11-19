@@ -1,6 +1,6 @@
 /**
  * The site's sections: the Docs (what the reader learns first, and what makes
- * the sound: the guides, the hooks, the libraries, the engine and gl), the
+ * the sound: the guides, the hooks, the libraries, the engine and webgl), the
  * components, with the primitives they install for each framework, and the
  * icons, with theirs.
  * The switcher at the top of the sidebar lists them. A section gathers top-level folders of the
@@ -10,7 +10,7 @@
 export const DOCS_SECTIONS = [
   {
     description: "Get started, guides, hooks, libraries and the engine",
-    folders: ["(root)", "guides", "hooks", "lib", "engine", "gl"],
+    folders: ["(root)", "guides", "hooks", "lib", "engine", "webgl"],
     href: "/docs",
     id: "docs",
     label: "Docs",

@@ -13,7 +13,7 @@ import { Frame } from "@/components/site/layout/frame";
 import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
 import { getRegistryItemMetadata } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
-import { AudioSessionProvider } from "@/registry/bases/shared/hooks/use-audio-session";
+import { AudioSessionProvider } from "@/registry/bases/shared/hooks/input/use-audio-session";
 
 export function ComponentPreviewTabs({
   className,

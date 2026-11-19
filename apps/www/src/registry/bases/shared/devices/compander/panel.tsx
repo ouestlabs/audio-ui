@@ -6,12 +6,12 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   COMPANDER_POINTS,
   COMPANDER_POINTS_DB,
@@ -22,8 +22,8 @@ import {
 import {
   curveDot,
   type DeviceSignal,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+} from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -90;
 const MAX_DB = 0;

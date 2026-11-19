@@ -7,19 +7,19 @@ import {
   PlotGraph,
   PlotGrid,
   PlotTraceArea,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type StutterState,
   stutterCycle,
   stutterDevice,
 } from "@/registry/bases/shared/devices/stutter/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = stutterDevice.parameters

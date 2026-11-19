@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/envelope/web/index.ts";
+import "@/registry/primitives/envelope/web/index.ts";
 import { type EnvelopeTree, envelopeSuite } from "./envelope-suite.ts";
 
 const kebab = (name: string) =>

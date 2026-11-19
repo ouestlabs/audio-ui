@@ -1,12 +1,12 @@
 import { type ReactNode, useCallback } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   TAPE_KEYS_HIGHEST,
   TAPE_KEYS_LOWEST,
@@ -14,7 +14,7 @@ import {
   type TapeKeysState,
   tapeKeysDevice,
 } from "@/registry/bases/shared/devices/tape-keys/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Timeline } from "@/registry/bases/shared/primitives/timeline/vue";
+import { Timeline } from "@/registry/primitives/timeline/vue";
 </script>
 
 <template>

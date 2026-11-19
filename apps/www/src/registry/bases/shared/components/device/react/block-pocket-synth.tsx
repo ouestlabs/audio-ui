@@ -6,8 +6,8 @@ import {
 } from "@/registry/bases/shared/devices/pocket-synth/device";
 import { createPocketSynthEngine } from "@/registry/bases/shared/devices/pocket-synth/engine";
 import { PocketSynthPanel } from "@/registry/bases/shared/devices/pocket-synth/panel";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 /**
  * A synth you can plug in: its state, a panel that draws and plays it and an

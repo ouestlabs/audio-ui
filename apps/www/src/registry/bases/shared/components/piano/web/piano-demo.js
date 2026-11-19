@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/piano/web";
+import "@/registry/primitives/piano/web";
 
 const MIN_PITCH = 48;
 const MAX_PITCH = 72;

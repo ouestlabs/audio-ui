@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Fader } from "@/registry/bases/shared/primitives/fader/vue/index.ts";
+import { Fader } from "@/registry/primitives/fader/vue/index.ts";
 import { faderSuite } from "./fader-suite.ts";
 
 faderSuite("Vue", async ({ label, marks, options, thumbLabel }) => {

@@ -12,15 +12,15 @@
  */
 
 import * as React from "react";
-import { audio as baseAudio } from "../../../registry/bases/base/audio/_registry";
+import { audioUi as baseAudio } from "../../../registry/bases/base/audio-ui/_registry";
 import componentsManifest from "../../../registry/bases/components.json";
 import registryStats from "../../../registry/bases/registry.json";
 import registrySeo from "../../../registry/bases/seo.json";
-import { audio } from "../../../registry/bases/shared/audio/_registry";
+import { audioUi } from "../../../registry/bases/shared/audio-ui/_registry";
 import { components } from "../../../registry/bases/shared/components/_registry";
 import { devices } from "../../../registry/bases/shared/devices/_registry";
-import { lib } from "../../../registry/bases/shared/lib/_registry";
-import { audio as sdkAudio } from "../../../registry/bases/ui-sdk/audio/_registry";
+import { audioUi as sdkAudio } from "../../../registry/bases/ui-sdk/audio-ui/_registry";
+import { lib } from "../../../registry/lib/_registry";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -234,7 +234,7 @@ function getStats(): StatsData {
 }
 
 /** The items no behavior library names, which every base serves from `bases/shared/`. */
-const SHARED: unknown[][] = [audio, devices, components, lib];
+const SHARED: unknown[][] = [audioUi, devices, components, lib];
 
 /** The items of each base whose files name its behavior library, by the same name and path in each. */
 const SUB_REGISTRIES: Record<string, unknown[][]> = {
@@ -373,7 +373,7 @@ export function getComponent(
     return null;
   }
 
-  // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
+  // The path in the metadata is relative to the base, e.g. "audio-ui/elements/knob.tsx".
   const origin = ORIGINS[base]?.[name] ?? base;
   const path = `../../../registry/bases/${origin}/${item.files[0].path}`;
   const loadFramework = frameworkModules[path];

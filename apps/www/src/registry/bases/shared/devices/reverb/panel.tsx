@@ -16,20 +16,20 @@ import {
   PlotGrid,
   PlotHandle,
   PlotTraceArea,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   DECAY_DB,
   type ReverbState,
   reverbDecay,
   reverbDevice,
 } from "@/registry/bases/shared/devices/reverb/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** How much time the plot shows: the longest decay is 10 s, after the longest pre-delay. */
 const WINDOW_SECONDS = 10.5;

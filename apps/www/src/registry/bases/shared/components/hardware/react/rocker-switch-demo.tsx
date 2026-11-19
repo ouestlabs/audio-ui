@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { RockerSwitch } from "@/components/audio-ui/rocker-switch";
-import { Led } from "@/registry/bases/shared/audio/elements/led";
+import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
 
 export default function RockerSwitchDemo() {
   const [power, setPower] = useState(true);

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { Plot } from "@/registry/bases/shared/primitives/plot/vue";
+import { Plot } from "@/registry/primitives/plot/vue";
 
 const peak = ref({ x: 1000, y: 6 });
 const response = (hz: number, point: { x: number; y: number }) =>

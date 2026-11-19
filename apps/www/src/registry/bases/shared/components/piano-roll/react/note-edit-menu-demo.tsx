@@ -8,7 +8,7 @@ import {
   NoteEditMenuContent,
   NoteEditMenuSub,
   NoteEditMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/note-edit-menu";
+} from "@/registry/bases/shared/audio-ui/elements/note-edit-menu";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -17,8 +17,8 @@ import {
   PianoRollVelocity,
   PianoRollVelocityScale,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
-import { Timeline } from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
+import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -26,11 +26,8 @@ import {
   PITCH_EDITS,
   TIME_EDITS,
   VELOCITY_EDITS,
-} from "@/registry/bases/shared/lib/note-edits";
-import type {
-  Note,
-  NoteId,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
+} from "@/registry/lib/notes/note-edits";
+import type { Note, NoteId } from "@/registry/primitives/piano-roll/edits";
 
 const BOUNDS = { duration: 16, maxPitch: 72, minLength: 1, minPitch: 60 };
 

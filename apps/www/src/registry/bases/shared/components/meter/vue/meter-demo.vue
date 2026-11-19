@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, onMounted } from "vue";
-import { createSimulatedLevels } from "@/registry/bases/shared/lib/simulated-levels";
-import { Meter } from "@/registry/bases/shared/primitives/meter/vue";
+import { createSimulatedLevels } from "@/registry/lib/devices/simulated-levels";
+import { Meter } from "@/registry/primitives/meter/vue";
 
 const simulated = createSimulatedLevels(2);
 let stop: (() => void) | undefined;

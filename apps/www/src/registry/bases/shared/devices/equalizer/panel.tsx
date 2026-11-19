@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { bandGainForHandle, bandHandleDb } from "@/engine/analysis";
 import { formatFrequency, formatLevel } from "@/engine/format";
-import { FilterTypeSelect } from "@/registry/bases/shared/audio/elements/filter-type-select";
+import { FilterTypeSelect } from "@/registry/bases/shared/audio-ui/elements/filter-type-select";
 import {
   Plot,
   PlotArea,
@@ -12,12 +12,12 @@ import {
   PlotGrid,
   PlotHandle,
   PlotTraceArea,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,
@@ -26,8 +26,8 @@ import {
   equalizerDevice,
   FILTER_TAKES,
 } from "@/registry/bases/shared/devices/equalizer/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

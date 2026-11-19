@@ -39,11 +39,11 @@ export const hooks: RegistryItem[] = [
       "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips",
     files: [
       {
-        path: "hooks/use-arrangement.ts",
+        path: "hooks/arrangement/use-arrangement.ts",
         type: "registry:hook",
       },
       {
-        path: "lib/arrangement-state.ts",
+        path: "lib/arrangement/arrangement-state.ts",
         type: "registry:lib",
       },
     ],
@@ -65,16 +65,16 @@ export const hooks: RegistryItem[] = [
       "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip. With the grip, the copy and the line where the track would land.",
     files: [
       {
-        path: "hooks/use-track-reorder.ts",
+        path: "hooks/arrangement/use-track-reorder.ts",
         type: "registry:hook",
       },
       {
-        path: "audio/elements/track-grip.tsx",
+        path: "audio-ui/elements/track-grip.tsx",
         type: "registry:ui",
       },
     ],
     name: "use-track-reorder",
-    registryDependencies: ["@audio-ui/sortable-drag"],
+    registryDependencies: ["@audio-ui/sortable-drag", "@audio-ui/bare-button"],
     type: "registry:hook",
   },
   hookItem("use-timeline-zoom", {
@@ -89,7 +89,7 @@ export const hooks: RegistryItem[] = [
       "A stretch of time on some tracks of an arrangement, drawn by dragging across bare lanes, with its overlay and what the keyboard does with it: copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time, each one step of undo.",
     files: [
       {
-        path: "hooks/use-time-selection.ts",
+        path: "hooks/timeline/use-time-selection.ts",
         type: "registry:hook",
       },
     ],
@@ -239,11 +239,11 @@ export const hooks: RegistryItem[] = [
       "The computer's keyboard as a keyboard of notes, as in a DAW: the middle row from A plays the white keys and the row above the black ones, by where the keys sit; Z and X move an octave, C and V the velocity.",
     files: [
       {
-        path: "hooks/use-computer-keyboard.ts",
+        path: "hooks/input/use-computer-keyboard.ts",
         type: "registry:hook",
       },
       {
-        path: "lib/computer-keyboard.ts",
+        path: "lib/input/computer-keyboard.ts",
         type: "registry:lib",
       },
     ],
@@ -270,7 +270,7 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio"],
     description:
       "A session of its own for a demo and its controls: a play switch and a microphone switch that nothing outside it follows. Holds no audio, so two previews on a page never play together. Outside a session the switches stay off.",
-    files: ["hooks/use-audio-session.tsx"],
+    files: ["hooks/input/use-audio-session.tsx"],
   }),
   hookItem("use-play-switch", {
     categories: ["hooks", "audio"],

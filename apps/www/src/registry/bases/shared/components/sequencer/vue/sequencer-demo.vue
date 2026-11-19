@@ -4,10 +4,10 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { createStepPlayer } from "@/registry/bases/shared/lib/step-player";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import { Sequencer } from "@/registry/bases/shared/primitives/sequencer/vue";
+} from "@/registry/lib/drums/drum-synthesis";
+import { createStepPlayer } from "@/registry/lib/drums/step-player";
+import { webAudio } from "@/registry/lib/web-audio";
+import { Sequencer } from "@/registry/primitives/sequencer/vue";
 
 const STEPS = 16;
 const BPM = 112;

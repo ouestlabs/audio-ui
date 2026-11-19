@@ -37,18 +37,18 @@ import {
 import {
   ArrangementView,
   shownLength,
-} from "@/registry/bases/shared/audio/elements/arrangement-view";
-import { Meter } from "@/registry/bases/shared/audio/elements/meter";
-import { TRACK_COLORS } from "@/registry/bases/shared/audio/elements/timeline";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
+} from "@/registry/bases/shared/audio-ui/elements/arrangement-view";
+import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
+import { TRACK_COLORS } from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
 import {
   ClipPanel,
   type ClipSettings,
-} from "@/registry/bases/shared/audio/panels/clip-panel";
+} from "@/registry/bases/shared/audio-ui/panels/clip-panel";
 import {
   MidiClipPanel,
   type MidiClipRegion,
-} from "@/registry/bases/shared/audio/panels/midi-clip-panel";
+} from "@/registry/bases/shared/audio-ui/panels/midi-clip-panel";
 import { channelEqDevice } from "@/registry/bases/shared/devices/channel-eq/device";
 import { compressorDevice } from "@/registry/bases/shared/devices/compressor/device";
 import { limiterDevice } from "@/registry/bases/shared/devices/limiter/device";
@@ -63,18 +63,18 @@ import {
   stringMachinePreset,
 } from "@/registry/bases/shared/devices/string-machine/device";
 import { vibeDevice } from "@/registry/bases/shared/devices/vibe/device";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { useTimeSelection } from "@/registry/bases/shared/hooks/use-time-selection";
-import { useTimelineCursor } from "@/registry/bases/shared/hooks/use-timeline-cursor";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { useTrackAutomation } from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
+import { useTimeSelection } from "@/registry/bases/shared/hooks/timeline/use-time-selection";
+import { useTimelineCursor } from "@/registry/bases/shared/hooks/timeline/use-timeline-cursor";
 import {
   GRID_KEYS,
   useTimelineGrid,
-} from "@/registry/bases/shared/hooks/use-timeline-grid";
-import { useTimelineMarkers } from "@/registry/bases/shared/hooks/use-timeline-markers";
-import { useTimelineZoom } from "@/registry/bases/shared/hooks/use-timeline-zoom";
-import { useTrackAutomation } from "@/registry/bases/shared/hooks/use-track-automation";
+} from "@/registry/bases/shared/hooks/timeline/use-timeline-grid";
+import { useTimelineMarkers } from "@/registry/bases/shared/hooks/timeline/use-timeline-markers";
+import { useTimelineZoom } from "@/registry/bases/shared/hooks/timeline/use-timeline-zoom";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -85,21 +85,21 @@ import {
   type TrackKind,
   UNITY_MIX,
   warpOnImport,
-} from "@/registry/bases/shared/lib/arrangement";
-import { renderTrackClips } from "@/registry/bases/shared/lib/arrangement-engine";
+} from "@/registry/lib/arrangement/arrangement";
+import { renderTrackClips } from "@/registry/lib/arrangement/arrangement-engine";
 import {
   audioClipsIn,
   MAIN_TRACK,
-} from "@/registry/bases/shared/lib/arrangement-state";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
+} from "@/registry/lib/arrangement/arrangement-state";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
 import {
   SONG_SCORE,
   SONG_TEMPO,
   type SongNote,
   type SongScorePart,
-} from "@/registry/bases/shared/lib/demo-song";
-import { drumKit } from "@/registry/bases/shared/lib/drum-kit";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/demo/demo-song";
+import { drumKit } from "@/registry/lib/drums/drum-kit";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const BARS = 24;
 

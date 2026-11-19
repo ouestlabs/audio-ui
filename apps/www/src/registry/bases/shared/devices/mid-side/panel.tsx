@@ -14,19 +14,19 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
-} from "@/registry/bases/shared/audio/elements/plot";
-import { StereoFieldLayer } from "@/registry/bases/shared/audio/elements/stereo-field";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
+import { StereoFieldLayer } from "@/registry/bases/shared/audio-ui/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type MidSideState,
   midSideDevice,
 } from "@/registry/bases/shared/devices/mid-side/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 const MIN_DB = -24;
 const MAX_DB = 12;

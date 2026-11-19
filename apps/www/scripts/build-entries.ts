@@ -14,8 +14,18 @@ import { MODULE_SETS } from "../src/registry/bases/modules.ts";
 
 const WEB = `${import.meta.dir}/..`;
 const SHARED = `${WEB}/src/registry/bases/shared`;
+const REGISTRY = `${WEB}/src/registry`;
+
+/** The folders at the registry root, which every base serves. */
+const ROOT_FOLDERS = ["lib", "primitives"];
+
+/** A registry file by its path: `lib/` and `primitives/` are at the registry root, the rest in `bases/shared/`. */
+const sourceOf = (path: string) =>
+  ROOT_FOLDERS.some((folder) => path.startsWith(`${folder}/`))
+    ? `${REGISTRY}/${path}`
+    : `${SHARED}/${path}`;
 export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
-const FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
+const FOLDERS = ["audio-ui", "devices", "hooks", "components", "lib"];
 
 const EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export (?:declare )?(?:async )?(function|const|interface|type|class) (\w+)/g;
@@ -71,7 +81,7 @@ export function exportsOf(source: string): EntryExport[] {
 /** Where a registry file installs in a project: an element to `components/audio-ui/`, a hook to `hooks/`, a lib to `lib/`. */
 export function installedPath(path: string) {
   const file = path.split("/").at(-1) ?? path;
-  if (path.startsWith("audio/")) {
+  if (path.startsWith("audio-ui/")) {
     return `components/audio-ui/${file}`;
   }
   return `${path.split("/")[0]}/${file}`;
@@ -81,13 +91,21 @@ export function installedPath(path: string) {
 const importOf = (path: string) =>
   `@/${installedPath(path).replace(EXTENSION, "")}`;
 
+const DASH_LETTER = /-([a-z])/g;
+
 async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
   const loaded = await Promise.all(
     folders.map(async (folder) => {
       const module = (await import(
-        `${SHARED}/${folder}/_registry.ts`
+        `${ROOT_FOLDERS.includes(folder) ? REGISTRY : SHARED}/${folder}/_registry.ts`
       )) as Record<string, RegistryItem[] | undefined>;
-      return module[folder] ?? [];
+      return (
+        module[
+          folder.replace(DASH_LETTER, (_, letter: string) =>
+            letter.toUpperCase()
+          )
+        ] ?? []
+      );
     })
   );
   return loaded.flat();
@@ -95,16 +113,16 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
 
 export async function buildEntries(): Promise<Entry[]> {
   const all = await loadItems(FOLDERS);
-  // A module of the engine or of gl has its page in its own section, headed by its module.
+  // A module of the engine or of webgl has its page in its own section, headed by its module.
   const own = (await loadItems(["hooks", "lib"])).filter(
     (item) =>
       (item.files?.length ?? 0) > 0 &&
-      !(item.name.startsWith("engine-") || item.name.startsWith("gl-"))
+      !(item.name.startsWith("engine-") || item.name.startsWith("webgl-"))
   );
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
       const files = (item.files ?? []).map((file) => file.path);
-      const main = await Bun.file(`${SHARED}/${files[0]}`).text();
+      const main = await Bun.file(sourceOf(files[0] ?? "")).text();
       return {
         dependencies: item.dependencies ?? [],
         description: item.description ?? "",
@@ -137,13 +155,13 @@ const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
 // `export default function name`, with its JSDoc, in a module or its declarations.
 const DEFAULT_EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
-// A module of the engine or of gl, as the registry's files import it: `@/engine/time`.
-const LIB_MODULE = /^@\/(engine|gl)\/([a-z-]+)$/;
+// A module of the engine or of webgl, as the registry's files import it: `@/engine/time`.
+const LIB_MODULE = /^@\/(engine|webgl)\/([a-z-]+)$/;
 const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const SOURCE_FILE = /\.tsx?$/;
 
-/** Where the modules of the engine and of gl are, in the registry. */
-const LIB = `${SHARED}/lib`;
+/** Where the modules of the engine and of webgl are, in the registry. */
+const LIB = `${REGISTRY}/lib`;
 
 /** A module of a published package, as its page heads it. */
 export interface PackageModule {
@@ -358,7 +376,7 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
     items.map(async (item) => ({
       name: item.name,
       sources: await Promise.all(
-        (item.files ?? []).map((file) => read(`${SHARED}/${file.path}`))
+        (item.files ?? []).map((file) => read(sourceOf(file.path)))
       ),
     }))
   );

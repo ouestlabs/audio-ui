@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { MeterFrame } from "@/registry/bases/shared/primitives/meter/levels";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import type { MeterFrame } from "@/registry/primitives/meter/levels";
+import { createSource } from "@/registry/primitives/primitive";
 
 /**
  * One suite for the meter in every framework: it writes no markup of its own,

@@ -5,19 +5,19 @@ import {
   PlotGraph,
   PlotGrid,
   PlotTrace,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type VibeState,
   vibeDevice,
   vibeLight,
 } from "@/registry/bases/shared/devices/vibe/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the lamp, whatever its speed: the plot shows how it pulses meanwhile. */
 const WINDOW_SECONDS = 2;

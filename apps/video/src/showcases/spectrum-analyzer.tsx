@@ -1,7 +1,7 @@
 import { useLayoutEffect, useState } from "react";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
-import { SpectrumAnalyzer } from "@/registry/bases/shared/audio/elements/spectrum-analyzer";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
+import { SpectrumAnalyzer } from "@/registry/bases/shared/audio-ui/elements/spectrum-analyzer";
+import { createSource } from "@/registry/primitives/primitive";
 import { noise } from "../motion.ts";
 
 const POINTS = 160;

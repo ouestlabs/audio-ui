@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 
 const formatPan = (pan: number) => {
   const amount = Math.round(Math.abs(pan) * 100);

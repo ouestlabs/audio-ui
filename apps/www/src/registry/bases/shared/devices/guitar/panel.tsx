@@ -1,11 +1,11 @@
 import { type ReactNode, useCallback } from "react";
 import { midiToHz } from "@/engine/pitch";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   GUITAR_HIGHEST,
   GUITAR_LOWEST,
@@ -13,7 +13,7 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/registry/bases/shared/devices/guitar/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

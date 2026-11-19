@@ -7,9 +7,9 @@ import {
 } from "@/registry/bases/shared/devices/mono-synth/device";
 import { createMonoSynthEngine } from "@/registry/bases/shared/devices/mono-synth/engine";
 import { MonoSynthPanel } from "@/registry/bases/shared/devices/mono-synth/panel";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */
 const PANEL_NOTE = "panel";

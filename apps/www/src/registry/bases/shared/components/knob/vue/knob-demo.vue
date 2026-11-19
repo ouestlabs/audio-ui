@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Knob } from "@/registry/bases/shared/primitives/knob/vue";
+import { Knob } from "@/registry/primitives/knob/vue";
 </script>
 
 <template>

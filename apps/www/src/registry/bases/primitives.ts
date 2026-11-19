@@ -1,6 +1,6 @@
 /**
  * A primitive as the registry ships it: one file written by hand,
- * `base/primitives/<name>/<name>.ts`, over `base/primitives/primitive.ts`,
+ * `registry/primitives/<name>/<name>.ts`, over `registry/primitives/primitive.ts`,
  * installed with each adapter in the same layout, `components/audio-ui/`
  * (`src/lib/components/audio-ui/` in Svelte). Its relative imports resolve as
  * written, with no alias and no package of ours.
@@ -72,7 +72,7 @@ const MORE_FILES: Record<string, string[]> = {
   ],
 };
 
-/** The files of a primitive, by path from `base/primitives/`. */
+/** The files of a primitive, by path from `registry/primitives/`. */
 export const primitiveFiles = (name: string) => [
   "primitive.ts",
   `${name}/${name}.ts`,
@@ -174,7 +174,7 @@ export const SHARED_ITEMS: Record<
 
 const INSTALLED_IMPORT = /from "@\/components\/audio-ui\/([a-z/-]+)"/g;
 
-/** The shared item that installs a file of `base/primitives/`, if there is one. */
+/** The shared item that installs a file of `registry/primitives/`, if there is one. */
 const sharedItemOf = (file: string) =>
   Object.entries(SHARED_ITEMS).find(([, item]) =>
     item.files.includes(file)

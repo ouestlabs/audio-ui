@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Fader } from "@/registry/bases/shared/primitives/fader/svelte/index";
+import { Fader } from "@/registry/primitives/fader/svelte/index";
 </script>
 
 <Fader.Root

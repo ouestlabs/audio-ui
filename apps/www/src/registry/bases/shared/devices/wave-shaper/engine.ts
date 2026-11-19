@@ -5,7 +5,7 @@ import {
   waveShaperCurve,
   waveShaperCutoff,
 } from "@/registry/bases/shared/devices/wave-shaper/device";
-import { createOversamplingDelay } from "@/registry/bases/shared/lib/oversampling";
+import { createOversamplingDelay } from "@/registry/lib/devices/oversampling";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.01;

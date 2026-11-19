@@ -1,12 +1,12 @@
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { midiToHz } from "@/engine/pitch";
-import { WaveformSelect } from "@/registry/bases/shared/audio/elements/waveform-select";
-import { XYPad } from "@/registry/bases/shared/audio/elements/xypad";
+import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
+import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type WaveShaperNote,
   type WaveShaperState,
@@ -15,7 +15,7 @@ import {
   waveShaperPosition,
   waveShaperResonance,
 } from "@/registry/bases/shared/devices/wave-shaper/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 const PAD_MAX = 100;
 /** The knobs under the pad: the wave is the row of buttons. */

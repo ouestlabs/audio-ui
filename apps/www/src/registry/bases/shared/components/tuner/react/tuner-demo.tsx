@@ -1,4 +1,4 @@
-import { Tuner } from "@/registry/bases/shared/audio/elements/tuner";
+import { Tuner } from "@/registry/bases/shared/audio-ui/elements/tuner";
 
 /** A chromatic tuner: start it, play or sing a note and read how far from it you are. Nothing is recorded or played back. */
 export default function TunerDemo() {

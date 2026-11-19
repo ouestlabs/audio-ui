@@ -8,12 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
-import { Pad, PadItem } from "@/registry/bases/shared/audio/elements/pad";
+import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   SAMPLER_FIRST_NOTE,
   SAMPLER_SLICES,
@@ -22,8 +22,8 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry/bases/shared/devices/sampler/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
+import { cn } from "@/registry/lib/utils";
+import type { PadOnDetails } from "@/registry/primitives/pad/pad";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;

@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/ducker/device";
 import { createDuckerEngine } from "@/registry/bases/shared/devices/ducker/engine";
 import { DuckerPanel } from "@/registry/bases/shared/devices/ducker/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** A deep, quick duck that breathes back between the kicks. */

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Waveform } from "@/registry/bases/shared/primitives/waveform/svelte/index.ts";
+import { Waveform } from "@/registry/primitives/waveform/svelte/index.ts";
 
 /** The waveform the shared suite drives: its options and the parts to draw on it. */
 let { tree }: { tree: Record<string, any> } = $props();

@@ -30,15 +30,15 @@ import {
 } from "@/engine/files";
 import { rollScale, type Scale } from "@/engine/pitch";
 import type { Tempo } from "@/engine/time";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import {
   NoteEditMenu,
   NoteEditMenuContent,
   NoteEditMenuItems,
   NoteEditMenuSub,
   NoteEditMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/note-edit-menu";
-import { NoteFind } from "@/registry/bases/shared/audio/elements/note-find";
+} from "@/registry/bases/shared/audio-ui/elements/note-edit-menu";
+import { NoteFind } from "@/registry/bases/shared/audio-ui/elements/note-find";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -49,7 +49,7 @@ import {
   PianoRollVelocity,
   PianoRollVelocityScale,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
 import {
   ScaleMenu,
   ScaleMenuContent,
@@ -58,7 +58,7 @@ import {
   ScaleMenuRoot,
   ScaleMenuToggle,
   ScaleMenuTrigger,
-} from "@/registry/bases/shared/audio/elements/scale-menu";
+} from "@/registry/bases/shared/audio-ui/elements/scale-menu";
 import {
   Timeline,
   TimelineLane,
@@ -68,19 +68,19 @@ import {
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
-} from "@/registry/bases/shared/audio/elements/timeline";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
+import { useUndoHistory } from "@/registry/bases/shared/hooks/arrangement/use-undo-history";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   DEFAULT_NOTE_ENVELOPE,
   type Meter,
   meterOf,
   usePianoRollPlayback,
-} from "@/registry/bases/shared/hooks/use-piano-roll-playback";
-import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { TransportRegion } from "@/registry/bases/shared/hooks/use-transport-clock";
-import { useUndoHistory } from "@/registry/bases/shared/hooks/use-undo-history";
+} from "@/registry/bases/shared/hooks/devices/use-piano-roll-playback";
+import { useSynthVoices } from "@/registry/bases/shared/hooks/devices/use-synth-voices";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
+import type { TransportRegion } from "@/registry/bases/shared/hooks/timeline/use-transport-clock";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -90,9 +90,9 @@ import {
   PLAY_EDITS,
   TIME_EDITS,
   VELOCITY_EDITS,
-} from "@/registry/bases/shared/lib/note-edits";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/notes/note-edits";
+import { cn } from "@/registry/lib/utils";
+import { webAudio } from "@/registry/lib/web-audio";
 import {
   findNotes,
   type Note,
@@ -101,8 +101,8 @@ import {
   type NoteQuery,
   selectionSpan,
   toggleMuted,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
-import { pitchClassName } from "@/registry/bases/shared/primitives/pitch";
+} from "@/registry/primitives/piano-roll/edits";
+import { pitchClassName } from "@/registry/primitives/pitch";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;

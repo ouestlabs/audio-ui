@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 
 const formatHertz = (hertz: number) =>
   hertz >= 1000 ? `${(hertz / 1000).toFixed(1)} kHz` : `${hertz} Hz`;

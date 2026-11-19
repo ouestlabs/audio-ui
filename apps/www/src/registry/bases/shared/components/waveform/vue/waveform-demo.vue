@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { Waveform } from "@/registry/bases/shared/primitives/waveform/vue";
+import { Waveform } from "@/registry/primitives/waveform/vue";
 
 const DURATION_SECONDS = 180;
 

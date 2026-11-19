@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/plot/web/index.ts";
+import "@/registry/primitives/plot/web/index.ts";
 import { flush } from "./helpers.ts";
 import { type PlotTree, plotSuite } from "./plot-suite.ts";
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import { createSource } from "@/registry/primitives/primitive";
 import { key, mockRect, pointer } from "./helpers.ts";
 
 /**

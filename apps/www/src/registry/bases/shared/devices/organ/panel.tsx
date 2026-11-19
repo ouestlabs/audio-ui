@@ -9,13 +9,13 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   MAX_DRAWBAR,
   ORGAN_DRAWBARS,
@@ -26,7 +26,7 @@ import {
   organDevice,
   organPreset,
 } from "@/registry/bases/shared/devices/organ/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [

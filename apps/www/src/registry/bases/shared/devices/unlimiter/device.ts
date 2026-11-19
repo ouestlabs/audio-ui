@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { unlimit, unlimitDeficitGain, unlimitGain } from "@/engine/dsp";
 import { UNLIMITER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
 
 /**
  * An unlimiter as a device: the de-limiter of `@audio/dynamics-unlimit`, its

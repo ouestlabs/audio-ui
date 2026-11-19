@@ -5,20 +5,20 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
-} from "@/registry/bases/shared/audio/elements/plot";
-import { StereoFieldLayer } from "@/registry/bases/shared/audio/elements/stereo-field";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
+import { StereoFieldLayer } from "@/registry/bases/shared/audio-ui/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type ChorusState,
   chorusDevice,
   chorusSweep,
 } from "@/registry/bases/shared/devices/chorus/device";
-import type { DeviceSignal } from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Fader } from "@/registry/bases/shared/primitives/fader/vue";
+import { Fader } from "@/registry/primitives/fader/vue";
 </script>
 
 <template>

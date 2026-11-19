@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Timeline } from "@/registry/bases/shared/primitives/timeline/svelte/index";
+import { Timeline } from "@/registry/primitives/timeline/svelte/index";
 </script>
 
 <Timeline.Root

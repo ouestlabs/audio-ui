@@ -1,20 +1,20 @@
 import { useCallback, useState } from "react";
 import { rollScale, type Scale } from "@/engine/pitch";
-import { NoteFind } from "@/registry/bases/shared/audio/elements/note-find";
+import { NoteFind } from "@/registry/bases/shared/audio-ui/elements/note-find";
 import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
   PianoRollStrip,
   PianoRollViewport,
-} from "@/registry/bases/shared/audio/elements/piano-roll";
-import { Timeline } from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll";
+import { Timeline } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import {
   findNotes,
   type Note,
   type NoteId,
   type NoteQuery,
-} from "@/registry/bases/shared/primitives/piano-roll/edits";
+} from "@/registry/primitives/piano-roll/edits";
 
 const SCALE: Scale = { name: "major", root: 0 };
 const ROLL_SCALE = rollScale(SCALE);

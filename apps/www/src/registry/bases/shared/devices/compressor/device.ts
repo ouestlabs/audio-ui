@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { compressor, fet, opto, varimu, vca } from "@/engine/dsp";
 import { COMPRESSOR_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/bases/shared/lib/manifest-worklet";
+import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
 
 /**
  * A compressor as a device: its parameters and what they mean, with no panel

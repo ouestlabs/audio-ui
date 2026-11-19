@@ -1,7 +1,7 @@
 import {
   ValueDisplay,
   type ValueKind,
-} from "@/registry/bases/shared/audio/elements/value-display";
+} from "@/registry/bases/shared/audio-ui/elements/value-display";
 
 const VALUES: { kind: ValueKind; label: string; value: number }[] = [
   { kind: "bpm", label: "Tempo", value: 128 },

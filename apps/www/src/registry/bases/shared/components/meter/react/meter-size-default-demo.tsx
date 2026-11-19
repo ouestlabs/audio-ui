@@ -1,4 +1,4 @@
-import { Meter } from "@/registry/bases/shared/audio/elements/meter";
+import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
 import { useSimulatedLevels } from "@/registry/bases/shared/hooks/use-simulated-levels";
 
 // The marks of a dBFS scale, down to the floor.

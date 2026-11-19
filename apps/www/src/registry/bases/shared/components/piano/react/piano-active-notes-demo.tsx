@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 
 const CHORD_NOTES = [48, 52, 55];
 const TOGGLE_MS = 900;

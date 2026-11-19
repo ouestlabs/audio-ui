@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { XYPad } from "@/registry/bases/shared/audio/elements/xypad";
+import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
 
 export default function XYPadLiveValueDemo() {
   const [value, setValue] = useState({ x: 50, y: 50 });

@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/saturator/device";
 import { createSaturatorEngine } from "@/registry/bases/shared/devices/saturator/engine";
 import { SaturatorPanel } from "@/registry/bases/shared/devices/saturator/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

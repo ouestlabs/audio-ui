@@ -61,38 +61,37 @@ import {
 } from "@/engine/files";
 import { formatLevel, formatSampleRate, formatTime } from "@/engine/format";
 import { secondsPerBeat, type Tempo } from "@/engine/time";
-import { hasWebGL2 } from "@/gl/lane";
-import { ArrangedTake } from "@/registry/bases/shared/audio/elements/arranged-clip";
-import type { SpectrogramBand } from "@/registry/bases/shared/audio/elements/clip-spectrogram";
+import { ArrangedTake } from "@/registry/bases/shared/audio-ui/elements/arranged-clip";
+import type { SpectrogramBand } from "@/registry/bases/shared/audio-ui/elements/clip-spectrogram";
 import {
   type ClipSamples,
   ClipWaveform,
-} from "@/registry/bases/shared/audio/elements/clip-waveform";
-import { DeviceBrowser } from "@/registry/bases/shared/audio/elements/device-browser";
-import { DeviceView } from "@/registry/bases/shared/audio/elements/device-view";
-import { ExportDialog } from "@/registry/bases/shared/audio/elements/export-dialog";
-import { Meter } from "@/registry/bases/shared/audio/elements/meter";
-import { ProcessMenuItems } from "@/registry/bases/shared/audio/elements/process-menu";
+} from "@/registry/bases/shared/audio-ui/elements/clip-waveform";
+import { DeviceBrowser } from "@/registry/bases/shared/audio-ui/elements/device-browser";
+import { DeviceView } from "@/registry/bases/shared/audio-ui/elements/device-view";
+import { ExportDialog } from "@/registry/bases/shared/audio-ui/elements/export-dialog";
+import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
+import { ProcessMenuItems } from "@/registry/bases/shared/audio-ui/elements/process-menu";
 import {
   FadeShade,
   formatDb,
   SelectionFrame,
-} from "@/registry/bases/shared/audio/elements/selection-frame";
+} from "@/registry/bases/shared/audio-ui/elements/selection-frame";
 import {
   isSoundView,
   isSpectrogramView,
   SOUND_VIEWS,
   SoundLane,
   type SoundView,
-} from "@/registry/bases/shared/audio/elements/sound-lane";
+} from "@/registry/bases/shared/audio-ui/elements/sound-lane";
 import {
   SoundChannels,
   SoundLevel,
   SoundRate,
   SoundReadout,
   SoundReadouts,
-} from "@/registry/bases/shared/audio/elements/sound-readouts";
-import { SoundReport } from "@/registry/bases/shared/audio/elements/sound-report";
+} from "@/registry/bases/shared/audio-ui/elements/sound-readouts";
+import { SoundReport } from "@/registry/bases/shared/audio-ui/elements/sound-report";
 import {
   Timeline,
   TimelineLane,
@@ -101,17 +100,17 @@ import {
   TimelinePlayhead,
   TimelineRuler,
   TimelineViewport,
-} from "@/registry/bases/shared/audio/elements/timeline";
-import { TimelineLocator } from "@/registry/bases/shared/audio/elements/timeline-markers";
-import { Transport } from "@/registry/bases/shared/audio/elements/transport";
-import type { WaveformClip } from "@/registry/bases/shared/audio/elements/waveform-lane";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { useBake } from "@/registry/bases/shared/hooks/use-bake";
-import { useClipEdits } from "@/registry/bases/shared/hooks/use-clip-edits";
-import { useSilenceHover } from "@/registry/bases/shared/hooks/use-silence-hover";
-import { useSoundReport } from "@/registry/bases/shared/hooks/use-sound-report";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
+import { TimelineLocator } from "@/registry/bases/shared/audio-ui/elements/timeline-markers";
+import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
+import type { WaveformClip } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { useSilenceHover } from "@/registry/bases/shared/hooks/analysis/use-silence-hover";
+import { useSoundReport } from "@/registry/bases/shared/hooks/analysis/use-sound-report";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { useBake } from "@/registry/bases/shared/hooks/arrangement/use-bake";
+import { useClipEdits } from "@/registry/bases/shared/hooks/arrangement/use-clip-edits";
 import { useStatusLine } from "@/registry/bases/shared/hooks/use-status-line";
 import {
   type Arranged,
@@ -119,52 +118,50 @@ import {
   clipSegments,
   type TimeSelection,
   type TrackDevice,
-} from "@/registry/bases/shared/lib/arrangement";
-import { renderArrangement } from "@/registry/bases/shared/lib/arrangement-engine";
+} from "@/registry/lib/arrangement/arrangement";
+import { renderArrangement } from "@/registry/lib/arrangement/arrangement-engine";
 import type {
   ArrangementCommand,
   ArrangementDoc,
   ArrangementLocator,
-} from "@/registry/bases/shared/lib/arrangement-state";
+} from "@/registry/lib/arrangement/arrangement-state";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
   exportSound,
-} from "@/registry/bases/shared/lib/audio-export";
+} from "@/registry/lib/arrangement/audio-export";
 import {
   near,
   SHRINK_GAPS,
   typing,
-} from "@/registry/bases/shared/lib/clip-edits";
-import type { RecordingSource } from "@/registry/bases/shared/lib/clip-player";
+} from "@/registry/lib/arrangement/clip-edits";
+import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
+import type { SoundOperation } from "@/registry/lib/arrangement/sound-operations";
 import {
   DEMO_SOURCES,
   type DemoSource,
   type DemoSourceName,
   demoTempo,
   renderDemoSource,
-} from "@/registry/bases/shared/lib/demo-sound";
+} from "@/registry/lib/demo/demo-sound";
 import {
   DEVICE_SHELVES,
   libraryDevice,
-} from "@/registry/bases/shared/lib/device-library";
+} from "@/registry/lib/devices/device-library";
 import {
   createInputRecorder,
   type InputRecorder,
   playCountIn,
-} from "@/registry/bases/shared/lib/input-recorder";
+} from "@/registry/lib/input/input-recorder";
 import {
   blockPeak,
   type RecordedBlock,
   sliceBlocks,
-} from "@/registry/bases/shared/lib/recording";
-import type { SoundOperation } from "@/registry/bases/shared/lib/sound-operations";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import {
-  createSource,
-  type Source,
-} from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/input/recording";
+import { cn } from "@/registry/lib/utils";
+import { webAudio } from "@/registry/lib/web-audio";
+import { createSource, type Source } from "@/registry/primitives/primitive";
+import { hasWebGL2 } from "@/webgl/lane";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Meter } from "@/registry/bases/shared/primitives/meter/svelte/index.ts";
+import { Meter } from "@/registry/primitives/meter/svelte/index.ts";
 
 /** The meter the shared suite drives: its options, its marks and its labels. */
 let {

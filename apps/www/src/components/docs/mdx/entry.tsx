@@ -136,7 +136,7 @@ function Exports({ exports }: { exports: EntryData["exports"] }) {
   );
 }
 
-const ITEM_PREFIX = /^(engine|gl)-/;
+const ITEM_PREFIX = /^(engine|webgl)-/;
 
 /** Where an item the reader also copies is documented: a hook's or a lib's page, or a module's. */
 function itemUrl(name: string): string | undefined {
@@ -240,9 +240,9 @@ export function Entry({ name }: { name: string }) {
   );
 }
 
-const MODULE_FROM = /^@\/lib\/(engine|gl)\/([a-z-]+)$/;
+const MODULE_FROM = /^@\/lib\/(engine|webgl)\/([a-z-]+)$/;
 
-/** The install of a module of the engine or of gl, from the registry's list of them. */
+/** The install of a module of the engine or of webgl, from the registry's list of them. */
 function ModuleInstall({ from }: { from: string }) {
   const [, set = "engine", module = ""] = MODULE_FROM.exec(from) ?? [];
   const spec = MODULE_SETS[set as keyof typeof MODULE_SETS][module];

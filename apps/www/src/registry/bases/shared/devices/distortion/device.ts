@@ -1,7 +1,7 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { distortion } from "@/engine/dsp";
 import { formatFrequency } from "@/engine/format";
-import { oversamplingSeconds } from "@/registry/bases/shared/lib/oversampling";
+import { oversamplingSeconds } from "@/registry/lib/devices/oversampling";
 
 const TABLE_SAMPLES = 16_384;
 

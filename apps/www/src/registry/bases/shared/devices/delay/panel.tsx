@@ -17,12 +17,12 @@ import {
   PlotHandle,
   PlotLine,
   PlotTraceArea,
-} from "@/registry/bases/shared/audio/elements/plot";
+} from "@/registry/bases/shared/audio-ui/elements/plot";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type DelayState,
   type DelayTap,
@@ -35,9 +35,9 @@ import {
 import {
   type DeviceSignal,
   deriveSource,
-} from "@/registry/bases/shared/lib/device-signal";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { Source } from "@/registry/bases/shared/primitives/primitive";
+} from "@/registry/lib/devices/device-signal";
+import { cn } from "@/registry/lib/utils";
+import type { Source } from "@/registry/primitives/primitive";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

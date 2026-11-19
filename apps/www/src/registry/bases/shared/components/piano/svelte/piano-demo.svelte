@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Piano } from "@/registry/bases/shared/primitives/piano/svelte/index";
+import { Piano } from "@/registry/primitives/piano/svelte/index";
 </script>
 
 <Piano.Root

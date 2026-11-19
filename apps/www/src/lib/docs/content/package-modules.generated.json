@@ -2252,8 +2252,8 @@
         "summary": "Starts a lane on `canvas`, which sits in the lane's box: placed on the stretch the view shows, drawn again when its inputs change, the lane resizes, the view scrolls a good way or the theme changes, and let go of with `destroy`."
       }
     ],
-    "from": "@/lib/gl/lane",
-    "package": "@audio-ui/gl-lane",
+    "from": "@/lib/webgl/lane",
+    "package": "@audio-ui/webgl-lane",
     "usedBy": []
   },
   {
@@ -2350,8 +2350,8 @@
         "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
       }
     ],
-    "from": "@/lib/gl/spectrogram",
-    "package": "@audio-ui/gl-spectrogram",
+    "from": "@/lib/webgl/spectrogram",
+    "package": "@audio-ui/webgl-spectrogram",
     "usedBy": []
   },
   {
@@ -2448,8 +2448,8 @@
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
       }
     ],
-    "from": "@/lib/gl/waveform",
-    "package": "@audio-ui/gl-waveform",
+    "from": "@/lib/webgl/waveform",
+    "package": "@audio-ui/webgl-waveform",
     "usedBy": [
       "use-loudest"
     ]

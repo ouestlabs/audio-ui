@@ -3,7 +3,7 @@ import {
   createAudioSession,
   silentMicrophone,
   silentPlay,
-} from "@/registry/bases/shared/hooks/use-audio-session";
+} from "@/registry/bases/shared/hooks/input/use-audio-session";
 
 describe("createAudioSession", () => {
   test("two sessions never follow each other", () => {

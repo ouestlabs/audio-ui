@@ -1,17 +1,17 @@
 import { type ReactNode, useCallback } from "react";
-import { Pad, PadItem } from "@/registry/bases/shared/audio/elements/pad";
+import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   type DrumSynthNote,
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry/bases/shared/devices/drum-synth/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
-import type { PadOnDetails } from "@/registry/bases/shared/primitives/pad/pad";
+import { cn } from "@/registry/lib/utils";
+import type { PadOnDetails } from "@/registry/primitives/pad/pad";
 
 /** The controls by what they do. */
 const GROUPS = [

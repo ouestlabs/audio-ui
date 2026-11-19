@@ -20,6 +20,7 @@ import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { categories, rootSeo } from "../src/registry/bases/categories.ts";
+import { HOOK_GROUPS, LIB_GROUPS } from "../src/registry/bases/items.ts";
 import {
   moduleDependencies,
   rewriteModuleImports,
@@ -49,6 +50,10 @@ const DEFAULT_STYLE = "base-nova";
 // Every base serves the items of `bases/shared/`, which name no behavior library and drive the manifests, beside its own: the `ui/` components its style is made of and the variants of the items that name its library.
 const BASES = ALL_BASES;
 const SHARED = "shared";
+/** The folders at the registry root that every base serves: a file path that starts with it is read from there, the others from `bases/`. */
+const ROOT_FOLDERS = ["lib", "primitives"];
+const isRootPath = (path: string) =>
+  ROOT_FOLDERS.some((folder) => path.startsWith(`${folder}/`));
 const UI_BASE = "ui-sdk";
 
 // Style names only: `registry/styles.tsx` also holds inline JSX icon SVGs that
@@ -56,9 +61,9 @@ const UI_BASE = "ui-sdk";
 const STYLES = ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"];
 
 // The folders of a base that hold registry items. Each `_registry.ts` exports
-// an array named after its folder; a later folder wins on a repeated name.
+// an array named after its folder, in camel case (`audioUi` for `audio-ui`); a later folder wins on a repeated name.
 const REGISTRY_FOLDERS = [
-  "audio",
+  "audio-ui",
   "devices",
   "hooks",
   "components",
@@ -67,21 +72,26 @@ const REGISTRY_FOLDERS = [
   "ui",
 ];
 
-// A folder a registry file imports from, and where it lands in a project. The longest first: `audio/` is every folder of audio.
+// A folder a registry file imports from, and where it lands in a project. The longest first: `audio-ui/` is every folder of audio.
 const INSTALL_PREFIXES: [prefix: string, installed: string][] = [
-  ["audio/elements/", "@/components/audio-ui/"],
-  ["audio/panels/", "@/components/audio-ui/"],
-  ["audio/", "@/components/audio-ui/"],
+  ["audio-ui/elements/", "@/components/audio-ui/"],
+  ["audio-ui/panels/", "@/components/audio-ui/"],
+  ["audio-ui/", "@/components/audio-ui/"],
   ["ui/", "@/components/ui/"],
   ["hooks/", "@/hooks/"],
   ["lib/", "@/lib/"],
   ["components/", "@/components/examples/"],
 ];
 
-// A module of a source tree, by what follows its root: the per-style copies the design system generates, and the bases themselves. One pass finds every import of a file, where a pattern for each file of the registry read it a thousand times over.
+// A module of a source tree, by what follows its root: the per-style copies the design system generates, the bases themselves, and `lib/` at the registry root. One pass finds every import of a file, where a pattern for each file of the registry read it a thousand times over.
 const SOURCE_MODULE = new RegExp(
-  `@/registry/bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/([^"'\`\\s]*)`,
+  `@/registry/(?:bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/|(?=(?:lib|primitives)/))([^"'\`\\s]*)`,
   "g"
+);
+
+// A lib or a hook written in a group folder installs beside the others: `lib/notes/note-edits` is `@/lib/note-edits`.
+const GROUP_MODULE = new RegExp(
+  `^(lib/(?:${Object.keys(LIB_GROUPS).join("|")})|hooks/(?:${Object.keys(HOOK_GROUPS).join("|")}))/([^/]+)$`
 );
 
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
@@ -110,7 +120,7 @@ const SVG_PATH_DATA = /^\s*d ?=/;
 // A bundle the engine ships as a string (`bun run engine:worklet` writes it): one long line by design.
 const BUNDLED_SOURCE = /-source\.ts$/;
 const STYLE_TOKEN = new RegExp(`\\bstyle-(?:${STYLES.join("|")}):`);
-const REGISTRY_IMPORT = /@\/registry\/bases\//;
+const REGISTRY_IMPORT = /@\/registry\/(?:bases|lib|primitives)\//;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -167,6 +177,8 @@ interface StyleBuild {
   cnClasses: Map<string, string>;
   name: string;
 }
+
+const DASH_LETTER = /-([a-z])/g;
 
 interface Problem {
   detail: string;
@@ -236,13 +248,21 @@ function expandCnClasses(
 // Items of a base
 // ---------------------------------------------------------------------------
 
+const camelCase = (name: string) =>
+  name.replace(DASH_LETTER, (_, letter: string) => letter.toUpperCase());
+
 async function loadFolder(base: string, folder: string): Promise<SourceItem[]> {
-  const path = `${BASES_DIR}/${base}/${folder}/_registry.ts`;
+  // `lib/` is the registry's own, at its root: every base serves it.
+  const root = ROOT_FOLDERS.includes(folder);
+  if (root && base !== SHARED) {
+    return [];
+  }
+  const path = `${root ? REGISTRY : `${BASES_DIR}/${base}`}/${folder}/_registry.ts`;
   if (!(await Bun.file(path).exists())) {
     return [];
   }
   const registry: Record<string, SourceItem[] | undefined> = await import(path);
-  return registry[folder] ?? [];
+  return registry[camelCase(folder)] ?? [];
 }
 
 async function loadItems(base: string): Promise<Map<string, SourceItem>> {
@@ -359,6 +379,10 @@ function rewriteSourceImports(code: string): string {
       if (installed !== undefined) {
         return installed;
       }
+      const flat = GROUP_MODULE.exec(path);
+      if (flat) {
+        return `@/${flat[1]?.split("/")[0]}/${flat[2]}`;
+      }
       for (const [prefix, folder] of INSTALL_PREFIXES) {
         if (path.startsWith(prefix)) {
           return folder + path.slice(prefix.length);
@@ -397,7 +421,9 @@ async function buildFile(
   item: SourceItem,
   build: StyleBuild
 ): Promise<BuiltFile | null> {
-  const source = `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
+  const source = isRootPath(file.path)
+    ? `src/registry/${file.path}`
+    : `src/registry/bases/${item.origin ?? build.base}/${file.path}`;
   let content: string;
   try {
     content = await Bun.file(`${PROJECT_ROOT}/${source}`).text();
@@ -431,7 +457,7 @@ async function buildFile(
     );
   }
 
-  // 7. A module of the engine or of gl is imported where it installs, `@/lib/engine/<module>`
+  // 7. A module of the engine or of webgl is imported where it installs, `@/lib/engine/<module>`
   content = rewriteModuleImports(content);
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
@@ -498,7 +524,7 @@ function withSharedItems(item: SourceItem, files: BuiltFile[]) {
     ])
     .filter((name) => {
       const shared = SHARED_ITEMS[name];
-      // A module of the engine or of gl is installed by its own item, never shipped by another.
+      // A module of the engine or of webgl is installed by its own item, never shipped by another.
       if (!shared) {
         return name !== item.name;
       }
@@ -545,7 +571,7 @@ async function buildItem(
     // Our own items are served under the @audio-ui namespace.
     registryDependencies: withSharedItems(item, files)?.map((dependency) => {
       const shadcn = SHADCN_DEPENDENCY.exec(dependency)?.[1];
-      if (shadcn && build.base === UI_BASE && uiNames.has(shadcn)) {
+      if (shadcn && itemsByBase.get(build.base)?.has(shadcn)) {
         return `${NAMESPACE}/${shadcn}`;
       }
       return itemNames.has(dependency)
@@ -760,9 +786,8 @@ const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
 );
 
-// A base serves its own items and, beside them, every item of `bases/shared/`. The `ui-sdk` base answers their `@shadcn/<name>` dependencies with its own components.
+// A base serves its own items and, beside them, every item of `bases/shared/`. Each base answers their `@shadcn/<name>` dependencies with its own components, and leaves to shadcn the ones it has none of.
 const SHADCN_DEPENDENCY = /^@shadcn\/([a-z-]+)$/;
-const uiNames = new Set(itemsByBase.get(UI_BASE)?.keys() ?? []);
 function itemOf(name: string, base: string): SourceItem | undefined {
   const own = itemsByBase.get(base)?.get(name);
   if (own) {

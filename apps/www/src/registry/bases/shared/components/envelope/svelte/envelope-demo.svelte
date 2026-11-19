@@ -1,5 +1,5 @@
 <script lang="ts">
-import { Envelope } from "@/registry/bases/shared/primitives/envelope/svelte/index";
+import { Envelope } from "@/registry/primitives/envelope/svelte/index";
 
 let points = $state([
   { x: 0, y: 0 },

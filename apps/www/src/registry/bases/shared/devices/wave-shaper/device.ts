@@ -1,5 +1,5 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
-import { oversamplingSeconds } from "@/registry/bases/shared/lib/oversampling";
+import { oversamplingSeconds } from "@/registry/lib/devices/oversampling";
 
 const MIN_FREQUENCY = 55;
 const MAX_FREQUENCY = 880;

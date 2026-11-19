@@ -3,9 +3,9 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
-import { Pad } from "@/registry/bases/shared/primitives/pad/svelte/index";
+} from "@/registry/lib/drums/drum-synthesis";
+import { webAudio } from "@/registry/lib/web-audio";
+import { Pad } from "@/registry/primitives/pad/svelte/index";
 
 const VOLUME = 0.7;
 /** How long the open hat rings, in seconds, unless the closed one chokes it. */

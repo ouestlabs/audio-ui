@@ -1,4 +1,10 @@
 {
+  "accordion": [
+    "components/ui/accordion.tsx"
+  ],
+  "alert-dialog": [
+    "components/ui/alert-dialog.tsx"
+  ],
   "arranged-clip": [
     "components/audio-ui/arranged-clip.tsx",
     "hooks/use-arranged-clips.ts"
@@ -27,6 +33,18 @@
   ],
   "automation-envelope": [
     "components/audio-ui/automation-envelope.tsx"
+  ],
+  "avatar": [
+    "components/ui/avatar.tsx"
+  ],
+  "badge": [
+    "components/ui/badge.tsx"
+  ],
+  "bare-button": [
+    "components/audio-ui/bare-button.tsx"
+  ],
+  "bare-input": [
+    "components/audio-ui/bare-input.tsx"
   ],
   "bass-enhancer-device": [
     "components/audio-ui/devices/bass-enhancer/device.ts"
@@ -214,6 +232,18 @@
   "bpm-control": [
     "components/audio-ui/bpm-control.tsx"
   ],
+  "button-group": [
+    "components/ui/button-group.tsx"
+  ],
+  "button": [
+    "components/ui/button.tsx"
+  ],
+  "calendar": [
+    "components/ui/calendar.tsx"
+  ],
+  "carousel": [
+    "components/ui/carousel.tsx"
+  ],
   "channel-eq-device": [
     "components/audio-ui/devices/channel-eq/device.ts"
   ],
@@ -222,6 +252,9 @@
   ],
   "channel-eq-panel": [
     "components/audio-ui/devices/channel-eq/panel.tsx"
+  ],
+  "checkbox": [
+    "components/ui/checkbox.tsx"
   ],
   "chorus-device": [
     "components/audio-ui/devices/chorus/device.ts"
@@ -250,6 +283,15 @@
   "clip-waveform": [
     "components/audio-ui/clip-waveform.tsx"
   ],
+  "collapsible": [
+    "components/ui/collapsible.tsx"
+  ],
+  "combobox": [
+    "components/ui/combobox.tsx"
+  ],
+  "command": [
+    "components/ui/command.tsx"
+  ],
   "compander-device": [
     "components/audio-ui/devices/compander/device.ts"
   ],
@@ -267,6 +309,9 @@
   ],
   "compressor-panel": [
     "components/audio-ui/devices/compressor/panel.tsx"
+  ],
+  "context-menu": [
+    "components/ui/context-menu.tsx"
   ],
   "curve-select": [
     "components/audio-ui/curve-select.tsx"
@@ -320,6 +365,9 @@
   "device-view": [
     "components/audio-ui/device-view.tsx"
   ],
+  "dialog": [
+    "components/ui/dialog.tsx"
+  ],
   "distortion-device": [
     "components/audio-ui/devices/distortion/device.ts"
   ],
@@ -328,6 +376,12 @@
   ],
   "distortion-panel": [
     "components/audio-ui/devices/distortion/panel.tsx"
+  ],
+  "drawer": [
+    "components/ui/drawer.tsx"
+  ],
+  "dropdown-menu": [
+    "components/ui/dropdown-menu.tsx"
   ],
   "drum-kit": [
     "lib/drum-kit.ts"
@@ -373,6 +427,9 @@
   ],
   "electric-piano-panel": [
     "components/audio-ui/devices/electric-piano/panel.tsx"
+  ],
+  "empty": [
+    "components/ui/empty.tsx"
   ],
   "engine-analysis": [
     "lib/engine/analysis/beat.ts",
@@ -653,15 +710,6 @@
   "gate-panel": [
     "components/audio-ui/devices/gate/panel.tsx"
   ],
-  "gl-lane": [
-    "lib/gl/lane/index.ts"
-  ],
-  "gl-spectrogram": [
-    "lib/gl/spectrogram/index.ts"
-  ],
-  "gl-waveform": [
-    "lib/gl/waveform/index.ts"
-  ],
   "graphic-eq-device": [
     "components/audio-ui/devices/graphic-eq/device.ts"
   ],
@@ -683,8 +731,26 @@
   "guitar-panel": [
     "components/audio-ui/devices/guitar/panel.tsx"
   ],
+  "hover-card": [
+    "components/ui/hover-card.tsx"
+  ],
+  "input-group": [
+    "components/ui/input-group.tsx"
+  ],
+  "input-otp": [
+    "components/ui/input-otp.tsx"
+  ],
+  "input": [
+    "components/ui/input.tsx"
+  ],
   "instrument-rack": [
     "lib/instrument-rack.ts"
+  ],
+  "item": [
+    "components/ui/item.tsx"
+  ],
+  "kbd": [
+    "components/ui/kbd.tsx"
   ],
   "key-detector": [
     "components/audio-ui/devices/key-detector.ts"
@@ -767,6 +833,9 @@
   ],
   "manifest-worklet": [
     "lib/manifest-worklet.ts"
+  ],
+  "menubar": [
+    "components/ui/menubar.tsx"
   ],
   "meter-levels": [
     "components/audio-ui/meter/levels.ts",
@@ -852,6 +921,9 @@
   "multiband-panel": [
     "components/audio-ui/devices/multiband/panel.tsx"
   ],
+  "navigation-menu": [
+    "components/ui/navigation-menu.tsx"
+  ],
   "needle-meter-demo": [
     "components/examples/needle-meter-demo.tsx"
   ],
@@ -927,6 +999,9 @@
   ],
   "pad": [
     "components/audio-ui/pad.tsx"
+  ],
+  "pagination": [
+    "components/ui/pagination.tsx"
   ],
   "parameter-field-demo": [
     "components/examples/parameter-field-demo.tsx"
@@ -1131,6 +1206,9 @@
   "polyphony": [
     "lib/polyphony.ts"
   ],
+  "popover": [
+    "components/ui/popover.tsx"
+  ],
   "primitive": [
     "components/audio-ui/primitive.ts"
   ],
@@ -1140,11 +1218,17 @@
   "process-menu": [
     "components/audio-ui/process-menu.tsx"
   ],
+  "progress": [
+    "components/ui/progress.tsx"
+  ],
   "rack-panel": [
     "components/audio-ui/rack-panel.tsx"
   ],
   "rack": [
     "lib/rack.ts"
+  ],
+  "radio-group": [
+    "components/ui/radio-group.tsx"
   ],
   "recording": [
     "lib/recording.ts",
@@ -1158,6 +1242,9 @@
   ],
   "redux-panel": [
     "components/audio-ui/devices/redux/panel.tsx"
+  ],
+  "resizable": [
+    "components/ui/resizable.tsx"
   ],
   "reverb-device": [
     "components/audio-ui/devices/reverb/device.ts"
@@ -1207,6 +1294,9 @@
   "scale-menu": [
     "components/audio-ui/scale-menu.tsx"
   ],
+  "scroll-area": [
+    "components/ui/scroll-area.tsx"
+  ],
   "scrubber-demo": [
     "components/examples/scrubber-demo.tsx"
   ],
@@ -1214,8 +1304,14 @@
     "components/audio-ui/scrubber.tsx",
     "components/audio-ui/scrubber-default.tsx"
   ],
+  "select": [
+    "components/ui/select.tsx"
+  ],
   "selection-frame": [
     "components/audio-ui/selection-frame.tsx"
+  ],
+  "separator": [
+    "components/ui/separator.tsx"
   ],
   "sequencer-demo": [
     "components/examples/sequencer-demo.tsx"
@@ -1256,11 +1352,20 @@
     "components/audio-ui/sequencer.tsx",
     "components/audio-ui/sequencer-default.tsx"
   ],
+  "sheet": [
+    "components/ui/sheet.tsx"
+  ],
   "signal-plot": [
     "components/audio-ui/signal-plot.tsx"
   ],
   "simulated-levels": [
     "lib/simulated-levels.ts"
+  ],
+  "slider": [
+    "components/ui/slider.tsx"
+  ],
+  "sonner": [
+    "components/ui/sonner.tsx"
   ],
   "sortable-drag": [
     "lib/sortable-drag.ts"
@@ -1310,8 +1415,14 @@
   "stutter-panel": [
     "components/audio-ui/devices/stutter/panel.tsx"
   ],
+  "switch": [
+    "components/ui/switch.tsx"
+  ],
   "synced-rate": [
     "lib/synced-rate.ts"
+  ],
+  "tabs": [
+    "components/ui/tabs.tsx"
   ],
   "tape-keys-device": [
     "components/audio-ui/devices/tape-keys/device.ts"
@@ -1321,6 +1432,9 @@
   ],
   "tape-keys-panel": [
     "components/audio-ui/devices/tape-keys/panel.tsx"
+  ],
+  "textarea": [
+    "components/ui/textarea.tsx"
   ],
   "tilt-eq-device": [
     "components/audio-ui/devices/tilt-eq/device.ts"
@@ -1451,8 +1565,17 @@
   "timeline": [
     "components/audio-ui/timeline.tsx"
   ],
+  "toggle-group": [
+    "components/ui/toggle-group.tsx"
+  ],
+  "toggle": [
+    "components/ui/toggle.tsx"
+  ],
   "toolbar": [
     "components/ui/toolbar.tsx"
+  ],
+  "tooltip": [
+    "components/ui/tooltip.tsx"
   ],
   "track-automation": [
     "components/audio-ui/track-automation.tsx",
@@ -1735,6 +1858,15 @@
   ],
   "web-audio": [
     "lib/web-audio.ts"
+  ],
+  "webgl-lane": [
+    "lib/webgl/lane/index.ts"
+  ],
+  "webgl-spectrogram": [
+    "lib/webgl/spectrogram/index.ts"
+  ],
+  "webgl-waveform": [
+    "lib/webgl/waveform/index.ts"
   ],
   "xypad-bipolar-range-demo": [
     "components/examples/xypad-bipolar-range-demo.tsx"

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { RockerSwitch } from "@/components/audio-ui/rocker-switch";
-import { Fader } from "@/registry/bases/shared/audio/elements/fader";
-import { Knob } from "@/registry/bases/shared/audio/elements/knob";
-import { Lcd } from "@/registry/bases/shared/audio/elements/lcd";
-import { Led } from "@/registry/bases/shared/audio/elements/led";
-import { ValueDisplay } from "@/registry/bases/shared/audio/elements/value-display";
-import { WaveformSelect } from "@/registry/bases/shared/audio/elements/waveform-select";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
+import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
+import { Lcd } from "@/registry/bases/shared/audio-ui/elements/lcd";
+import { Led } from "@/registry/bases/shared/audio-ui/elements/led";
+import { ValueDisplay } from "@/registry/bases/shared/audio-ui/elements/value-display";
+import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const WAVEFORMS = [
   { label: "Sine", value: "sine" },

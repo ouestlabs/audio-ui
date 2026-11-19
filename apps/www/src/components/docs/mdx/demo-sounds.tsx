@@ -1,13 +1,13 @@
 import { PauseIcon, PlayIcon } from "@phosphor-icons/react/ssr";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   DEMO_SOURCES,
   type DemoSourceName,
   renderDemoSource,
-} from "@/registry/bases/shared/lib/demo-sound";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/demo/demo-sound";
+import { webAudio } from "@/registry/lib/web-audio";
 
 const NAMES = Object.keys(DEMO_SOURCES) as DemoSourceName[];
 

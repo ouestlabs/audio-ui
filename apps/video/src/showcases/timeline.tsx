@@ -12,7 +12,7 @@ import {
   TimelineTrackHeader,
   TimelineViewport,
   TRACK_COLORS,
-} from "@/registry/bases/shared/audio/elements/timeline";
+} from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { MOTION, ramp } from "../motion.ts";
 
 const BARS = 8;

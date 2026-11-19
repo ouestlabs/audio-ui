@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/graphic-eq/device";
 import { createGraphicEqEngine } from "@/registry/bases/shared/devices/graphic-eq/engine";
 import { GraphicEqPanel } from "@/registry/bases/shared/devices/graphic-eq/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

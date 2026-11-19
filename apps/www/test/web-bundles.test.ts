@@ -2,10 +2,7 @@ import { expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const PRIMITIVES = join(
-  import.meta.dir,
-  "../src/registry/bases/shared/primitives"
-);
+const PRIMITIVES = join(import.meta.dir, "../src/registry/primitives");
 const { version } = (await Bun.file(
   join(import.meta.dir, "../src/registry/web-version.json")
 ).json()) as { version: string };

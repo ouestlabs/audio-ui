@@ -8,12 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   FM_SYNTH_PRESETS,
   type FmSynthNote,
@@ -21,7 +21,7 @@ import {
   fmSynthDevice,
   fmSynthPreset,
 } from "@/registry/bases/shared/devices/fm-synth/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [

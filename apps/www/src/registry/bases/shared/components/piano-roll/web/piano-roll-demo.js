@@ -1,4 +1,4 @@
-import "@/registry/bases/shared/primitives/piano-roll/web";
+import "@/registry/primitives/piano-roll/web";
 
 const NOTES = [
   { id: "1", length: 1, pitch: 60, start: 0 },

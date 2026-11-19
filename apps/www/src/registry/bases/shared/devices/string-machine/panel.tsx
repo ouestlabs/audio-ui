@@ -8,12 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { midiToHz } from "@/engine/pitch";
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
-} from "@/registry/bases/shared/audio/panels/device-panel";
+} from "@/registry/bases/shared/audio-ui/panels/device-panel";
 import {
   STRING_MACHINE_PRESETS,
   type StringMachineNote,
@@ -21,7 +21,7 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry/bases/shared/devices/string-machine/device";
-import { cn } from "@/registry/bases/shared/lib/utils";
+import { cn } from "@/registry/lib/utils";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [

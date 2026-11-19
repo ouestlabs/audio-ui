@@ -1,4 +1,4 @@
-import { Piano } from "@/registry/bases/shared/audio/elements/piano";
+import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
 
 const ROOT = 48;
 /** C, Am, F, G: a bass note held, the chord's notes arpeggiated an octave up. */
