@@ -67,27 +67,21 @@ const REGISTRY_FOLDERS = [
   "ui",
 ];
 
-// A folder a registry file imports from, and where it lands in a project.
-const INSTALL_FOLDERS: [folder: string, installed: string][] = [
-  ["audio/(?:elements/|panels/)?", "@/components/audio-ui/"],
+// A folder a registry file imports from, and where it lands in a project. The longest first: `audio/` is every folder of audio.
+const INSTALL_PREFIXES: [prefix: string, installed: string][] = [
+  ["audio/elements/", "@/components/audio-ui/"],
+  ["audio/panels/", "@/components/audio-ui/"],
+  ["audio/", "@/components/audio-ui/"],
   ["ui/", "@/components/ui/"],
   ["hooks/", "@/hooks/"],
   ["lib/", "@/lib/"],
   ["components/", "@/components/examples/"],
 ];
 
-// The module roots those folders sit under: the per-style copies the design
-// system generates, and the base itself.
-const SOURCE_ROOTS = [
-  `@/registry/bases/__generated/base-(?:${STYLES.join("|")})/`,
-  "@/registry/bases/(?:shared|base|ui-sdk)/",
-];
-
-const IMPORT_REWRITES = SOURCE_ROOTS.flatMap((root) =>
-  INSTALL_FOLDERS.map(
-    ([folder, installed]) =>
-      [new RegExp(root + folder, "g"), installed] as const
-  )
+// A module of a source tree, by what follows its root: the per-style copies the design system generates, and the bases themselves. One pass finds every import of a file, where a pattern for each file of the registry read it a thousand times over.
+const SOURCE_MODULE = new RegExp(
+  `@/registry/bases/(?:__generated/base-(?:${STYLES.join("|")})|shared|base|ui-sdk)/([^"'\`\\s]*)`,
+  "g"
 );
 
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
@@ -352,14 +346,31 @@ async function buildManifests(): Promise<void> {
 // One item, in one style
 // ---------------------------------------------------------------------------
 
+/** Each import of a source tree becomes where it installs: a file that says where it lands (`explicitTargets`) by its own address, any other by its folder. */
+function rewriteSourceImports(code: string): string {
+  return code.replace(
+    SOURCE_MODULE,
+    (module, path: string, offset: number, text: string) => {
+      // Only a whole address, closed by its quote, is a file's own.
+      const installed =
+        text[offset + module.length] === '"'
+          ? explicitTargets.get(path)
+          : undefined;
+      if (installed !== undefined) {
+        return installed;
+      }
+      for (const [prefix, folder] of INSTALL_PREFIXES) {
+        if (path.startsWith(prefix)) {
+          return folder + path.slice(prefix.length);
+        }
+      }
+      return module;
+    }
+  );
+}
+
 function transformImportPaths(code: string): string {
-  return [...explicitRewrites, ...IMPORT_REWRITES]
-    .reduce(
-      (text, [pattern, installed]) => text.replace(pattern, installed),
-      code
-    )
-    .replace(DEMO_METADATA, "")
-    .trimStart();
+  return rewriteSourceImports(code).replace(DEMO_METADATA, "").trimStart();
 }
 
 /** Where a file lands in a project when its item doesn't say. */
@@ -715,17 +726,17 @@ const itemsByBase = new Map(
 );
 // A file that says where it installs (`target`) is imported from there: its
 // source module becomes that path, before the folder rules above apply.
-const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
 const SOURCE_EXTENSION = /\.tsx?$/;
 const INDEX_FILE = /\/index$/;
 const ADAPTER_ITEM = /^([a-z-]+)-(react|vue|svelte|web)$/;
 const SVELTE_ROOT = /^~\/src\/lib\//;
-const explicitRewrites = [...itemsByBase.values()]
-  .flatMap((items) => [...items.values()])
-  .flatMap((item) => item.files ?? [])
-  .flatMap((file) => {
+const explicitTargets = new Map<string, string>();
+for (const item of [...itemsByBase.values()].flatMap((items) => [
+  ...items.values(),
+])) {
+  for (const file of item.files ?? []) {
     if (!file.target) {
-      return [];
+      continue;
     }
     // A Svelte file lands under `$lib/components` (shadcn-svelte).
     const svelte = file.path.includes("/svelte/");
@@ -734,23 +745,16 @@ const explicitRewrites = [...itemsByBase.values()]
       ? `$lib/${target.replace(SVELTE_ROOT, "").replace(INDEX_FILE, "")}`
       : `@/${target}`;
     const source = file.path.replace(SOURCE_EXTENSION, "");
-    // A folder's index is imported as the folder.
-    const sources = INDEX_FILE.test(source)
+    // A folder's index is imported as the folder. A path two items write goes where the first says.
+    for (const from of INDEX_FILE.test(source)
       ? [source, source.replace(INDEX_FILE, "")]
-      : [source];
-    return sources.flatMap((from) =>
-      SOURCE_ROOTS.map(
-        (root) =>
-          [
-            new RegExp(
-              `${root}${from.replace(REGEX_SPECIALS, "\\$&")}(?=")`,
-              "g"
-            ),
-            installed,
-          ] as const
-      )
-    );
-  });
+      : [source]) {
+      if (!explicitTargets.has(from)) {
+        explicitTargets.set(from, installed);
+      }
+    }
+  }
+}
 // Every item name, once, in the order the registry lists them.
 const itemNames = new Set(
   [...itemsByBase.values()].flatMap((items) => [...items.keys()])
