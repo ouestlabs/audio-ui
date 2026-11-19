@@ -22,6 +22,21 @@ describe("the marks of the navigation", () => {
     expect(shownMarks(updates, new Date("2026-12-02T12:00:00Z"))).toEqual([]);
   });
 
+  test("by default the marks are those of the build's day, not of the clock", () => {
+    const built = import.meta.env.VITE_BUILD_DAY;
+    try {
+      import.meta.env.VITE_BUILD_DAY = "2026-11-07";
+      expect(shownMarks(updates)).toEqual([
+        ["fresh", "New"],
+        ["last", "Updated"],
+      ]);
+      import.meta.env.VITE_BUILD_DAY = "2026-12-02";
+      expect(shownMarks(updates)).toEqual([]);
+    } finally {
+      import.meta.env.VITE_BUILD_DAY = built;
+    }
+  });
+
   test("every entry has a day", () => {
     for (const { on } of [
       ...Object.values(DOCS_MENU_UPDATES),

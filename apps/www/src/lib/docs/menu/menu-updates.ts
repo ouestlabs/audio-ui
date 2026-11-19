@@ -8,10 +8,17 @@ export interface MenuUpdate {
 /** How long a mark stays after its day: past it, the page shows none. */
 const MARK_DAYS = 30;
 
-/** The marks still shown on `today`: those within `MARK_DAYS` of their day. */
+/**
+ * The marks still shown on `today`: those within `MARK_DAYS` of their day.
+ * `today` is the day of the build (`VITE_BUILD_DAY`, `YYYY-MM-DD`), not the
+ * clock: the pages are rendered once, at the build, in a runtime whose clock
+ * when a module loads is not the day, so reading `new Date()` gave the server
+ * one set of marks and the browser another, and every page failed to hydrate.
+ * Both bundles carry the same string.
+ */
 export function shownMarks(
   updates: Readonly<Record<string, MenuUpdate>>,
-  today = new Date()
+  today = new Date(import.meta.env.VITE_BUILD_DAY ?? Date.now())
 ): [string, string][] {
   // Whole days: a mark lasts to the end of its last day, whatever the hour.
   const since =

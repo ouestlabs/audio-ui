@@ -22,10 +22,14 @@ const deploymentId =
   process.env.WORKERS_CI_COMMIT_SHA ??
   Date.now().toString(36);
 
+// The day of the build, read in Node: the same string in the server's bundle and in the browser's (see menu-updates.ts).
+const buildDay = new Date().toISOString().slice(0, 10);
+
 const SDK_VARIANTS = ["parameter-field", "rocker-switch"];
 
 export default defineConfig({
   define: {
+    "import.meta.env.VITE_BUILD_DAY": JSON.stringify(buildDay),
     "import.meta.env.VITE_DEPLOYMENT_ID": JSON.stringify(deploymentId),
   },
   plugins: [
