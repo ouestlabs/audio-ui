@@ -17,7 +17,7 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@/components/ui/input-group";
+} from "@/registry/bases/base/ui/input-group";
 import { cn } from "@/registry/bases/shared/lib/utils";
 
 const parameterFieldVariants = cva("cn-parameter-field", {
