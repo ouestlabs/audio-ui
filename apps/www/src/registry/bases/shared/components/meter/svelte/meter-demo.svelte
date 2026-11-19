@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createSimulatedLevels } from "@/registry/bases/shared/lib/simulated-levels";
+import { createSimulatedLevels } from "@/registry/lib/devices/simulated-levels";
 import { Meter } from "@/registry/primitives/meter/svelte/index";
 
 const simulated = createSimulatedLevels(2);

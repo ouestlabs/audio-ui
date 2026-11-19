@@ -3,8 +3,8 @@ import {
   triggerHihat,
   triggerKick,
   triggerSnare,
-} from "@/registry/bases/shared/lib/drum-synthesis";
-import { webAudio } from "@/registry/bases/shared/lib/web-audio";
+} from "@/registry/lib/drums/drum-synthesis";
+import { webAudio } from "@/registry/lib/web-audio";
 import { Pad } from "@/registry/primitives/pad/svelte/index";
 
 const VOLUME = 0.7;

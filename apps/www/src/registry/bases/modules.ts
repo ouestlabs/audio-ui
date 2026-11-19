@@ -1,7 +1,7 @@
 /**
  * The engine and the GPU drawing as the registry ships them: one item per
  * module, `<set>-<module>` (`engine-time`, `webgl-waveform`), from
- * `base/lib/<set>/<module>/`, installed to `lib/<set>/<module>/`. A file of the
+ * `registry/lib/<set>/<module>/`, installed to `lib/<set>/<module>/`. A file of the
  * registry imports a module as `@/<set>/<module>` (a tsconfig path), which the
  * build rewrites to `@/lib/<set>/<module>`, and the item that imports it gets
  * the module's item. `test/lib-modules.test.ts` keeps the lists below in step
@@ -33,7 +33,7 @@ export interface LibModule {
   /** The npm packages its files import. */
   dependencies: string[];
   description: string;
-  /** Its files, by path from `base/lib/<set>/<module>/`. */
+  /** Its files, by path from `registry/lib/<set>/<module>/`. */
   files: string[];
   /** The other modules its files import. */
   modules: string[];
