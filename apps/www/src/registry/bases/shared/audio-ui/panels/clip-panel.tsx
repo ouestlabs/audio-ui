@@ -81,7 +81,7 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import { useLoudest } from "@/registry/bases/shared/hooks/use-loudest";
+import { useLoudest } from "@/registry/bases/shared/hooks/analysis/use-loudest";
 import {
   type ClipPeaks,
   type ClipReading,

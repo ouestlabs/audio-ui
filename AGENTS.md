@@ -71,7 +71,7 @@ registry/bases/shared/
 ├── audio-ui/panels/    # Panels that are no device's own: clip, rack, drum rack, the generic device-panel
 ├── devices/<name>/  # A device, named as it installs: device.ts, engine.ts, panel.tsx
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
-└── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
+└── hooks/           # by use: arrangement/, timeline/, analysis/, devices/, input/ (`HOOK_GROUPS` in `bases/items.ts`), and use-mobile… at the root; a hook installs to `hooks/<name>.ts` whichever folder it is written in
 
 registry/primitives/ # at the registry root, served by every base: the twelve primitives and their adapters
 registry/lib/        # at the registry root, served by every base: engine/ and webgl/ (modules), then arrangement/, drums/, devices/, notes/, input/, demo/ (by use, `LIB_GROUPS` in `bases/items.ts`) and web-audio, zip, sortable-drag at the root; a lib installs to `lib/<name>.ts` whichever folder it is written in

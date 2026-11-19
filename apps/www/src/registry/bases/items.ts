@@ -89,25 +89,82 @@ export const LIB_GROUPS = {
   notes: ["note-edits", "piano-roll-tools"],
 } as const satisfies Record<string, readonly string[]>;
 
-const libGroupOf = (name: string) =>
-  Object.entries(LIB_GROUPS).find(([, names]) =>
-    (names as readonly string[]).includes(name)
-  )?.[0];
+/** The folders of `bases/shared/hooks/`, by use, with the hooks each holds. A hook installs to `hooks/<name>.ts` whichever folder it is written in. */
+export const HOOK_GROUPS = {
+  analysis: [
+    "use-audio-levels",
+    "use-audio-signal",
+    "use-loudness",
+    "use-loudest",
+    "use-pitch",
+    "use-spectrum",
+    "use-silence-hover",
+    "use-sound-report",
+  ],
+  arrangement: [
+    "use-arrangement",
+    "use-arrangement-engine",
+    "use-arranged-clips",
+    "use-clip-edits",
+    "use-undo-history",
+    "use-track-automation",
+    "use-track-reorder",
+    "use-bake",
+  ],
+  devices: [
+    "use-device-engines",
+    "use-device-loop",
+    "use-device-signal",
+    "use-synth-voices",
+    "use-polyphony",
+    "use-piano-roll-playback",
+    "use-play-switch",
+    "use-noise-through-eq",
+    "use-master-bus",
+  ],
+  input: [
+    "use-microphone",
+    "use-midi-input",
+    "use-computer-keyboard",
+    "use-audio-session",
+  ],
+  timeline: [
+    "use-timeline-cursor",
+    "use-timeline-grid",
+    "use-timeline-markers",
+    "use-timeline-zoom",
+    "use-time-selection",
+    "use-marquee-selection",
+    "use-transport-clock",
+  ],
+} as const satisfies Record<string, readonly string[]>;
+
+const groupOf = (groups: Record<string, readonly string[]>, name: string) =>
+  Object.entries(groups).find(([, names]) => names.includes(name))?.[0];
 
 /** A lib: framework-free logic in `lib/<name>.ts` (or `lib/<group>/<name>.ts`), installed to `lib/`. */
 export const libItem = (
   name: string,
   spec: ItemSpec & { files?: string[] }
 ): RegistryItem => {
-  const group = libGroupOf(name);
+  const group = groupOf(LIB_GROUPS, name);
   return flat("registry:lib", group ? `lib/${group}` : "lib", "ts", name, spec);
 };
 
-/** A hook: React integration in `hooks/<name>.ts`, installed to `hooks/`. */
+/** A hook: React integration in `hooks/<name>.ts` (or `hooks/<group>/<name>.ts`), installed to `hooks/`. */
 export const hookItem = (
   name: string,
   spec: ItemSpec & { files?: string[] }
-): RegistryItem => flat("registry:hook", "hooks", "ts", name, spec);
+): RegistryItem => {
+  const group = groupOf(HOOK_GROUPS, name);
+  return flat(
+    "registry:hook",
+    group ? `hooks/${group}` : "hooks",
+    "ts",
+    name,
+    spec
+  );
+};
 
 /** A part of a device: what its file needs beyond the device's own state. */
 export interface DevicePartSpec {

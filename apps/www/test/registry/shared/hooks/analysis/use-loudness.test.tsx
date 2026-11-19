@@ -17,7 +17,7 @@ mock.module("@/engine/analysis", () => ({
   createLoudnessMeter: () => Promise.resolve(meter),
 }));
 const { useLoudness } = await import(
-  "@/registry/bases/shared/hooks/use-loudness"
+  "@/registry/bases/shared/hooks/analysis/use-loudness"
 );
 
 describe("useLoudness", () => {

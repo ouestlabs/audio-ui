@@ -77,23 +77,23 @@ import {
   TrackReorderGhost,
 } from "@/registry/bases/shared/audio-ui/elements/track-grip";
 import { TrackLevel } from "@/registry/bases/shared/audio-ui/elements/track-level";
-import { useArrangedClips } from "@/registry/bases/shared/hooks/use-arranged-clips";
-import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import type { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useMarquee } from "@/registry/bases/shared/hooks/use-marquee-selection";
-import type { useTimeSelection } from "@/registry/bases/shared/hooks/use-time-selection";
-import {
-  GRID_DIVISION_OPTIONS,
-  type useTimelineGrid,
-} from "@/registry/bases/shared/hooks/use-timeline-grid";
-import type { useTimelineMarkers } from "@/registry/bases/shared/hooks/use-timeline-markers";
-import type { useTimelineZoom } from "@/registry/bases/shared/hooks/use-timeline-zoom";
+import { useArrangedClips } from "@/registry/bases/shared/hooks/arrangement/use-arranged-clips";
+import type { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import type { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
 import {
   type AutomationFollowing,
   useAutomatedMix,
   type useTrackAutomation,
-} from "@/registry/bases/shared/hooks/use-track-automation";
-import { useTrackReorder } from "@/registry/bases/shared/hooks/use-track-reorder";
+} from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
+import { useTrackReorder } from "@/registry/bases/shared/hooks/arrangement/use-track-reorder";
+import { useMarquee } from "@/registry/bases/shared/hooks/timeline/use-marquee-selection";
+import type { useTimeSelection } from "@/registry/bases/shared/hooks/timeline/use-time-selection";
+import {
+  GRID_DIVISION_OPTIONS,
+  type useTimelineGrid,
+} from "@/registry/bases/shared/hooks/timeline/use-timeline-grid";
+import type { useTimelineMarkers } from "@/registry/bases/shared/hooks/timeline/use-timeline-markers";
+import type { useTimelineZoom } from "@/registry/bases/shared/hooks/timeline/use-timeline-zoom";
 import {
   type Arranged,
   type ArrangementTrack,

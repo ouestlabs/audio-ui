@@ -3,7 +3,7 @@ import type { EngineFactory, InstrumentEngine } from "@/engine/device";
 import {
   type DeviceEngineLike,
   useDeviceEngines,
-} from "@/registry/bases/shared/hooks/use-device-engines";
+} from "@/registry/bases/shared/hooks/devices/use-device-engines";
 import { createPolyphony } from "@/registry/lib/devices/polyphony";
 
 /** What a voice needs of an instrument's engine: it plays one note at a time. */

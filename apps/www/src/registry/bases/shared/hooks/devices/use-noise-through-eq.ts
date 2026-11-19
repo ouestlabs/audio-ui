@@ -5,7 +5,7 @@ import {
   WEB_AUDIO_FILTER_TYPES,
 } from "@/engine/analysis";
 import { noiseBuffer } from "@/engine/device";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
 import { webAudio } from "@/registry/lib/web-audio";
 
 /** The noise's level out: audio.js's pink noise peaks at 0.9, so this keeps it where the demo always played it. */

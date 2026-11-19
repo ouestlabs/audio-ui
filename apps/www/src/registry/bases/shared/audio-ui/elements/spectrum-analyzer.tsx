@@ -8,7 +8,7 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/registry/bases/shared/audio-ui/elements/plot";
-import { useSpectrumPeaks } from "@/registry/bases/shared/hooks/use-spectrum";
+import { useSpectrumPeaks } from "@/registry/bases/shared/hooks/analysis/use-spectrum";
 import { cn } from "@/registry/lib/utils";
 import type { Source } from "@/registry/primitives/primitive";
 

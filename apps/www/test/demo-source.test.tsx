@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import {
   AudioSessionProvider,
   useAudioSession,
-} from "@/registry/bases/shared/hooks/use-audio-session";
+} from "@/registry/bases/shared/hooks/input/use-audio-session";
 import { useDemoSource } from "@/registry/bases/shared/hooks/use-demo-source";
 
 function Device({ fallback }: { fallback: "groove" | "chord" }) {

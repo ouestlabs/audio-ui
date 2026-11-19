@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playedVelocity } from "@/engine/playback";
 import type { Tempo } from "@/engine/time";
-import type { UseSynthVoicesReturn } from "@/registry/bases/shared/hooks/use-synth-voices";
+import type { UseSynthVoicesReturn } from "@/registry/bases/shared/hooks/devices/use-synth-voices";
 import {
   type TransportRegion,
   useTransportClock,
-} from "@/registry/bases/shared/hooks/use-transport-clock";
+} from "@/registry/bases/shared/hooks/timeline/use-transport-clock";
 import type { EnvelopePoint } from "@/registry/lib/devices/envelope-ramp";
 import { triggerClick } from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";

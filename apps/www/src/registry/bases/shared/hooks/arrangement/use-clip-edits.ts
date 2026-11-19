@@ -6,7 +6,7 @@ import {
   MIN_DB,
   type SelectionShape,
 } from "@/registry/bases/shared/audio-ui/elements/selection-frame";
-import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
+import type { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
 import type {
   Clipping,
   TimeSelection,

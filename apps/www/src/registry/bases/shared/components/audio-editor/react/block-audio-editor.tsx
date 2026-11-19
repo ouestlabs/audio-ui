@@ -104,13 +104,13 @@ import {
 import { TimelineLocator } from "@/registry/bases/shared/audio-ui/elements/timeline-markers";
 import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
 import type { WaveformClip } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { useBake } from "@/registry/bases/shared/hooks/use-bake";
-import { useClipEdits } from "@/registry/bases/shared/hooks/use-clip-edits";
-import { useSilenceHover } from "@/registry/bases/shared/hooks/use-silence-hover";
-import { useSoundReport } from "@/registry/bases/shared/hooks/use-sound-report";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { useSilenceHover } from "@/registry/bases/shared/hooks/analysis/use-silence-hover";
+import { useSoundReport } from "@/registry/bases/shared/hooks/analysis/use-sound-report";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { useBake } from "@/registry/bases/shared/hooks/arrangement/use-bake";
+import { useClipEdits } from "@/registry/bases/shared/hooks/arrangement/use-clip-edits";
 import { useStatusLine } from "@/registry/bases/shared/hooks/use-status-line";
 import {
   type Arranged,

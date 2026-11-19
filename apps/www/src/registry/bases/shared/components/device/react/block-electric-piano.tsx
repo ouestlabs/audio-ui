@@ -7,9 +7,9 @@ import {
 } from "@/registry/bases/shared/devices/electric-piano/device";
 import { createElectricPianoEngine } from "@/registry/bases/shared/devices/electric-piano/engine";
 import { ElectricPianoPanel } from "@/registry/bases/shared/devices/electric-piano/panel";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
-import { usePolyphony } from "@/registry/bases/shared/hooks/use-polyphony";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { usePolyphony } from "@/registry/bases/shared/hooks/devices/use-polyphony";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */
 const PANEL_NOTE = "panel";

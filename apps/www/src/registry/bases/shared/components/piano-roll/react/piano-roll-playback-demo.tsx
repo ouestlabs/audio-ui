@@ -11,13 +11,13 @@ import {
   Timeline,
   TimelinePlayhead,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   meterOf,
   usePianoRollPlayback,
-} from "@/registry/bases/shared/hooks/use-piano-roll-playback";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
-import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
+} from "@/registry/bases/shared/hooks/devices/use-piano-roll-playback";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
+import { useSynthVoices } from "@/registry/bases/shared/hooks/devices/use-synth-voices";
 import type { Note } from "@/registry/primitives/piano-roll/edits";
 
 const TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 110 };

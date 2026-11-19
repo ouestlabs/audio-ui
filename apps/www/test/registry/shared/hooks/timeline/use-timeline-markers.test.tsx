@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { useTimelineMarkers } from "@/registry/bases/shared/hooks/use-timeline-markers";
+import { useTimelineMarkers } from "@/registry/bases/shared/hooks/timeline/use-timeline-markers";
 import {
   type ArrangementCommand,
   apply,

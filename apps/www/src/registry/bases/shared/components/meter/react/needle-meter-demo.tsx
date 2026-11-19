@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { NeedleMeter } from "@/registry/bases/shared/audio-ui/elements/needle-meter";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { usePageMicrophone } from "@/registry/bases/shared/hooks/use-microphone";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { usePageMicrophone } from "@/registry/bases/shared/hooks/input/use-microphone";
 import { useSimulatedLevels } from "@/registry/bases/shared/hooks/use-simulated-levels";
 
 /** The needle follows the microphone when the bar's microphone is on, and a moving signal when it is not. */

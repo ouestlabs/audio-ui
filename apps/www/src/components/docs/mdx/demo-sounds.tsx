@@ -1,7 +1,7 @@
 import { PauseIcon, PlayIcon } from "@phosphor-icons/react/ssr";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   DEMO_SOURCES,
   type DemoSourceName,

@@ -7,11 +7,11 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMicrophone } from "@/registry/bases/shared/hooks/use-microphone";
 import {
   type PitchReading,
   usePitch,
-} from "@/registry/bases/shared/hooks/use-pitch";
+} from "@/registry/bases/shared/hooks/analysis/use-pitch";
+import { useMicrophone } from "@/registry/bases/shared/hooks/input/use-microphone";
 import { cn } from "@/registry/lib/utils";
 import type { Source } from "@/registry/primitives/primitive";
 

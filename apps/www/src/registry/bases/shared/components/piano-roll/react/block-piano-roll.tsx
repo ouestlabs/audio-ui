@@ -70,17 +70,17 @@ import {
   TimelineRuler,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { Transport } from "@/registry/bases/shared/audio-ui/elements/transport";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
+import { useUndoHistory } from "@/registry/bases/shared/hooks/arrangement/use-undo-history";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   DEFAULT_NOTE_ENVELOPE,
   type Meter,
   meterOf,
   usePianoRollPlayback,
-} from "@/registry/bases/shared/hooks/use-piano-roll-playback";
-import { useSynthVoices } from "@/registry/bases/shared/hooks/use-synth-voices";
-import type { TransportRegion } from "@/registry/bases/shared/hooks/use-transport-clock";
-import { useUndoHistory } from "@/registry/bases/shared/hooks/use-undo-history";
+} from "@/registry/bases/shared/hooks/devices/use-piano-roll-playback";
+import { useSynthVoices } from "@/registry/bases/shared/hooks/devices/use-synth-voices";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
+import type { TransportRegion } from "@/registry/bases/shared/hooks/timeline/use-transport-clock";
 import {
   applyNoteEdit,
   canApplyNoteEdit,

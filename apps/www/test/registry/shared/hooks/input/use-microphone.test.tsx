@@ -12,7 +12,7 @@ mock.module("@/registry/lib/web-audio", () => ({
 }));
 
 const { useMicrophone } = await import(
-  "@/registry/bases/shared/hooks/use-microphone"
+  "@/registry/bases/shared/hooks/input/use-microphone"
 );
 
 /** A microphone stream whose one track says whether it was stopped. */

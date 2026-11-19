@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
 
 /** An analyser that hands out a sine of `amplitude` every time it is read. */
 const analyserOf = (amplitude: number) =>

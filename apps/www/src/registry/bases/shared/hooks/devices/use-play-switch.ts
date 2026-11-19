@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import {
   silentPlay,
   useAudioSession,
-} from "@/registry/bases/shared/hooks/use-audio-session";
+} from "@/registry/bases/shared/hooks/input/use-audio-session";
 
 const OFF = { on: false };
 

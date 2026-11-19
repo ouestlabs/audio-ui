@@ -7,9 +7,9 @@ import {
 } from "@/registry/bases/shared/devices/fm-synth/device";
 import { createFmSynthEngine } from "@/registry/bases/shared/devices/fm-synth/engine";
 import { FmSynthPanel } from "@/registry/bases/shared/devices/fm-synth/panel";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
-import { usePolyphony } from "@/registry/bases/shared/hooks/use-polyphony";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { usePolyphony } from "@/registry/bases/shared/hooks/devices/use-polyphony";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */
 const PANEL_NOTE = "panel";

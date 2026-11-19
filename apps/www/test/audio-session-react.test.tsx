@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { act, render, screen } from "@testing-library/react";
-import { AudioSessionProvider } from "@/registry/bases/shared/hooks/use-audio-session";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
+import { AudioSessionProvider } from "@/registry/bases/shared/hooks/input/use-audio-session";
 
 function Preview({ name }: { name: string }) {
   const { playing, toggle } = usePlaySwitch();

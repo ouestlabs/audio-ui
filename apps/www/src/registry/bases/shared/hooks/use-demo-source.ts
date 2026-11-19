@@ -2,7 +2,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import {
   silentSource,
   useAudioSession,
-} from "@/registry/bases/shared/hooks/use-audio-session";
+} from "@/registry/bases/shared/hooks/input/use-audio-session";
 import {
   DEMO_SOURCES,
   type DemoSourceName,

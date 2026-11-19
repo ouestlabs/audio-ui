@@ -4,7 +4,7 @@ import {
   GRID_DIVISION_OPTIONS,
   GRID_KEYS,
   useTimelineGrid,
-} from "@/registry/bases/shared/hooks/use-timeline-grid";
+} from "@/registry/bases/shared/hooks/timeline/use-timeline-grid";
 
 const TEMPO = { beatUnit: 4, beatsPerBar: 4, bpm: 120 };
 

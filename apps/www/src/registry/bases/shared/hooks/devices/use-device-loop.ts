@@ -4,9 +4,9 @@ import type {
   EffectEngine,
   EngineFactory,
 } from "@/engine/device";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
 import { useDemoSource } from "@/registry/bases/shared/hooks/use-demo-source";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 import {
   type DemoSourceName,
   demoKey,

@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { useArrangedClips } from "@/registry/bases/shared/hooks/use-arranged-clips";
+import { useArrangedClips } from "@/registry/bases/shared/hooks/arrangement/use-arranged-clips";
 import type { Arranged } from "@/registry/lib/arrangement/arrangement";
 import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 

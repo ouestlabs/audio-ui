@@ -300,7 +300,7 @@ const items: RegistryItem[] = [
         type: "registry:lib",
       },
       {
-        path: "hooks/use-arrangement-engine.ts",
+        path: "hooks/arrangement/use-arrangement-engine.ts",
         type: "registry:hook",
       },
     ],

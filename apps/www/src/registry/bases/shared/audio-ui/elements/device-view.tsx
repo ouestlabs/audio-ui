@@ -40,12 +40,12 @@ import {
   RackPanel,
   type RackParameter,
 } from "@/registry/bases/shared/audio-ui/panels/rack-panel";
-import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
+import type { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
 import {
   type AutomationFollowing,
   useAutomatedDevice,
   useAutomatedRack,
-} from "@/registry/bases/shared/hooks/use-track-automation";
+} from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
 import {
   type Arranged,
   type ArrangementTrack,

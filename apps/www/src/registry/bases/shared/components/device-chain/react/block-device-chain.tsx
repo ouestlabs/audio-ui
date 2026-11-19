@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { DeviceView } from "@/registry/bases/shared/audio-ui/elements/device-view";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
 import { useDemoSource } from "@/registry/bases/shared/hooks/use-demo-source";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
 import type { Arranged } from "@/registry/lib/arrangement/arrangement";
 import type { RecordingSource } from "@/registry/lib/arrangement/clip-player";
 import {

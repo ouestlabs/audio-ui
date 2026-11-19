@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { renderHook } from "@testing-library/react";
-import { useTimelineCursor } from "@/registry/bases/shared/hooks/use-timeline-cursor";
+import { useTimelineCursor } from "@/registry/bases/shared/hooks/timeline/use-timeline-cursor";
 import type { Arranged } from "@/registry/lib/arrangement/arrangement";
 
 const clip = (id: string, track: string, start: number, length: number) =>

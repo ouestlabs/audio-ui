@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
 import type { NoteTiming } from "@/engine/device";
-import { usePolyphony } from "@/registry/bases/shared/hooks/use-polyphony";
+import { usePolyphony } from "@/registry/bases/shared/hooks/devices/use-polyphony";
 
 interface State {
   level: number;

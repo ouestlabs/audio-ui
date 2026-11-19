@@ -6,8 +6,8 @@ import {
 } from "@/registry/bases/shared/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/registry/bases/shared/devices/wave-shaper/engine";
 import { WaveShaperPanel } from "@/registry/bases/shared/devices/wave-shaper/panel";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 /**
  * A wave shaper synth you can plug in: its state, a panel that draws and plays

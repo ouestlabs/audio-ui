@@ -63,18 +63,18 @@ import {
   stringMachinePreset,
 } from "@/registry/bases/shared/devices/string-machine/device";
 import { vibeDevice } from "@/registry/bases/shared/devices/vibe/device";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { useTimeSelection } from "@/registry/bases/shared/hooks/use-time-selection";
-import { useTimelineCursor } from "@/registry/bases/shared/hooks/use-timeline-cursor";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { useTrackAutomation } from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
+import { useTimeSelection } from "@/registry/bases/shared/hooks/timeline/use-time-selection";
+import { useTimelineCursor } from "@/registry/bases/shared/hooks/timeline/use-timeline-cursor";
 import {
   GRID_KEYS,
   useTimelineGrid,
-} from "@/registry/bases/shared/hooks/use-timeline-grid";
-import { useTimelineMarkers } from "@/registry/bases/shared/hooks/use-timeline-markers";
-import { useTimelineZoom } from "@/registry/bases/shared/hooks/use-timeline-zoom";
-import { useTrackAutomation } from "@/registry/bases/shared/hooks/use-track-automation";
+} from "@/registry/bases/shared/hooks/timeline/use-timeline-grid";
+import { useTimelineMarkers } from "@/registry/bases/shared/hooks/timeline/use-timeline-markers";
+import { useTimelineZoom } from "@/registry/bases/shared/hooks/timeline/use-timeline-zoom";
 import {
   type Arranged,
   type ArrangementTrack,

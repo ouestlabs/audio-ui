@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   type DrumOptions,
   triggerHihat,

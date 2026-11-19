@@ -122,7 +122,7 @@ export const audioUi: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "hooks/use-arranged-clips.ts",
+        path: "hooks/arrangement/use-arranged-clips.ts",
         type: "registry:hook",
       },
     ],
@@ -147,7 +147,7 @@ export const audioUi: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "hooks/use-timeline-markers.ts",
+        path: "hooks/timeline/use-timeline-markers.ts",
         type: "registry:hook",
       },
     ],
@@ -169,7 +169,7 @@ export const audioUi: RegistryItem[] = [
         type: "registry:ui",
       },
       {
-        path: "hooks/use-track-automation.ts",
+        path: "hooks/arrangement/use-track-automation.ts",
         type: "registry:hook",
       },
     ],

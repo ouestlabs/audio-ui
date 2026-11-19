@@ -20,7 +20,7 @@ import { $ } from "bun";
 import { transformStyleClassNames } from "../src/lib/code/code-utils.ts";
 import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { categories, rootSeo } from "../src/registry/bases/categories.ts";
-import { LIB_GROUPS } from "../src/registry/bases/items.ts";
+import { HOOK_GROUPS, LIB_GROUPS } from "../src/registry/bases/items.ts";
 import {
   moduleDependencies,
   rewriteModuleImports,
@@ -89,9 +89,9 @@ const SOURCE_MODULE = new RegExp(
   "g"
 );
 
-// A lib written in a group folder installs beside the others: `lib/notes/note-edits` is `@/lib/note-edits`.
-const LIB_GROUP_MODULE = new RegExp(
-  `^lib/(?:${Object.keys(LIB_GROUPS).join("|")})/([^/]+)$`
+// A lib or a hook written in a group folder installs beside the others: `lib/notes/note-edits` is `@/lib/note-edits`.
+const GROUP_MODULE = new RegExp(
+  `^(lib/(?:${Object.keys(LIB_GROUPS).join("|")})|hooks/(?:${Object.keys(HOOK_GROUPS).join("|")}))/([^/]+)$`
 );
 
 const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
@@ -379,9 +379,9 @@ function rewriteSourceImports(code: string): string {
       if (installed !== undefined) {
         return installed;
       }
-      const flat = LIB_GROUP_MODULE.exec(path);
+      const flat = GROUP_MODULE.exec(path);
       if (flat) {
-        return `@/lib/${flat[1]}`;
+        return `@/${flat[1]?.split("/")[0]}/${flat[2]}`;
       }
       for (const [prefix, folder] of INSTALL_PREFIXES) {
         if (path.startsWith(prefix)) {

@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/registry/bases/shared/devices/auto-pan/engine";
 import { AutoPanPanel } from "@/registry/bases/shared/devices/auto-pan/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** Sways on the half note: one cycle every two beats of the loop. */

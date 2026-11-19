@@ -55,13 +55,13 @@ mock.module("@/registry/lib/web-audio", () => ({
 }));
 
 const { AudioSessionProvider } = await import(
-  "@/registry/bases/shared/hooks/use-audio-session"
+  "@/registry/bases/shared/hooks/input/use-audio-session"
 );
 const { usePlaySwitch } = await import(
-  "@/registry/bases/shared/hooks/use-play-switch"
+  "@/registry/bases/shared/hooks/devices/use-play-switch"
 );
 const { useNoiseThroughEq } = await import(
-  "@/registry/bases/shared/hooks/use-noise-through-eq"
+  "@/registry/bases/shared/hooks/devices/use-noise-through-eq"
 );
 
 const BANDS: EqBand[] = [

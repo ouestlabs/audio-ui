@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { MixerView } from "@/registry/bases/shared/audio-ui/elements/mixer-view";
-import { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { usePlaySwitch } from "@/registry/bases/shared/hooks/use-play-switch";
-import { useTrackAutomation } from "@/registry/bases/shared/hooks/use-track-automation";
+import { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
+import { useTrackAutomation } from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
+import { usePlaySwitch } from "@/registry/bases/shared/hooks/devices/use-play-switch";
 import {
   type Arranged,
   type ArrangementTrack,

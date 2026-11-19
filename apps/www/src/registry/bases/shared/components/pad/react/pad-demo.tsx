@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { Pad, PadItem } from "@/registry/bases/shared/audio-ui/elements/pad";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 import {
   triggerHihat,
   triggerKick,

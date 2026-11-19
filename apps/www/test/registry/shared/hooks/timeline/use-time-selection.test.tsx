@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { useTimeSelection } from "@/registry/bases/shared/hooks/use-time-selection";
+import { useTimeSelection } from "@/registry/bases/shared/hooks/timeline/use-time-selection";
 import type { Clipping } from "@/registry/lib/arrangement/arrangement";
 import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 

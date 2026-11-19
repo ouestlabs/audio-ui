@@ -1,5 +1,5 @@
 import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
 
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 

@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { useTrackAutomation } from "@/registry/bases/shared/hooks/use-track-automation";
+import { useTrackAutomation } from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
 import type { ArrangementTrack } from "@/registry/lib/arrangement/arrangement";
 import type { ArrangementCommand } from "@/registry/lib/arrangement/arrangement-state";
 

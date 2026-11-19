@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/delay/device";
 import { createDelayEngine } from "@/registry/bases/shared/devices/delay/engine";
 import { DelayPanel } from "@/registry/bases/shared/devices/delay/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** A dotted eighth: the echo that has made a thousand guitars sound larger. */

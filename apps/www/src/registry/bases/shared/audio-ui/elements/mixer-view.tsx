@@ -19,14 +19,14 @@ import {
   SWITCH_TONES,
   trackSwatch,
 } from "@/registry/bases/shared/audio-ui/elements/timeline";
-import type { useArrangement } from "@/registry/bases/shared/hooks/use-arrangement";
-import type { useArrangementEngine } from "@/registry/bases/shared/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/registry/bases/shared/hooks/use-audio-levels";
-import { useLoudness } from "@/registry/bases/shared/hooks/use-loudness";
+import { useAudioLevels } from "@/registry/bases/shared/hooks/analysis/use-audio-levels";
+import { useLoudness } from "@/registry/bases/shared/hooks/analysis/use-loudness";
+import type { useArrangement } from "@/registry/bases/shared/hooks/arrangement/use-arrangement";
+import type { useArrangementEngine } from "@/registry/bases/shared/hooks/arrangement/use-arrangement-engine";
 import {
   type AutomationFollowing,
   useAutomatedMix,
-} from "@/registry/bases/shared/hooks/use-track-automation";
+} from "@/registry/bases/shared/hooks/arrangement/use-track-automation";
 import {
   type ArrangementTrack,
   type AutomatedParameter,

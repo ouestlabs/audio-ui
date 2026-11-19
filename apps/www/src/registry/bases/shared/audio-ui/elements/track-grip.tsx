@@ -1,6 +1,6 @@
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
-import type { TrackGhost } from "@/registry/bases/shared/hooks/use-track-reorder";
+import type { TrackGhost } from "@/registry/bases/shared/hooks/arrangement/use-track-reorder";
 import { cn } from "@/registry/lib/utils";
 
 /**

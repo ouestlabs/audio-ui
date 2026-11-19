@@ -8,7 +8,7 @@ mock.module("@/registry/lib/web-audio", () => ({
 }));
 
 const { useTransportClock } = await import(
-  "@/registry/bases/shared/hooks/use-transport-clock"
+  "@/registry/bases/shared/hooks/timeline/use-transport-clock"
 );
 
 const setup = (bpm: number) =>

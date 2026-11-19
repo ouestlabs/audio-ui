@@ -6,9 +6,9 @@ import {
 } from "@/registry/bases/shared/devices/drum-synth/device";
 import { createDrumSynthEngine } from "@/registry/bases/shared/devices/drum-synth/engine";
 import { DrumSynthPanel } from "@/registry/bases/shared/devices/drum-synth/panel";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
-import { useMidiInput } from "@/registry/bases/shared/hooks/use-midi-input";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useMidiInput } from "@/registry/bases/shared/hooks/input/use-midi-input";
 import { webAudio } from "@/registry/lib/web-audio";
 
 /**

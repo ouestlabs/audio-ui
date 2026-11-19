@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderHook } from "@testing-library/react";
 import type { DeviceContext } from "@/engine/device";
-import { useDeviceEngines } from "@/registry/bases/shared/hooks/use-device-engines";
+import { useDeviceEngines } from "@/registry/bases/shared/hooks/devices/use-device-engines";
 
 interface State {
   level: number;

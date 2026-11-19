@@ -5,9 +5,9 @@ import {
 } from "@/registry/bases/shared/devices/gate/device";
 import { createGateEngine } from "@/registry/bases/shared/devices/gate/engine";
 import { GatePanel } from "@/registry/bases/shared/devices/gate/panel";
-import { useDeviceLoop } from "@/registry/bases/shared/hooks/use-device-loop";
-import { useDeviceSignal } from "@/registry/bases/shared/hooks/use-device-signal";
-import { useMasterBus } from "@/registry/bases/shared/hooks/use-master-bus";
+import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
+import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** A loop whose tails fall under the threshold, so the gate closes between the hits. */
