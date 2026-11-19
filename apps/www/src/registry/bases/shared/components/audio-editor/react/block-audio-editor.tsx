@@ -61,7 +61,6 @@ import {
 } from "@/engine/files";
 import { formatLevel, formatSampleRate, formatTime } from "@/engine/format";
 import { secondsPerBeat, type Tempo } from "@/engine/time";
-import { hasWebGL2 } from "@/gl/lane";
 import { ArrangedTake } from "@/registry/bases/shared/audio-ui/elements/arranged-clip";
 import type { SpectrogramBand } from "@/registry/bases/shared/audio-ui/elements/clip-spectrogram";
 import {
@@ -165,6 +164,7 @@ import {
 } from "@/registry/lib/input/recording";
 import { cn } from "@/registry/lib/utils";
 import { webAudio } from "@/registry/lib/web-audio";
+import { hasWebGL2 } from "@/webgl/lane";
 
 const TRACK = "track-1";
 /** What the editor's recordings are named after, apart from those of other demos on the same context. */

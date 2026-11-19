@@ -43,8 +43,6 @@ import {
   warpedTime,
   warpRate,
 } from "@/engine/time";
-import { hasWebGL2 } from "@/gl/lane";
-import type { WaveformBands } from "@/gl/waveform";
 import {
   ClipBox,
   type ClipMeter,
@@ -97,6 +95,8 @@ import {
   soundOperationTiming,
 } from "@/registry/lib/arrangement/sound-operations";
 import { cn } from "@/registry/lib/utils";
+import { hasWebGL2 } from "@/webgl/lane";
+import type { WaveformBands } from "@/webgl/waveform";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {

@@ -108,11 +108,11 @@ async function loadItems(folders: readonly string[]): Promise<RegistryItem[]> {
 
 export async function buildEntries(): Promise<Entry[]> {
   const all = await loadItems(FOLDERS);
-  // A module of the engine or of gl has its page in its own section, headed by its module.
+  // A module of the engine or of webgl has its page in its own section, headed by its module.
   const own = (await loadItems(["hooks", "lib"])).filter(
     (item) =>
       (item.files?.length ?? 0) > 0 &&
-      !(item.name.startsWith("engine-") || item.name.startsWith("gl-"))
+      !(item.name.startsWith("engine-") || item.name.startsWith("webgl-"))
   );
   const entries = await Promise.all(
     own.map(async (item): Promise<Entry> => {
@@ -150,12 +150,12 @@ const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
 // `export default function name`, with its JSDoc, in a module or its declarations.
 const DEFAULT_EXPORT =
   /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
-// A module of the engine or of gl, as the registry's files import it: `@/engine/time`.
-const LIB_MODULE = /^@\/(engine|gl)\/([a-z-]+)$/;
+// A module of the engine or of webgl, as the registry's files import it: `@/engine/time`.
+const LIB_MODULE = /^@\/(engine|webgl)\/([a-z-]+)$/;
 const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const SOURCE_FILE = /\.tsx?$/;
 
-/** Where the modules of the engine and of gl are, in the registry. */
+/** Where the modules of the engine and of webgl are, in the registry. */
 const LIB = `${REGISTRY}/lib`;
 
 /** A module of a published package, as its page heads it. */

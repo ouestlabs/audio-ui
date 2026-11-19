@@ -5,7 +5,7 @@ import { stftAnalyse } from "@audio/stft";
  * does not hold the recording: a column every `hop` frames, each bin's level
  * from DC to Nyquist over windows of `size` frames, a byte each. This is the
  * form `gl-spectrogram` takes them in, and `LaneSamples.spectra` of
- * `@/gl/lane`.
+ * `@/webgl/lane`.
  */
 export interface Spectra {
   hop: number;

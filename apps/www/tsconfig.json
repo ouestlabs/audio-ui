@@ -57,7 +57,7 @@
         "./src/registry/bases/shared/primitives/xypad/xypad.ts"
       ],
       "@/engine/*": ["./src/registry/lib/engine/*/index.ts"],
-      "@/gl/*": ["./src/registry/lib/gl/*/index.ts"],
+      "@/webgl/*": ["./src/registry/lib/webgl/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [
         "../../packages/icons/src/providers/react/index.tsx"

@@ -455,7 +455,7 @@ async function buildFile(
     );
   }
 
-  // 7. A module of the engine or of gl is imported where it installs, `@/lib/engine/<module>`
+  // 7. A module of the engine or of webgl is imported where it installs, `@/lib/engine/<module>`
   content = rewriteModuleImports(content);
 
   const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
@@ -522,7 +522,7 @@ function withSharedItems(item: SourceItem, files: BuiltFile[]) {
     ])
     .filter((name) => {
       const shared = SHARED_ITEMS[name];
-      // A module of the engine or of gl is installed by its own item, never shipped by another.
+      // A module of the engine or of webgl is installed by its own item, never shipped by another.
       if (!shared) {
         return name !== item.name;
       }

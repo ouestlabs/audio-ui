@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { MODULE_SETS } from "@/registry/bases/modules";
 
 /**
- * The items of the engine and of gl list each module's files, the npm packages
+ * The items of the engine and of webgl list each module's files, the npm packages
  * they import and the other modules they reach: the folders decide, so a file
  * added, removed or importing something new shows here first.
  */

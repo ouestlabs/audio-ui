@@ -6,7 +6,7 @@ const DOCS = `${import.meta.dir}/../src/content/docs`;
 /** Each docs folder, the guides that live there beside its modules, and what its modules are imported from. */
 const SECTIONS = [
   { folder: "engine", from: "@/lib/engine", guides: [] },
-  { folder: "gl", from: "@/lib/gl", guides: [] },
+  { folder: "webgl", from: "@/lib/webgl", guides: [] },
 ] as const;
 
 /** The section a module is in, by what it is imported from. */

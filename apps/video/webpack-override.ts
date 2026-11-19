@@ -105,7 +105,7 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
         "registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ),
       "@/engine": path.join(www, "registry/lib/engine"),
-      "@/gl": path.join(www, "registry/lib/gl"),
+      "@/webgl": path.join(www, "registry/lib/webgl"),
       "@": www,
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),

@@ -73,7 +73,7 @@ registry/bases/shared/
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
 └── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
 
-registry/lib/        # at the registry root, served by every base: engine/ and gl/ (modules), then arrangement/, drums/, devices/, notes/, input/, demo/ (by use, `LIB_GROUPS` in `bases/items.ts`) and web-audio, zip, sortable-drag at the root; a lib installs to `lib/<name>.ts` whichever folder it is written in
+registry/lib/        # at the registry root, served by every base: engine/ and webgl/ (modules), then arrangement/, drums/, devices/, notes/, input/, demo/ (by use, `LIB_GROUPS` in `bases/items.ts`) and web-audio, zip, sortable-drag at the root; a lib installs to `lib/<name>.ts` whichever folder it is written in
 ```
 
 Each of `audio-ui/`, `devices/`, `components/`, `hooks/`, `lib/`, `primitives/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/shared/`, except those of `lib/`, which start at `registry/` (`lib/web-audio.ts`). Items are declared through the factories of `registry/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js a device runs is the engine's: its worklet's kernels come from `@/lib/engine/kernels` (listed in `apps/www/scripts/engine/kernels.ts`, written by `bun run engine:kernels` there, checked by its `kernels.test.ts`) and the processors its description uses from `@/lib/engine/dsp`; a registry file never imports an `@audio/*` atom.
@@ -119,7 +119,7 @@ The docs are in sections (`lib/docs/content/sections.ts`), switched at the top o
 
 Every hook and lib has its own entry page, `hooks/<name>.mdx` or `lib/<name>.mdx`, listed once in that folder's `meta.json`. It opens with `<Entry name="<name>" />`, which draws the install command, the import, the files, what it depends on, what uses it and its exports from `lib/docs/content/entries.generated.json` (written by `registry:build` from the `_registry.ts` files and the sources), then goes on with a written Usage section. `test/registry-entries-docs.test.ts` fails on an entry with no page or a page with no entry.
 
-Every module of the engine and of gl has a page the same way: `engine/<module>.mdx` or `gl/<module>.mdx`, headed by `<Module from="@/lib/engine/<module>" />` or `<Module from="@/lib/gl/<module>" />` (the install, the import, the hooks and libs that use it, the audio.js packages it builds on, each linked to its page on audio.js.org, and its exports), read from `lib/docs/content/package-modules.generated.json`, which the same `registry:build` writes from the packages' exports and sources. `test/package-modules-docs.test.ts` fails on a module with no page.
+Every module of the engine and of webgl has a page the same way: `engine/<module>.mdx` or `webgl/<module>.mdx`, headed by `<Module from="@/lib/engine/<module>" />` or `<Module from="@/lib/webgl/<module>" />` (the install, the import, the hooks and libs that use it, the audio.js packages it builds on, each linked to its page on audio.js.org, and its exports), read from `lib/docs/content/package-modules.generated.json`, which the same `registry:build` writes from the packages' exports and sources. `test/package-modules-docs.test.ts` fails on a module with no page.
 
 How items are grouped:
 
@@ -164,7 +164,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 2. After a registry change: `bun run registry:build` from `apps/www/`, **after** the last lint fix, so the generated JSON matches the formatted source
 3. The checks CI runs on every PR:
    ```sh
-   bunx biome ci packages/icons apps/www/src/registry/lib/engine apps/www/src/registry/lib/gl
+   bunx biome ci packages/icons apps/www/src/registry/lib/engine apps/www/src/registry/lib/webgl
    bun run build:pkg
    (cd packages/icons && bunx tsc --noEmit && bun test)
    ```

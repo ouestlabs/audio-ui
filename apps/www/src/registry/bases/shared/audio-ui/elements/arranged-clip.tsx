@@ -20,7 +20,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { dbToGain } from "@/engine/analysis";
-import { hasWebGL2 } from "@/gl/lane";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,
@@ -54,6 +53,7 @@ import {
   type TrackColor,
 } from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
+import { hasWebGL2 } from "@/webgl/lane";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";

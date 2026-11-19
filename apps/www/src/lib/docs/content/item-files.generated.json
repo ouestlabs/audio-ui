@@ -704,15 +704,6 @@
   "gate-panel": [
     "components/audio-ui/devices/gate/panel.tsx"
   ],
-  "gl-lane": [
-    "lib/gl/lane/index.ts"
-  ],
-  "gl-spectrogram": [
-    "lib/gl/spectrogram/index.ts"
-  ],
-  "gl-waveform": [
-    "lib/gl/waveform/index.ts"
-  ],
   "graphic-eq-device": [
     "components/audio-ui/devices/graphic-eq/device.ts"
   ],
@@ -1861,6 +1852,15 @@
   ],
   "web-audio": [
     "lib/web-audio.ts"
+  ],
+  "webgl-lane": [
+    "lib/webgl/lane/index.ts"
+  ],
+  "webgl-spectrogram": [
+    "lib/webgl/spectrogram/index.ts"
+  ],
+  "webgl-waveform": [
+    "lib/webgl/waveform/index.ts"
   ],
   "xypad-bipolar-range-demo": [
     "components/examples/xypad-bipolar-range-demo.tsx"

@@ -1,6 +1,4 @@
 import { type ComponentProps, useState } from "react";
-import type { SpectrogramScale } from "@/gl/spectrogram";
-import type { WaveformClip, WaveformLayout } from "@/gl/waveform";
 import {
   SpectrogramAxis,
   type SpectrogramBand,
@@ -8,6 +6,8 @@ import {
 } from "@/registry/bases/shared/audio-ui/elements/clip-spectrogram";
 import { WaveformLane } from "@/registry/bases/shared/audio-ui/elements/waveform-lane";
 import { createSource } from "@/registry/bases/shared/primitives/primitive";
+import type { SpectrogramScale } from "@/webgl/spectrogram";
+import type { WaveformClip, WaveformLayout } from "@/webgl/waveform";
 
 /** How a sound lane draws its clips: the waveform, the waveform by band, or the spectrogram on one of its frequency axes. */
 export type SoundView = "bands" | "wave" | SpectrogramScale;
@@ -41,7 +41,7 @@ export const isSpectrogramView = (view: SoundView): view is SpectrogramScale =>
  * the frequency and level under the pointer. Put it in the lane's box, `zoom`
  * being the lane's pixels a second. Clips without `bands` are drawn plain in
  * the band view. It keeps the frequencies shown itself unless given `band`, and
- * needs WebGL 2: `hasWebGL2` of `@/gl/lane` says whether to draw this
+ * needs WebGL 2: `hasWebGL2` of `@/webgl/lane` says whether to draw this
  * way at all.
  */
 function SoundLane({

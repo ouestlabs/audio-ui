@@ -6,7 +6,7 @@
     "hooks",
     "lib",
     "engine",
-    "gl",
+    "webgl",
     "components",
     "icons"
   ]
