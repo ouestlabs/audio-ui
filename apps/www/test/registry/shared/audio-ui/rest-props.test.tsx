@@ -8,15 +8,15 @@ import { ValueDisplay } from "@/registry/bases/shared/audio-ui/elements/value-di
 const EXTRA = { "data-testid": "root", id: "mine", title: "a title" } as const;
 
 test.each([
-  ["Lcd", <Lcd {...EXTRA}>0</Lcd>],
-  ["Led", <Led {...EXTRA} label="Signal" on />],
+  ["Lcd", () => <Lcd {...EXTRA}>0</Lcd>],
+  ["Led", () => <Led {...EXTRA} label="Signal" on />],
   [
     "TimelineTimeSelection",
-    <TimelineTimeSelection {...EXTRA} range={[1, 2]} />,
+    () => <TimelineTimeSelection {...EXTRA} range={[1, 2]} />,
   ],
-  ["ValueDisplay", <ValueDisplay {...EXTRA} kind="db" value={-6} />],
+  ["ValueDisplay", () => <ValueDisplay {...EXTRA} kind="db" value={-6} />],
 ])("%s passes the props of its element to its root", (_name, element) => {
-  const { getByTestId } = render(element);
+  const { getByTestId } = render(element());
   const root = getByTestId("root");
   expect(root.id).toBe("mine");
   expect(root.title).toBe("a title");
