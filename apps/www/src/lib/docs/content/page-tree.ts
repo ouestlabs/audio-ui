@@ -151,14 +151,20 @@ export function getGroupsFromFolder(
         (child): child is PageTreeFolder => child.type === "folder"
       )
     : undefined;
+  // The section's own page, which lists every component: the folder's index, or the page its content starts with.
+  const own =
+    folder.index ??
+    folder.children.find(
+      (child): child is PageTreePage => child.type === "page"
+    );
   if (spaces?.length) {
     return [
-      // The section's own page, which lists every component, comes first as its Overview.
-      ...(folder.index
+      // It comes first as the section's Overview.
+      ...(own
         ? [
             {
               collapsible: false,
-              sections: [{ pages: [{ ...folder.index, name: "Overview" }] }],
+              sections: [{ pages: [{ ...own, name: "Overview" }] }],
             },
           ]
         : []),
