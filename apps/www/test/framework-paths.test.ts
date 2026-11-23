@@ -78,9 +78,15 @@ test("every framework address built is one the router reads", () => {
 });
 
 /** Runs the script as a page does, as a global script. */
-const run = (kept: string | null, pathname: string) => {
+const run = (kept: string | null, pathname: string, search = "?x=1") => {
   const went: string[] = [];
   const window: Record<string, unknown> = {
+    history: {
+      replaceState: (_state: unknown, _title: string, url: string) => {
+        went.push(url);
+      },
+      state: null,
+    },
     localStorage: { "audio-ui-framework": kept },
     location: {
       hash: "#a",
@@ -88,13 +94,13 @@ const run = (kept: string | null, pathname: string) => {
       replace: (url: string) => {
         went.push(url);
       },
-      search: "?x=1",
+      search,
     },
   };
   runInNewContext(FRAMEWORK_REDIRECT_SCRIPT, window);
   // A `var` at the top of a page is a property of `window`, and `window.name` turns what it is given into text.
   const leaked = Object.keys(window).filter(
-    (key) => key !== "localStorage" && key !== "location"
+    (key) => key !== "history" && key !== "localStorage" && key !== "location"
   );
   if (leaked.length > 0) {
     throw new Error(`the script leaks globals: ${leaked.join(", ")}`);
@@ -110,6 +116,19 @@ test("the redirect script goes to the address of the framework kept", () => {
   expect(run("svelte", "/docs/components/base/piano-roll/")).toBe(
     "/docs/svelte/components/base/piano-roll?x=1#a"
   );
+});
+
+test("the redirect script drops a query naming the framework or the base from a docs address", () => {
+  const knob = "/docs/components/base/knob";
+  expect(run(null, knob, "?framework=svelte&x=1")).toBe(`${knob}?x=1#a`);
+  expect(run(null, "/docs/components/ui-sdk/knob", "?base")).toBe(
+    "/docs/components/ui-sdk/knob#a"
+  );
+  expect(run("vue", knob, "?x=1&framework=svelte&base=ui-sdk")).toBe(
+    "/docs/vue/components/base/knob?x=1#a"
+  );
+  // Outside the docs, a query is the page's own.
+  expect(run(null, "/", "?base=ui-sdk")).toBeNull();
 });
 
 test("the redirect script stays where it is without a framework kept or an address for the page", () => {

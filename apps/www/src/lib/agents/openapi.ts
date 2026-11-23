@@ -613,7 +613,7 @@ ${VERSIONING}`,
             },
             {
               description:
-                "One section of the page, such as installation, usage or api-reference.",
+                "One section of the page, such as installation, which every page has. The others differ by page: an unknown one returns the page's list.",
               in: "query",
               name: "section",
               required: false,

@@ -38,6 +38,22 @@ test("any starting address settles in at most one redirect", () => {
   }
 });
 
+test("another framework's address reads no base, so the base kept sends no reader back to it", () => {
+  const vue = {
+    ...kept,
+    framework: "vue",
+    pathname: "/docs/components/base/xypad",
+  };
+  expect(keptRedirectSearch({ ...vue, search: {} })).toEqual({
+    base: "ui-sdk",
+    framework: "vue",
+  });
+  // `/docs/vue/components/base/xypad` reaches the router with no base, and stays.
+  expect(
+    keptRedirectSearch({ ...vue, search: { framework: "vue" } })
+  ).toBeNull();
+});
+
 test("a page loaded whole keeps the base of its address", () => {
   expect(
     keptRedirectSearch({ ...kept, framework: null, inSite: false, search: {} })
