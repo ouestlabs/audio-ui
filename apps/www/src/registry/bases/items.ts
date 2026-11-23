@@ -303,7 +303,7 @@ export function libModuleItems(): RegistryItem[] {
  * an older beta than the one the primitives are written for, so a bare name
  * would install the wrong one.
  */
-const UI_SDK = "0.1.0-beta.5";
+const UI_SDK = "0.1.0-beta.14";
 
 /** The frameworks a primitive is rendered in, with the files each one installs. */
 export interface PrimitiveFramework {
