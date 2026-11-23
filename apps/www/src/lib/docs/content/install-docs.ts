@@ -51,7 +51,7 @@ export function installAgent(name: string): InstallPart[] {
   ];
 }
 
-const REACT = "@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5";
+const REACT = "@ui-sdk/core@0.1.0-beta.14 @ui-sdk/react@0.1.0-beta.14";
 const REACT_AND_CORE = REACT;
 
 /** What the two tabs hold, as data: the site draws it, and the markdown pages print it. */
