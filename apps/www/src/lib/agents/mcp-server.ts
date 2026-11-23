@@ -115,7 +115,7 @@ export function createAudioUiMcpServer() {
     {
       annotations: readOnly,
       description:
-        "Get the documentation of one audio/ui component as markdown: installation, API, props, accessibility, examples and the source to copy. Use a name from list_components (for example 'knob' or 'piano-roll'). Pass a section (for example 'installation' or 'api-reference') to get only that part. Returns markdown; an unknown name or section returns an error that lists the valid choices.",
+        "Get the documentation of one audio/ui component as markdown: installation, API, props, accessibility, examples and the source to copy. Use a name from list_components (for example 'knob' or 'piano-roll'). Pass a section to get only that part: every page has 'installation', and the others differ by page (a device's page has no 'api-reference'). Returns markdown; an unknown name or section returns an error that lists the valid choices.",
       inputSchema: {
         name: z
           .string()
@@ -124,7 +124,7 @@ export function createAudioUiMcpServer() {
           .string()
           .optional()
           .describe(
-            "One section of the page, e.g. 'installation', 'usage' or 'api-reference'. Empty returns the whole page."
+            "One section of the page, e.g. 'installation', which every page has. The others differ by page: an unknown one returns the page's list. Empty returns the whole page."
           ),
       },
       title: "Get component docs",
