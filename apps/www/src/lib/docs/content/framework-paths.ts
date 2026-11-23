@@ -153,7 +153,9 @@ export const FRAMEWORK_CLASS_SCRIPT = `
  * Runs in the head, before the first paint: a page that has an address for the
  * framework the reader kept (`/docs/components/base/knob` for Vue) goes to it, so the
  * page is drawn for their framework from the start. It is `frameworkAddressOf`
- * written for a document with no module, from the same lists. It runs in a function: a `var` at the top of a page would be a property of `window`, and `window.name` turns what it is given into text.
+ * written for a document with no module, from the same lists. A query that
+ * names the framework or the base leaves the address first: the address says
+ * them in its path, and the page was drawn without them. It runs in a function: a `var` at the top of a page would be a property of `window`, and `window.name` turns what it is given into text.
  */
 export const FRAMEWORK_REDIRECT_SCRIPT = `
   (function () { try {
@@ -168,10 +170,15 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
     var segment = segments[kept];
     var path = location.pathname.replace(/\\/$/, '');
     var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
+    var docs = under('/docs');
+    var pairs = location.search.slice(1).split('&').filter(Boolean);
+    var rest = pairs.filter(function (pair) { return !/^(framework|base)(=|$)/.test(pair); });
+    var search = rest.length ? '?' + rest.join('&') : '';
     var to = null;
-    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' || primitives.indexOf(path) >= 0 || !reactOnly.some(under))) {
+    if (segment && docs && !${PREFIXED.toString()}.test(path) && (kept === 'react' || primitives.indexOf(path) >= 0 || !reactOnly.some(under))) {
       to = '/docs/' + segment + path.slice(5);
     }
-    if (to) location.replace(to + location.search + location.hash);
+    if (to) location.replace(to + search + location.hash);
+    else if (docs && rest.length < pairs.length) history.replaceState(history.state, '', location.pathname + search + location.hash);
   } catch (_) {} })();
 `;
