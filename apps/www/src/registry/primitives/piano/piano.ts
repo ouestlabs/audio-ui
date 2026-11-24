@@ -411,9 +411,8 @@ export const piano: PianoPrimitive = definePrimitive({
       dispatch(context, "onNoteOff", pitch, { event, reason });
     };
 
-    /** The key under a pointer, and how hard it strikes it. */
-    const strikeAt = (event: PointerEvent, element: Element) => {
-      const rect = element.getBoundingClientRect();
+    /** The key under a pointer, and how hard it strikes it, from the keyboard's box as the press measured it. */
+    const strikeAt = (event: PointerEvent, rect: DOMRect) => {
       if (!(rect.width > 0 && rect.height > 0)) {
         return null;
       }
@@ -486,7 +485,9 @@ export const piano: PianoPrimitive = definePrimitive({
         if (state().disabled || event.button !== 0) {
           return;
         }
-        const strike = strikeAt(event, element);
+        // Measured once, before the press writes anything: read on each move of a glide, after a key went down, it made the browser lay the page out every frame.
+        const rect = element.getBoundingClientRect();
+        const strike = strikeAt(event, rect);
         if (strike === null) {
           return;
         }
@@ -510,7 +511,7 @@ export const piano: PianoPrimitive = definePrimitive({
           },
           // Dragging across the keys glides from one to the next.
           onMove: ({ event: move }) => {
-            const glide = strikeAt(move, element);
+            const glide = strikeAt(move, rect);
             if (glide === null || glide.pitch === hold.pitch) {
               return;
             }
