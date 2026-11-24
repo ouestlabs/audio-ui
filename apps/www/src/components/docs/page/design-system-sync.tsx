@@ -1,4 +1,3 @@
-import { useRouterState } from "@tanstack/react-router";
 import * as React from "react";
 import { useMenuColor } from "@/components/customizer/use-menu-color";
 import { useConfig } from "@/hooks/use-config";
@@ -40,22 +39,10 @@ function syncBodyStyleClass(styleClass: string) {
  */
 export function DocsDesignSystemEffects() {
   const [config, setConfig] = useConfig();
-  const [{ base: baseParam }] = useDesignSystemSearchParams();
-  // Only React's catalog has a base address: another framework's page names none, so it leaves the reader's base be.
-  const onComponentPage = useRouterState({
-    select: (state) => {
-      const { framework } = state.location.search as { framework?: unknown };
-      return (
-        state.location.pathname.startsWith("/docs/components/base/") &&
-        (framework === undefined || framework === "react")
-      );
-    },
-  });
-  // On a component page, the base is the address's: `/ui-sdk/` names it, `/base/` is the other.
-  const urlBase = onComponentPage ? (baseParam ?? "base") : baseParam;
+  const [{ base: urlBase }] = useDesignSystemSearchParams();
   useMenuColor(config.menuColor);
 
-  // The base in the address of a component page is the reader's choice from then on.
+  // A base named in the address (`/ui-sdk/`) is the reader's choice from then on. An address that names none, as `/docs/components/base/knob` that a search result or a shared link leads to, leaves the reader's base be: ui-sdk until they pick another.
   React.useEffect(() => {
     if (urlBase && urlBase !== config.base) {
       setConfig((prev) => ({ ...prev, base: urlBase }));
