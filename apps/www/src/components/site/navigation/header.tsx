@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ExpandEditor } from "@/components/site/home/expand-editor";
 import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
+import { DawLink } from "@/components/site/navigation/daw-link";
 import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { GitHubLink } from "@/components/site/navigation/github-link";
 import {
@@ -8,7 +9,6 @@ import {
   SiteHeaderMobileNav,
   SiteHeaderModeSwitcher,
 } from "@/components/site/navigation/header-client";
-import { DawLink } from "@/components/site/navigation/daw-link";
 import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
 import { SectionSelect } from "@/components/site/navigation/section-select";
