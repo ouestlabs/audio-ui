@@ -196,6 +196,38 @@ export function pianoSuite(framework: string, mount: MountPiano) {
       p.unmount();
     });
 
+    test("a glide measures the keyboard once, at the press, not on each move", async () => {
+      const p = await render(mount);
+      const measure = p.root.getBoundingClientRect.bind(p.root);
+      let reads = 0;
+      p.root.getBoundingClientRect = () => {
+        reads += 1;
+        return measure();
+      };
+      await p.act(() =>
+        pointer(p.root, "pointerdown", {
+          clientX: 50,
+          clientY: 50,
+          pointerId: 1,
+        })
+      );
+      const atPress = reads;
+      await p.act(() => {
+        for (const clientX of [90, 130, 150]) {
+          pointer(p.root, "pointermove", {
+            clientX,
+            clientY: 50,
+            pointerId: 1,
+          });
+        }
+      });
+      await frame();
+      await p.act(() => undefined);
+      expect(p.ons.at(-1)?.[0]).toBe(61);
+      expect(reads).toBe(atPress);
+      p.unmount();
+    });
+
     test("each pointer holds its own key, so chords can be played", async () => {
       const p = await render(mount);
       await p.act(() => {

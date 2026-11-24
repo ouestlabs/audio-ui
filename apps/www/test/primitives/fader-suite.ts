@@ -317,6 +317,44 @@ export function faderSuite(framework: string, mount: MountFader) {
       f.unmount();
     });
 
+    test("a drag measures the control once, at the press, not on each move", async () => {
+      const f = await render(mount);
+      const measure = f.control.getBoundingClientRect.bind(f.control);
+      let reads = 0;
+      f.control.getBoundingClientRect = () => {
+        reads += 1;
+        return measure();
+      };
+      await f.act(() =>
+        pointer(f.track, "pointerdown", {
+          clientX: 50,
+          clientY: 50,
+          pointerId: 1,
+        })
+      );
+      const atPress = reads;
+      await f.act(() => {
+        for (const clientY of [40, 30, 20, 10]) {
+          pointer(f.track, "pointermove", {
+            clientX: 50,
+            clientY,
+            pointerId: 1,
+          });
+        }
+      });
+      await frame();
+      expect(f.changes.at(-1)).toEqual([90, "drag"]);
+      expect(reads).toBe(atPress);
+      await f.act(() =>
+        pointer(f.track, "pointerup", {
+          clientX: 50,
+          clientY: 10,
+          pointerId: 1,
+        })
+      );
+      f.unmount();
+    });
+
     test("a double click, Alt + click and Delete return to defaultValue", async () => {
       const f = await render(mount, { defaultValue: 30 });
       await f.act(() => key(f.input, "End"));

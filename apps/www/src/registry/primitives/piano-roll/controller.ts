@@ -5,6 +5,8 @@ import {
   type CommitEventDetails,
   createChangeEventDetails,
   createPointerLock,
+  type MeasuredBox,
+  measuredBox,
 } from "../primitive";
 import {
   cellStart,
@@ -360,14 +362,13 @@ interface StretchGesture {
   origin: Note[];
 }
 
-/** The timeline's units under a point of `element`, clamped to the timeline. */
+/** The timeline's units under a point of an element, from its box, clamped to the timeline. */
 function timeAt(
-  element: Element,
+  rect: DOMRect,
   clientX: number,
   zoom: number | null,
   duration: number
 ): number {
-  const rect = element.getBoundingClientRect();
   const unit = zoom ?? rect.width / Math.max(duration, Number.MIN_VALUE);
   const value = (clientX - rect.left) / Math.max(unit, Number.MIN_VALUE);
   return Math.min(duration, Math.max(0, value));
@@ -417,6 +418,29 @@ export function createPianoRollController(
 ): PianoRollController {
   let options = initial;
   const pointers = createPointerLock();
+  // The boxes a gesture measured, kept till it ends: read on each move, after the move wrote, they made the browser lay the page out every frame.
+  let measured: Map<Element, MeasuredBox> | null = null;
+  const boxOf = (element: Element): DOMRect => {
+    if (!measured) {
+      return element.getBoundingClientRect();
+    }
+    let box = measured.get(element);
+    if (!box) {
+      box = measuredBox(element);
+      measured.set(element, box);
+    }
+    return box.get();
+  };
+  const follow: (typeof pointers)["follow"] = (target, down, move, end) => {
+    measured = new Map();
+    pointers.follow(target, down, move, (event) => {
+      for (const box of measured?.values() ?? []) {
+        box.stop();
+      }
+      measured = null;
+      end(event);
+    });
+  };
   const bounds = (): RollBounds => {
     const { duration, grid, step } = options.timeline;
     return {
@@ -735,7 +759,7 @@ export function createPianoRollController(
     if (zoom !== null) {
       return 1 / zoom;
     }
-    const { width } = grid.getBoundingClientRect();
+    const { width } = boxOf(grid);
     return duration / Math.max(width, 1);
   };
 
@@ -753,7 +777,7 @@ export function createPianoRollController(
     event: { clientX: number; ctrlKey?: boolean; metaKey?: boolean }
   ) => {
     const { duration, grid: cells, zoom } = options.timeline;
-    const raw = timeAt(grid, event.clientX, zoom, duration);
+    const raw = timeAt(boxOf(grid), event.clientX, zoom, duration);
     return bypassesGrid(event) ? raw : cellStart(raw, cells);
   };
 
@@ -761,7 +785,7 @@ export function createPianoRollController(
   const pitchAt = (grid: Element, clientY: number): number => {
     const rows = rowsFor(displayed());
     const count = rows.pitches.length;
-    const rect = grid.getBoundingClientRect();
+    const rect = boxOf(grid);
     const row = clamp(
       Math.floor(((clientY - rect.top) / rect.height) * count),
       0,
@@ -988,7 +1012,7 @@ export function createPianoRollController(
     current: Extract<GridGesture, { kind: "marquee" }>,
     event: PointerEvent
   ) => {
-    const rect = current.grid.getBoundingClientRect();
+    const rect = boxOf(current.grid);
     const x = clamp(event.clientX - rect.left, 0, rect.width);
     const y = clamp(event.clientY - rect.top, 0, rect.height);
     band = {
@@ -1030,7 +1054,7 @@ export function createPianoRollController(
     }
     current.started = true;
     const { duration, grid, zoom } = options.timeline;
-    const raw = timeAt(current.grid, event.clientX, zoom, duration);
+    const raw = timeAt(boxOf(current.grid), event.clientX, zoom, duration);
     const end = bypassesGrid(event) ? raw : snapToGrid(raw, grid);
     const length = Math.min(
       duration - current.start,
@@ -1098,7 +1122,7 @@ export function createPianoRollController(
     };
     gridGesture = current;
     soundPainted(current, note.pitch, event);
-    pointers.follow(grid, event, moveGrid, endGrid);
+    follow(grid, event, moveGrid, endGrid);
   };
 
   const pressGrid: PianoRollController["pressGrid"] = (event, grid) => {
@@ -1118,7 +1142,7 @@ export function createPianoRollController(
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
       };
-      pointers.follow(grid, event, moveGrid, endGrid);
+      follow(grid, event, moveGrid, endGrid);
       return;
     }
     editing = true;
@@ -1156,7 +1180,7 @@ export function createPianoRollController(
       startX: event.clientX,
       startY: event.clientY,
     };
-    pointers.follow(grid, event, moveGrid, endGrid);
+    follow(grid, event, moveGrid, endGrid);
   };
 
   const doubleClickGrid: PianoRollController["doubleClickGrid"] = (
@@ -1334,7 +1358,7 @@ export function createPianoRollController(
       startY: event.clientY,
     };
     audition(noteGesture, anchor.pitch, event, anchor.velocity ?? 1);
-    pointers.follow(element, event, moveNote, endNote);
+    follow(element, event, moveNote, endNote);
   };
 
   const doubleClickNote: PianoRollController["doubleClickNote"] = (
@@ -1480,7 +1504,7 @@ export function createPianoRollController(
       origin: [...displayed()],
       startY: event.clientY,
     };
-    pointers.follow(element, event, moveVelocity, endVelocity);
+    follow(element, event, moveVelocity, endVelocity);
   };
 
   const keyVelocity: PianoRollController["keyVelocity"] = (
@@ -1530,12 +1554,12 @@ export function createPianoRollController(
     if (!current) {
       return;
     }
-    const rect = current.lane.getBoundingClientRect();
+    const rect = boxOf(current.lane);
     if (rect.height <= 0) {
       return;
     }
     const { duration, grid, zoom } = options.timeline;
-    const time = timeAt(current.lane, at.x, zoom, duration);
+    const time = timeAt(rect, at.x, zoom, duration);
     const from = grid.step > 0 ? cellStart(time, grid) : time;
     const to = grid.step > 0 ? from + grid.step : time;
     const value = clamp(1 - (at.y - rect.top) / rect.height, 0, 1);
@@ -1587,7 +1611,7 @@ export function createPianoRollController(
     notify();
     paintLevelGesture = { changed: false, lane, level };
     movePaintLevel(event);
-    pointers.follow(
+    follow(
       lane,
       event,
       (move, from) => {
@@ -1613,7 +1637,7 @@ export function createPianoRollController(
       return;
     }
     const { duration, grid, zoom } = options.timeline;
-    const raw = timeAt(current.grid, event.clientX, zoom, duration);
+    const raw = timeAt(boxOf(current.grid), event.clientX, zoom, duration);
     const edge = bypassesGrid(event) ? raw : snapToGrid(raw, grid);
     const factor = (edge - current.anchor) / (current.moving - current.anchor);
     if (!(factor > 0)) {
@@ -1675,7 +1699,7 @@ export function createPianoRollController(
       moving: edge === "end" ? span.end : span.start,
       origin: [...displayed()],
     };
-    pointers.follow(element, event, moveStretch, endStretch);
+    follow(element, event, moveStretch, endStretch);
   };
 
   // ---- keys and commands

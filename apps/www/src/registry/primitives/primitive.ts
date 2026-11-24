@@ -425,6 +425,40 @@ export function createGestures<Data>(context: {
   };
 }
 
+/** An element's box for one gesture, from `measuredBox`. */
+export interface MeasuredBox {
+  /** The box: measured the first time, and again only after the page scrolled or resized. */
+  get: () => DOMRect;
+  /** Stops watching the page. Call it when the gesture ends. */
+  stop: () => void;
+}
+
+/**
+ * An element's box, measured once for a gesture rather than on each of its
+ * moves. Read after a move wrote to the page, `getBoundingClientRect` makes
+ * the browser lay the page out on the spot, every frame. A scroll or a resize
+ * during the gesture moves the element, so either one measures it again.
+ */
+export function measuredBox(element: Element): MeasuredBox {
+  let box: DOMRect | null = null;
+  const view = element.ownerDocument?.defaultView;
+  const stale = () => {
+    box = null;
+  };
+  view?.addEventListener("scroll", stale, { capture: true, passive: true });
+  view?.addEventListener("resize", stale, { passive: true });
+  return {
+    get: () => {
+      box ??= element.getBoundingClientRect();
+      return box;
+    },
+    stop: () => {
+      view?.removeEventListener("scroll", stale, { capture: true });
+      view?.removeEventListener("resize", stale);
+    },
+  };
+}
+
 const KEBAB = /([a-z0-9])([A-Z])/g;
 const kebab = (name: string) => name.replace(KEBAB, "$1-$2").toLowerCase();
 
