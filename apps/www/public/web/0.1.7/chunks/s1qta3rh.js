@@ -1,0 +1,2 @@
+import{K}from"./9r8aw8cm.js";function N(r,{orientation:t="horizontal",dir:n="ltr",arrows:o="all"}={}){if(K(r))return null;if(r.key==="Home")return{bound:"min"};if(r.key==="End")return{bound:"max"};if(r.key==="PageUp"||r.key==="PageDown")return{direction:r.key==="PageUp"?1:-1,size:"large"};let i=n==="rtl"&&t==="horizontal"?-1:1,a=o==="horizontal"?0:r.key==="ArrowUp"?1:r.key==="ArrowDown"?-1:0,e=o==="vertical"?0:r.key==="ArrowRight"?i:r.key==="ArrowLeft"?-i:0,l=a||e;if(!l)return null;return{direction:l,size:r.shiftKey?"large":r.altKey?"small":"step"}}
+export{N};

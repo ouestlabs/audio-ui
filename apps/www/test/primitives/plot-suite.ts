@@ -236,6 +236,19 @@ export function plotSuite(framework: string, mount: MountPlot) {
       live.unmount();
     });
 
+    test("a live dot and a live trace sit on a layer of their own, a still dot does not", async () => {
+      const still = await render(mount, { dot: { value: { x: 25, y: 75 } } });
+      expect(styleOf(still.dot)).not.toContain("will-change");
+      still.unmount();
+      const live = await render(mount, {
+        dot: { source: createSource<Point>({ x: 10, y: 10 }) },
+        trace: { source: createSource<ArrayLike<number>>([0, 100]) },
+      });
+      expect(styleOf(live.dot)).toContain("will-change: transform");
+      expect(styleOf(live.trace)).toContain("will-change: transform");
+      live.unmount();
+    });
+
     test("a handle holds a native range input for each axis it moves along, named by its label", async () => {
       const both = await render(mount, {
         handle: { handle: "band", label: "Band" },
