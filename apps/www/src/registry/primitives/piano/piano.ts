@@ -8,7 +8,7 @@ import {
 } from "@ui-sdk/core";
 import { clamp } from "@ui-sdk/core/number";
 import { isBlackKey, pitchName } from "../pitch";
-import { definePrimitive, flag, sourceOf } from "../primitive";
+import { definePrimitive, flag, measuredBox, sourceOf } from "../primitive";
 
 /**
  * The piano keyboard: a key sounds while it is pressed, by pointer or from
@@ -485,10 +485,11 @@ export const piano: PianoPrimitive = definePrimitive({
         if (state().disabled || event.button !== 0) {
           return;
         }
-        // Measured once, before the press writes anything: read on each move of a glide, after a key went down, it made the browser lay the page out every frame.
-        const rect = element.getBoundingClientRect();
-        const strike = strikeAt(event, rect);
+        // Measured once, before the press writes anything, and again only after a scroll: read on each move of a glide, after a key went down, it made the browser lay the page out every frame.
+        const box = measuredBox(element);
+        const strike = strikeAt(event, box.get());
         if (strike === null) {
+          box.stop();
           return;
         }
         set({ focused: strike.pitch });
@@ -500,8 +501,9 @@ export const piano: PianoPrimitive = definePrimitive({
           stop: () => undefined,
         };
         pointers.set(event.pointerId, hold);
-        hold.stop = bindDrag(element, event, {
+        const stopDrag = bindDrag(element, event, {
           onEnd: (end) => {
+            box.stop();
             if (pointers.get(event.pointerId) === hold) {
               pointers.delete(event.pointerId);
             }
@@ -511,7 +513,7 @@ export const piano: PianoPrimitive = definePrimitive({
           },
           // Dragging across the keys glides from one to the next.
           onMove: ({ event: move }) => {
-            const glide = strikeAt(move, rect);
+            const glide = strikeAt(move, box.get());
             if (glide === null || glide.pitch === hold.pitch) {
               return;
             }
@@ -523,6 +525,10 @@ export const piano: PianoPrimitive = definePrimitive({
             hold.sounding = noteOn(glide.pitch, "glide", move, glide.velocity);
           },
         });
+        hold.stop = () => {
+          stopDrag();
+          box.stop();
+        };
       },
       register: (pitch: number, el: HTMLElement | null) => {
         if (el) {

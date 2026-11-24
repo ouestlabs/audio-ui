@@ -19,6 +19,7 @@ import {
   createReporter,
   definePrimitive,
   flag,
+  measuredBox,
   VISUALLY_HIDDEN,
 } from "../primitive";
 
@@ -355,8 +356,8 @@ export const fader: FaderPrimitive = definePrimitive({
         const current = state();
         const vertical = current.orientation === "vertical";
         const onThumb = Boolean(thumb?.contains(event.target as Node));
-        // Measured once, before the gesture writes anything: read on each move, after the thumb moved, they made the browser lay the page out every frame.
-        const box = control.getBoundingClientRect();
+        // Measured once, before the gesture writes anything, and again only after a scroll: read on each move, after the thumb moved, they made the browser lay the page out every frame.
+        const box = measuredBox(control);
         const rtl = isRtl(control);
         // Taken by the thumb, the drag keeps the pointer where it grabbed it.
         let offset = 0;
@@ -379,7 +380,7 @@ export const fader: FaderPrimitive = definePrimitive({
         };
         if (!onThumb) {
           set(
-            valueUnder(current, box, rtl, event.clientX, event.clientY),
+            valueUnder(current, box.get(), rtl, event.clientX, event.clientY),
             "track-press",
             event
           );
@@ -387,6 +388,7 @@ export const fader: FaderPrimitive = definePrimitive({
         context.store.set({ dragging: true } as never);
         gestures.start(control, event, null, {
           onEnd: (end) => {
+            box.stop();
             context.store.set({ dragging: false, draft: null } as never);
             if (changed) {
               commit(value, moved ? "drag" : "track-press", end);
@@ -397,7 +399,7 @@ export const fader: FaderPrimitive = definePrimitive({
             set(
               valueUnder(
                 state(),
-                box,
+                box.get(),
                 rtl,
                 move.clientX - (vertical ? 0 : offset),
                 move.clientY - (vertical ? offset : 0)

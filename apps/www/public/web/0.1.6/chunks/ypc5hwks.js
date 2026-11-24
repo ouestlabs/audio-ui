@@ -1,2 +1,0 @@
-import{n}from"./ww8ve3rr.js";var a={linear:{to:(t)=>t,from:(t)=>t},log:{to:Math.log,from:Math.exp}};function c(t,o,i="linear"){let{to:m}=typeof i==="string"?a[i]:i,r=m(o.min),f=m(o.max)-r,s=(m(n(t,o.min,o.max))-r)/f;return Number.isFinite(s)?n(s,0,1):0}function T(t,o,i="linear"){let{to:m,from:r}=typeof i==="string"?a[i]:i,f=m(o.min),s=r(f+n(t,0,1)*(m(o.max)-f));return n(s,o.min,o.max)}
-export{c,T};

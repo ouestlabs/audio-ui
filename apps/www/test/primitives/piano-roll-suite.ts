@@ -332,6 +332,40 @@ export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
       p.unmount();
     });
 
+    test("a marquee measures the grid once for the gesture, not on each move", async () => {
+      const p = await render(mount);
+      const measure = p.grid.getBoundingClientRect.bind(p.grid);
+      let reads = 0;
+      p.grid.getBoundingClientRect = () => {
+        reads += 1;
+        return measure();
+      };
+      const move = async (to: number) => {
+        await p.act(() =>
+          pointer(p.grid, "pointermove", {
+            clientX: to,
+            clientY: to,
+            pointerId: 1,
+          })
+        );
+        await frame();
+      };
+      await p.act(() =>
+        pointer(p.grid, "pointerdown", { clientX: 5, clientY: 5, pointerId: 1 })
+      );
+      await move(15);
+      const afterFirstMove = reads;
+      await move(25);
+      await move(35);
+      await p.act(() => undefined);
+      expect(styleOf(p.one("marquee"))).toContain("width: 30px");
+      expect(reads).toBe(afterFirstMove);
+      await p.act(() =>
+        pointer(p.grid, "pointerup", { clientX: 35, clientY: 35, pointerId: 1 })
+      );
+      p.unmount();
+    });
+
     test("the selection's span follows the notes selected", async () => {
       const p = await render(mount, { defaultSelection: [1, 2] });
       const span = p.one("selectionSpan");
