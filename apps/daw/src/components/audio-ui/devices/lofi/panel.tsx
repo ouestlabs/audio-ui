@@ -1,5 +1,13 @@
 import { type ReactNode, useMemo } from "react";
 import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -9,14 +17,6 @@ import {
   lofiCurve,
   lofiDevice,
 } from "@/components/audio-ui/devices/lofi/device";
-import {
-  Plot,
-  PlotArea,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

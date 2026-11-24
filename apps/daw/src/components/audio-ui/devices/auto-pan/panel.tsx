@@ -1,4 +1,12 @@
 import { type ReactNode, useMemo } from "react";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotTrace,
+} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,15 +17,7 @@ import {
   autoPanDevice,
   autoPanSweep,
 } from "@/components/audio-ui/devices/auto-pan/device";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotTrace,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */

@@ -1,5 +1,16 @@
 import { type ReactNode, useCallback, useState } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { midiToHz } from "@/lib/engine/pitch";
+import { Piano } from "@/components/audio-ui/piano";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -11,17 +22,6 @@ import {
   polySynthDevice,
   polySynthPreset,
 } from "@/components/audio-ui/devices/poly-synth/device";
-import { Piano } from "@/components/audio-ui/piano";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do, as the synth's panel lays them out. */

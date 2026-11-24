@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createSource } from "@/components/audio-ui/primitive";
 import type { AutomatedParameter } from "@/lib/arrangement";
 import {
   type ArrangementEngine,
@@ -9,6 +8,7 @@ import {
 import type { ArrangementDoc } from "@/lib/arrangement-state";
 import type { RecordingSource } from "@/lib/clip-player";
 import { webAudio } from "@/lib/web-audio";
+import { createSource } from "@/components/audio-ui/primitive";
 
 /** What the engine line shows: the context's rate, how late its sound is, and whether it runs. */
 export interface EngineStatus {

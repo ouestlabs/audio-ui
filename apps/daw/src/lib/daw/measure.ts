@@ -10,7 +10,7 @@ import {
   computePeaks,
   normalizePeaks,
 } from "@/lib/engine/analysis";
-import { LEAF_FRAMES } from "@/lib/gl/waveform";
+import { LEAF_FRAMES } from "@/lib/webgl/waveform";
 
 /** How many peaks a recording keeps per second: one per pixel at the closest zoom. */
 const PEAKS_PER_SECOND = 256;

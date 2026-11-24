@@ -1,3 +1,4 @@
+import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 import {
   attackSeconds,
   decaySeconds,
@@ -12,7 +13,6 @@ import {
   vibratoCents,
   volumeGain,
 } from "@/components/audio-ui/devices/fm-synth/device";
-import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 
 /** What one voice can reach at full velocity, all its carriers together: struck alone, where a whole synth summed eight. */
 const VOICE_GAIN = 0.8;

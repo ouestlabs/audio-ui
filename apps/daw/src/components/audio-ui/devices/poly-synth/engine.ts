@@ -1,3 +1,5 @@
+import type { NoteTiming } from "@/lib/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@/lib/engine/device";
 import {
   attackSeconds,
   contourCents,
@@ -12,8 +14,6 @@ import {
   vibratoCents,
   volumeGain,
 } from "@/components/audio-ui/devices/poly-synth/device";
-import type { NoteTiming } from "@/lib/engine/device";
-import { type InstrumentEngine, noiseBuffer } from "@/lib/engine/device";
 
 /** What each source adds before the filter: with the resonance, a chord of voices stays under full scale. */
 const SOURCE_GAIN = 0.1;

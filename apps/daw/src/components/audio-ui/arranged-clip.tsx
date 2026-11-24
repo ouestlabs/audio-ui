@@ -12,10 +12,23 @@ import {
   useState,
 } from "react";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { dbToGain } from "@/lib/engine/analysis";
+import type {
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "./timeline/timeline";
+import { BareInput } from "@/components/audio-ui/bare-input";
+import {
   type ClipSamples,
   ClipWaveform,
 } from "@/components/audio-ui/clip-waveform";
-import type { Source } from "@/components/audio-ui/primitive";
 import {
   TimelineClip,
   TimelineClipFade,
@@ -24,20 +37,7 @@ import {
   TimelineClipHeader,
   trackSwatch,
 } from "@/components/audio-ui/timeline";
-import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
-import type {
-  ClipChangeDetails,
-  ClipCommitDetails,
-} from "@/components/audio-ui/timeline/timeline";
 import { WaveformLane } from "@/components/audio-ui/waveform-lane";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import {
   type Arranged,
   type ClipAction,
@@ -48,9 +48,10 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/lib/arrangement";
-import { dbToGain } from "@/lib/engine/analysis";
-import { hasWebGL2 } from "@/lib/gl/lane";
 import { cn } from "@/lib/utils";
+import type { Source } from "@/components/audio-ui/primitive";
+import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
+import { hasWebGL2 } from "@/lib/webgl/lane";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = "[--clip-fade-top:1.25rem]";
@@ -125,7 +126,7 @@ function RenameField({
     []
   );
   return (
-    <input
+    <BareInput
       aria-label="Clip name"
       className="min-w-0 flex-1 bg-transparent outline-none"
       defaultValue={name}

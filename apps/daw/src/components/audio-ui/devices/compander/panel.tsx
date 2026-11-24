@@ -1,5 +1,13 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Plot,
+  PlotCurve,
+  PlotDot,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -12,14 +20,9 @@ import {
   companderDevice,
 } from "@/components/audio-ui/devices/compander/device";
 import {
-  Plot,
-  PlotCurve,
-  PlotDot,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-} from "@/components/audio-ui/plot";
-import { curveDot, type DeviceSignal } from "@/lib/device-signal";
+  curveDot,
+  type DeviceSignal,
+} from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -90;

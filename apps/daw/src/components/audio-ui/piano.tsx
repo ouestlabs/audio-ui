@@ -40,7 +40,7 @@ export function Piano({ className, size, ...props }: PianoProps) {
       {({ pitches }) =>
         pitches.map((pitch) => (
           <PianoPrimitive.Key
-            className="top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-[color:color-mix(in_oklab,var(--piano-key-black)_30%,transparent)] data-[color=white]:border-x data-[color=white]:bg-(--piano-key-white) data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-b-[min(var(--radius-sm),4px)] data-[color=black]:bg-(--piano-key-black) data-[active]:data-[color]:bg-primary motion-reduce:transition-none cursor-pointer"
+            className="top-0 outline-none transition-colors duration-100 ease-out focus-visible:z-20 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset data-[color=white]:z-0 data-[color=white]:h-full data-[color=white]:border-[color:color-mix(in_oklab,var(--piano-key-black)_30%,transparent)] data-[color=white]:border-x data-[color=white]:bg-(--piano-key-white) data-[color=black]:z-10 data-[color=black]:h-[60%] data-[color=black]:rounded-b-[min(var(--radius-sm),4px)] data-[color=black]:bg-(--piano-key-black) data-[active]:data-[color]:bg-primary motion-reduce:transition-none cursor-pointer"
             key={pitch}
             pitch={pitch}
           />

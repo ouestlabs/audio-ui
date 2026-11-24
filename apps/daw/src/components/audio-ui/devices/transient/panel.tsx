@@ -1,13 +1,5 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type TransientState,
-  transientDevice,
-} from "@/components/audio-ui/devices/transient/device";
+import { formatLevel } from "@/lib/engine/format";
 import {
   Plot,
   PlotGraph,
@@ -17,8 +9,16 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import {
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type TransientState,
+  transientDevice,
+} from "@/components/audio-ui/devices/transient/device";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const LIMIT_DB = 12;

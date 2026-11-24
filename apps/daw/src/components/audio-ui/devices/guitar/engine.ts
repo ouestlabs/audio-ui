@@ -1,3 +1,4 @@
+import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 import {
   bodyDecibels,
   decaySeconds,
@@ -7,7 +8,6 @@ import {
   toneHertz,
   volumeGain,
 } from "@/components/audio-ui/devices/guitar/device";
-import type { InstrumentEngine, NoteTiming } from "@/lib/engine/device";
 
 /** What a string is brought to: picked hard, its attack peaks near -12 dB before the volume, where the pick's burst is loudest. */
 const STRING_GAIN = 0.3;

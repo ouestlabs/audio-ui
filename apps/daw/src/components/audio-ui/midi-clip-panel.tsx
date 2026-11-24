@@ -1,9 +1,4 @@
 import {
-  CaretDownIcon,
-  PencilSimpleIcon,
-  RepeatIcon,
-} from "@phosphor-icons/react";
-import {
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
@@ -13,6 +8,28 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { type KeyNote, rollScale, type Scale } from "@/lib/engine/pitch";
+import type {
+  RollNoteOffDetails,
+  RollNoteOnDetails,
+} from "./piano-roll/piano-roll";
 import {
   ClipBox,
   type ClipMeter,
@@ -46,18 +63,6 @@ import {
   PianoRollViewport,
 } from "@/components/audio-ui/piano-roll";
 import {
-  duplicateTime,
-  type Note,
-  type NoteId,
-  type NoteLevel,
-} from "@/components/audio-ui/piano-roll/edits";
-import type {
-  RollNoteOffDetails,
-  RollNoteOnDetails,
-} from "@/components/audio-ui/piano-roll/piano-roll";
-import { pitchName } from "@/components/audio-ui/pitch";
-import type { Source } from "@/components/audio-ui/primitive";
-import {
   ScaleMenu,
   ScaleMenuContent,
   ScaleMenuDetect,
@@ -76,25 +81,10 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/components/audio-ui/timeline";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { ClipScale, ClipSwing } from "@/lib/arrangement";
-import { type KeyNote, rollScale, type Scale } from "@/lib/engine/pitch";
+import type {
+  ClipScale,
+  ClipSwing,
+} from "@/lib/arrangement";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -105,6 +95,15 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/lib/note-edits";
+import {
+  duplicateTime,
+  type Note,
+  type NoteId,
+  type NoteLevel,
+} from "@/components/audio-ui/piano-roll/edits";
+import { pitchName } from "@/components/audio-ui/pitch";
+import type { Source } from "@/components/audio-ui/primitive";
+import { PencilSimpleIcon, RepeatIcon, CaretDownIcon } from "@phosphor-icons/react";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;
@@ -575,7 +574,8 @@ function NotesBar({
           title="Draw notes, a grid step at a time (B)"
           variant={drawing ? "secondary" : "ghost"}
         >
-          <PencilSimpleIcon />
+          <PencilSimpleIcon
+          />
           Draw
         </Button>
       ) : (
@@ -586,7 +586,8 @@ function NotesBar({
           title="Roll a step that plays: press it for two, three or four hits, then one again"
           variant={repeating ? "secondary" : "ghost"}
         >
-          <RepeatIcon />
+          <RepeatIcon
+          />
           Repeat
         </Button>
       )}
@@ -602,7 +603,8 @@ function NotesBar({
           render={<Button size="sm" title="View" variant="ghost" />}
         >
           View
-          <CaretDownIcon />
+          <CaretDownIcon
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
           {drums ? (

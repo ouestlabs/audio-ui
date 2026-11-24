@@ -1,5 +1,15 @@
 import { type ReactNode, useCallback, useState } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { midiToHz } from "@/lib/engine/pitch";
+import { Piano } from "@/components/audio-ui/piano";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -11,16 +21,6 @@ import {
   electricPianoDevice,
   electricPianoPreset,
 } from "@/components/audio-ui/devices/electric-piano/device";
-import { Piano } from "@/components/audio-ui/piano";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do, as the piano's panel lays them out. */

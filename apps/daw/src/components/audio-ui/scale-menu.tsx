@@ -6,7 +6,6 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { pitchClassName } from "@/components/audio-ui/pitch";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,6 +29,7 @@ import {
   type ScaleName,
 } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
+import { pitchClassName } from "@/components/audio-ui/pitch";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

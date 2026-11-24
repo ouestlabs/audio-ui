@@ -10,8 +10,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
 import { useTimelineValues } from "@/components/audio-ui/timeline";
+import { cn } from "@/lib/utils";
 import { Piano as PianoPrimitive } from "@/components/audio-ui/piano/react";
 import { PianoRoll as PianoRollPrimitive } from "@/components/audio-ui/piano-roll/react";
 import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
@@ -219,7 +219,7 @@ function PianoRollKeys({
           {({ pitches: rows }) =>
             rows.map((pitch) => (
               <PianoPrimitive.Key
-                className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
+                className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
                 key={pitch}
                 pitch={pitch}
               >
@@ -296,7 +296,7 @@ function PianoRollGrid({
   return (
     <PianoRollPrimitive.Grid
       className={cn(
-        "focus-visible:outline-2 focus-visible:outline-ring/60 focus-visible:-outline-offset-2 flex-1 touch-none select-none outline-none data-[mode=draw]:cursor-cell",
+        "focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 flex-1 touch-none select-none outline-none data-[mode=draw]:cursor-cell",
         pianoRollVariants({ size }),
         className
       )}
@@ -307,7 +307,7 @@ function PianoRollGrid({
       <PianoRollPrimitive.Rows>
         {(pitch) => (
           <PianoRollPrimitive.Row
-            className="data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10 data-out-of-scale:bg-foreground/13 data-in-scale:data-[color=black]:bg-transparent data-scale-root:bg-linear-to-r data-scale-root:from-primary/8 data-scale-root:to-primary/8 data-scale-root:shadow-[inset_3px_0_0_var(--primary)] data-in-scale:data-scale-root:border-t data-in-scale:data-scale-root:border-primary/60"
+            className="data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-selected:bg-primary/10 data-out-of-scale:bg-foreground/13 data-in-scale:data-[color=black]:bg-transparent data-scale-root:bg-linear-to-r data-scale-root:from-primary/8 data-scale-root:to-primary/8 data-scale-root:shadow-[inset_3px_0_0_var(--primary)] data-in-scale:data-scale-root:border-t data-in-scale:data-scale-root:border-primary/60"
             key={pitch}
             pitch={pitch}
           />
@@ -317,7 +317,7 @@ function PianoRollGrid({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Note
-            className="rounded-[min(var(--radius-sm),3px)] transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-2 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] opacity-[calc(0.4+var(--piano-roll-chance)*0.6)] outline-none active:cursor-grabbing data-muted:border-muted-foreground data-muted:bg-muted data-[selected]:border-foreground data-[selected]:bg-primary data-[selected]:ring-1 data-[selected]:ring-foreground data-muted:data-[selected]:bg-muted-foreground/40"
+            className="rounded-[min(var(--radius-sm),3px)] transition-[border-color,background-color] duration-100 ease-out focus-visible:ring-3 focus-visible:ring-ring/50 data-disabled:pointer-events-none motion-reduce:transition-none cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] opacity-[calc(0.4+var(--piano-roll-chance)*0.6)] outline-none active:cursor-grabbing data-muted:border-muted-foreground data-muted:bg-muted data-[selected]:border-foreground data-[selected]:bg-primary data-[selected]:ring-1 data-[selected]:ring-foreground data-muted:data-[selected]:bg-muted-foreground/40"
             key={note.id}
             note={note}
           >
@@ -438,7 +438,7 @@ function PianoRollVelocity({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Velocity
-            className="rounded-t-[min(var(--radius-sm),2px)] bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0 group-data-[mode=draw]/piano-roll:cursor-crosshair"
+            className="rounded-t-[min(var(--radius-sm),2px)] bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0 group-data-[mode=draw]/piano-roll:cursor-crosshair"
             key={note.id}
             level={level}
             note={note}

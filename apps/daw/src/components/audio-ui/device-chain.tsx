@@ -14,7 +14,6 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -25,7 +24,9 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Toggle } from "@/components/ui/toggle";
+import { BareButton } from "@/components/audio-ui/bare-button";
 import { startSortableDrag } from "@/lib/sortable-drag";
+import { cn } from "@/lib/utils";
 import { CaretLeftIcon } from "@phosphor-icons/react";
 
 /** The type a dragged device carries, with its id as the data: what a library sets and the chain takes. */
@@ -521,7 +522,7 @@ function SlotFold() {
   // Folded, the whole strip is what is pressed: this only says so, and is how the keyboard unfolds it.
   if (folded) {
     return (
-      <button
+      <BareButton
         aria-expanded={false}
         aria-keyshortcuts={keys || undefined}
         aria-label={`Unfold ${title}`}
@@ -533,7 +534,7 @@ function SlotFold() {
         type="button"
       >
         {arrow}
-      </button>
+      </BareButton>
     );
   }
   return (
@@ -814,7 +815,7 @@ function DeviceChainAdd({
 }: ComponentProps<"button">) {
   const { dropIndex, order } = useDeviceChain();
   return (
-    <button
+    <BareButton
       className={cn(
         "rounded-xl [--device-radius:calc(var(--radius)+4px)] flex w-36 shrink-0 flex-col items-center justify-center gap-1 border border-dashed px-3 text-center text-muted-foreground text-xs transition-colors hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-over:border-primary data-over:bg-primary/10",
         className
@@ -830,7 +831,7 @@ function DeviceChainAdd({
           <span>Drop one here, or open the library</span>
         </>
       )}
-    </button>
+    </BareButton>
   );
 }
 

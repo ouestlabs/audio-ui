@@ -1,9 +1,4 @@
 import {
-  CaretLeftIcon,
-  CaretRightIcon,
-  MagnifyingGlassIcon,
-} from "@phosphor-icons/react";
-import {
   type ChangeEvent,
   type ComponentProps,
   type DragEvent,
@@ -13,14 +8,16 @@ import {
   useId,
   useState,
 } from "react";
-import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { BareButton } from "@/components/audio-ui/bare-button";
+import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { cn } from "@/lib/utils";
+import { CaretRightIcon, CaretLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 /** A device as the library lists it: a device definition is one. */
 export interface DeviceBrowserItem {
@@ -195,7 +192,7 @@ function DeviceBrowser({
 
   if (!open) {
     return (
-      <button
+      <BareButton
         aria-expanded={false}
         aria-label="Open the library"
         className={cn(
@@ -211,7 +208,7 @@ function DeviceBrowser({
         <span className="rotate-180 font-medium text-xs [writing-mode:vertical-rl]">
           Library
         </span>
-      </button>
+      </BareButton>
     );
   }
 
@@ -231,7 +228,7 @@ function DeviceBrowser({
           Library
         </span>
         {onOpenChange ? (
-          <button
+          <BareButton
             aria-expanded
             aria-label="Fold the library"
             className="flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none after:absolute after:inset-0 hover:text-foreground hover:after:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3.5"
@@ -239,7 +236,7 @@ function DeviceBrowser({
             type="button"
           >
             <CaretLeftIcon aria-hidden="true" />
-          </button>
+          </BareButton>
         ) : null}
       </div>
       <div className="shrink-0 border-b p-1.5">
@@ -266,7 +263,7 @@ function DeviceBrowser({
           role="group"
         >
           {shelves.map((entry, index) => (
-            <button
+            <BareButton
               aria-pressed={!searching && index === shelf}
               className="border-transparent border-s-2 px-2 py-1 text-start text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset aria-pressed:border-primary aria-pressed:bg-primary/10 aria-pressed:text-foreground"
               data-shelf={index}
@@ -275,7 +272,7 @@ function DeviceBrowser({
               type="button"
             >
               {entry.label}
-            </button>
+            </BareButton>
           ))}
         </div>
         <div className="flex min-w-0 flex-1 flex-col">

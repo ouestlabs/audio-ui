@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   LOFI_WORKLET,
   type LofiState,
   lofiSettings,
 } from "@/components/audio-ui/devices/lofi/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;

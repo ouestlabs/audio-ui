@@ -1,14 +1,5 @@
 import { type ReactNode, useMemo } from "react";
-import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type TiltEqState,
-  tiltEqCurve,
-  tiltEqDevice,
-} from "@/components/audio-ui/devices/tilt-eq/device";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import {
   Plot,
   PlotArea,
@@ -19,8 +10,17 @@ import {
   PlotLine,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import {
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type TiltEqState,
+  tiltEqCurve,
+  tiltEqDevice,
+} from "@/components/audio-ui/devices/tilt-eq/device";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

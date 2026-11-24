@@ -1,19 +1,19 @@
-import { clampFinite } from "../grid";
+import {
+  bypassesGrid,
+  clampFinite,
+  type Grid,
+  SNAP_RADIUS_PX,
+  snapToGrid,
+  withSnapRadius,
+} from "../grid";
+import type { Source } from "../primitive";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
   createChangeEventDetails,
   createPointerLock,
 } from "../primitive";
-import type { Source } from "../primitive";
 import { clampZoom } from "./scale";
-import {
-  bypassesGrid,
-  type Grid,
-  SNAP_RADIUS_PX,
-  snapToGrid,
-  withSnapRadius,
-} from "../grid";
 
 /** What `onPositionChange` receives with each move of the playhead: the reason (`"press"`, `"drag"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse the move. */
 export type TimelinePositionChangeEventDetails =

@@ -6,7 +6,6 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { NoteEdit } from "@/lib/note-edits";
+import { cn } from "@/lib/utils";
 import { CaretDownIcon } from "@phosphor-icons/react";
 
 interface NoteEditMenuContextValue {

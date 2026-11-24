@@ -1,11 +1,15 @@
 import { type RefObject, useCallback, useState } from "react";
-import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
 import type {
   ClipChangeDetails,
   ClipCommitDetails,
-} from "@/components/audio-ui/timeline/timeline";
-import type { Arranged, ArrangementTrack, ClipAction } from "@/lib/arrangement";
+} from "../components/audio-ui/timeline/timeline";
+import type {
+  Arranged,
+  ArrangementTrack,
+  ClipAction,
+} from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
+import type { ClipValue, FadeShape } from "@/components/audio-ui/timeline/clip";
 
 /** The track of those given whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
 function nearestTrack(

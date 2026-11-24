@@ -1,7 +1,7 @@
 import { type ComponentType, lazy, type ReactNode } from "react";
-import type { DeviceSignal } from "@/lib/device-signal";
 import type { ParameterValue } from "@/lib/engine/device";
 import type { Tempo } from "@/lib/engine/time";
+import type { DeviceSignal } from "@/lib/device-signal";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {
@@ -116,7 +116,9 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     "w-[52rem]"
   ),
   "audioui.gate": entry(() =>
-    import("@/components/audio-ui/devices/gate/panel").then((m) => m.GatePanel)
+    import("@/components/audio-ui/devices/gate/panel").then(
+      (m) => m.GatePanel
+    )
   ),
   "audioui.unlimiter": entry(() =>
     import("@/components/audio-ui/devices/unlimiter/panel").then(
@@ -174,7 +176,9 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   ),
   "audioui.wah": entry(
     () =>
-      import("@/components/audio-ui/devices/wah/panel").then((m) => m.WahPanel),
+      import("@/components/audio-ui/devices/wah/panel").then(
+        (m) => m.WahPanel
+      ),
     "w-[32rem]"
   ),
   "audioui.graphic-eq": entry(
@@ -278,7 +282,9 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     )
   ),
   "audioui.lofi": entry(() =>
-    import("@/components/audio-ui/devices/lofi/panel").then((m) => m.LofiPanel)
+    import("@/components/audio-ui/devices/lofi/panel").then(
+      (m) => m.LofiPanel
+    )
   ),
   "audioui.reverb": entry(() =>
     import("@/components/audio-ui/devices/reverb/panel").then(
@@ -308,7 +314,9 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
     )
   ),
   "audioui.vibe": entry(() =>
-    import("@/components/audio-ui/devices/vibe/panel").then((m) => m.VibePanel)
+    import("@/components/audio-ui/devices/vibe/panel").then(
+      (m) => m.VibePanel
+    )
   ),
   "audioui.wave-shaper": entry(() =>
     import("@/components/audio-ui/devices/wave-shaper/panel").then(

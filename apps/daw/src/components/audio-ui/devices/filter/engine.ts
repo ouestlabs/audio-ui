@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   CIRCUIT_WORKLET,
   circuitSettings,
   type FilterState,
 } from "@/components/audio-ui/devices/filter/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.015;

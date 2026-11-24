@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createSource } from "@/components/audio-ui/primitive";
 import {
   createLoudnessMeter,
   type LiveLoudness,
   type LoudnessMeter,
 } from "@/lib/engine/analysis";
+import { createSource } from "@/components/audio-ui/primitive";
 
 const UNMEASURED: LiveLoudness = {
   integrated: Number.NEGATIVE_INFINITY,

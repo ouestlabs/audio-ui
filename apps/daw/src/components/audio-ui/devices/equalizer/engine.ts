@@ -1,10 +1,10 @@
+import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@/lib/engine/analysis";
+import type { EffectEngine } from "@/lib/engine/device";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,
   equalizerBands,
 } from "@/components/audio-ui/devices/equalizer/device";
-import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@/lib/engine/analysis";
-import type { EffectEngine } from "@/lib/engine/device";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;

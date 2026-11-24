@@ -1,15 +1,12 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  DECAY_DB,
-  type ReverbState,
-  reverbDecay,
-  reverbDevice,
-} from "@/components/audio-ui/devices/reverb/device";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Plot,
   PlotArea,
@@ -21,13 +18,16 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  DECAY_DB,
+  type ReverbState,
+  reverbDecay,
+  reverbDevice,
+} from "@/components/audio-ui/devices/reverb/device";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

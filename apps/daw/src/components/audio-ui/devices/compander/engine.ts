@@ -1,11 +1,11 @@
+import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
+import { createFeed, type Feed } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   COMPANDER_WORKLET,
   type CompanderState,
   companderSettings,
 } from "@/components/audio-ui/devices/compander/device";
-import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
-import { createFeed, type Feed } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 const RAMP_SECONDS = 0.01;
 

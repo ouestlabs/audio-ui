@@ -86,7 +86,7 @@ function Sequencer({
                   <SequencerPrimitive.Cell
                     aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
                     className={cn(
-                      "rounded-[min(var(--radius-sm),6px)] border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
+                      "rounded-[min(var(--radius-sm),6px)] border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 focus-visible:border-ring flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
                       size === "sm" ? "h-6" : "h-9",
                       step % beatEvery === 0 && "bg-muted",
                       shadeByVelocity &&
@@ -115,7 +115,7 @@ function Sequencer({
                     <SequencerPrimitive.Velocity
                       aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
                       className={cn(
-                        "overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-2 focus-within:ring-ring/50 data-disabled:pointer-events-none group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
+                        "overflow-hidden rounded-[min(var(--radius-sm),6px)] bg-muted/40 focus-within:ring-3 focus-within:ring-ring/50 data-disabled:pointer-events-none group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
                         size === "sm" ? "h-3" : "h-8"
                       )}
                       key={step}

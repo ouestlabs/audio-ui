@@ -24,7 +24,7 @@ import {
   LEAF_FRAMES,
   type WaveformBands,
   waveformLeaves,
-} from "@/lib/gl/waveform";
+} from "@/lib/webgl/waveform";
 
 const BYTES = Float32Array.BYTES_PER_ELEMENT;
 

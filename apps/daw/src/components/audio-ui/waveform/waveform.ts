@@ -1333,7 +1333,7 @@ export const waveform: WaveformPrimitive = definePrimitive({
           const mark = () => {
             const { levels } = part.store.get();
             el.toggleAttribute(
-              "data-active",
+              "data-selected",
               levels ? isAudible(levels.getSnapshot()) : false
             );
           };
@@ -1359,7 +1359,7 @@ export const waveform: WaveformPrimitive = definePrimitive({
             offStore();
             unfollow();
             unhear();
-            el.removeAttribute("data-active");
+            el.removeAttribute("data-selected");
           };
         },
         state: (state: WaveformState) => publicState(state),

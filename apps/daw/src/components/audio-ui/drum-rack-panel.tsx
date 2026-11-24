@@ -1,10 +1,4 @@
 import {
-  CaretDownIcon,
-  CaretUpIcon,
-  UploadIcon,
-  XIcon,
-} from "@phosphor-icons/react";
-import {
   type ChangeEvent,
   type DragEvent,
   type FocusEvent,
@@ -15,18 +9,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Knob } from "@/components/audio-ui/knob";
-import { Pad, PadItem } from "@/components/audio-ui/pad";
-import type { PadOnDetails } from "@/components/audio-ui/pad/pad";
-import { pitchName } from "@/components/audio-ui/pitch";
-import {
-  decibels,
-  formatPan,
-  type RackChainMix,
-  RackFrame,
-  RackMacros,
-  type RackParameter,
-} from "@/components/audio-ui/rack-panel";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -44,6 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
+import { Knob } from "@/components/audio-ui/knob";
+import { Pad, PadItem } from "@/components/audio-ui/pad";
+import {
+  decibels,
+  formatPan,
+  type RackChainMix,
+  RackFrame,
+  RackMacros,
+  type RackParameter,
+} from "@/components/audio-ui/rack-panel";
 import {
   DRUM_DECAYS,
   type DrumSound,
@@ -53,6 +45,9 @@ import {
   type RackMapping,
 } from "@/lib/arrangement";
 import { cn } from "@/lib/utils";
+import type { PadOnDetails } from "./pad/pad";
+import { pitchName } from "@/components/audio-ui/pitch";
+import { UploadIcon, XIcon, CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 
 /** How many pads a bank shows, four by four. */
 const BANK = 16;

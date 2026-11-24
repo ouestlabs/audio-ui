@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
+import { peakDb, rmsDb } from "@/lib/engine/analysis";
 import type { MeterFrame } from "@/components/audio-ui/meter/levels";
 import { createSource } from "@/components/audio-ui/primitive";
-import { peakDb, rmsDb } from "@/lib/engine/analysis";
 
 /** Below what a Meter draws: the level of digital silence. */
 const SILENCE_DB = -100;

@@ -8,13 +8,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import type {
-  DitherMethod,
-  ShiftMethod,
-  StretchMethod,
-} from "@/lib/engine/files";
+import type { DitherMethod, ShiftMethod, StretchMethod } from "@/lib/engine/files";
 import type { Repair } from "@/lib/engine/repair";
-import { REPAIR_NAMES, type SoundOperation } from "@/lib/sound-operations";
+import {
+  REPAIR_NAMES,
+  type SoundOperation,
+} from "@/lib/sound-operations";
 
 /** One operation as the menu offers it: what it says, with a note at its end. */
 interface OperationEntry {

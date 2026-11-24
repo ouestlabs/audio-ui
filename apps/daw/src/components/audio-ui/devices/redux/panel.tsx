@@ -1,5 +1,12 @@
 import { type ReactNode, useMemo } from "react";
 import {
+  Plot,
+  PlotCurve,
+  PlotDot,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -10,13 +17,9 @@ import {
   reduxDevice,
 } from "@/components/audio-ui/devices/redux/device";
 import {
-  Plot,
-  PlotCurve,
-  PlotDot,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
-import { type DeviceSignal, peakDots } from "@/lib/device-signal";
+  type DeviceSignal,
+  peakDots,
+} from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];

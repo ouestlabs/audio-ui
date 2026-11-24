@@ -2,7 +2,7 @@ export interface LaneSamples {
   frames: number;
   /**
    * The recording summed up 256 frames at a time, `[min, max, Σx², count]`
-   * each, as `waveformLeaves` of `@/gl/waveform` makes them: for a
+   * each, as `waveformLeaves` of `@/webgl/waveform` makes them: for a
    * recording streamed from a file, which a lane then never reads whole. A
    * waveform lane draws it from them zoomed out, and zoomed in reads only the
    * frames it shows, `CHUNK_FRAMES` at a time. Left out, a lane reads the

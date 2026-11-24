@@ -1,11 +1,10 @@
+import type { DeviceContext } from "@/lib/engine/device";
 import type {
   DrumSound,
   Rack,
   RackChain,
   TrackDevice,
 } from "@/lib/arrangement";
-import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
-import type { DeviceContext } from "@/lib/engine/device";
 import { chainInstrument } from "@/lib/instrument-rack";
 import {
   createRackEngine,
@@ -19,6 +18,11 @@ import {
   type NotePlayer,
   type VoicePool,
 } from "@/lib/voice-pool";
+import {
+  triggerHihat,
+  triggerKick,
+  triggerSnare,
+} from "@/lib/drum-synthesis";
 
 /** A recording a pad plays: an `AudioBuffer`, or its channels decoded. */
 export type PadRecording =

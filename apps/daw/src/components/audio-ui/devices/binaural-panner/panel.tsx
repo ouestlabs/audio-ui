@@ -1,5 +1,13 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Plot,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -10,14 +18,6 @@ import {
   binauralPlace,
   binauralPoint,
 } from "@/components/audio-ui/devices/binaural-panner/device";
-import {
-  Plot,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
-import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

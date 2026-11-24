@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import type { Tempo } from "@/lib/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -17,7 +18,6 @@ import {
   trackOf,
   unfoldedTracks,
 } from "@/lib/arrangement-state";
-import type { Tempo } from "@/lib/engine/time";
 import { canRedo, canUndo } from "@/lib/undo-history";
 
 /** What a clip's menu can do: renaming is the clip's own, in place, and editing opens the app's clip panel. */

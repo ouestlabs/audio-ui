@@ -9,9 +9,9 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { Plot as PlotPrimitive } from "@/components/audio-ui/plot/react";
 import { cn } from "@/lib/utils";
 import { type PlotAxis, valueOn } from "./plot/plot";
+import { Plot as PlotPrimitive } from "@/components/audio-ui/plot/react";
 
 type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
 type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
@@ -163,10 +163,7 @@ function PlotDot({
 }: ComponentProps<typeof PlotPrimitive.Dot>) {
   return (
     <PlotPrimitive.Dot
-      className={cn(
-        "rounded-full bg-primary ring-4 ring-primary/25 size-2.5",
-        className
-      )}
+      className={cn("rounded-full bg-primary ring-4 ring-primary/25 size-2.5 rounded-full", className)}
       data-slot="plot-dot"
       {...props}
     />
@@ -212,9 +209,8 @@ function PlotCursor({ className, format, ...props }: PlotCursorProps) {
         style={{ top: "var(--plot-cursor-y)" }}
       />
       <PlotPrimitive.CursorReadout
-        className="rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
+        className="rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
         format={format}
-        style={{ left: "auto", right: "0.5rem", top: "0.375rem" }}
       />
     </PlotPrimitive.Cursor>
   );
@@ -228,7 +224,7 @@ function PlotGrid({
   return (
     <PlotPrimitive.Grid
       className={cn(
-        "text-muted-foreground rounded-[inherit] text-[10px] tabular-nums leading-none",
+        "text-muted-foreground rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none",
         // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame.
         "[&>svg]:overflow-hidden! [&>svg]:rounded-[inherit]",
         "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",
@@ -310,7 +306,7 @@ function PlotHandle({
   return (
     <PlotPrimitive.Handle
       className={cn(
-        "rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none size-4 cursor-grab outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
+        "rounded-full border-2 border-primary bg-background shadow-xs data-selected:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-3 focus-within:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none size-4 cursor-grab outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
         className
       )}
       data-slot="plot-handle"

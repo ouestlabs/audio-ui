@@ -1,4 +1,18 @@
 import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { Toggle } from "@/components/ui/toggle";
+import { bandGainForHandle, bandHandleDb } from "@/lib/engine/analysis";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import { FilterTypeSelect } from "@/components/audio-ui/filter-type-select";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -12,21 +26,7 @@ import {
   equalizerDevice,
   FILTER_TAKES,
 } from "@/components/audio-ui/devices/equalizer/device";
-import { FilterTypeSelect } from "@/components/audio-ui/filter-type-select";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
-import { Toggle } from "@/components/ui/toggle";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { bandGainForHandle, bandHandleDb } from "@/lib/engine/analysis";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
@@ -112,7 +112,7 @@ function BandHandle({
     <PlotHandle
       aria-label={`${BAND_NAMES[index]} band`}
       className={cn(selected && "bg-primary")}
-      data-active={selected || undefined}
+      data-selected={selected || undefined}
       getAriaValueText={describeValue}
       onDoubleClick={reset}
       onFocus={select}

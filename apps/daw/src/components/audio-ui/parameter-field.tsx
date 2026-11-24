@@ -17,7 +17,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,
@@ -25,6 +24,7 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
+import { cn } from "@/lib/utils";
 import { ArrowsHorizontalIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 
 const parameterFieldVariants = cva("w-auto min-w-0", {

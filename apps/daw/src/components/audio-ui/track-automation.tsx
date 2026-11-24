@@ -1,7 +1,4 @@
-import { TrashIcon } from "@phosphor-icons/react";
 import { useCallback, useMemo } from "react";
-import { AutomationEnvelope } from "@/components/audio-ui/automation-envelope";
-import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { Device, ParameterDescriptor } from "@/lib/engine/device";
+import { AutomationEnvelope } from "@/components/audio-ui/automation-envelope";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
@@ -25,8 +24,9 @@ import {
   volumeGain,
   volumeValue,
 } from "@/lib/arrangement";
-import type { Device, ParameterDescriptor } from "@/lib/engine/device";
 import { cn } from "@/lib/utils";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import { TrashIcon } from "@phosphor-icons/react";
 
 /** A gain as the decibels it plays at. */
 function formatGain(gain: number) {
@@ -256,7 +256,8 @@ function TrackAutomationChooser({
         size="icon-xs"
         variant="ghost"
       >
-        <TrashIcon />
+        <TrashIcon
+        />
       </Button>
     </div>
   );

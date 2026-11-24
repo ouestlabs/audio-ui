@@ -899,7 +899,7 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
           return {
             ...stateAttrs(state),
             "aria-hidden": "true",
-            "data-active": flag(view.active),
+            "data-selected": flag(view.active),
             "data-color": view.color,
             "data-in-scale": flag(view.inScale),
             "data-octave": flag(view.octave),

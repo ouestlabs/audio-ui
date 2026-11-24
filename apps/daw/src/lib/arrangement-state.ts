@@ -1,18 +1,4 @@
-import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
-import type { Note } from "@/components/audio-ui/piano-roll/edits";
-import {
-  type ClipValue,
-  copyRange,
-  coverClips,
-  duplicateClip,
-  type FadeShape,
-  insertTime,
-  moveClip,
-  removeTime,
-  setClipFadeShape,
-  splitClip,
-  trimClipEnd,
-} from "@/components/audio-ui/timeline/clip";
+import { type SignatureChange, secondsPerBar, type Tempo } from "@/lib/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -47,11 +33,6 @@ import {
   withoutDeviceAutomation,
 } from "@/lib/arrangement";
 import {
-  type SignatureChange,
-  secondsPerBar,
-  type Tempo,
-} from "@/lib/engine/time";
-import {
   beginChange,
   emptyHistory,
   type History,
@@ -61,6 +42,21 @@ import {
   settleChange,
   undo,
 } from "@/lib/undo-history";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
+import {
+  type ClipValue,
+  copyRange,
+  coverClips,
+  duplicateClip,
+  type FadeShape,
+  insertTime,
+  moveClip,
+  removeTime,
+  setClipFadeShape,
+  splitClip,
+  trimClipEnd,
+} from "@/components/audio-ui/timeline/clip";
 
 /**
  * A new id for a piece of the clip `id`: the first `-n` after it that no clip

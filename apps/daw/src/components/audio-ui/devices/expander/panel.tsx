@@ -1,14 +1,12 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type ExpanderState,
-  expanderCurve,
-  expanderDevice,
-} from "@/components/audio-ui/devices/expander/device";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Plot,
   PlotCurve,
@@ -19,14 +17,19 @@ import {
   PlotLine,
 } from "@/components/audio-ui/plot";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { curveDot, type DeviceSignal } from "@/lib/device-signal";
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type ExpanderState,
+  expanderCurve,
+  expanderDevice,
+} from "@/components/audio-ui/devices/expander/device";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -80;

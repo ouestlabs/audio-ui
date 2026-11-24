@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
 import {
   ROTARY_WORKLET,
   type RotaryState,
   rotarySettings,
 } from "@/components/audio-ui/devices/rotary/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { createWorkletStage } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.02;
 

@@ -1,14 +1,12 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type FrequencyShifterState,
-  frequencyShifterDevice,
-  frequencyShifterPartials,
-} from "@/components/audio-ui/devices/frequency-shifter/device";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Plot,
   PlotGraph,
@@ -18,13 +16,15 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type FrequencyShifterState,
+  frequencyShifterDevice,
+  frequencyShifterPartials,
+} from "@/components/audio-ui/devices/frequency-shifter/device";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

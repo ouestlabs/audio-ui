@@ -1,15 +1,6 @@
 import type { NumberScale } from "@ui-sdk/core/number";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import {
-  FilterTypeSelect,
-  isFilterType,
-} from "@/components/audio-ui/filter-type-select";
-import { Knob } from "@/components/audio-ui/knob";
-import {
-  isWaveform,
-  WaveformSelect,
-} from "@/components/audio-ui/waveform-select";
-import {
   Select,
   SelectContent,
   SelectGroup,
@@ -18,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
-import type { DeviceSignal } from "@/lib/device-signal";
 import type {
   ChoiceParameter,
   Device,
@@ -28,6 +18,16 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@/lib/engine/device";
+import {
+  FilterTypeSelect,
+  isFilterType,
+} from "@/components/audio-ui/filter-type-select";
+import { Knob } from "@/components/audio-ui/knob";
+import {
+  isWaveform,
+  WaveformSelect,
+} from "@/components/audio-ui/waveform-select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;

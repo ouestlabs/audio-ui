@@ -512,19 +512,27 @@ const fnId = (value: unknown) => {
 };
 
 /** The box every drawing part is: an `<svg>` stretched over the plot, hidden from the pointer. */
+const DRAWING_STYLE = {
+  height: "100%",
+  inset: "0",
+  overflow: "visible",
+  "pointer-events": "none",
+  position: "absolute",
+  width: "100%",
+};
+
 const drawingAttrs = (state: PlotState) => ({
   "aria-hidden": "true",
   "data-disabled": flag(state.disabled),
   preserveAspectRatio: "none",
-  style: css({
-    height: "100%",
-    inset: "0",
-    overflow: "visible",
-    "pointer-events": "none",
-    position: "absolute",
-    width: "100%",
-  }),
+  style: css(DRAWING_STYLE),
   viewBox: "0 0 1 1",
+});
+
+/** A drawing redrawn every frame, on a layer of its own: a frame repaints it alone, not the graph under it. */
+const liveDrawingAttrs = (state: PlotState) => ({
+  ...drawingAttrs(state),
+  style: css({ ...DRAWING_STYLE, "will-change": "transform" }),
 });
 
 const percent = (value: number) =>
@@ -1065,7 +1073,7 @@ export const plot: PlotPrimitive = definePrimitive({
               const down = clamp((event.clientY - box.top) / box.height, 0, 1);
               el.style.setProperty("--plot-cursor-x", `${across * 100}%`);
               el.style.setProperty("--plot-cursor-y", `${down * 100}%`);
-              el.setAttribute("data-active", "");
+              el.setAttribute("data-selected", "");
               part.api.cursor.set({
                 x: valueOn(axes.x, across),
                 y: valueOn(axes.y, 1 - down),
@@ -1073,7 +1081,7 @@ export const plot: PlotPrimitive = definePrimitive({
             };
             const handleEnter = () => part.api.measure(true);
             const handleLeave = () => {
-              el.removeAttribute("data-active");
+              el.removeAttribute("data-selected");
               part.api.cursor.set(null);
             };
             plotEl.addEventListener("pointerenter", handleEnter);
@@ -1139,6 +1147,8 @@ export const plot: PlotPrimitive = definePrimitive({
               "pointer-events": "none",
               position: "absolute",
               translate: "-50% -50%",
+              // A live point moves every frame: on a layer of its own, its moves repaint nothing under it.
+              ...(props.source ? { "will-change": "transform" } : {}),
             }),
           };
         },
@@ -1301,7 +1311,7 @@ export const plot: PlotPrimitive = definePrimitive({
         },
         PathState
       >({
-        attrs: drawingAttrs,
+        attrs: liveDrawingAttrs,
         // A live trace is drawn straight onto its path, frame by frame.
         bind: (el, part) => {
           const { source } = part.props;

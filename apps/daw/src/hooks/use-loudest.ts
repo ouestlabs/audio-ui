@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { leavesPeak } from "@/lib/gl/waveform";
+import { leavesPeak } from "@/lib/webgl/waveform";
 
 /** How many frames are read at a time, so a long recording does not hold the page. */
 const CHUNK = 1 << 20;

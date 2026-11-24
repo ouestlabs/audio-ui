@@ -1,8 +1,4 @@
 import {
-  createRangeController,
-  type RangeController,
-} from "./range-controller";
-import {
   css,
   dispatch,
   type PrimitiveContext,
@@ -10,6 +6,10 @@ import {
 } from "@ui-sdk/core";
 import { flag, sourceOf, VISUALLY_HIDDEN } from "../primitive";
 import { laneOf, placedOver } from "./layout";
+import {
+  createRangeController,
+  type RangeController,
+} from "./range-controller";
 import type {
   DescribePosition,
   TimelineApi,

@@ -8,18 +8,22 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { dbToGain, gainToDb, peakDb } from "@/lib/engine/analysis";
+import { formatLevel, formatPan as formatPanOf } from "@/lib/engine/format";
+import { BareButton } from "@/components/audio-ui/bare-button";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
-import type { MeterFrame } from "@/components/audio-ui/meter/levels";
-import type { Source } from "@/components/audio-ui/primitive";
-import { SWITCH_TONES, trackSwatch } from "@/components/audio-ui/timeline";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { useArrangement } from "@/hooks/use-arrangement";
-import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import {
+  SWITCH_TONES,
+  trackSwatch,
+} from "@/components/audio-ui/timeline";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 import { useLoudness } from "@/hooks/use-loudness";
+import type { useArrangement } from "@/hooks/use-arrangement";
+import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import {
   type AutomationFollowing,
   useAutomatedMix,
@@ -30,11 +34,14 @@ import {
   hasOutput,
   type Mix,
 } from "@/lib/arrangement";
-import { trackBlock, trackOf } from "@/lib/arrangement-state";
-import { dbToGain, gainToDb, peakDb } from "@/lib/engine/analysis";
-import { formatLevel, formatPan as formatPanOf } from "@/lib/engine/format";
+import {
+  trackBlock,
+  trackOf,
+} from "@/lib/arrangement-state";
 import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
+import type { MeterFrame } from "@/components/audio-ui/meter/levels";
+import type { Source } from "@/components/audio-ui/primitive";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -145,7 +152,7 @@ function PeakReadout({
     paint();
   }, [paint]);
   return (
-    <button
+    <BareButton
       aria-label={`${name} peak -∞ dB, click to clear`}
       className={cn(
         "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive",
@@ -156,7 +163,7 @@ function PeakReadout({
       type="button"
     >
       -∞
-    </button>
+    </BareButton>
   );
 }
 
@@ -198,7 +205,7 @@ function LoudnessReadout({
     return source.subscribe(paint);
   }, [source]);
   return (
-    <button
+    <BareButton
       aria-label="Main loudness -∞ LUFS, click to clear"
       className={cn(
         "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
@@ -209,7 +216,7 @@ function LoudnessReadout({
       type="button"
     >
       -∞ LUFS
-    </button>
+    </BareButton>
   );
 }
 
@@ -429,7 +436,7 @@ function Strip({
           style={swatch.style}
         />
         {grip ? (
-          <button
+          <BareButton
             aria-label={`Move ${track.name}`}
             className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
             data-mixer-grip={track.id}
@@ -437,7 +444,7 @@ function Strip({
             {...grip}
           >
             {track.name}
-          </button>
+          </BareButton>
         ) : (
           <span className="min-h-4 w-full truncate text-center font-medium text-xs">
             {track.name}

@@ -6,7 +6,7 @@ import {
   recordingChannels,
   recordingSamples,
 } from "@/lib/daw/samples";
-import { leavesPeak, waveformLeaves } from "@/lib/gl/waveform";
+import { leavesPeak, waveformLeaves } from "@/lib/webgl/waveform";
 
 describe("a recording's samples for the clip view (CLP-024)", () => {
   test("reads the middle of its channels, only the frames asked for", async () => {

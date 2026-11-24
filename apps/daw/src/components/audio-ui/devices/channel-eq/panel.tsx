@@ -1,14 +1,5 @@
 import { type ReactNode, useCallback, useMemo } from "react";
-import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type ChannelEqState,
-  channelEqCurve,
-  channelEqDevice,
-} from "@/components/audio-ui/devices/channel-eq/device";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import {
   Plot,
   PlotArea,
@@ -19,8 +10,17 @@ import {
   PlotHandle,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import {
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type ChannelEqState,
+  channelEqCurve,
+  channelEqDevice,
+} from "@/components/audio-ui/devices/channel-eq/device";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

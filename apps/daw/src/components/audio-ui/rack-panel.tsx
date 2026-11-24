@@ -1,8 +1,4 @@
-import { PlusIcon, XIcon } from "@phosphor-icons/react";
-
 import { type ReactNode, useCallback, useState } from "react";
-import { Knob } from "@/components/audio-ui/knob";
-import { pitchName } from "@/components/audio-ui/pitch";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
+import { BareButton } from "@/components/audio-ui/bare-button";
+import { Knob } from "@/components/audio-ui/knob";
 import {
   type ChainZone,
   FULL_ZONE,
@@ -26,6 +24,8 @@ import {
   type RackMapping,
 } from "@/lib/arrangement";
 import { cn } from "@/lib/utils";
+import { pitchName } from "@/components/audio-ui/pitch";
+import { XIcon, PlusIcon } from "@phosphor-icons/react";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {
@@ -132,7 +132,7 @@ function Macro({
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <button
+            <BareButton
               aria-label={`${name}: ${mappings.length} mapped`}
               className={cn(
                 "max-w-16 truncate rounded px-1 text-[10px] text-muted-foreground outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
@@ -257,14 +257,14 @@ function RackChainRow({
       )}
       data-slot="rack-chain"
     >
-      <button
+      <BareButton
         aria-pressed={selected}
         className="min-w-0 flex-1 truncate rounded px-1 text-start text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={select}
         type="button"
       >
         {chain.name}
-      </button>
+      </BareButton>
       <Knob
         aria-label={`${chain.name} volume`}
         formatValue={decibels}

@@ -38,7 +38,7 @@ import {
   transferable,
 } from "@/lib/daw/samples";
 import { encodeAudio } from "@/lib/engine/files";
-import { LEAF_FRAMES } from "@/lib/gl/waveform";
+import { LEAF_FRAMES } from "@/lib/webgl/waveform";
 import {
   applySoundOperation,
   SEAM,
