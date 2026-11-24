@@ -1,11 +1,4 @@
 import {
-  CaretLeftIcon,
-  CaretRightIcon,
-  MapPinPlusIcon,
-  MusicNotesPlusIcon,
-  PlusIcon,
-} from "@phosphor-icons/react";
-import {
   type ComponentProps,
   type DragEvent,
   type MouseEvent,
@@ -20,6 +13,26 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  barsBeatsWith,
+  secondsPerBar,
+  secondsPerBeat,
+  type Tempo,
+} from "@/lib/engine/time";
 import {
   ArrangedClip,
   ArrangedClipGhost,
@@ -58,25 +71,20 @@ import {
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
-import { TrackGrip, TrackReorderGhost } from "@/components/audio-ui/track-grip";
+import {
+  TrackGrip,
+  TrackReorderGhost,
+} from "@/components/audio-ui/track-grip";
 import { TrackLevel } from "@/components/audio-ui/track-level";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useArrangedClips } from "@/hooks/use-arranged-clips";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import {
+  type AutomationFollowing,
+  useAutomatedMix,
+  type useTrackAutomation,
+} from "@/hooks/use-track-automation";
+import { useTrackReorder } from "@/hooks/use-track-reorder";
 import { useMarquee } from "@/hooks/use-marquee-selection";
 import type { useTimeSelection } from "@/hooks/use-time-selection";
 import {
@@ -85,12 +93,6 @@ import {
 } from "@/hooks/use-timeline-grid";
 import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
-import {
-  type AutomationFollowing,
-  useAutomatedMix,
-  type useTrackAutomation,
-} from "@/hooks/use-track-automation";
-import { useTrackReorder } from "@/hooks/use-track-reorder";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -108,13 +110,8 @@ import {
   trackDepth,
 } from "@/lib/arrangement-state";
 import { drumKit } from "@/lib/drum-kit";
-import {
-  barsBeatsWith,
-  secondsPerBar,
-  secondsPerBeat,
-  type Tempo,
-} from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
+import { CaretLeftIcon, CaretRightIcon, PlusIcon, MapPinPlusIcon, MusicNotesPlusIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;

@@ -1,21 +1,23 @@
 import {
-  type ChangeEventDetails,
-  type CommitEventDetails,
-  createChangeEventDetails,
-  createPointerLock,
-} from "../primitive";
-import { normalizeRange, type RangeEdge, type RangeValue } from "../grid";
-import { keyTargets } from "./clip-controller";
-import { valueAtLane } from "./position";
-import {
   bypassesGrid,
   type Grid,
+  normalizeRange,
+  type RangeEdge,
+  type RangeValue,
   SNAP_RADIUS_PX,
   snapRangeMove,
   snapToGrid,
   withoutSnapPoints,
   withSnapRadius,
 } from "../grid";
+import {
+  type ChangeEventDetails,
+  type CommitEventDetails,
+  createChangeEventDetails,
+  createPointerLock,
+} from "../primitive";
+import { keyTargets } from "./clip-controller";
+import { valueAtLane } from "./position";
 
 type Edged<Details> = Details & {
   /** What moved: one edge, or the whole range with `"both"`. */

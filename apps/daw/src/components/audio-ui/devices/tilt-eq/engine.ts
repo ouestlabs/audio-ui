@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
 import {
   TILT_EQ_WORKLET,
   type TiltEqState,
   tiltEqSettings,
 } from "@/components/audio-ui/devices/tilt-eq/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { createWorkletStage } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.02;
 

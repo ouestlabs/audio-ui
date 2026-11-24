@@ -1,9 +1,9 @@
+import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@/lib/engine/analysis";
+import type { EffectEngine } from "@/lib/engine/device";
 import {
   type GraphicEqState,
   graphicEqBands,
 } from "@/components/audio-ui/devices/graphic-eq/device";
-import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@/lib/engine/analysis";
-import type { EffectEngine } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.02;
 

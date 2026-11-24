@@ -1,4 +1,13 @@
 import { type ReactNode, useMemo } from "react";
+import { DEFAULT_TEMPO, secondsPerBeat } from "@/lib/engine/time";
+import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,16 +18,7 @@ import {
   stutterCycle,
   stutterDevice,
 } from "@/components/audio-ui/devices/stutter/device";
-import {
-  Plot,
-  PlotArea,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { DEFAULT_TEMPO, secondsPerBeat } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;

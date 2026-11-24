@@ -42,7 +42,7 @@ function PadItem({ className, ...props }: PadItemProps) {
   return (
     <PadPrimitive.Item
       className={cn(
-        "rounded-[min(var(--radius-md),10px)] border bg-muted/60 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-100 ease-out hover:not-data-active:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 data-active:scale-[0.97] data-active:border-primary data-active:bg-[color-mix(in_oklab,var(--primary)_calc(55%_+_var(--pad-velocity,1)*45%),var(--muted))] data-active:text-primary-foreground data-active:duration-0 motion-reduce:transition-none motion-reduce:data-active:scale-100 flex aspect-square min-w-0 cursor-pointer items-end justify-start p-2 text-left font-medium text-xs data-disabled:pointer-events-none",
+        "rounded-[min(var(--radius-md),10px)] border bg-muted/60 text-muted-foreground outline-none transition-[background-color,border-color,color,transform] duration-100 ease-out hover:not-data-active:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 data-selected:scale-[0.97] data-selected:border-primary data-selected:bg-[color-mix(in_oklab,var(--primary)_calc(55%_+_var(--pad-velocity,1)*45%),var(--muted))] data-selected:text-primary-foreground data-selected:duration-0 motion-reduce:transition-none motion-reduce:data-selected:scale-100 focus-visible:border-ring flex aspect-square min-w-0 cursor-pointer items-end justify-start p-2 text-left font-medium text-xs data-disabled:pointer-events-none",
         className
       )}
       data-slot="pad-item"

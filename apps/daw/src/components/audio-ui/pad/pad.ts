@@ -458,7 +458,7 @@ export const pad: PadPrimitive = definePrimitive({
         const disabled = isDisabled(state, props);
         const velocity = view.velocities.get(props.value);
         return {
-          "data-active": flag(view.active.has(props.value)),
+          "data-selected": flag(view.active.has(props.value)),
           "data-disabled": flag(disabled),
           disabled: flag(disabled),
           style: css({

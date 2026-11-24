@@ -1,9 +1,9 @@
+import type { EffectEngine } from "@/lib/engine/device";
 import {
   type SaturatorState,
   saturatorSettings,
   saturatorTable,
 } from "@/components/audio-ui/devices/saturator/device";
-import type { EffectEngine } from "@/lib/engine/device";
 import { createOversamplingDelay } from "@/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;

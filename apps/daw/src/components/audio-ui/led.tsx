@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 const ledVariants = cva("rounded-full bg-muted-foreground/25 shadow-inner transition-[background-color,box-shadow] duration-100 data-on:bg-current data-on:shadow-[0_0_0.375rem_currentColor] data-blink:data-on:animate-pulse motion-reduce:transition-none motion-reduce:data-blink:data-on:animate-none inline-block shrink-0", {
@@ -20,10 +21,11 @@ const ledVariants = cva("rounded-full bg-muted-foreground/25 shadow-inner transi
   },
 });
 
-export interface LedProps extends VariantProps<typeof ledVariants> {
+export interface LedProps
+  extends Omit<ComponentProps<"span">, "children">,
+    VariantProps<typeof ledVariants> {
   /** Blinks while lit: a take arming, a clip about to start. Still for reduced motion. @default false */
   blink?: boolean;
-  className?: string;
   /** Names what it shows, for assistive technology: "Recording", "Signal". */
   label: string;
   /** Whether it is lit. */
@@ -42,6 +44,7 @@ export function Led({
   on,
   size,
   tone,
+  ...props
 }: LedProps) {
   return (
     <span
@@ -52,6 +55,7 @@ export function Led({
       data-size={size ?? "default"}
       data-slot="led"
       role="img"
+      {...props}
     />
   );
 }

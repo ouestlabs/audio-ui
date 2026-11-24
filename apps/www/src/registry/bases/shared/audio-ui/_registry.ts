@@ -921,7 +921,6 @@ export const audioUi: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@base-ui/react"],
     description:
       "A tempo field on its own: type it, step it with the arrows, or drag its unit to scrub the value.",
     files: [

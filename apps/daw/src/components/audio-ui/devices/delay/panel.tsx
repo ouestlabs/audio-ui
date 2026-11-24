@@ -1,5 +1,24 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
+import {
+  Plot,
+  PlotCursor,
+  PlotDot,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -14,27 +33,11 @@ import {
   nearestDivision,
 } from "@/components/audio-ui/devices/delay/device";
 import {
-  Plot,
-  PlotCursor,
-  PlotDot,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
-import type { Source } from "@/components/audio-ui/primitive";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { type DeviceSignal, deriveSource } from "@/lib/device-signal";
-import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
+  type DeviceSignal,
+  deriveSource,
+} from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
+import type { Source } from "@/components/audio-ui/primitive";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

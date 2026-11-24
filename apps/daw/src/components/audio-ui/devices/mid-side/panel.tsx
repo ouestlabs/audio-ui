@@ -1,13 +1,13 @@
 import { type ReactNode, useCallback } from "react";
 import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type MidSideState,
-  midSideDevice,
-} from "@/components/audio-ui/devices/mid-side/device";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatLevel } from "@/lib/engine/format";
 import {
   Plot,
   PlotGraph,
@@ -17,15 +17,15 @@ import {
 } from "@/components/audio-ui/plot";
 import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type MidSideState,
+  midSideDevice,
+} from "@/components/audio-ui/devices/mid-side/device";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -24;

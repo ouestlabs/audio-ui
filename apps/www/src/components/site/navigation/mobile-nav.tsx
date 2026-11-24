@@ -1,4 +1,4 @@
-import { CaretDownIcon } from "@phosphor-icons/react/ssr";
+import { ArrowUpRightIcon, CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import {
@@ -20,6 +20,7 @@ import {
   useReadingSection,
   useSidebarGroups,
 } from "@/hooks/use-sidebar-groups";
+import { siteConfig } from "@/lib/config";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
 import { cn, isFileUrl } from "@/lib/utils";
@@ -224,6 +225,20 @@ export function MobileNav({
           <NavRow active={pathname === "/"} href="/" onNavigate={close}>
             Home
           </NavRow>
+          {/* The header shows the DAW from `sm` up: under it, the menu lists it. */}
+          <a
+            className={rowClassName}
+            href={siteConfig.links.daw}
+            onClick={close}
+            rel="noreferrer"
+            target="_blank"
+          >
+            DAW
+            <ArrowUpRightIcon
+              aria-hidden="true"
+              className="size-4 text-site-muted-foreground"
+            />
+          </a>
           {section === "icons" ? <IconLinks onNavigate={close} /> : null}
           {section === "docs"
             ? groups.map((group) => (

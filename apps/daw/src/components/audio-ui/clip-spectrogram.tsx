@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import { cn } from "@/lib/utils";
 import {
   createSpectrogramLane,
   hertzLabel,
@@ -21,8 +22,7 @@ import {
   type SpectrogramScale,
   spectrogramAxis,
   zoomBand,
-} from "@/lib/gl/spectrogram";
-import { cn } from "@/lib/utils";
+} from "@/lib/webgl/spectrogram";
 
 /** A frequency held where the lane and the axis both reach it: the lane says it, the axis reads it. */
 export interface PointerHertz {
@@ -52,13 +52,13 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
 /**
  * The spectrograms of a lane's clips on one canvas and one WebGL context,
- * computed on the GPU by `gl-spectrogram` through `@/lib/gl/spectrogram`:
+ * computed on the GPU by `gl-spectrogram` through `@/webgl/spectrogram`:
  * their frequencies over the stretch of the lane the view shows, in the text
  * colour over the ground under it, on the frequency `scale` you pick. Put it
  * in the lane's box, `zoom` being the lane's pixels a second. Shift and the
  * wheel over the picture zoom its frequencies (`band`), and the pointer reads
  * the frequency and level under it. A stretch read backwards is not drawn:
- * `hasWebGL2` of `@/lib/gl/lane` says whether to draw this way at all.
+ * `hasWebGL2` of `@/webgl/lane` says whether to draw this way at all.
  */
 function SpectrogramLane({
   band,
@@ -156,7 +156,7 @@ const NO_BAND_SNAPSHOT = () => NO_BAND;
  * edge of the lane, as audio.js draws it: labels roundest first (20k, 2k,
  * 200, then between as room allows), each with its tick at the row its
  * frequency sits on by the axis the picture is spaced on, and shorter ticks
- * between, laid out by `spectrogramAxis` of `@/lib/gl/spectrogram`.
+ * between, laid out by `spectrogramAxis` of `@/webgl/spectrogram`.
  * `pointer`, a frequency, is marked on it as the pointer reads it. It holds
  * still as the lane scrolls. Put it in the lane's box with the clips, given
  * the same `scale` and the recording's `sampleRate`.

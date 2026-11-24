@@ -8,6 +8,7 @@ import {
   SiteHeaderMobileNav,
   SiteHeaderModeSwitcher,
 } from "@/components/site/navigation/header-client";
+import { DawLink } from "@/components/site/navigation/daw-link";
 import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
 import { SectionSelect } from "@/components/site/navigation/section-select";
@@ -132,6 +133,7 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
       <>
         <ExpandEditor />
         <LabLink />
+        <DawLink />
         <GitHubLink />
       </>
     );
@@ -202,6 +204,7 @@ export function SiteHeader({
             <Separator className="hidden sm:flex" orientation="vertical" />
             <div className="flex items-center gap-1">
               <LabLink />
+              <DawLink />
               <GitHubLink />
               <SiteHeaderModeSwitcher />
             </div>

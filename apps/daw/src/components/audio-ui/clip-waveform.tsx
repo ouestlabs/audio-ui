@@ -20,7 +20,7 @@ export interface ClipSamples {
   frames: number;
   /**
    * For a recording streamed from a file: it summed up 256 frames at a time,
-   * as `waveformLeaves` of `@/lib/gl/waveform` makes it. A waveform drawn
+   * as `waveformLeaves` of `@/webgl/waveform` makes it. A waveform drawn
    * on the GPU then never reads it whole, only the frames it shows zoomed in.
    */
   leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
@@ -30,7 +30,7 @@ export interface ClipSamples {
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
   /**
    * For a recording streamed from a file: its spectra, as
-   * `spectrogramSpectra` of `@/lib/gl/spectrogram` makes them. A
+   * `spectrogramSpectra` of `@/webgl/spectrogram` makes them. A
    * spectrogram drawn on the GPU then never reads it whole, only the frames it
    * shows zoomed in.
    */

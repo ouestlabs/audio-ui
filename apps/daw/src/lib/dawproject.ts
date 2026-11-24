@@ -1,3 +1,6 @@
+import type { ParameterValue } from "@/lib/engine/device";
+import type { WarpMode } from "@/lib/engine/playback";
+import type { Tempo } from "@/lib/engine/time";
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 import {
   EQUALIZER_BANDS,
@@ -5,8 +8,6 @@ import {
 } from "@/components/audio-ui/devices/equalizer/device";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
-import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
-import type { Note } from "@/components/audio-ui/piano-roll/edits";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -23,10 +24,9 @@ import {
   type ArrangementSignature,
   createArrangementState,
 } from "@/lib/arrangement-state";
-import type { ParameterValue } from "@/lib/engine/device";
-import type { WarpMode } from "@/lib/engine/playback";
-import type { Tempo } from "@/lib/engine/time";
 import { createZip, readZip } from "@/lib/zip";
+import type { Breakpoint } from "@/components/audio-ui/envelope/geometry";
+import type { Note } from "@/components/audio-ui/piano-roll/edits";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */
 export interface DawprojectRecording {

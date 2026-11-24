@@ -23,9 +23,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ExportNormalize, ExportSettings } from "@/lib/audio-export";
 import { LOUDNESS_TARGETS } from "@/lib/engine/analysis";
 import type { AudioFileFormat } from "@/lib/engine/files";
+import type {
+  ExportNormalize,
+  ExportSettings,
+} from "@/lib/audio-export";
 
 interface SettingItem {
   label: string;

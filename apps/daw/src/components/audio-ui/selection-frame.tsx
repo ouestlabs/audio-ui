@@ -5,20 +5,20 @@ import {
   useRef,
   useState,
 } from "react";
+import { dbToGain, gainToDb } from "@/lib/engine/analysis";
+import { formatTime } from "@/lib/engine/format";
+import type { ClipChangeDetails } from "./timeline/timeline";
 import {
   TimelineClip,
   TimelineClipFadeHandle,
   TimelineClipHandle,
 } from "@/components/audio-ui/timeline";
+import { cn } from "@/lib/utils";
 import {
   type ClipValue,
   type FadeShape,
   fadeGain,
 } from "@/components/audio-ui/timeline/clip";
-import type { ClipChangeDetails } from "@/components/audio-ui/timeline/timeline";
-import { dbToGain, gainToDb } from "@/lib/engine/analysis";
-import { formatTime } from "@/lib/engine/format";
-import { cn } from "@/lib/utils";
 
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
 export interface SelectionShape {

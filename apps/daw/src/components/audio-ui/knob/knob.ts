@@ -687,7 +687,7 @@ export const knob: KnobPrimitive = definePrimitive({
         return {
           ...stateAttrs(state),
           "aria-hidden": "true",
-          "data-active": flag(
+          "data-selected": flag(
             position >= lower - 1e-9 && position <= upper + 1e-9
           ),
           style: css({

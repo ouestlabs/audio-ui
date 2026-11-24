@@ -6,8 +6,8 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
-import type { Source } from "@/components/audio-ui/primitive";
 import { cn } from "@/lib/utils";
+import type { PlotSource } from "./plot/plot";
 
 type PlotFrameProps = Omit<
   ComponentProps<typeof Plot>,
@@ -22,7 +22,7 @@ interface ScopePlotProps extends PlotFrameProps {
   /** Drawn without its frame and its middle line, filling the box it sits in, such as a pad's background, under what is drawn on it. */
   bare?: boolean;
   /** The samples, -1 to 1, such as a signal point's `scope({ fit: true })`. */
-  source: Source<ArrayLike<number>>;
+  source: PlotSource<ArrayLike<number>>;
 }
 
 /**
@@ -76,7 +76,7 @@ interface SpectrumPlotProps extends PlotFrameProps {
   /** @default 20 */
   minHz?: number;
   /** The spectrum in dB along a log frequency axis from `minHz` to `maxHz`, such as a signal point's `spectrum({ minHz, maxHz })`. */
-  source: Source<ArrayLike<number>>;
+  source: PlotSource<ArrayLike<number>>;
 }
 
 /**
@@ -118,9 +118,9 @@ const LEVEL_FLOOR_DB = -60;
 
 interface LevelPlotProps extends PlotFrameProps {
   /** The level in dB over time, the oldest first, such as a signal point's `history({ of: "level", seconds })`. */
-  source: Source<ArrayLike<number>>;
+  source: PlotSource<ArrayLike<number>>;
   /** Another level over the same time, filled under the line of `source`: what went in, against what came out. Without it, `source` is filled. */
-  under?: Source<ArrayLike<number>>;
+  under?: PlotSource<ArrayLike<number>>;
 }
 
 /**

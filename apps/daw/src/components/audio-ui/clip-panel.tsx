@@ -1,9 +1,4 @@
 import {
-  MagicWandIcon,
-  ScissorsIcon,
-  WaveformIcon,
-} from "@phosphor-icons/react";
-import {
   type KeyboardEvent,
   type MouseEvent,
   memo,
@@ -16,6 +11,37 @@ import {
   useRef,
   useState,
 } from "react";
+import { ParameterField } from "@/components/audio-ui/parameter-field";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { WarpMode } from "@/lib/engine/playback";
+import {
+  addWarpMarker,
+  moveWarpMarker,
+  removeWarpMarker,
+  scaleWarp,
+  unwarpedTime,
+  type WarpMarker,
+  warpedTime,
+  warpRate,
+} from "@/lib/engine/time";
 import {
   ClipBox,
   type ClipMeter,
@@ -29,8 +55,6 @@ import {
   type ClipSamples,
   ClipWaveform,
 } from "@/components/audio-ui/clip-waveform";
-import { ParameterField } from "@/components/audio-ui/parameter-field";
-import type { Source } from "@/components/audio-ui/primitive";
 import { ProcessMenuItems } from "@/components/audio-ui/process-menu";
 import {
   FLAT,
@@ -56,25 +80,6 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useLoudest } from "@/hooks/use-loudest";
 import {
   type ClipPeaks,
@@ -82,25 +87,16 @@ import {
   clipPeakCount,
   clipSegments,
 } from "@/lib/arrangement";
-import type { WarpMode } from "@/lib/engine/playback";
-import {
-  addWarpMarker,
-  moveWarpMarker,
-  removeWarpMarker,
-  scaleWarp,
-  unwarpedTime,
-  type WarpMarker,
-  warpedTime,
-  warpRate,
-} from "@/lib/engine/time";
-import { hasWebGL2 } from "@/lib/gl/lane";
-import type { WaveformBands } from "@/lib/gl/waveform";
 import {
   type SoundOperation,
   type SoundRange,
   soundOperationTiming,
 } from "@/lib/sound-operations";
 import { cn } from "@/lib/utils";
+import type { Source } from "@/components/audio-ui/primitive";
+import { hasWebGL2 } from "@/lib/webgl/lane";
+import type { WaveformBands } from "@/lib/webgl/waveform";
+import { ScissorsIcon, MagicWandIcon, WaveformIcon } from "@phosphor-icons/react";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -304,7 +300,7 @@ export function processedSettings(
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
-  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@/lib/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
+  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
   bands?: () => WaveformBands;
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;
@@ -1512,7 +1508,8 @@ function SourceEditMenu({ edits }: { edits: SourceEdits }) {
       <DropdownMenuTrigger
         render={<Button size="sm" title="Edit" variant="ghost" />}
       >
-        <ScissorsIcon />
+        <ScissorsIcon
+        />
         Edit
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
@@ -1544,7 +1541,8 @@ function SourceProcessMenu({
           />
         }
       >
-        <MagicWandIcon />
+        <MagicWandIcon
+        />
         Process
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
@@ -1592,7 +1590,8 @@ function SourceViewMenu({
           />
         }
       >
-        <WaveformIcon />
+        <WaveformIcon
+        />
         View
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">

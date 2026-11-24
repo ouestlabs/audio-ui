@@ -1,8 +1,3 @@
-import {
-  DUCKER_WORKLET,
-  type DuckerState,
-  duckerSettings,
-} from "@/components/audio-ui/devices/ducker/device";
 import type {
   DeviceReadings,
   EffectEngine,
@@ -10,6 +5,11 @@ import type {
 } from "@/lib/engine/device";
 import { createFeed, type Feed } from "@/lib/engine/device";
 import { loadWorklet } from "@/lib/engine/worklet";
+import {
+  DUCKER_WORKLET,
+  type DuckerState,
+  duckerSettings,
+} from "@/components/audio-ui/devices/ducker/device";
 
 const RAMP_SECONDS = 0.01;
 

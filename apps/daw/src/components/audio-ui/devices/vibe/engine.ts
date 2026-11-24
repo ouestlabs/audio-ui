@@ -1,3 +1,4 @@
+import type { EffectEngine } from "@/lib/engine/device";
 import {
   lampCycle,
   speedHertz,
@@ -7,7 +8,6 @@ import {
   vibeMix,
   volumeGain,
 } from "@/components/audio-ui/devices/vibe/device";
-import type { EffectEngine } from "@/lib/engine/device";
 
 /** A stage's all-pass: a broad one, close to the single pole of the circuit. */
 const STAGE_Q = 0.5;

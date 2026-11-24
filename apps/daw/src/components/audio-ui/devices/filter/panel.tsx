@@ -1,5 +1,25 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -15,27 +35,7 @@ import {
   resonanceDb,
   resonanceFromDb,
 } from "@/components/audio-ui/devices/filter/device";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

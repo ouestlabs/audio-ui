@@ -1,5 +1,12 @@
 import { type ReactNode, useMemo } from "react";
 import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotTrace,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -9,13 +16,6 @@ import {
   vibeDevice,
   vibeLight,
 } from "@/components/audio-ui/devices/vibe/device";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotTrace,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

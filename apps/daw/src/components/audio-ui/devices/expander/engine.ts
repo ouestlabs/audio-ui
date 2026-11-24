@@ -1,11 +1,11 @@
+import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
+import { createFeed, type Feed } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   EXPANDER_WORKLET,
   type ExpanderState,
   expanderSettings,
 } from "@/components/audio-ui/devices/expander/device";
-import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
-import { createFeed, type Feed } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 const RAMP_SECONDS = 0.01;
 

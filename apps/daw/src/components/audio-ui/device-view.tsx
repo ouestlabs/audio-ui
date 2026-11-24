@@ -1,4 +1,3 @@
-import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import {
   type ReactNode,
   Suspense,
@@ -7,19 +6,6 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import {
-  DeviceChain,
-  DeviceChainSlot,
-  DeviceChainSlotControls,
-} from "@/components/audio-ui/device-chain";
-import { devicePanel } from "@/components/audio-ui/device-panels";
-import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
-import type { Source } from "@/components/audio-ui/primitive";
-import {
-  type RackChainMix,
-  RackPanel,
-  type RackParameter,
-} from "@/components/audio-ui/rack-panel";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,6 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type {
+  Device,
+  ParameterDescriptor,
+  ParameterValue,
+} from "@/lib/engine/device";
+import { secondsPerBeat, type Tempo } from "@/lib/engine/time";
+import { devicePanel } from "@/components/audio-ui/device-panels";
+import {
+  DeviceChain,
+  DeviceChainSlot,
+  DeviceChainSlotControls,
+} from "@/components/audio-ui/device-chain";
+import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
+import {
+  type RackChainMix,
+  RackPanel,
+  type RackParameter,
+} from "@/components/audio-ui/rack-panel";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
   type AutomationFollowing,
@@ -61,12 +65,8 @@ import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { DRUM_KIT_PADS, drumKit } from "@/lib/drum-kit";
-import type {
-  Device,
-  ParameterDescriptor,
-  ParameterValue,
-} from "@/lib/engine/device";
-import { secondsPerBeat, type Tempo } from "@/lib/engine/time";
+import type { Source } from "@/components/audio-ui/primitive";
+import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

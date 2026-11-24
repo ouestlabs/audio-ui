@@ -19,6 +19,7 @@ export const siteConfig = {
   email: "contact.ouest.labs@gmail.com",
 
   links: Object.freeze({
+    daw: "https://daw.audio-ui.dev",
     github: "https://github.com/ouestlabs/audio-ui",
     lab: "https://lab.audio-ui.dev",
     npm: "https://www.npmjs.com/org/audio-ui",

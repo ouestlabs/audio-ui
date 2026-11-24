@@ -38,13 +38,13 @@ import {
   transferable,
 } from "@/lib/daw/samples";
 import { encodeAudio } from "@/lib/engine/files";
-import { LEAF_FRAMES } from "@/lib/gl/waveform";
 import {
   applySoundOperation,
   SEAM,
   type SoundOperation,
   type SoundRange,
 } from "@/lib/sound-operations";
+import { LEAF_FRAMES } from "@/lib/webgl/waveform";
 
 /** A recording held in memory: the clip's source, read, and the operation to run on it, on `range` of it or on all of it. */
 export interface MemoryJob {

@@ -55,7 +55,7 @@ export function AutomationEnvelope({
             {indexes(points.length - 1).map((index) => (
               <EnvelopePrimitive.Segment
                 aria-label={`Curve ${index + 1}`}
-                className="size-3 rounded-full border border-primary bg-background shadow-xs transition-[box-shadow,opacity] hover:ring-4 hover:ring-ring/30 focus-visible:ring-4 focus-visible:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 data-flat:hidden motion-reduce:transition-none pointer-events-auto size-2.5 cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 group-hover/automation:opacity-100 data-dragging:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+                className="size-3 rounded-full border border-primary bg-background shadow-xs transition-[box-shadow,opacity] hover:ring-4 hover:ring-ring/30 focus-visible:ring-3 focus-visible:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 data-flat:hidden motion-reduce:transition-none pointer-events-auto size-2.5 cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 group-hover/automation:opacity-100 data-dragging:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
                 index={index}
                 key={index}
               />
@@ -68,7 +68,7 @@ export function AutomationEnvelope({
               return (
                 <EnvelopePrimitive.Point
                   aria-label={`Point ${index + 1} of ${points.length}`}
-                  className="rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none group/point pointer-events-auto size-3 cursor-grab touch-none select-none outline-none after:absolute after:-inset-2 focus-visible:bg-primary active:cursor-grabbing data-dragging:bg-primary pointer-coarse:after:-inset-3"
+                  className="rounded-full border-2 border-primary bg-background shadow-xs data-selected:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-3 focus-within:ring-ring/50 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none group/point pointer-events-auto size-3 cursor-grab touch-none select-none outline-none after:absolute after:-inset-2 focus-visible:bg-primary active:cursor-grabbing data-dragging:bg-primary pointer-coarse:after:-inset-3"
                   getAriaValueText={formatValue}
                   index={index}
                   key={index}

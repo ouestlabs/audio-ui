@@ -1,4 +1,12 @@
 import { type ReactNode, useMemo } from "react";
+import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,15 +17,7 @@ import {
   chorusDevice,
   chorusSweep,
 } from "@/components/audio-ui/devices/chorus/device";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
-import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { DEFAULT_TEMPO, type Tempo } from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */

@@ -1,4 +1,6 @@
 import { type ReactNode, useCallback } from "react";
+import { midiToHz } from "@/lib/engine/pitch";
+import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -11,8 +13,6 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/components/audio-ui/devices/guitar/device";
-import { Piano } from "@/components/audio-ui/piano";
-import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */

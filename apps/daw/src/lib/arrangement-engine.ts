@@ -1,44 +1,3 @@
-import {
-  type Arranged,
-  type ArrangementTrack,
-  type AutomatedParameter,
-  DRUM_RACK_DEVICE,
-  devicePositions,
-  INSTRUMENT_RACK_DEVICE,
-  mixAt,
-  mixOf,
-  playedNotes,
-  type Rack,
-  rackWithMacros,
-  type TrackDevice,
-  withCrossfades,
-} from "@/lib/arrangement";
-import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
-import {
-  type ClipPlayer,
-  createClipPlayer,
-  loadClipPlayer,
-  type RecordingSource,
-  streamedRecording,
-  wantPages,
-} from "@/lib/clip-player";
-import {
-  type AnyDeviceState,
-  type LibraryDevice,
-  type LibraryEngine,
-  libraryDevice,
-} from "@/lib/device-library";
-import {
-  createDeviceSignal,
-  type DeviceSignal,
-  type SignalTarget,
-} from "@/lib/device-signal";
-import {
-  createDrumRackEngine,
-  type DrumRackEngine,
-  type PadRecording,
-} from "@/lib/drum-rack";
-import { triggerClick } from "@/lib/drum-synthesis";
 import type {
   Device,
   DeviceContext,
@@ -67,9 +26,32 @@ import {
   secondsPerBeat,
 } from "@/lib/engine/time";
 import {
-  createInstrumentRackEngine,
-  type InstrumentRackEngine,
-} from "@/lib/instrument-rack";
+  type Arranged,
+  type ArrangementTrack,
+  type AutomatedParameter,
+  DRUM_RACK_DEVICE,
+  devicePositions,
+  INSTRUMENT_RACK_DEVICE,
+  mixAt,
+  mixOf,
+  playedNotes,
+  type Rack,
+  rackWithMacros,
+  type TrackDevice,
+  withCrossfades,
+} from "@/lib/arrangement";
+import {
+  type ArrangementDoc,
+  allTracks,
+} from "@/lib/arrangement-state";
+import {
+  type ClipPlayer,
+  createClipPlayer,
+  loadClipPlayer,
+  type RecordingSource,
+  streamedRecording,
+  wantPages,
+} from "@/lib/clip-player";
 import {
   type ChainLink,
   createMixer,
@@ -78,12 +60,36 @@ import {
   type MixerStrip,
 } from "@/lib/mixer-engine";
 import {
+  type AnyDeviceState,
+  type LibraryDevice,
+  type LibraryEngine,
+  libraryDevice,
+} from "@/lib/device-library";
+import {
+  createDeviceSignal,
+  type DeviceSignal,
+  type SignalTarget,
+} from "@/lib/device-signal";
+import {
+  createInstrumentRackEngine,
+  type InstrumentRackEngine,
+} from "@/lib/instrument-rack";
+import {
   createRackEngine,
   type MacroPositions,
   playedState,
   type RackEngine,
 } from "@/lib/rack";
-import { createVoicePool, type VoicePool } from "@/lib/voice-pool";
+import {
+  createVoicePool,
+  type VoicePool,
+} from "@/lib/voice-pool";
+import {
+  createDrumRackEngine,
+  type DrumRackEngine,
+  type PadRecording,
+} from "@/lib/drum-rack";
+import { triggerClick } from "@/lib/drum-synthesis";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of

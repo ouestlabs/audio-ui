@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { createWorkletStage } from "@/lib/engine/device";
 import {
   GATE_WORKLET,
   type GateState,
   gateSettings,
 } from "@/components/audio-ui/devices/gate/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { createWorkletStage } from "@/lib/engine/device";
 
 const RAMP_SECONDS = 0.01;
 

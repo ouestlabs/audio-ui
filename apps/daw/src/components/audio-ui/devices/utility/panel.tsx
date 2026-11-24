@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { StereoField } from "@/components/audio-ui/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -8,7 +9,6 @@ import {
   type UtilityState,
   utilityDevice,
 } from "@/components/audio-ui/devices/utility/device";
-import { StereoField } from "@/components/audio-ui/stereo-field";
 import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 

@@ -1,7 +1,8 @@
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
-import { cn } from "@/lib/utils";
+import { BareButton } from "@/components/audio-ui/bare-button";
 import type { TrackGhost } from "@/hooks/use-track-reorder";
+import { cn } from "@/lib/utils";
 
 /**
  * The grip a track is moved by, down the left edge of its header: give it
@@ -18,7 +19,7 @@ function TrackGrip({
   trackName: string;
 }) {
   return (
-    <button
+    <BareButton
       aria-label={`Move ${trackName}`}
       className={cn(
         "absolute inset-y-0 inset-s-1 z-10 flex w-3 cursor-grab items-center justify-center text-muted-foreground/60 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring focus-visible:outline-none active:cursor-grabbing",
@@ -43,7 +44,7 @@ function TrackGrip({
         <circle cx="5.5" cy="12.5" r="1.25" />
         <circle cx="10.5" cy="12.5" r="1.25" />
       </svg>
-    </button>
+    </BareButton>
   );
 }
 

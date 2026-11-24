@@ -13,6 +13,7 @@ import {
   definePrimitive,
   flag,
   formatPair,
+  measuredBox,
 } from "../primitive";
 import {
   type Breakpoint,
@@ -352,9 +353,8 @@ const graphOf = (el: HTMLElement | undefined) =>
   el?.closest('[data-slot="envelope"]')?.querySelector<HTMLElement>(GRAPH) ??
   undefined;
 
-/** A pointer's place in the graph, 0 to 1 from the left and from the bottom, or null while it has no size. */
-function pointOf(event: MouseEvent, graph: Element) {
-  const rect = graph.getBoundingClientRect();
+/** A pointer's place in the graph, 0 to 1 from the left and from the bottom, from the graph's box as the gesture measured it, or null while it has no size. */
+function pointOf(event: MouseEvent, rect: DOMRect) {
   if (rect.width <= 0 || rect.height <= 0) {
     return null;
   }
@@ -651,7 +651,9 @@ export const envelope: EnvelopePrimitive = definePrimitive({
         if (!(event.altKey && accepts(event))) {
           return;
         }
-        const at = pointOf(event, graph);
+        // Measured once, before the gesture writes anything: read on each move, after the curve moved, it made the browser lay the page out every frame. A bend reads only its height, which a scroll leaves as it is.
+        const rect = graph.getBoundingClientRect();
+        const at = pointOf(event, rect);
         const base = displayed(state());
         const index = at ? segmentNear(base, at.x, at.y) : null;
         const from = base[index ?? 0];
@@ -669,7 +671,6 @@ export const envelope: EnvelopePrimitive = definePrimitive({
             const now = displayed(state());
             const left = now[index];
             const right = now[index + 1];
-            const rect = graph.getBoundingClientRect();
             if (rect.height <= 0 || !(left && right)) {
               return;
             }
@@ -699,11 +700,16 @@ export const envelope: EnvelopePrimitive = definePrimitive({
           remove(index, event);
           return;
         }
+        const box = measuredBox(graph);
+        box.get();
         const gesture = begin(index, "point");
         gestures.start(handle, event, gesture, {
-          onEnd: (end) => finish(gesture, end),
+          onEnd: (end) => {
+            box.stop();
+            finish(gesture, end);
+          },
           onMove: (move) => {
-            const pointer = pointOf(move, graph);
+            const pointer = pointOf(move, box.get());
             if (!pointer) {
               return;
             }
@@ -747,14 +753,19 @@ export const envelope: EnvelopePrimitive = definePrimitive({
         ) {
           return;
         }
+        const box = measuredBox(graph);
+        box.get();
         const gesture = begin(index, "segment");
         gestures.start(handle, event, gesture, {
-          onEnd: (end) => finish(gesture, end),
+          onEnd: (end) => {
+            box.stop();
+            finish(gesture, end);
+          },
           onMove: (move) => {
             const now = displayed(state());
             const left = now[index];
             const right = now[index + 1];
-            const rect = graph.getBoundingClientRect();
+            const rect = box.get();
             if (!(left && right) || rect.height <= 0) {
               return;
             }
@@ -823,7 +834,7 @@ export const envelope: EnvelopePrimitive = definePrimitive({
       on: {
         // A double click adds a point; with Alt it straightens the segment under it.
         dblclick: (event, { api, el }) => {
-          const at = el ? pointOf(event, el) : null;
+          const at = el ? pointOf(event, el.getBoundingClientRect()) : null;
           if (!at) {
             return;
           }
@@ -880,6 +891,8 @@ export const envelope: EnvelopePrimitive = definePrimitive({
               ))
             : undefined,
           "data-blocked": flag(current.blocked),
+          // The point says it is dragged when it is the one, as its state does: the others stay as they are.
+          "data-dragging": flag(current.dragging),
           "data-index": String(index),
           "data-removable": flag(current.removable),
           role: "slider",
@@ -990,6 +1003,8 @@ export const envelope: EnvelopePrimitive = definePrimitive({
             ? props.getAriaValueText(current.curve, index)
             : String(Math.round(current.curve * 100) / 100),
           "data-curve": String(current.curve),
+          // The segment says it is dragged when it is the one, as its state does.
+          "data-dragging": flag(current.dragging),
           "data-flat": flag(current.flat),
           "data-index": String(index),
           role: "slider",

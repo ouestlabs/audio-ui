@@ -1,5 +1,15 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { midiToHz } from "@/lib/engine/pitch";
+import { Pad, PadItem } from "@/components/audio-ui/pad";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -12,18 +22,8 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/components/audio-ui/devices/sampler/device";
-import { Pad, PadItem } from "@/components/audio-ui/pad";
-import type { PadOnDetails } from "@/components/audio-ui/pad/pad";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { midiToHz } from "@/lib/engine/pitch";
 import { cn } from "@/lib/utils";
+import type { PadOnDetails } from "../../pad/pad";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;

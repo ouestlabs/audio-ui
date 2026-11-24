@@ -1,11 +1,11 @@
+import type { EffectEngine } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   REDUX_WORKLET,
   type ReduxState,
   reduxSettings,
   reduxTable,
 } from "@/components/audio-ui/devices/redux/device";
-import type { EffectEngine } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 const RAMP_SECONDS = 0.015;
 

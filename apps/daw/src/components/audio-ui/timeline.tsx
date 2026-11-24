@@ -1,5 +1,4 @@
 import { CurveIcon } from "@audio-ui/icons/react";
-import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   type ComponentProps,
   type CSSProperties,
@@ -18,15 +17,6 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { Fader } from "@/components/audio-ui/fader";
-import { Knob } from "@/components/audio-ui/knob";
-import { Led } from "@/components/audio-ui/led";
-import {
-  FADE_SHAPES,
-  type FadeShape,
-  fadeGain,
-} from "@/components/audio-ui/timeline/clip";
-import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -48,9 +38,21 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { Mix, TrackColor } from "@/lib/arrangement";
 import { dbToGain, gainToDb } from "@/lib/engine/analysis";
+import { BareButton } from "@/components/audio-ui/bare-button";
+import { BareInput } from "@/components/audio-ui/bare-input";
+import { Fader } from "@/components/audio-ui/fader";
+import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
+import type { Mix, TrackColor } from "@/lib/arrangement";
 import { cn } from "@/lib/utils";
+import {
+  FADE_SHAPES,
+  type FadeShape,
+  fadeGain,
+} from "@/components/audio-ui/timeline/clip";
+import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 
 type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;
 
@@ -568,7 +570,10 @@ function TimelinePlayhead({
 }: ComponentProps<typeof TimelinePrimitive.Playhead>) {
   return (
     <TimelinePrimitive.Playhead
-      className={cn("bg-primary pointer-events-none inset-y-0 w-px", className)}
+      className={cn(
+        "bg-primary pointer-events-none inset-y-0 w-px",
+        className
+      )}
       data-slot="timeline-playhead"
       {...props}
     />
@@ -603,7 +608,7 @@ function TimelineRange({
     <RangeName value={name}>
       <TimelinePrimitive.Range
         className={cn(
-          "bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+          "bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
           className
         )}
         data-slot="timeline-range"
@@ -787,10 +792,7 @@ function TimelineClipFade({
   const clip = use(ClipName);
   return (
     <TimelinePrimitive.ClipFade
-      className={cn(
-        "text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]",
-        className
-      )}
+      className={cn("text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]", className)}
       clip={clip}
       data-slot="timeline-clip-fade"
       {...props}
@@ -886,17 +888,14 @@ function TimelineNavigator({
 }) {
   return (
     <TimelinePrimitive.Navigator
-      className={cn(
-        "h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none",
-        className
-      )}
+      className={cn("h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none", className)}
       data-slot="timeline-navigator"
       minWindowWidth={48}
       {...props}
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
+        className="bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
         getAriaValueText={getAriaValueText}
       />
       <TimelinePrimitive.NavigatorHandle
@@ -1328,7 +1327,7 @@ function TimelineTrackControls({
             </Button>
           ) : null}
           {renaming ? (
-            <input
+            <BareInput
               aria-label="Track name"
               autoFocus
               className="min-w-0 flex-1 bg-transparent font-medium outline-none"
@@ -1338,7 +1337,7 @@ function TimelineTrackControls({
               ref={selectText}
             />
           ) : (
-            <button
+            <BareButton
               aria-pressed={selected}
               className={cn(
                 "min-w-0 flex-1 truncate text-left font-medium outline-none hover:underline focus-visible:underline",
@@ -1349,7 +1348,7 @@ function TimelineTrackControls({
               type="button"
             >
               {name}
-            </button>
+            </BareButton>
           )}
           {/* Its switches, one stop of Tab and the arrows between them: each holds its state, pressed or not. */}
           {switches ? (

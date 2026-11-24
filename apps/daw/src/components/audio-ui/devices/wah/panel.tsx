@@ -1,15 +1,13 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
-  DeviceFrame,
-  DeviceHeader,
-  DevicePanel,
-} from "@/components/audio-ui/device-panel";
-import {
-  type WahState,
-  wahCurve,
-  wahDevice,
-  wahReach,
-} from "@/components/audio-ui/devices/wah/device";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import {
   Plot,
   PlotArea,
@@ -20,15 +18,17 @@ import {
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DeviceFrame,
+  DeviceHeader,
+  DevicePanel,
+} from "@/components/audio-ui/device-panel";
+import {
+  type WahState,
+  wahCurve,
+  wahDevice,
+  wahReach,
+} from "@/components/audio-ui/devices/wah/device";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

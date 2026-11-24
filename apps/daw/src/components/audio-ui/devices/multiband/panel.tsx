@@ -1,4 +1,14 @@
 import { type ReactNode, useCallback, useMemo } from "react";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import {
+  Plot,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,17 +19,7 @@ import {
   multibandBands,
   multibandDevice,
 } from "@/components/audio-ui/devices/multiband/device";
-import {
-  Plot,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

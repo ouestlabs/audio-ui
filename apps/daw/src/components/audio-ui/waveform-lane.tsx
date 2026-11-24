@@ -1,4 +1,5 @@
 import { type ComponentProps, useLayoutEffect, useMemo, useRef } from "react";
+import { cn } from "@/lib/utils";
 import {
   createWaveformLane,
   type Lane,
@@ -6,12 +7,11 @@ import {
   type WaveformInputs,
   type WaveformLayout,
   type WaveformLook,
-} from "@/lib/gl/waveform";
-import { cn } from "@/lib/utils";
+} from "@/lib/webgl/waveform";
 
 /**
  * The waveforms of a lane's clips on one canvas and one WebGL context, drawn
- * on the GPU by `gl-waveform` through `@/lib/gl/waveform`: every pixel
+ * on the GPU by `gl-waveform` through `@/webgl/waveform`: every pixel
  * column shows the exact lowest and highest of its samples with the RMS
  * inside, and zoomed in a line through the samples, however long the
  * recording. Put it in the lane's box, `zoom` being the lane's pixels a
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
  * are tall enough to read (`layout`), as a DAW does. With `look="bands"` each clip is drawn as the three bands of its
  * sound one over the other, the lows warm and the highs cool. A clip is read
  * in stretches (`segments`), as a DAW paints a region; a reversed clip is
- * not drawn here, and `hasWebGL2` of `@/lib/gl/lane` says whether to draw
+ * not drawn here, and `hasWebGL2` of `@/webgl/lane` says whether to draw
  * this way at all. With `shared`, it draws on the page's one WebGL context and
  * copies the picture onto its canvas, so a page draws as many lanes as it has
  * clips, as an arrangement's clips each draw their own.

@@ -1,5 +1,8 @@
+import {
+  type Arranged,
+  withEdgeFades,
+} from "@/lib/arrangement";
 import type { Note } from "@/components/audio-ui/piano-roll/edits";
-import { type Arranged, withEdgeFades } from "@/lib/arrangement";
 
 /** What came in from an input, block by block: each block's first frame on the audio clock, and its channels. */
 export interface RecordedBlock {

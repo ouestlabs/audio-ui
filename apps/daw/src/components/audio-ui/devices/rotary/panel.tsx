@@ -1,4 +1,14 @@
 import { type ReactNode, useMemo } from "react";
+import { formatFrequency, formatLevel } from "@/lib/engine/format";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,17 +19,7 @@ import {
   rotaryBands,
   rotaryDevice,
 } from "@/components/audio-ui/devices/rotary/device";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { formatFrequency, formatLevel } from "@/lib/engine/format";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;

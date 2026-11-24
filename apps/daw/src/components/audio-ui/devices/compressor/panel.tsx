@@ -1,5 +1,21 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Plot,
+  PlotCurve,
+  PlotDot,
+  PlotGraph,
+  PlotGrid,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -11,22 +27,9 @@ import {
   compressorUnused,
 } from "@/components/audio-ui/devices/compressor/device";
 import {
-  Plot,
-  PlotCurve,
-  PlotDot,
-  PlotGraph,
-  PlotGrid,
-  PlotLine,
-} from "@/components/audio-ui/plot";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { curveDot, type DeviceSignal } from "@/lib/device-signal";
+  curveDot,
+  type DeviceSignal,
+} from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -60;
