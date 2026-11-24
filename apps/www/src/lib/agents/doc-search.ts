@@ -181,3 +181,23 @@ export function closest(name: string, known: string[]) {
     .slice(0, 3)
     .map((item) => item.candidate);
 }
+
+/**
+ * The one known name a mistyped one surely means: the nearest, within two
+ * edits. Nothing when another name is as near, or when a longer name holds
+ * the mistyped one ('pan' could be 'auto-pan' as well as 'pad').
+ */
+export function nearest(name: string, known: string[]) {
+  const wanted = name.trim().toLowerCase();
+  const ranked = known
+    .map((candidate) => ({ candidate, edits: distance(wanted, candidate) }))
+    .sort((a, b) => a.edits - b.edits);
+  const [first, second] = ranked;
+  if (!first || first.edits > 2 || second?.edits === first.edits) {
+    return;
+  }
+  const held = known.some(
+    (candidate) => candidate !== first.candidate && candidate.includes(wanted)
+  );
+  return held ? undefined : first.candidate;
+}

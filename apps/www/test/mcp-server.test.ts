@@ -65,19 +65,52 @@ describe("the MCP server", () => {
     expect(part.text).not.toContain("log scale");
   });
 
-  test("get_component_docs names the nearest component, or the sections", async () => {
-    const name = await call("get_component_docs", { name: "knobb" });
-    expect(name.isError).toBe(true);
-    expect(name.text).toBe(
-      "No component named 'knobb'. Did you mean: knob? Use search_docs to find a component by what it does, or list_components to browse."
+  test("get_component_docs requires a name, before the call reaches the docs", async () => {
+    const { tools } = await client.listTools();
+    const tool = tools.find((t) => t.name === "get_component_docs");
+    expect(tool?.inputSchema.required).toEqual(["name"]);
+    const missing = await call("get_component_docs", {
+      section: "installation",
+    });
+    expect(missing.isError).toBe(true);
+    expect(missing.text).toContain("Input validation error");
+  });
+
+  test("get_component_docs answers the component a name is within two edits of", async () => {
+    const typo = await call("get_component_docs", {
+      name: "knobb",
+      section: "installation",
+    });
+    expect(typo.isError).toBe(false);
+    expect(typo.text).toBe(
+      "No component named 'knobb'. Showing docs for 'knob' instead.\n\n## Installation\n\nRun the command."
     );
-    const section = await call("get_component_docs", {
-      name: "knob",
+  });
+
+  test("get_component_docs names the nearest components when none is within two edits", async () => {
+    const far = await call("get_component_docs", { name: "knob-large" });
+    expect(far.isError).toBe(true);
+    expect(far.text).toBe(
+      "No component named 'knob-large'. Did you mean: knob? Use search_docs to find a component by what it does, or list_components to browse."
+    );
+  });
+
+  test("get_component_docs answers the overview for an unknown section, or the first section", async () => {
+    const overview = await call("get_component_docs", {
+      name: "compressor",
+      section: "api-reference",
+    });
+    expect(overview.isError).toBe(false);
+    expect(overview.text).toBe(
+      "Section 'api-reference' not found in compressor. Showing overview instead. Available sections: installation, overview, usage.\n\n## Overview\n\nEvens out the level."
+    );
+    const first = await call("get_component_docs", {
+      name: "knobb",
       section: "pricing",
     });
-    expect(section.isError).toBe(true);
-    expect(section.text).toStartWith(
-      "No section 'pricing' in knob. Sections: "
+    expect(first.isError).toBe(false);
+    expect(first.text).toBe(
+      "No component named 'knobb'. Showing docs for 'knob' instead.\nSection 'pricing' not found in knob. Showing installation instead. Available sections: installation, api-reference.\n\n## Installation\n\nRun the command."
     );
   });
 

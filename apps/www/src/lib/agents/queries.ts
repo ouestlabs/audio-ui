@@ -1,4 +1,4 @@
-import { closest, searchDocs } from "@/lib/agents/doc-search";
+import { closest, nearest, searchDocs } from "@/lib/agents/doc-search";
 import {
   pickSection,
   sectionNames,
@@ -73,8 +73,8 @@ export async function searchComponentDocs(query: string, limit: number) {
 
 /**
  * One component's docs as markdown: the whole page, or one of its sections.
- * An unknown name answers with the names nearest to it, an unknown section
- * with the sections the page has.
+ * An unknown name answers with the names nearest to it, and the one it surely
+ * means if there is one; an unknown section with the sections the page has.
  */
 export async function readComponentDocs(name: string, section?: string) {
   const slug = name.trim().toLowerCase();
@@ -82,6 +82,7 @@ export async function readComponentDocs(name: string, section?: string) {
   if (!page) {
     const names = componentPages().map((p) => p.slugs.at(-1) ?? "");
     return {
+      nearest: nearest(name, names),
       problem: "unknown-component" as const,
       suggestions: closest(name, names),
     };
