@@ -14,6 +14,7 @@
     "stars": "bun scripts/render.ts stars",
     "studio": "remotion studio src/index.ts",
     "teaser": "bun scripts/render.ts teaser",
+    "third-user": "bun scripts/render.ts third-user",
     "update": "bun scripts/render.ts update"
   },
   "dependencies": {

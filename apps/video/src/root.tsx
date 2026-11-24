@@ -10,6 +10,7 @@ import {
 } from "./compositions/spotlight.tsx";
 import { STARS_SECONDS, Stars } from "./compositions/stars.tsx";
 import { TEASER_SECONDS, Teaser } from "./compositions/teaser.tsx";
+import { THIRD_USER_SECONDS, ThirdUser } from "./compositions/third-user.tsx";
 
 const FPS = 60;
 const LANDSCAPE = { height: 1080, width: 1920 };
@@ -46,6 +47,14 @@ export function Root() {
         durationInFrames={Math.round(STARS_SECONDS * FPS)}
         fps={FPS}
         id="Stars"
+        {...LANDSCAPE}
+      />
+      <Composition
+        component={ThirdUser}
+        defaultProps={{ lang: "fr" as const, theme: "light" as const }}
+        durationInFrames={Math.round(THIRD_USER_SECONDS * FPS)}
+        fps={FPS}
+        id="ThirdUser"
         {...LANDSCAPE}
       />
       <Composition
