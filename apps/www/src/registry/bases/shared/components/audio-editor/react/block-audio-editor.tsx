@@ -977,8 +977,19 @@ function useFollowPlayhead({
     let was: number | null = null;
     let placed = element.scrollLeft;
     let steered = false;
+    // Measures kept as they were last seen: reading them each frame, after the frame's other writes, makes the browser lay the page out on the spot.
+    let { clientWidth: width, scrollLeft: left, scrollWidth } = element;
+    const measured = () => {
+      ({ clientWidth: width, scrollWidth } = element);
+    };
+    const resize = new ResizeObserver(measured);
+    resize.observe(element);
+    if (element.firstElementChild) {
+      resize.observe(element.firstElementChild);
+    }
     const scrolled = () => {
-      if (Math.abs(element.scrollLeft - placed) > 1) {
+      left = element.scrollLeft;
+      if (Math.abs(left - placed) > 1) {
         steered = true;
       }
     };
@@ -993,7 +1004,6 @@ function useFollowPlayhead({
         was === null || x < was || x - was > JUMP_SECONDS * dt * zoom;
       const from = jumped ? x : (was ?? x);
       was = x;
-      const { clientWidth: width, scrollLeft: left } = element;
       // Moved by hand, the view waits for the playhead to pass its right edge in sight.
       const seen = from >= left && from <= left + width;
       if (steered && !(seen && x > left + width)) {
@@ -1002,12 +1012,14 @@ function useFollowPlayhead({
       steered = false;
       const target = on ? followScroll(x, from, left, width, dt) : null;
       if (target !== null) {
-        placed = Math.min(element.scrollWidth - width, Math.max(0, target));
+        placed = Math.min(scrollWidth - width, Math.max(0, target));
+        left = placed;
         element.scrollLeft = placed;
       }
     });
     return () => {
       unsubscribe();
+      resize.disconnect();
       element.removeEventListener("scroll", scrolled);
     };
   }, [playing, position, viewport]);
