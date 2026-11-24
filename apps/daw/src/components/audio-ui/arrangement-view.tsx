@@ -1,4 +1,11 @@
 import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  MapPinPlusIcon,
+  MusicNotesPlusIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
+import {
   type ComponentProps,
   type DragEvent,
   type MouseEvent,
@@ -13,26 +20,6 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  barsBeatsWith,
-  secondsPerBar,
-  secondsPerBeat,
-  type Tempo,
-} from "@/lib/engine/time";
 import {
   ArrangedClip,
   ArrangedClipGhost,
@@ -71,20 +58,25 @@ import {
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
-import {
-  TrackGrip,
-  TrackReorderGhost,
-} from "@/components/audio-ui/track-grip";
+import { TrackGrip, TrackReorderGhost } from "@/components/audio-ui/track-grip";
 import { TrackLevel } from "@/components/audio-ui/track-level";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useArrangedClips } from "@/hooks/use-arranged-clips";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
-import {
-  type AutomationFollowing,
-  useAutomatedMix,
-  type useTrackAutomation,
-} from "@/hooks/use-track-automation";
-import { useTrackReorder } from "@/hooks/use-track-reorder";
 import { useMarquee } from "@/hooks/use-marquee-selection";
 import type { useTimeSelection } from "@/hooks/use-time-selection";
 import {
@@ -93,6 +85,12 @@ import {
 } from "@/hooks/use-timeline-grid";
 import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import {
+  type AutomationFollowing,
+  useAutomatedMix,
+  type useTrackAutomation,
+} from "@/hooks/use-track-automation";
+import { useTrackReorder } from "@/hooks/use-track-reorder";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -110,8 +108,13 @@ import {
   trackDepth,
 } from "@/lib/arrangement-state";
 import { drumKit } from "@/lib/drum-kit";
+import {
+  barsBeatsWith,
+  secondsPerBar,
+  secondsPerBeat,
+  type Tempo,
+} from "@/lib/engine/time";
 import { cn } from "@/lib/utils";
-import { CaretLeftIcon, CaretRightIcon, PlusIcon, MapPinPlusIcon, MusicNotesPlusIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -527,25 +530,31 @@ function useVisibleSpan(
     0,
     Number.POSITIVE_INFINITY,
   ]);
+  // The viewport's scroll and width as last read, on a scroll or a resize: a zoom reads them from here, since read as the zoom renders, after it wrote the lanes' width, they made the browser lay the arrangement out on every step of a zoom.
+  const seen = useRef<{ left: number; width: number } | null>(null);
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!(element && zoom > 0)) {
       return;
     }
-    const measure = () => {
-      const width = element.clientWidth / zoom;
+    const spanOf = ({ left, width: px }: { left: number; width: number }) => {
+      const width = px / zoom;
       const step = Math.max(width / 2, 1e-6);
-      const from = Math.max(
-        0,
-        Math.floor((element.scrollLeft / zoom - width) / step) * step
-      );
-      const to =
-        Math.ceil((element.scrollLeft / zoom + 2 * width) / step) * step;
+      const from = Math.max(0, Math.floor((left / zoom - width) / step) * step);
+      const to = Math.ceil((left / zoom + 2 * width) / step) * step;
       setSpan((held) =>
         held[0] === from && held[1] === to ? held : [from, to]
       );
     };
-    measure();
+    const measure = () => {
+      seen.current = { left: element.scrollLeft, width: element.clientWidth };
+      spanOf(seen.current);
+    };
+    if (seen.current) {
+      spanOf(seen.current);
+    } else {
+      measure();
+    }
     element.addEventListener("scroll", measure, { passive: true });
     const observer = new ResizeObserver(measure);
     observer.observe(element);
