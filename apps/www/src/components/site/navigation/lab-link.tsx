@@ -6,14 +6,14 @@ import { siteConfig } from "@/lib/config";
 export function LabLink() {
   return (
     <Button
-      className="shadow-none"
+      className="shadow-none max-sm:size-8 max-sm:px-0"
       render={
         <a href={siteConfig.links.lab} rel="noreferrer" target="_blank" />
       }
       variant="outline"
     >
       <FlaskIcon aria-hidden weight="fill" />
-      Lab
+      <span className="max-sm:sr-only">Lab</span>
     </Button>
   );
 }
