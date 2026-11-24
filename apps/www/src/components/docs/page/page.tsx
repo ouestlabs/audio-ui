@@ -263,8 +263,8 @@ function DocArticle({
           <div className="mx-auto flex w-full min-w-0 max-w-2xl flex-1 flex-col gap-8 px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-300">
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-2">
-                <div className="flex items-start justify-between">
-                  <h1 className="scroll-m-20 font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
+                <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+                  <h1 className="min-w-0 scroll-m-20 font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
                     {data.heading}
                   </h1>
                   <div className="docs-nav flex items-center gap-2 pt-1.5">

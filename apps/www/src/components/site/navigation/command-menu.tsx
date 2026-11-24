@@ -188,7 +188,7 @@ export function CommandMenu({
                 Search…
               </span>
             </span>
-            <KbdGroup>
+            <KbdGroup className="max-sm:hidden">
               <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
               <Kbd className="border">K</Kbd>
             </KbdGroup>
