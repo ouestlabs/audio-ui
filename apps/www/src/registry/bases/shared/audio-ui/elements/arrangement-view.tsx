@@ -565,25 +565,31 @@ function useVisibleSpan(
     0,
     Number.POSITIVE_INFINITY,
   ]);
+  // The viewport's scroll and width as last read, on a scroll or a resize: a zoom reads them from here, since read as the zoom renders, after it wrote the lanes' width, they made the browser lay the arrangement out on every step of a zoom.
+  const seen = useRef<{ left: number; width: number } | null>(null);
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!(element && zoom > 0)) {
       return;
     }
-    const measure = () => {
-      const width = element.clientWidth / zoom;
+    const spanOf = ({ left, width: px }: { left: number; width: number }) => {
+      const width = px / zoom;
       const step = Math.max(width / 2, 1e-6);
-      const from = Math.max(
-        0,
-        Math.floor((element.scrollLeft / zoom - width) / step) * step
-      );
-      const to =
-        Math.ceil((element.scrollLeft / zoom + 2 * width) / step) * step;
+      const from = Math.max(0, Math.floor((left / zoom - width) / step) * step);
+      const to = Math.ceil((left / zoom + 2 * width) / step) * step;
       setSpan((held) =>
         held[0] === from && held[1] === to ? held : [from, to]
       );
     };
-    measure();
+    const measure = () => {
+      seen.current = { left: element.scrollLeft, width: element.clientWidth };
+      spanOf(seen.current);
+    };
+    if (seen.current) {
+      spanOf(seen.current);
+    } else {
+      measure();
+    }
     element.addEventListener("scroll", measure, { passive: true });
     const observer = new ResizeObserver(measure);
     observer.observe(element);

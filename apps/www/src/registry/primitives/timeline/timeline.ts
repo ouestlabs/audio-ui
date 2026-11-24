@@ -1271,7 +1271,18 @@ export const timeline: TimelinePrimitive = definePrimitive({
                 ),
               };
               api.anchor.current = null;
-              el.scrollLeft = anchoredScroll(at, current, origin());
+              // Written and not read back: read after the zoom changed the lanes' width, the scroll and the viewport's width made the browser lay the timeline out on every step of a zoom. A zoom leaves the width and the origin as they are, and a scroll the browser clamps reports itself through `handleScroll`.
+              const scrollStart = Math.max(
+                0,
+                anchoredScroll(at, current, origin())
+              );
+              el.scrollLeft = scrollStart;
+              previous = { scrollStart, zoom: current };
+              const view = api.viewport.get();
+              if (view.scrollStart !== scrollStart || view.zoom !== current) {
+                api.viewport.set({ ...view, scrollStart, zoom: current });
+              }
+              return;
             }
             previous = { scrollStart: el.scrollLeft, zoom: current };
             report();

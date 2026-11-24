@@ -53,7 +53,9 @@ export function createWheelZoom(
   let pending: {
     delta: number;
     event: WheelEvent;
-    element: HTMLElement;
+    /** Where the pointer was in the view and how far the view had scrolled, read when the wheel turned. */
+    offset: number;
+    scrollLeft: number;
   } | null = null;
   let frame = 0;
 
@@ -68,14 +70,8 @@ export function createWheelZoom(
     if (!(current > 0)) {
       return;
     }
-    const { element, event } = batch;
-    const offset = event.clientX - element.getBoundingClientRect().left;
-    const value = valueAtOffset(
-      offset,
-      element.scrollLeft,
-      current,
-      options.origin()
-    );
+    const { event, offset, scrollLeft } = batch;
+    const value = valueAtOffset(offset, scrollLeft, current, options.origin());
     const exponent = Math.min(
       MOST_PER_FRAME,
       Math.max(-MOST_PER_FRAME, -batch.delta * WHEEL_ZOOM_SENSITIVITY)
@@ -104,12 +100,14 @@ export function createWheelZoom(
         return false;
       }
       event.preventDefault();
+      // Read here, as the wheel turns, before the frame writes the zoom: read in the frame, after the last zoom was written, it made the browser lay the timeline out on every frame of a zoom.
       pending = {
         delta:
           (pending?.delta ?? 0) +
           event.deltaY * (DELTA_PX[event.deltaMode] ?? 1),
-        element,
         event,
+        offset: event.clientX - element.getBoundingClientRect().left,
+        scrollLeft: element.scrollLeft,
       };
       if (!frame) {
         frame = requestAnimationFrame(flush);
