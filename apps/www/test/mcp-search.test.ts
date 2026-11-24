@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { closest, searchDocs } from "@/lib/agents/doc-search";
+import { closest, nearest, searchDocs } from "@/lib/agents/doc-search";
 
 const PAGES = [
   {
@@ -77,5 +77,43 @@ describe("closest", () => {
 
   test("suggests nothing when no name is close", () => {
     expect(closest("reverb", known)).toEqual([]);
+  });
+});
+
+describe("nearest", () => {
+  const known = [
+    "auto-pan",
+    "channel-eq",
+    "gate",
+    "knob",
+    "lcd",
+    "led",
+    "pad",
+    "piano",
+    "piano-roll",
+    "tape-keys",
+    "tilt-eq",
+    "wah",
+    "xypad",
+  ];
+
+  test("answers the one name within two edits", () => {
+    expect(nearest("knobb", known)).toBe("knob");
+    expect(nearest("pianoroll", known)).toBe("piano-roll");
+    expect(nearest("Piano Roll", known)).toBe("piano-roll");
+    expect(nearest("xy-pad", known)).toBe("xypad");
+    expect(nearest("gat", known)).toBe("gate");
+  });
+
+  test("answers nothing when two names are as near, or a longer name holds the query", () => {
+    expect(nearest("lad", known)).toBeUndefined();
+    expect(nearest("pan", known)).toBeUndefined();
+    expect(nearest("eq", known)).toBeUndefined();
+    expect(nearest("tape", known)).toBeUndefined();
+  });
+
+  test("answers nothing beyond two edits", () => {
+    expect(nearest("knob-large", known)).toBeUndefined();
+    expect(nearest("reverb", known)).toBeUndefined();
   });
 });

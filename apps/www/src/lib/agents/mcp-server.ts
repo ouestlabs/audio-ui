@@ -45,6 +45,32 @@ function fitText(markdown: string, hint = "") {
   return `${head}\n\n[Truncated: ${markdown.length} characters, the first ${head.length} shown.${hint}]`;
 }
 
+/**
+ * The docs an agent most likely asked for: a name within two edits of one
+ * component answers that component, and an unknown section the page's
+ * overview, or its first section. Each stand-in adds a note that says so.
+ */
+async function readNearestDocs(name: string, section?: string) {
+  const notes: string[] = [];
+  let docs = await readComponentDocs(name, section);
+  if (docs.problem === "unknown-component" && docs.nearest) {
+    notes.push(
+      `No component named '${name}'. Showing docs for '${docs.nearest}' instead.`
+    );
+    docs = await readComponentDocs(docs.nearest, section);
+  }
+  if (docs.problem === "unknown-section") {
+    const shown = docs.sections.includes("overview")
+      ? "overview"
+      : docs.sections[0];
+    notes.push(
+      `Section '${section}' not found in ${docs.slug}. Showing ${shown ?? "the whole page"} instead. Available sections: ${docs.sections.join(", ")}.`
+    );
+    docs = await readComponentDocs(docs.slug, shown);
+  }
+  return { docs, notes };
+}
+
 export function createAudioUiMcpServer() {
   const server = new McpServer(
     {
@@ -130,7 +156,7 @@ export function createAudioUiMcpServer() {
       title: "Get component docs",
     },
     async ({ name, section }) => {
-      const docs = await readComponentDocs(name, section);
+      const { docs, notes } = await readNearestDocs(name, section);
       if ("problem" in docs) {
         const message =
           docs.problem === "unknown-component"
@@ -138,13 +164,14 @@ export function createAudioUiMcpServer() {
             : `No section '${section}' in ${docs.slug}. Sections: ${docs.sections.join(", ")}.`;
         return { ...text(message), isError: true };
       }
+      const markdown = section
+        ? fitText(docs.markdown)
+        : fitText(
+            docs.markdown,
+            ` Call again with section set to one of: ${docs.sections.join(", ")}.`
+          );
       return text(
-        section
-          ? fitText(docs.markdown)
-          : fitText(
-              docs.markdown,
-              ` Call again with section set to one of: ${docs.sections.join(", ")}.`
-            )
+        notes.length > 0 ? `${notes.join("\n")}\n\n${markdown}` : markdown
       );
     }
   );
