@@ -95,6 +95,9 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       "@/components/icon-placeholder$": path.resolve(
         "src/icon-placeholder.tsx"
       ),
+      // `@/lib/utils` imports one function of it, and the module loads the
+      // whole registry through Vite's `import.meta.glob`.
+      "@/lib/seo/seo$": path.resolve("src/seo.ts"),
       // The elements that name a behavior library: a video draws the ui-sdk ones, as the site does.
       "@/components/audio-ui/parameter-field$": path.join(
         www,

@@ -59,9 +59,19 @@ bun run stars
 
 A thank you for the GitHub stars, in 7.5 seconds: a star and a number counting up to the last hundred reached, "stars on GitHub" and "Thank you", three lines set to one width. Then the card leaves for the logo and the repository's address, as the other videos end. The script reads the count with `gh` first.
 
+### The third user
+
+```sh
+bun run third-user            # French, the default
+bun run third-user --lang en
+```
+
+An agent and an app in one window, in 16.3 seconds: asked for a filter, the agent writes two knobs into the app, a pointer turns the cutoff, then the agent, asked in words, turns both knobs by their names. The requests are in the language given, the code and the knobs' names stay in English.
+
 ### Options
 
 - `--theme dark`: render on the dark theme (light by default).
+- `--lang fr|en`: the language of the third user's requests (French by default).
 
 ## Studio
 

@@ -8,6 +8,7 @@
  *   bun run teaser                            the whole library
  *   bun run registry                          the shadcn CLI installing a knob, then the knob turning
  *   bun run stars                             a thank you for the GitHub stars, at the last hundred reached
+ *   bun run third-user [--lang fr|en]         an agent builds a filter, a hand turns it, then the agent drives it
  *
  * Options: --theme light|dark.
  * The videos land in apps/video/out/.
@@ -16,7 +17,6 @@ import { parseArgs } from "node:util";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
 import { $ } from "bun";
-import { SHOWCASES } from "../src/showcases/index.ts";
 import { webpackOverride } from "../webpack-override.ts";
 
 // URLs resolve the `..`, so these are plain absolute paths.
@@ -36,6 +36,7 @@ const MAX_NOTES = 3;
 const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: {
+    lang: { default: "fr", type: "string" },
     note: { multiple: true, type: "string" },
     theme: { default: "light", type: "string" },
   },
@@ -80,10 +81,18 @@ async function changesetNotes(component: string) {
   return notes.slice(0, MAX_NOTES);
 }
 
+/**
+ * The showcases, loaded only by the commands that film one: they import the
+ * site's components, whose `@/lib/utils` reaches a module Bun cannot run.
+ */
+const loadShowcases = async () =>
+  (await import("../src/showcases/index.ts")).SHOWCASES;
+
 async function spotlightProps(
   kind: "new" | "showcase" | "update",
   component: string
 ) {
+  const SHOWCASES = await loadShowcases();
   if (!SHOWCASES[component]) {
     fail(
       `No showcase for "${component}": add one to apps/video/src/showcases/ and list it in index.ts.\nKnown: ${Object.keys(SHOWCASES).join(", ")}`
@@ -146,6 +155,7 @@ async function everyComponent(): Promise<Job[]> {
   const { DOCS_MENU_UPDATES } = await import(
     `${root}/apps/www/src/config/update.ts`
   );
+  const SHOWCASES = await loadShowcases();
   return Promise.all(
     Object.keys(SHOWCASES).map((component) =>
       spotlight(
@@ -187,6 +197,15 @@ if (command === "teaser") {
       },
     },
   ];
+} else if (command === "third-user") {
+  const lang = values.lang === "en" ? "en" : "fr";
+  jobs = [
+    {
+      file: `third-user-${lang}.mp4`,
+      id: "ThirdUser",
+      props: { lang, theme: values.theme === "dark" ? "dark" : "light" },
+    },
+  ];
 } else if (command === "all") {
   jobs = await everyComponent();
 } else if (
@@ -196,7 +215,7 @@ if (command === "teaser") {
   jobs = [await spotlight(command, name)];
 } else {
   fail(
-    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser | bun run registry | bun run stars"
+    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser | bun run registry | bun run stars | bun run third-user [--lang fr|en]"
   );
 }
 

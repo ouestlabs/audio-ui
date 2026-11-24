@@ -3,6 +3,16 @@
 @import "../../www/src/registry/styles/style-vega.css" layer(base);
 @import "../../www/src/registry/styles/audio/style-vega.css" layer(base);
 
+/* The site sets these in fonts.css with its own font files: here they name the faces fonts.ts loads. */
+:root {
+  --font-geist-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+@theme {
+  --font-serif: "Instrument Serif", ui-serif, serif;
+}
+
 @source "../../www/src/registry/bases/shared/audio-ui";
 @source "../../www/src/components/ui";
 
