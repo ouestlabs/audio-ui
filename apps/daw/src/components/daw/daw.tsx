@@ -261,6 +261,16 @@ function onSurface(target: EventTarget | null) {
 const OWN_DELETE =
   '[data-slot="midi-clip-panel"], [data-slot="clip-panel"], [data-slot="clip-view"], [data-slot="device-chain"], [data-part="timeline-locator"], [data-part="timeline-signature"]';
 
+/** Whether Space goes to the button focused, which presses on it, and not to play or stop: any button but the transport's, which the shortcut drives. */
+function keepsSpace(event: KeyboardEvent) {
+  return (
+    event.code === "Space" &&
+    event.target instanceof Element &&
+    event.target.closest("button") !== null &&
+    event.target.closest('[data-part="transport"]') === null
+  );
+}
+
 /** Whether Delete or Backspace goes to a part that deletes what is focused in it, and not to the selected clips or track. */
 function deletesItsOwn(event: KeyboardEvent) {
   return (
@@ -1494,7 +1504,7 @@ export function Daw({
   const appHotkeys = useAppHotkeys();
   const hotkeys = useMemo(() => {
     const run = (command: ShortcutCommand) => (event: KeyboardEvent) => {
-      if (TAKEN.has(event)) {
+      if (TAKEN.has(event) || keepsSpace(event)) {
         return;
       }
       TAKEN.add(event);

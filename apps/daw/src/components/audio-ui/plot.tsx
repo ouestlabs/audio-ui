@@ -201,15 +201,15 @@ function PlotCursor({ className, format, ...props }: PlotCursorProps) {
       {...props}
     >
       <div
-        className="bg-foreground/25 absolute inset-y-0 w-px opacity-0 group-data-[active]/cursor:opacity-100"
+        className="bg-foreground/25 absolute inset-y-0 w-px opacity-0 group-data-[selected]/cursor:opacity-100"
         style={{ left: "var(--plot-cursor-x)" }}
       />
       <div
-        className="bg-foreground/25 absolute inset-x-0 h-px opacity-0 group-data-[active]/cursor:opacity-100"
+        className="bg-foreground/25 absolute inset-x-0 h-px opacity-0 group-data-[selected]/cursor:opacity-100"
         style={{ top: "var(--plot-cursor-y)" }}
       />
       <PlotPrimitive.CursorReadout
-        className="rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
+        className="rounded-sm bg-card/80 px-1 font-mono text-[10px] text-muted-foreground top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[selected]/cursor:opacity-100"
         format={format}
       />
     </PlotPrimitive.Cursor>
