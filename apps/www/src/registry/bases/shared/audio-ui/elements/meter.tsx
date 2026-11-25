@@ -16,7 +16,7 @@ const meterVariants = cva("", {
   },
 });
 
-interface MeterProps
+export interface MeterProps
   extends Omit<ComponentProps<typeof MeterPrimitive.Root>, "children">,
     VariantProps<typeof meterVariants> {
   /** Levels graduated along the meter's length, such as `[-48, -24, -12, -6, 0]`, each with its label. */

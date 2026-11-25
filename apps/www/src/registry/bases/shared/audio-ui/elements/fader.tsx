@@ -80,7 +80,7 @@ const faderThumbMarkVariants = cva("cn-fader-thumb-mark", {
 /** A graduation on the fader's scale: a value, or a value and its label. */
 export type FaderMark = number | { label?: ReactNode; value: number };
 
-interface FaderProps
+export interface FaderProps
   extends ComponentProps<typeof FaderPrimitive.Root>,
     VariantProps<typeof faderVariants> {
   /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
