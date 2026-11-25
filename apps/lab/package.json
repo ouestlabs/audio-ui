@@ -3,14 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bun run --cwd ../.. build:pkg && bun run images:build && vite build",
+    "build": "bun run --cwd ../.. build:pkg && bun run wasm:build && bun run images:build && vite build",
     "deploy": "bun run build && wrangler deploy",
     "dev": "vite dev --port 3000",
     "images:build": "bun scripts/build-images.tsx",
     "preview": "vite preview",
-    "registry:local": "bun scripts/registry-local.ts"
+    "registry:local": "bun scripts/registry-local.ts",
+    "wasm:build": "bun scripts/build-wasm.ts"
   },
   "dependencies": {
+    "@audio-ui/icons": "workspace:*",
     "@audio/beat-detect": "catalog:",
     "@audio/biquad": "catalog:",
     "@audio/dynamics-compand": "catalog:",
@@ -59,6 +61,7 @@
     "@tanstack/react-start": "catalog:",
     "@ui-sdk/core": "0.1.0-beta.14",
     "@ui-sdk/react": "0.1.0-beta.14",
+    "@ui-sdk/web": "0.1.0-beta.14",
     "class-variance-authority": "catalog:",
     "cmdk": "^1.1.1",
     "cn": "catalog:",
@@ -78,6 +81,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "jz": "1.0.3",
     "satori": "catalog:",
     "shadcn": "catalog:",
     "typescript": "catalog:",
