@@ -105,7 +105,7 @@ function SoundLevel({
       <DropdownMenuTrigger
         aria-label="Level measure"
         className={TRIGGER}
-        data-slot="sound-level"
+        data-part="sound-level"
         title="Level measure"
       >
         {formatLevel(levels[current.id], current.unit)}
@@ -143,7 +143,7 @@ function SoundRate({
       <DropdownMenuTrigger
         aria-label="Sample rate"
         className={TRIGGER}
-        data-slot="sound-rate"
+        data-part="sound-rate"
         title="Resample"
       >
         {formatSampleRate(sampleRate)}
@@ -190,7 +190,7 @@ function SoundChannels({
       <DropdownMenuTrigger
         aria-label="Channels"
         className={TRIGGER}
-        data-slot="sound-channels"
+        data-part="sound-channels"
         title="Mix to"
       >
         {current?.id ?? `${channels} channels`}

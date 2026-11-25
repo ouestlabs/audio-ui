@@ -219,7 +219,7 @@ function PianoRollKeys({
           {({ pitches: rows }) =>
             rows.map((pitch) => (
               <PianoPrimitive.Key
-                className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
+                className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[selected]:hover:bg-foreground/70 data-[selected]:data-[color]:bg-primary data-[selected]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
                 key={pitch}
                 pitch={pitch}
               >

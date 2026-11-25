@@ -53,7 +53,7 @@ function CurveSelect({
     <ToggleGroup
       aria-label={props["aria-label"]}
       className={cn("w-full", className)}
-      data-slot="curve-select"
+      data-part="curve-select"
       disabled={disabled}
       onValueChange={pick}
       size="sm"

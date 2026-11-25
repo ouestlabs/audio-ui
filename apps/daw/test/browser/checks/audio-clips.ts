@@ -608,7 +608,7 @@ export const checks: Checks = {
       await clip.waitFor({ timeout: 10_000 });
       await clip.click();
       await page.getByRole("tab", { name: "Clip" }).click();
-      const sound = page.locator("[data-slot=clip-panel-edit]");
+      const sound = page.locator("[data-part=clip-panel-edit]");
       await sound.waitFor({ timeout: 5000 });
       const width = async () => (await clip.boundingBox())?.width ?? 0;
       const before = await width();

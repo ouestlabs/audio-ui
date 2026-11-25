@@ -104,13 +104,13 @@ const EXPORT_DEFAULT = /export default/g;
 const GROUP_ORIENTATION = /group-data-(horizontal|vertical)\//g;
 const ORIENTATION = /(?<![\w\]-])data-(horizontal|vertical):/g;
 const ACTIVE = /(?<![\w-])data-active\b/g;
+// The same attribute as a bracket variant, `in-data-[active]:` or `group-data-[active]/cursor:`, which the audio hooks use for a primitive's part: renamed with it.
+const ACTIVE_VARIANT = /\bdata-\[active\]/g;
 const POPUP_OPEN = /\bdata-popup-open\b/g;
 // input-otp marks its active slot `data-active="true"`, ui-sdk with a bare `data-active`.
 const ACTIVE_TRUE = /\bdata-\[active=true\]/g;
 // vaul names a drawer's edge `data-vaul-drawer-direction`, ui-sdk `data-side`.
 const DRAWER_DIRECTION = /\bdata-\[vaul-drawer-direction=/g;
-// A ui-sdk part keeps its own `data-slot`: an input group's control is an input, a textarea or a combobox's input.
-const INPUT_GROUP_CONTROL = /\[data-slot=input-group-control\]/g;
 const DEMO_METADATA =
   /^\s*\/\/\s*(?:Description|Order|GridSize|PreviewHeight):.*$\n?/gm;
 
@@ -219,19 +219,20 @@ async function readCnClasses(style: string): Promise<Map<string, string>> {
   return classes;
 }
 
-/** The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others. */
-function toUiSdkAttributes(content: string): string {
-  return content
+/**
+ * The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others.
+ * `forUiSdk`: a file written for ui-sdk, whose own `data-[active]` is ui-sdk's.
+ */
+function toUiSdkAttributes(content: string, forUiSdk: boolean): string {
+  const renamed = content.replace(ACTIVE, "data-selected");
+  return (
+    forUiSdk ? renamed : renamed.replace(ACTIVE_VARIANT, "data-[selected]")
+  )
     .replace(GROUP_ORIENTATION, "group-data-[orientation=$1]/")
     .replace(ORIENTATION, "data-[orientation=$1]:")
-    .replace(ACTIVE, "data-selected")
     .replace(POPUP_OPEN, "data-open")
     .replace(ACTIVE_TRUE, "data-[active]")
-    .replace(DRAWER_DIRECTION, "data-[side=")
-    .replace(
-      INPUT_GROUP_CONTROL,
-      ":is([data-slot=input],[data-slot=textarea],[data-slot=combobox-input])"
-    );
+    .replace(DRAWER_DIRECTION, "data-[side=");
 }
 
 function expandCnClasses(
@@ -437,7 +438,7 @@ async function buildFile(
   // 2. cn-* placeholder classes become their utility classes
   content = expandCnClasses(content, build.cnClasses);
   if (build.base === UI_BASE) {
-    content = toUiSdkAttributes(content);
+    content = toUiSdkAttributes(content, source.includes(`/bases/${UI_BASE}/`));
   }
   // 3. Import paths become the paths the files land at
   content = transformImportPaths(content);

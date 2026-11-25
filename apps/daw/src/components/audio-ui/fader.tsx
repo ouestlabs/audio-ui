@@ -174,17 +174,17 @@ export function Fader({
                 {orientation === "vertical" ? (
                   <>
                     {markLabel(mark) === undefined ? null : (
-                      <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground">
+                      <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[selected]:text-foreground">
                         {markLabel(mark)}
                       </span>
                     )}
-                    <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none h-px w-1.5" />
+                    <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[selected]:data-[color]:bg-primary motion-reduce:transition-none h-px w-1.5" />
                   </>
                 ) : (
                   <>
-                    <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none h-1.5 w-px" />
+                    <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[selected]:data-[color]:bg-primary motion-reduce:transition-none h-1.5 w-px" />
                     {markLabel(mark) === undefined ? null : (
-                      <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground">
+                      <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[selected]:text-foreground">
                         {markLabel(mark)}
                       </span>
                     )}

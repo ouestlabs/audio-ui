@@ -67,7 +67,7 @@ function FilterTypeSelect({
     <ToggleGroup
       aria-label={props["aria-label"]}
       className={cn("w-full", className)}
-      data-slot="filter-type-select"
+      data-part="filter-type-select"
       disabled={disabled}
       onValueChange={pick}
       size="sm"

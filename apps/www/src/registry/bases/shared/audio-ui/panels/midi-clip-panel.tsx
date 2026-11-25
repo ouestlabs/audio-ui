@@ -696,7 +696,7 @@ function NotesEditor({
     <ContextMenu>
       <ContextMenuTrigger
         className="flex min-h-0 min-w-0 flex-1 flex-col"
-        data-slot="midi-clip-panel-editor"
+        data-part="midi-clip-panel-editor"
         onKeyDown={keyDown}
       >
         {children}

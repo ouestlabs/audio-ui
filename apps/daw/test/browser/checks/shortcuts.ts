@@ -8,7 +8,7 @@ export const checks: Checks = {
     const page = await open(browser);
     await page.getByRole("region", { name: "Library" }).waitFor();
     await page.keyboard.press("Meta+Alt+KeyB");
-    await page.locator("button[data-slot=device-browser]").waitFor();
+    await page.locator("button[data-part=device-browser]").waitFor();
     await page.keyboard.press("Meta+Alt+KeyB");
     await page.getByRole("region", { name: "Library" }).waitFor();
   },

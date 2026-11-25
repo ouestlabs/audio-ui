@@ -696,7 +696,7 @@ function Transport({
         "@container/transport flex w-full min-w-0 flex-wrap items-center gap-2",
         className
       )}
-      data-slot="transport"
+      data-part="transport"
     >
       <ToolbarGroup render={<ButtonGroup className="shrink-0" />}>
         <ToolbarButton

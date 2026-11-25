@@ -197,7 +197,7 @@ export const checks: Checks = {
         "a clip with its scale off marks rows"
       );
       await trigger.click();
-      const detected = page.locator("[data-slot=scale-menu-detect]");
+      const detected = page.locator("[data-part=scale-menu-detect]");
       await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
       const keys = await detected.getByRole("menuitem").allTextContents();
       assert(
@@ -237,8 +237,8 @@ export const checks: Checks = {
     const lane = await page.locator('[data-track="track-3"]').boundingBox();
     assert(lane, "the MIDI lane is there");
     await page.mouse.dblclick(lane.x + 4, lane.y + lane.height / 2);
-    await page.locator("[data-slot=scale-menu-trigger]").click();
-    const detected = page.locator("[data-slot=scale-menu-detect]");
+    await page.locator("[data-part=scale-menu-trigger]").click();
+    const detected = page.locator("[data-part=scale-menu-detect]");
     await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
     const keys = await detected.getByRole("menuitem").allTextContents();
     assert(
@@ -280,9 +280,9 @@ export const checks: Checks = {
               .sort()
               .join(" ")
           );
-      const scaleMenu = page.locator("[data-slot=scale-menu-trigger]");
+      const scaleMenu = page.locator("[data-part=scale-menu-trigger]");
       await scaleMenu.click();
-      const detected = page.locator("[data-slot=scale-menu-detect]");
+      const detected = page.locator("[data-part=scale-menu-detect]");
       await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
       await detected.getByRole("menuitem", { name: "D Minor" }).click();
       // The Notes menu, in the bar over the roll: its commands by what they change.
@@ -317,7 +317,7 @@ export const checks: Checks = {
         timeout: 5000,
       });
       // The menu stays open on a root picked: the trigger closes it (Escape would let go of the clip too).
-      if (await page.locator("[data-slot=scale-menu-content]").isVisible()) {
+      if (await page.locator("[data-part=scale-menu-content]").isVisible()) {
         await scaleMenu.click();
       }
       await command("Pitch", "Fit to scale");

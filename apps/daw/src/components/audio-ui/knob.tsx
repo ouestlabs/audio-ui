@@ -134,9 +134,9 @@ function Knob({
       </KnobPrimitive.Control>
       {marks?.map((mark) => (
         <KnobPrimitive.Mark key={markValue(mark)} value={markValue(mark)}>
-          <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2" />
+          <span className="bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[selected]:data-[color]:bg-primary motion-reduce:transition-none -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2" />
           {markLabel(mark) === undefined ? null : (
-            <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground -top-6 absolute left-1/2 -translate-x-1/2 [rotate:calc(var(--knob-mark-angle)*-1)]">
+            <span className="text-[10px] leading-none text-muted-foreground tabular-nums in-data-[selected]:text-foreground -top-6 absolute left-1/2 -translate-x-1/2 [rotate:calc(var(--knob-mark-angle)*-1)]">
               {markLabel(mark)}
             </span>
           )}

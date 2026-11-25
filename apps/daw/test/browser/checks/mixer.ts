@@ -274,7 +274,7 @@ export const checks: Checks = {
         "Library"
       );
       await page
-        .locator("button[data-slot=device-browser]")
+        .locator("button[data-part=device-browser]")
         .waitFor({ timeout: 3000 });
       await page.getByRole("tab", { name: DEVICES }).click();
       const bar = page.locator("[data-slot=panel-bar]");

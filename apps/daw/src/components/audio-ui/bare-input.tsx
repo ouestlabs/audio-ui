@@ -17,7 +17,7 @@ export function BareInput({
         "h-auto rounded-none border-0 bg-transparent px-0 py-0 shadow-none focus-visible:ring-0 dark:bg-transparent",
         className
       )}
-      data-slot="bare-input"
+      data-part="bare-input"
       {...props}
     />
   );

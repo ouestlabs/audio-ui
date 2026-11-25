@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 const STYLES = `${import.meta.dir}/../src/registry/styles/audio`;
 const SERVED = `${import.meta.dir}/../public/r/styles/base-nova`;
+const SERVED_UI_SDK = `${import.meta.dir}/../public/r/styles/ui-sdk-nova`;
 const COMMENT = /\/\*[\s\S]*?\*\//g;
 const APPLIED_SELECTOR = /([^{};]+)\{\s*@apply\b/g;
 const PLAIN_CLASS = /^\.[a-zA-Z0-9_-]+$/;
@@ -34,6 +35,19 @@ describe("a style's rules reach a project", () => {
     const { content } = await served("piano-roll");
     expect(content).toContain("data-[color=black]:bg-foreground/85");
     expect(content).toContain("data-[active]:data-[color]:bg-primary");
+  });
+
+  test("on the ui-sdk base, a pressed key's color reads the attribute its primitive writes", async () => {
+    const read = async (item: string) =>
+      (await Bun.file(`${SERVED_UI_SDK}/${item}.json`).json()).files
+        .map((file: { content: string }) => file.content)
+        .join("\n") as string;
+    expect(await read("piano-react")).toContain(
+      '"data-selected": flag(current.active)'
+    );
+    expect(await read("piano-roll")).toContain(
+      "data-[selected]:data-[color]:bg-primary"
+    );
   });
 
   test("a velocity's fill keeps its dim color until its step is on", async () => {

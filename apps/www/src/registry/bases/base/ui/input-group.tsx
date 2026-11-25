@@ -122,7 +122,7 @@ function InputGroupInput({
   return (
     <Input
       className={cn("cn-input-group-input flex-1", className)}
-      data-slot="input-group-control"
+      data-part="input-group-control"
       {...props}
     />
   );
@@ -135,7 +135,7 @@ function InputGroupTextarea({
   return (
     <Textarea
       className={cn("cn-input-group-textarea flex-1 resize-none", className)}
-      data-slot="input-group-control"
+      data-part="input-group-control"
       {...props}
     />
   );

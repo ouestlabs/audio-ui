@@ -112,7 +112,7 @@ function ScaleMenuTrigger(
       render={
         <Button
           aria-label={`Scale: ${enabled ? scaleLabel(scale) : "off"}`}
-          data-slot="scale-menu-trigger"
+          data-part="scale-menu-trigger"
           variant={enabled ? "default" : "outline"}
           {...props}
         />
@@ -132,7 +132,7 @@ function ScaleMenuContent({
     <DropdownMenuContent
       align={align}
       className={cn("w-auto min-w-48", className)}
-      data-slot="scale-menu-content"
+      data-part="scale-menu-content"
       {...props}
     />
   );
@@ -150,7 +150,7 @@ function ScaleMenuToggle({
   return (
     <DropdownMenuCheckboxItem
       checked={enabled}
-      data-slot="scale-menu-toggle"
+      data-part="scale-menu-toggle"
       onCheckedChange={onEnabledChange}
       {...props}
     >
@@ -171,7 +171,7 @@ function ScaleMenuRoot() {
   );
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger data-slot="scale-menu-root">
+      <DropdownMenuSubTrigger data-part="scale-menu-root">
         Root: {pitchClassName(scale.root)}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
@@ -199,7 +199,7 @@ function ScaleMenuName() {
   );
   return (
     <DropdownMenuSub>
-      <DropdownMenuSubTrigger data-slot="scale-menu-name">
+      <DropdownMenuSubTrigger data-part="scale-menu-name">
         Scale: {SCALE_LABELS[scale.name]}
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent>
@@ -259,7 +259,7 @@ function ScaleMenuDetect({
     [onEnabledChange, onScaleChange]
   );
   return (
-    <DropdownMenuGroup data-slot="scale-menu-detect">
+    <DropdownMenuGroup data-part="scale-menu-detect">
       <DropdownMenuLabel>Detected</DropdownMenuLabel>
       {keys.length === 0 ? (
         <DropdownMenuItem disabled>Nothing to read</DropdownMenuItem>

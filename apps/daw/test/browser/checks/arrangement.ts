@@ -128,7 +128,7 @@ export const checks: Checks = {
       .boundingBox();
     // The first grip spans the first track's row.
     const top = await page
-      .locator("[data-slot=track-grip]")
+      .locator("[data-part=track-grip]")
       .first()
       .boundingBox();
     assert(grip && top, "the grips are there");
@@ -601,7 +601,7 @@ export const checks: Checks = {
         `a second after the double-click the playhead is at ${played}, the locator at ${placed}`
       );
       assert(
-        (await page.locator("[data-slot=timeline-locator-input]").count()) ===
+        (await page.locator("[data-part=timeline-locator-input]").count()) ===
           0,
         "the double-click opened the name to edit"
       );
@@ -624,7 +624,7 @@ export const checks: Checks = {
         () => document.activeElement?.tagName === "INPUT"
       );
       await page.keyboard.press("Enter");
-      const signature = page.locator("[data-slot=timeline-signature]").last();
+      const signature = page.locator("[data-part=timeline-signature]").last();
       await signature.waitFor({ timeout: 5000 });
       await movesLikeAMarker(page, signature);
     },
@@ -819,10 +819,10 @@ export const checks: Checks = {
       await page.keyboard.press("ArrowRight");
       await page.keyboard.press("ArrowRight");
       await page.keyboard.press("KeyM");
-      const first = page.locator("[data-slot=timeline-locator]").first();
+      const first = page.locator("[data-part=timeline-locator]").first();
       await first.waitFor({ timeout: 5000 });
       assert(
-        (await page.locator("[data-slot=timeline-locator]").count()) >= 2,
+        (await page.locator("[data-part=timeline-locator]").count()) >= 2,
         "two locators were not added"
       );
       const loop = page.getByRole("slider", { exact: true, name: "Loop" });
@@ -869,7 +869,7 @@ export const checks: Checks = {
       await page.keyboard.press("ArrowRight");
       await page.keyboard.press("KeyM");
       await page.keyboard.press("Home");
-      const marks = (await offsetOf("[data-slot=timeline-locator]")).sort(
+      const marks = (await offsetOf("[data-part=timeline-locator]")).sort(
         (a, b) => a - b
       );
       assert(marks.length >= 2, "two locators were not added");
