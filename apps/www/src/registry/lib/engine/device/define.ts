@@ -443,6 +443,30 @@ function describeParameter(
   };
 }
 
+/** A group names parameters the device has, each in one group only. */
+function checkGroups(
+  groups: readonly DeviceGroup[],
+  byId: ReadonlyMap<string, ParameterDescriptor>,
+  device: string
+) {
+  const grouped = new Set<string>();
+  for (const group of groups) {
+    for (const id of group.parameters) {
+      if (!byId.has(id)) {
+        throw new DeviceDefinitionError(
+          `${device}: the group ${group.label} names ${id}, which is not a parameter.`
+        );
+      }
+      if (grouped.has(id)) {
+        throw new DeviceDefinitionError(
+          `${device}.${id}: this parameter is in two groups.`
+        );
+      }
+      grouped.add(id);
+    }
+  }
+}
+
 /**
  * Defines a device from its parameters. The definition is checked once, here:
  * a duplicate id, a default outside its range or a log scale from zero throws
@@ -490,22 +514,7 @@ export function defineDevice<
   }
 
   const groups: readonly DeviceGroup[] = definition.groups ?? [];
-  const grouped = new Set<string>();
-  for (const group of groups) {
-    for (const id of group.parameters) {
-      if (!byId.has(id)) {
-        throw new DeviceDefinitionError(
-          `${definition.id}: the group ${group.label} names ${id}, which is not a parameter.`
-        );
-      }
-      if (grouped.has(id)) {
-        throw new DeviceDefinitionError(
-          `${definition.id}.${id}: this parameter is in two groups.`
-        );
-      }
-      grouped.add(id);
-    }
-  }
+  checkGroups(groups, byId, definition.id);
 
   const clampValue = (id: string, value: unknown): ParameterValue => {
     const parameter = byId.get(id);
