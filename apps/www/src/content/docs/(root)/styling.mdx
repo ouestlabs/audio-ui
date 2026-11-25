@@ -112,6 +112,21 @@ import { HardwareKnob } from "@/components/audio-ui/skins/hardware/knob"
 </div>
 ```
 
+### Device panels
+
+Wrap device panels in `HardwareSkin`: their frame takes the matte body, their graphs become screens, and their knobs and faders are drawn with the faces. The panels themselves do not change.
+
+```tsx
+import { HardwareSkin } from "@/components/audio-ui/skins/hardware/skin"
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel"
+
+<HardwareSkin>
+  <CompressorPanel onValueChange={setState} value={state} />
+</HardwareSkin>
+```
+
+`--audio-grid` is the width of a column of a panel with no groups, `4.5rem` by default. For faces of your own, give `DeviceFacesProvider` from `@/components/audio-ui/device-faces` a `Knob` or a `Fader` with the element's props.
+
 The faces draw their own parts, so `thumbMarks` of the fader and `marks`, `peakMarks` and `scale` of the meter do not change them.
 
 ### Materials

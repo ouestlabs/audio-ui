@@ -45,7 +45,7 @@ const [set] = deviceTools(compressorDevice); // for any agent: JSON Schema in, a
 const { state: next, summary } = set.run(state, modelInput); // clamped, refused by name, never throws
 ```
 
-A device of your own is `defineDevice({ id, name, description, parameters })` from `@/lib/engine/device`: `DevicePanel` and `deviceTools` work on it with no further code, and a host with its own engine implements `DeviceBinding` (`update(state)`, `dispose()`) instead of using the Web Audio one. Keep the state a plain object keyed by parameter id and store the device's `id`, not the panel that draws it.
+A device of your own is `defineDevice({ id, name, description, parameters })` from `@/lib/engine/device`: `DevicePanel` and `deviceTools` work on it with no further code (optional `groups`, each a `label` and parameter ids, lay the panel out), and a host with its own engine implements `DeviceBinding` (`update(state)`, `dispose()`) instead of using the Web Audio one. Keep the state a plain object keyed by parameter id and store the device's `id`, not the panel that draws it.
 
 An instrument is a device with `kind: "instrument"`: its parameters shape the timbre (a `choice` parameter holds a waveform or a filter type) and its engine adds `noteOn(note)` and `noteOff()` next to `update(state)`. `block-pocket-synth` is the reference: the panel is controlled and sends notes out through `onNoteOn` and `onNoteOff`, so it plays through any engine, or none.
 
