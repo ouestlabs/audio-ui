@@ -31,11 +31,11 @@
   }
 
   .cn-knob-control {
-    @apply bg-secondary text-secondary-foreground shadow-xs transition-[color,background-color,box-shadow,border-color,opacity] duration-150 ease-out hover:bg-secondary/90 active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.14)] motion-reduce:transition-none dark:bg-secondary/60 dark:hover:bg-secondary/70 dark:active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.28)];
+    @apply bg-[color:var(--audio-socket,var(--secondary))] text-secondary-foreground shadow-xs transition-[color,background-color,box-shadow,border-color,opacity] duration-150 ease-out hover:bg-[color:var(--audio-socket,color-mix(in_oklab,var(--secondary)_90%,transparent))] active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.14)] motion-reduce:transition-none dark:bg-[color:var(--audio-socket,color-mix(in_oklab,var(--secondary)_60%,transparent))] dark:hover:bg-[color:var(--audio-socket,color-mix(in_oklab,var(--secondary)_70%,transparent))] dark:active:shadow-[inset_0_-14px_28px_-12px_rgb(0_0_0/0.28)];
   }
 
   .cn-knob-body {
-    @apply rounded-full bg-card text-card-foreground ring-1 ring-foreground/10 transition-transform duration-100 ease-out motion-reduce:transition-none;
+    @apply rounded-full bg-[color:var(--audio-cap,var(--card))] text-card-foreground ring-1 ring-foreground/10 transition-transform duration-100 ease-out motion-reduce:transition-none;
   }
 
   .cn-knob-body-size-xs {
@@ -59,28 +59,28 @@
   }
 
   .cn-knob-arc {
-    @apply text-primary [&_path]:stroke-current;
+    @apply text-[color:var(--audio-accent,var(--primary))] [&_path]:stroke-current;
   }
 
   .cn-knob-mark-tick {
-    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
+    @apply bg-[color:var(--audio-print,color-mix(in_oklab,var(--muted-foreground)_40%,transparent))] transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-[color:var(--audio-accent,var(--primary))] motion-reduce:transition-none;
   }
 
   .cn-knob-mark-label {
-    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-foreground;
   }
 
   .cn-knob-value {
-    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+    @apply rounded-none bg-[color:var(--audio-readout,var(--foreground))] px-1.5 py-0.5 font-medium text-[10px] text-[color:var(--audio-readout-ink,var(--background))] tabular-nums leading-none shadow-sm;
   }
 
   .cn-knob-indicator {
-    @apply text-primary;
+    @apply text-[color:var(--audio-accent,var(--primary))];
   }
 
   /* MARK: Fader (track ← cn-slider-track, thumb ← cn-slider-thumb) */
   .cn-fader-track {
-    @apply rounded-none bg-input/90;
+    @apply rounded-none bg-[color:var(--audio-groove,color-mix(in_oklab,var(--input)_90%,transparent))];
   }
 
   .cn-fader-track-size-sm {
@@ -96,23 +96,23 @@
   }
 
   .cn-fader-range {
-    @apply bg-primary;
+    @apply bg-[color:var(--audio-accent,var(--primary))];
   }
 
   .cn-fader-mark-tick {
-    @apply bg-muted-foreground/40 transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-primary motion-reduce:transition-none;
+    @apply bg-[color:var(--audio-print,color-mix(in_oklab,var(--muted-foreground)_40%,transparent))] transition-colors duration-150 ease-out in-data-[active]:data-[color]:bg-[color:var(--audio-accent,var(--primary))] motion-reduce:transition-none;
   }
 
   .cn-fader-mark-label {
-    @apply text-[10px] leading-none text-muted-foreground tabular-nums in-data-[active]:text-foreground;
+    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-foreground;
   }
 
   .cn-fader-value {
-    @apply rounded-none bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none shadow-sm;
+    @apply rounded-none bg-[color:var(--audio-readout,var(--foreground))] px-1.5 py-0.5 font-medium text-[10px] text-[color:var(--audio-readout-ink,var(--background))] tabular-nums leading-none shadow-sm;
   }
 
   .cn-fader-thumb {
-    @apply rounded-none border-ring border bg-card transition-[color,box-shadow] hover:ring-1 hover:ring-ring/40 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 active:ring-1 active:ring-ring/50 motion-reduce:transition-none;
+    @apply rounded-none border-ring border bg-[color:var(--audio-cap,var(--card))] transition-[color,box-shadow] hover:ring-1 hover:ring-ring/40 has-focus-visible:ring-1 has-focus-visible:ring-ring/50 active:ring-1 active:ring-ring/50 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {
@@ -140,7 +140,7 @@
   }
 
   .cn-fader-thumb-mark {
-    @apply bg-primary opacity-50;
+    @apply bg-[color:var(--audio-accent,var(--primary))] opacity-50;
   }
 
   .cn-fader-thumb-mark-size-sm {
@@ -219,19 +219,19 @@
   }
 
   .cn-meter-channel {
-    @apply rounded-none bg-input/70 transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipped:ring-2 data-clipping:ring-destructive data-clipped:ring-destructive;
+    @apply rounded-none bg-[color:var(--audio-groove,color-mix(in_oklab,var(--input)_70%,transparent))] transition-shadow duration-150 ease-out data-clipping:ring-2 data-clipped:ring-2 data-clipping:ring-destructive data-clipped:ring-destructive;
   }
 
   .cn-meter-fill {
-    @apply bg-success data-warning:bg-warning data-clipping:bg-destructive data-clipped:bg-destructive;
+    @apply bg-[color:var(--audio-level,var(--success))] data-warning:bg-[color:var(--audio-warn,var(--warning))] data-clipping:bg-[color:var(--audio-clip,var(--destructive))] data-clipped:bg-[color:var(--audio-clip,var(--destructive))];
   }
 
   .cn-meter-peak {
-    @apply bg-foreground;
+    @apply bg-[color:var(--audio-readout,var(--foreground))];
   }
 
   .cn-meter-mark {
-    @apply text-muted-foreground;
+    @apply text-[color:var(--audio-print,var(--muted-foreground))];
   }
 
   /* MARK: Piano (container ← cn-xypad, white/black keys ← cn-fader-track/cn-knob-body) */
