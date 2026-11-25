@@ -24,7 +24,7 @@ function ItemSeparator({
   return (
     <Separator
       className={cn("my-2", className)}
-      data-slot="item-separator"
+      data-part="item-separator"
       orientation="horizontal"
       {...props}
     />

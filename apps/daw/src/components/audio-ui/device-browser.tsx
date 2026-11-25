@@ -200,7 +200,7 @@ function DeviceBrowser({
           className
         )}
         data-folded=""
-        data-slot="device-browser"
+        data-part="device-browser"
         onClick={unfold}
         type="button"
       >

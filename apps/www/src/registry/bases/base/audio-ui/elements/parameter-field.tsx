@@ -557,8 +557,8 @@ function TextParameterField({
     <InputGroup
       className={cn(parameterFieldVariants({ size }), className)}
       data-disabled={disabled ? "" : undefined}
+      data-part="parameter-field"
       data-size={size}
-      data-slot="parameter-field"
     >
       {hideLabel ? null : (
         <InputGroupAddon align="inline-start">

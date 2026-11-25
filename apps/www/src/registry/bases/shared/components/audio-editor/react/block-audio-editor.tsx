@@ -2057,7 +2057,7 @@ function MoreMenu({
     (open: boolean) => {
       if (open) {
         const loop = frame.current?.querySelector<HTMLElement>(
-          '[data-slot="transport"] button[aria-label="Loop"]'
+          '[data-part="transport"] button[aria-label="Loop"]'
         );
         setLoopHidden(loop?.offsetParent === null);
       }

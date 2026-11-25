@@ -83,7 +83,7 @@ function NoteEditMenuTrigger({
     <DropdownMenuTrigger
       render={
         <Button
-          data-slot="note-edit-menu-trigger"
+          data-part="note-edit-menu-trigger"
           variant="outline"
           {...props}
         />
@@ -110,7 +110,7 @@ function NoteEditMenuContent({
     <DropdownMenuContent
       align={align}
       className={cn("w-auto min-w-52", className)}
-      data-slot="note-edit-menu-content"
+      data-part="note-edit-menu-content"
       {...props}
     />
   );

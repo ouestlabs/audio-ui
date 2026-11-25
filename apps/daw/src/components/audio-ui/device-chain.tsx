@@ -262,7 +262,7 @@ function DeviceChain({
       (
         keyOf(root.current, neighbor) ??
         root.current?.querySelector<HTMLElement>(
-          '[data-slot="device-chain-add"]'
+          '[data-part="device-chain-add"]'
         )
       )?.focus()
     );
@@ -528,7 +528,7 @@ function SlotFold() {
         aria-label={`Unfold ${title}`}
         className="flex size-6 shrink-0 cursor-pointer items-center justify-center text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         data-device-key={value}
-        data-slot="device-chain-slot-fold"
+        data-part="device-chain-slot-fold"
         onClick={toggleFold}
         onKeyDown={handleKey}
         type="button"
@@ -543,7 +543,7 @@ function SlotFold() {
       aria-keyshortcuts={keys || undefined}
       aria-label={`Fold ${title}`}
       data-device-key={value}
-      data-slot="device-chain-slot-fold"
+      data-part="device-chain-slot-fold"
       onClick={toggleFold}
       onKeyDown={handleKey}
       size="icon-xs"
@@ -675,7 +675,7 @@ function DeviceChainSlot({
     // The button that was pressed is gone with the face it was on: the focus goes to the one that takes its place.
     requestAnimationFrame(() =>
       root.current
-        ?.querySelector<HTMLElement>('[data-slot="device-chain-slot-fold"]')
+        ?.querySelector<HTMLElement>('[data-part="device-chain-slot-fold"]')
         ?.focus()
     );
   }, [folded, onFoldedChange]);
@@ -821,7 +821,7 @@ function DeviceChainAdd({
         className
       )}
       data-over={dropIndex === order.length ? "" : undefined}
-      data-slot="device-chain-add"
+      data-part="device-chain-add"
       type="button"
       {...props}
     >

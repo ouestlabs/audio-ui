@@ -57,7 +57,7 @@ function WaveformSelect({
     <ToggleGroup
       aria-label={props["aria-label"]}
       className={cn("w-full", className)}
-      data-slot="waveform-select"
+      data-part="waveform-select"
       disabled={disabled}
       onValueChange={pick}
       size="sm"

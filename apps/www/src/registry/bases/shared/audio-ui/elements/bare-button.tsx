@@ -18,7 +18,7 @@ export function BareButton({
         "inline-block h-auto gap-0 rounded-none border-0 bg-transparent px-0 font-normal text-[length:inherit] hover:bg-transparent hover:text-inherit active:translate-y-0 aria-expanded:bg-transparent aria-expanded:text-inherit dark:hover:bg-transparent",
         className
       )}
-      data-slot="bare-button"
+      data-part="bare-button"
       type="button"
       variant="ghost"
       {...props}

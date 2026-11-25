@@ -142,6 +142,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 - Each icon name is a string literal: the shadcn CLI turns `IconPlaceholder` into an import, so `lucide={playing ? "PauseIcon" : "PlayIcon"}` installs as invalid code. Render one element per icon (`{playing ? <IconPlaceholder … /> : <IconPlaceholder … />}`); `apps/www/test/install-paths.test.ts` fails on an expression
 - Icon-only interactive elements get `aria-label`; decorative icons get `aria-hidden="true"`
 - Static data outside the component function
+- A ui component's `data-slot` is its library's: on the ui-sdk base the part writes its own over the one given. Name a ui component an element renders, or one it looks up, with `data-part` (`<BareButton data-part="track-grip" />`, `querySelector('[data-part="track-grip"]')`); `test/registry/ui-data-part.test.ts` fails on a `data-slot` given to one
 - Semantic color tokens only (`text-muted-foreground`, `bg-primary`), never raw palette colors; don't add `border-border`, it's the default
 - React imports are named, never `import * as React`
 - `registryDependencies`: audio/ui items as `"@audio-ui/{name}"`, shadcn as `"@shadcn/{name}"`; npm imports go in `dependencies`

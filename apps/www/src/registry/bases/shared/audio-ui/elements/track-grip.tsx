@@ -26,7 +26,7 @@ function TrackGrip({
         dragging && "cursor-grabbing bg-muted text-foreground",
         className
       )}
-      data-slot="track-grip"
+      data-part="track-grip"
       type="button"
       {...props}
     >

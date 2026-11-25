@@ -259,7 +259,7 @@ function onSurface(target: EventTarget | null) {
 
 /** The parts with a Delete of their own: a note, a step or a warp marker of the clip view, a device, a locator, a time signature. */
 const OWN_DELETE =
-  '[data-slot="midi-clip-panel"], [data-slot="clip-panel"], [data-slot="clip-view"], [data-slot="device-chain"], [data-slot="timeline-locator"], [data-slot="timeline-signature"]';
+  '[data-slot="midi-clip-panel"], [data-slot="clip-panel"], [data-slot="clip-view"], [data-slot="device-chain"], [data-part="timeline-locator"], [data-part="timeline-signature"]';
 
 /** Whether Delete or Backspace goes to a part that deletes what is focused in it, and not to the selected clips or track. */
 function deletesItsOwn(event: KeyboardEvent) {
@@ -272,7 +272,7 @@ function deletesItsOwn(event: KeyboardEvent) {
 
 /** The clip view's editors, which edit what is picked in them with keys of their own: the sound's and the notes'. */
 const OWN_EDITS =
-  '[data-slot="clip-panel-edit"], [data-slot="midi-clip-panel-editor"]';
+  '[data-part="clip-panel-edit"], [data-part="midi-clip-panel-editor"]';
 
 /**
  * Whether a key goes to an editor of the clip view and not to the arrangement:
@@ -1467,7 +1467,7 @@ export function Daw({
       if (
         spaceShortcut &&
         event.detail === 0 &&
-        (event.target as Element).closest('[data-slot="transport"]')
+        (event.target as Element).closest('[data-part="transport"]')
       ) {
         event.preventDefault();
         event.stopImmediatePropagation();

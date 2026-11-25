@@ -1966,7 +1966,7 @@ function SourceEditor({
       <ContextMenuTrigger
         aria-label={`${name}: drag to select, right-click to edit`}
         className="relative flex flex-1 select-none flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
-        data-slot="clip-panel-edit"
+        data-part="clip-panel-edit"
         onContextMenu={contextMenu}
         onDoubleClick={doubleClick}
         onKeyDown={keyDown}

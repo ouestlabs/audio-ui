@@ -143,7 +143,7 @@ export const checks: Checks = {
   "ARR: a track dragged by its grip: the rows slide aside, and it lands in the gap":
     async (browser) => {
       const page = await open(browser);
-      const rows = page.locator("[data-slot=track-grip]");
+      const rows = page.locator("[data-part=track-grip]");
       const names = () =>
         rows.evaluateAll((all) =>
           all.map((grip) => grip.getAttribute("aria-label")).join()
