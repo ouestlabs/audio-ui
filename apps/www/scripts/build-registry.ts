@@ -219,13 +219,17 @@ async function readCnClasses(style: string): Promise<Map<string, string>> {
   return classes;
 }
 
-/** The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others. */
-function toUiSdkAttributes(content: string): string {
-  return content
+/**
+ * The hooks of a style name the attributes of the parts they were written for: ui-sdk's parts carry others.
+ * `forUiSdk`: a file written for ui-sdk, whose own `data-[active]` is ui-sdk's.
+ */
+function toUiSdkAttributes(content: string, forUiSdk: boolean): string {
+  const renamed = content.replace(ACTIVE, "data-selected");
+  return (
+    forUiSdk ? renamed : renamed.replace(ACTIVE_VARIANT, "data-[selected]")
+  )
     .replace(GROUP_ORIENTATION, "group-data-[orientation=$1]/")
     .replace(ORIENTATION, "data-[orientation=$1]:")
-    .replace(ACTIVE, "data-selected")
-    .replace(ACTIVE_VARIANT, "data-[selected]")
     .replace(POPUP_OPEN, "data-open")
     .replace(ACTIVE_TRUE, "data-[active]")
     .replace(DRAWER_DIRECTION, "data-[side=");
@@ -434,7 +438,7 @@ async function buildFile(
   // 2. cn-* placeholder classes become their utility classes
   content = expandCnClasses(content, build.cnClasses);
   if (build.base === UI_BASE) {
-    content = toUiSdkAttributes(content);
+    content = toUiSdkAttributes(content, source.includes(`/bases/${UI_BASE}/`));
   }
   // 3. Import paths become the paths the files land at
   content = transformImportPaths(content);

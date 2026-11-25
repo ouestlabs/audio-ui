@@ -15,7 +15,7 @@ export function BareButton({
   return (
     <Button
       className={cn(
-        "inline-block h-auto gap-0 rounded-none border-0 bg-transparent px-0 font-normal text-[length:inherit] hover:bg-transparent hover:text-inherit active:translate-y-0 aria-expanded:bg-transparent aria-expanded:text-inherit dark:hover:bg-transparent",
+        "inline-block h-auto gap-0 rounded-none border-0 bg-transparent px-0 font-normal text-[length:inherit] hover:bg-transparent hover:text-inherit active:translate-none! aria-expanded:bg-transparent aria-expanded:text-inherit dark:hover:bg-transparent",
         className
       )}
       data-part="bare-button"
