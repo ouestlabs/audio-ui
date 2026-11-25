@@ -35,14 +35,6 @@ const HIDDEN = ["enabled", "lowHz", "highHz"] as const;
 const OFF = multibandDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
-/** What the knobs gather: each band, the timing, the output. */
-const GROUPS = [
-  { label: "Low", parameters: ["lowThresholdDb", "lowRatio"] },
-  { label: "Mid", parameters: ["midThresholdDb", "midRatio"] },
-  { label: "High", parameters: ["highThresholdDb", "highRatio"] },
-  { label: "Time", parameters: ["attackMs", "releaseMs"] },
-  { label: "Output", parameters: ["outputDb"] },
-] as const;
 
 const formatDbMark = (db: number) =>
   formatLevel(db, "dB", { decimals: 0, unit: false });
@@ -155,7 +147,6 @@ function MultibandPanel({
           device={multibandDevice}
           disabled={value.enabled ? undefined : OFF}
           exclude={HIDDEN}
-          groups={GROUPS}
           onValueChange={onValueChange}
           value={value}
         />

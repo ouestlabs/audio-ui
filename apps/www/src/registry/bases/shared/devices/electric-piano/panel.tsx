@@ -23,14 +23,6 @@ import {
 } from "@/registry/bases/shared/devices/electric-piano/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do, as the piano's panel lays them out. */
-const GROUPS = [
-  { label: "Tone", parameters: ["bark", "bell", "decay"] },
-  { label: "Pickup", parameters: ["drive"] },
-  { label: "Tremolo", parameters: ["rate", "depth"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 const PRESET_NAMES = ELECTRIC_PIANO_PRESETS.map((preset) => ({
   label: preset.name,
   value: preset.name,
@@ -132,7 +124,6 @@ function ElectricPianoPanel({
         <DevicePanel
           className="grid-cols-4"
           device={electricPianoDevice}
-          groups={GROUPS}
           onValueChange={change}
           value={value}
         />

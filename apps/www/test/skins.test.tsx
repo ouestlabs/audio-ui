@@ -25,9 +25,20 @@ const { HardwareVuMeter } = await import(
 const { HARDWARE_CSS } = await import(
   "@/registry/bases/shared/audio-ui/skins/hardware-css"
 );
+const { HardwareSkin } = await import(
+  "@/registry/bases/shared/audio-ui/skins/hardware/skin"
+);
+const { DevicePanel } = await import(
+  "@/registry/bases/shared/audio-ui/panels/device-panel"
+);
+const { compressorDevice } = await import(
+  "@/registry/bases/shared/devices/compressor/device"
+);
 const { skinSheet } = await import("../scripts/skin-css.ts");
 
 afterEach(cleanup);
+
+const ignore = () => undefined;
 
 const ID = /[a-z0-9_-]*(?:«|_r_|:r)[^\s"]*/gi;
 
@@ -121,5 +132,41 @@ describe("the Hardware skin", () => {
     const digital = accessibility(<Meter {...props} />);
     expect(digital.length).toBeGreaterThan(0);
     expect(accessibility(<HardwareVuMeter {...props} />)).toEqual(digital);
+  });
+
+  test("a device panel wears it, and says what it said", () => {
+    const panel = (
+      <DevicePanel
+        device={compressorDevice}
+        onValueChange={ignore}
+        value={compressorDevice.defaults()}
+      />
+    );
+    const digital = accessibility(panel);
+    expect(accessibility(<HardwareSkin>{panel}</HardwareSkin>)).toEqual(
+      digital
+    );
+
+    const { container } = render(<HardwareSkin>{panel}</HardwareSkin>);
+    expect(
+      container.querySelectorAll("[data-slot=knob-body].audio-cap").length
+    ).toBeGreaterThan(0);
+  });
+
+  test("a device panel gathers its knobs as the description says", () => {
+    const { container } = render(
+      <DevicePanel
+        device={compressorDevice}
+        exclude={["enabled", "model", "makeupDb", "mix"]}
+        onValueChange={ignore}
+        value={compressorDevice.defaults()}
+      />
+    );
+    // Output has nothing left to show, so it is not named.
+    expect(
+      [...container.querySelectorAll("[role=group][aria-label]")].map((group) =>
+        group.getAttribute("aria-label")
+      )
+    ).toEqual(["Compressor", "Curve", "Time"]);
   });
 });

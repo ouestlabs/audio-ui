@@ -15,6 +15,14 @@ import {
 export const compressorDevice = defineDevice({
   description:
     "Brings loud parts down: above the threshold the level rises by one decibel for every ratio decibels in, with a soft knee, an attack and a release, make-up gain and a dry and compressed mix. Its model is a smooth one, whose gain reduction is smoothed in decibels so its attack and release hold at any depth; a VCA, clean and near hard-kneed; a FET, very fast; an opto, which follows the level's RMS and releases slower the longer it has been reducing, with no release of its own; or a vari-mu, which follows its own output, its ratio rising as it is pushed, with no ratio of its own.",
+  groups: [
+    { label: "Curve", parameters: ["thresholdDb", "ratio", "kneeDb"] },
+    { label: "Time", parameters: ["attackMs", "releaseMs"] },
+    {
+      label: "Output",
+      parameters: ["makeupDb", "mix"],
+    },
+  ],
   id: "audioui.compressor",
   name: "Compressor",
   parameters: [

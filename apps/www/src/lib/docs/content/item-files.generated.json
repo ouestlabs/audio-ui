@@ -354,7 +354,8 @@
     "lib/device-library.ts"
   ],
   "device-panel": [
-    "components/audio-ui/device-panel.tsx"
+    "components/audio-ui/device-panel.tsx",
+    "components/audio-ui/device-faces.tsx"
   ],
   "device-panels": [
     "components/audio-ui/device-panels.tsx"
@@ -1373,7 +1374,8 @@
   "skin-hardware": [
     "components/audio-ui/skins/hardware/knob.tsx",
     "components/audio-ui/skins/hardware/fader.tsx",
-    "components/audio-ui/skins/hardware/vu-meter.tsx"
+    "components/audio-ui/skins/hardware/vu-meter.tsx",
+    "components/audio-ui/skins/hardware/skin.tsx"
   ],
   "slider": [
     "components/ui/slider.tsx"

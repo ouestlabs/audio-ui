@@ -60,6 +60,12 @@ const control = <const Id extends string>(
 export const stringMachineDevice = defineDevice({
   description:
     "A string machine: a violin, a viola, a cello and a bass register into a brightness filter, bowed in and out slowly, through an ensemble. Strings, violins, cellos, swells, pizzicato and choirs.",
+  groups: [
+    { label: "Registers", parameters: ["violin", "viola", "cello", "bass"] },
+    { label: "Tone", parameters: ["bright", "ensemble"] },
+    { label: "Bow", parameters: ["attack", "release"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.string-machine",
   kind: "instrument",
   name: "String Machine",

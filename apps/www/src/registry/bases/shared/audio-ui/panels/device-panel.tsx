@@ -27,6 +27,7 @@ import {
   isWaveform,
   WaveformSelect,
 } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
+import { useDeviceFaces } from "@/registry/bases/shared/audio-ui/panels/device-faces";
 import type { DeviceSignal } from "@/registry/lib/devices/device-signal";
 import { cn } from "@/registry/lib/utils";
 
@@ -63,6 +64,7 @@ function NumberControl({
   value,
 }: ControlProps<NumberParameter>) {
   const current = value[parameter.id];
+  const Face = useDeviceFaces().Knob ?? Knob;
   const format = useCallback(
     (next: number) => device.format(parameter.id, next),
     [device, parameter.id]
@@ -90,7 +92,7 @@ function NumberControl({
       >
         {withoutGroup(parameter.label, group)}
       </span>
-      <Knob
+      <Face
         anchor={parameter.anchor}
         aria-label={parameter.label}
         className="mb-5"
@@ -456,6 +458,7 @@ interface DevicePanelProps<Parameters extends readonly ParameterDescriptor[]> {
    * Parameters gathered by what they do, each group under its name, in this
    * order: a compressor's curve, its timing, its output. A group draws its
    * parameters in the order it lists them. What is in no group follows them.
+   * @default device.groups
    */
   groups?: readonly {
     label: string;
@@ -527,12 +530,22 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
   const shown = device.parameters.filter(
     (parameter) => !exclude.includes(parameter.id as never)
   );
-  if (!groups) {
+  const sections = (groups ?? device.groups ?? [])
+    .map((group) => ({
+      label: group.label,
+      controls: group.parameters.flatMap((id) => {
+        const parameter = shown.find((candidate) => candidate.id === id);
+        return parameter ? [parameter] : [];
+      }),
+    }))
+    // A group whose parameters the face all draws itself has nothing to name.
+    .filter((section) => section.controls.length > 0);
+  if (sections.length === 0) {
     return (
       <div
         aria-label={device.name}
         className={cn(
-          "grid grid-cols-[repeat(auto-fit,minmax(4.5rem,1fr))] items-start justify-items-center gap-x-2 gap-y-2",
+          "grid grid-cols-[repeat(auto-fit,minmax(var(--audio-grid,4.5rem),1fr))] items-start justify-items-center gap-x-2 gap-y-2",
           className
         )}
         data-slot="device-panel"
@@ -542,7 +555,9 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
       </div>
     );
   }
-  const grouped = new Set<string>(groups.flatMap((group) => group.parameters));
+  const grouped = new Set<string>(
+    sections.flatMap((section) => section.controls.map(({ id }) => id))
+  );
   const rest = shown.filter((parameter) => !grouped.has(parameter.id));
   return (
     <div
@@ -551,24 +566,23 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
       data-slot="device-panel"
       role="group"
     >
-      {groups.map((group) => (
+      {sections.map((section) => (
         <div
-          aria-label={group.label}
+          aria-label={section.label}
           className="flex flex-col gap-1"
-          key={group.label}
+          key={section.label}
           role="group"
         >
           <span
             aria-hidden="true"
             className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider"
           >
-            {group.label}
+            {section.label}
           </span>
           <div className="flex gap-2">
-            {group.parameters.flatMap((id) => {
-              const parameter = shown.find((candidate) => candidate.id === id);
-              return parameter ? [control(parameter, group.label)] : [];
-            })}
+            {section.controls.map((parameter) =>
+              control(parameter, section.label)
+            )}
           </div>
         </div>
       ))}

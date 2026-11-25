@@ -10,6 +10,7 @@ import {
   PlotGrid,
   PlotTraceArea,
 } from "@/registry/bases/shared/audio-ui/elements/plot";
+import { useDeviceFaces } from "@/registry/bases/shared/audio-ui/panels/device-faces";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -59,9 +60,10 @@ interface BandProps {
 /** A band: a fader for its gain, its frequency under it. */
 function Band({ disabled, id, mark, onChange, value }: BandProps) {
   const change = useCallback((db: number) => onChange(id, db), [id, onChange]);
+  const Face = useDeviceFaces().Fader ?? Fader;
   return (
     <div className="flex h-full min-w-0 flex-1 flex-col items-center gap-2">
-      <Fader
+      <Face
         anchor={BAND.anchor}
         aria-label={LABELS[id]}
         className="min-h-0 flex-1 [--fader-min-height:5rem]"

@@ -23,37 +23,6 @@ import {
 } from "@/registry/bases/shared/devices/fm-synth/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do: what every operator shares, then each operator's four. */
-const GROUPS = [
-  {
-    label: "Global",
-    parameters: [
-      "algorithm",
-      "feedback",
-      "attack",
-      "release",
-      "vibrato",
-      "volume",
-    ],
-  },
-  {
-    label: "Operator 1",
-    parameters: ["ratio1", "level1", "decay1", "sustain1"],
-  },
-  {
-    label: "Operator 2",
-    parameters: ["ratio2", "level2", "decay2", "sustain2"],
-  },
-  {
-    label: "Operator 3",
-    parameters: ["ratio3", "level3", "decay3", "sustain3"],
-  },
-  {
-    label: "Operator 4",
-    parameters: ["ratio4", "level4", "decay4", "sustain4"],
-  },
-] as const;
-
 const PRESET_NAMES = FM_SYNTH_PRESETS.map((preset) => ({
   label: preset.name,
   value: preset.name,
@@ -156,7 +125,6 @@ function FmSynthPanel({
         <DevicePanel
           className="grid-cols-6"
           device={fmSynthDevice}
-          groups={GROUPS}
           onValueChange={change}
           value={value}
         />

@@ -56,6 +56,12 @@ const control = <const Id extends string>(
 export const electricPianoDevice = defineDevice({
   description:
     "A tine electric piano: a body that barks when struck hard and a bell that pings, rung down by itself, through a pickup that can be driven and a tremolo. Warm, bell, bark and mellow.",
+  groups: [
+    { label: "Tone", parameters: ["bark", "bell", "decay"] },
+    { label: "Pickup", parameters: ["drive"] },
+    { label: "Tremolo", parameters: ["rate", "depth"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.electric-piano",
   kind: "instrument",
   name: "Electric Piano",

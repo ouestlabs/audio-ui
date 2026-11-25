@@ -36,6 +36,36 @@ export const HARDWARE_CSS = {
     "--audio-print": "oklch(0.78 0.01 90)",
     "--audio-accent": "oklch(0.7 0.17 42)",
   },
+  // A device panel wears the skin from its frame: the theme's own colors read the skin's, so no panel changes.
+  ".skin-hardware [data-slot=device-frame]": {
+    "--card": "var(--audio-body)",
+    "--card-foreground": "var(--audio-print)",
+    "--foreground": "var(--audio-print)",
+    "--muted-foreground": "var(--audio-print)",
+    "--muted": "color-mix(in oklab, black 8%, var(--audio-body))",
+    "--border":
+      "color-mix(in oklab, var(--audio-print) 22%, var(--audio-body))",
+    "--input": "color-mix(in oklab, var(--audio-print) 28%, var(--audio-body))",
+    "--primary": "var(--audio-accent)",
+    "--primary-foreground": "oklch(0.15 0.01 40)",
+    "--ring": "var(--audio-accent)",
+    color: "var(--audio-print)",
+  },
+  // A graph is a screen set in the body.
+  ".skin-hardware [data-slot=device-frame] [data-slot=plot]": {
+    "--card": "var(--audio-screen)",
+    "--foreground": "var(--audio-screen-ink)",
+    "--muted-foreground":
+      "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
+    "--muted":
+      "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
+    "--border":
+      "color-mix(in oklab, var(--audio-screen-ink) 18%, var(--audio-screen))",
+    "background-color": "var(--audio-screen)",
+    color: "var(--audio-screen-ink)",
+    "box-shadow": "inset 0 2px 6px rgb(0 0 0 / 0.55)",
+    "border-radius": "6px",
+  },
   "@utility audio-body": {
     "background-color": "var(--audio-body)",
     color: "var(--audio-print)",

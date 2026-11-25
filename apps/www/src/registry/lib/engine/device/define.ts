@@ -83,12 +83,21 @@ export type DeviceState<
       : number;
 };
 
+/** Parameters gathered by what they do, under a name: a compressor's curve, its timing, its output. */
+export interface DeviceGroup<Id extends string = string> {
+  label: string;
+  /** Parameter ids, in the order they are drawn. */
+  parameters: readonly Id[];
+}
+
 /** What `defineDevice` takes: the device's id, name, description and parameters, and whether it is an instrument, takes a sidechain or adds latency. */
 export interface DeviceDefinition<
   Parameters extends readonly ParameterDescriptor[],
 > {
   /** What it does, in a line: what a catalog or an agent shows. */
   description: string;
+  /** How a panel gathers the parameters, in the order drawn. A parameter in no group follows them. @default [] */
+  groups?: readonly DeviceGroup<NoInfer<Parameters>[number]["id"]>[];
   /** A stable reverse-DNS id, such as `audioui.compressor`: a saved project stores this, not the panel that draws it. */
   id: string;
   /** Whether it processes sound or makes it. @default "effect" */
@@ -257,6 +266,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
   readonly description: string;
   /** Prints a parameter's value for a readout, with its unit. */
   format: (id: Parameters[number]["id"], value: ParameterValue) => string;
+  /** How a panel gathers the parameters. Empty for a device that declares no group. */
+  readonly groups: readonly DeviceGroup[];
   readonly id: string;
   readonly kind: "effect" | "instrument";
   /** How long the device delays the sound for a state, in seconds, at a sample rate. 0 for a device that adds none. */
@@ -478,6 +489,24 @@ export function defineDevice<
     byId.set(parameter.id, parameter);
   }
 
+  const groups: readonly DeviceGroup[] = definition.groups ?? [];
+  const grouped = new Set<string>();
+  for (const group of groups) {
+    for (const id of group.parameters) {
+      if (!byId.has(id)) {
+        throw new DeviceDefinitionError(
+          `${definition.id}: the group ${group.label} names ${id}, which is not a parameter.`
+        );
+      }
+      if (grouped.has(id)) {
+        throw new DeviceDefinitionError(
+          `${definition.id}.${id}: this parameter is in two groups.`
+        );
+      }
+      grouped.add(id);
+    }
+  }
+
   const clampValue = (id: string, value: unknown): ParameterValue => {
     const parameter = byId.get(id);
     if (!parameter) {
@@ -569,6 +598,7 @@ export function defineDevice<
       const text = value.toFixed(decimalsOf(parameter.step));
       return parameter.unit ? `${text} ${parameter.unit}` : text;
     },
+    groups,
     id: definition.id,
     kind: definition.kind ?? "effect",
     latency: (state, sampleRate) =>

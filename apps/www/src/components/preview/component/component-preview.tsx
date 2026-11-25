@@ -3,10 +3,14 @@ import { ComponentSource } from "@/components/code/source/component-source";
 import { ComponentPreviewTabs } from "@/components/preview/component/component-preview-tabs";
 import { PreviewLoading } from "@/components/preview/frame/preview-frame";
 import { useSkin } from "@/hooks/use-skin";
-import { HARDWARE_DEMOS } from "@/lib/docs/content/skinned-demos";
+import {
+  HARDWARE_DEMOS,
+  isDevicePreview,
+} from "@/lib/docs/content/skinned-demos";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryComponent } from "@/lib/registry/core/registry";
+import { HardwareSkin } from "@/registry/bases/shared/audio-ui/skins/hardware/skin";
 import type { IconLibraryName } from "@/registry/config";
 
 // Default styleName - matches the API default
@@ -77,7 +81,13 @@ export function ComponentPreview({
       className={className}
       component={
         <React.Suspense fallback={<PreviewLoading />}>
-          <Component />
+          {skin === "hardware" && isDevicePreview(name) ? (
+            <HardwareSkin className="contents">
+              <Component />
+            </HardwareSkin>
+          ) : (
+            <Component />
+          )}
         </React.Suspense>
       }
       expand={isExpandable(name)}

@@ -11,6 +11,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { midiToHz } from "@/engine/pitch";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Piano } from "@/registry/bases/shared/audio-ui/elements/piano";
+import { useDeviceFaces } from "@/registry/bases/shared/audio-ui/panels/device-faces";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -27,13 +28,6 @@ import {
   organPreset,
 } from "@/registry/bases/shared/devices/organ/device";
 import { cn } from "@/registry/lib/utils";
-
-/** The controls by what they do, beside the drawbars. */
-const GROUPS = [
-  { label: "Percussion", parameters: ["percussion", "harmonic", "decay"] },
-  { label: "Tone", parameters: ["click", "drive"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
 
 /** What the panel draws itself: the drawbars as faders, and the rotary speaker in the title bar. */
 const DRAWN = [...ORGAN_DRAWBARS.map((bar) => bar.id), "rotary"] as const;
@@ -66,9 +60,10 @@ function Drawbar({ footage, id, onChange, value }: DrawbarProps) {
     (level: number) => onChange(id, level),
     [id, onChange]
   );
+  const Face = useDeviceFaces().Fader ?? Fader;
   return (
     <div className="flex h-full w-6 flex-col items-center gap-2">
-      <Fader
+      <Face
         aria-label={`Drawbar ${footage}`}
         className="min-h-0 flex-1 [--fader-min-height:6rem]"
         max={MAX_DRAWBAR}
@@ -240,7 +235,6 @@ function OrganPanel({
             device={organDevice}
             disabled={value.percussion ? NONE : PERCUSSION_OFF}
             exclude={DRAWN}
-            groups={GROUPS}
             onValueChange={change}
             value={value}
           />

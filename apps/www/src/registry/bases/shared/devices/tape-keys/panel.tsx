@@ -16,12 +16,6 @@ import {
 } from "@/registry/bases/shared/devices/tape-keys/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do. */
-const GROUPS = [
-  { label: "Tape", parameters: ["speed", "wow", "tone"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 /** What the title bar holds: the track the heads read, a switch of three. */
 const HEADER_CONTROLS = ["station"] as const;
 const STATION = tapeKeysDevice.parameters.find(
@@ -108,7 +102,6 @@ function TapeKeysPanel({
         <DevicePanel
           device={tapeKeysDevice}
           exclude={HEADER_CONTROLS}
-          groups={GROUPS}
           onValueChange={onValueChange}
           value={value}
         />
