@@ -1,7 +1,7 @@
 /**
  * audio.js kernels, each module as published, in its own scope, for an
  * `AudioWorklet`, which cannot import them:
- * - `@audio/effect-exciter` 1.2.1 (MIT, Dmitry Iv.): `exciter`
+ * - `@audio/effect-exciter` 1.2.3 (MIT, Dmitry Iv.): `exciter`
  */
 export const EXCITER_KERNELS = `const exciter = (() => {
 /**

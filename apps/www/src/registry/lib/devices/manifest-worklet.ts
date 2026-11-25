@@ -1,7 +1,25 @@
 /**
+ * What a host gives an audio.js manifest besides its parameters, for a device
+ * that plays one off the clock: no buffers, nowhere to emit to, and a
+ * transport at rest.
+ */
+export const MANIFEST_HOST = {
+  buffers: {},
+  emit: () => undefined,
+  transport: {
+    barStart: 0,
+    beat: 0,
+    bpm: 120,
+    playing: false,
+    timeSig: [4, 4] as [number, number],
+  },
+};
+
+/**
  * The source of an `AudioWorklet` processor that plays one of several audio.js
  * manifests: the `audio.js` of an `@audio/*` package, a processor made from
- * its parameters, which flags `restart` the ones it is made with. The devices
+ * its parameters, which mark `restart` the ones it is made with (`restart: true`,
+ * or `flags: ["restart"]` in older packages). The devices
  * that play an audio.js package as one of their models share it.
  *
  * `kernels` holds the manifests, as a device's `kernels.ts` vendors them, and
@@ -46,13 +64,15 @@ const PREROLL_SECONDS = 0.1;
 const QUIET_SECONDS = 1;
 const POST_SECONDS = 0.01;
 const BLOCK = 128;
+/** What the host gives each model besides its parameters: no buffers, nowhere to emit to, a transport at rest. */
+const HOST = { buffers: {}, emit() {}, transport: ${JSON.stringify(MANIFEST_HOST.transport)} };
 /** The parameters that make each model again when they change. */
 const RESTARTS = {};
 /** A parameter for each one of any model, at the default of the first that has it: a choice by its index. */
 const DESCRIPTORS = [];
 for (const name in MODELS) {
   const params = MODELS[name].params;
-  RESTARTS[name] = Object.keys(params).filter((key) => (params[key].flags || []).includes("restart"));
+  RESTARTS[name] = Object.keys(params).filter((key) => params[key].restart === true || (params[key].flags || []).includes("restart"));
   for (const key in params) {
     if (!DESCRIPTORS.some((descriptor) => descriptor.name === key)) {
       const param = params[key];
@@ -115,7 +135,7 @@ class ManifestProcessor extends AudioWorkletProcessor {
   }
   /** A new model, played first on the sound just gone. */
   start(name, values, key) {
-    const context = { currentTime, maxBlockSize: BLOCK, maxChannels: 2, params: values, sampleRate };
+    const context = { ...HOST, currentTime, maxBlockSize: BLOCK, maxChannels: 2, params: values, sampleRate };
     const run = MODELS[name](context);
     const late = MODELS[name].latency ? MODELS[name].latency(context) : 0;
     const [left, right] = this.history;

@@ -9,18 +9,20 @@ import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
  * a look-ahead that delays the signal so the gate is open before a transient
  * arrives, and no panel and no audio in it. It is the gate of
  * `@audio/dynamics-gate`, which closes only under a lower threshold than the
- * one it opens at.
+ * one it opens at. A key on its engine's `sidechain` opens and closes it in
+ * place of the signal.
  */
 /** The longest look-ahead, in milliseconds. */
 export const MAX_LOOKAHEAD_MS = 10;
 
 export const gateDevice = defineDevice({
   description:
-    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. Once open it closes only when the level falls the hysteresis under the threshold, so a level around the threshold does not make it chatter.",
+    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. Once open it closes only when the level falls the hysteresis under the threshold, so a level around the threshold does not make it chatter. A key connected to the sidechain opens and closes it in place of the signal, a kick opening a bass; with no key, it follows the signal itself.",
   id: "audioui.gate",
   // The look-ahead delays the signal, and so the device; off, the signal goes straight through.
   latency: (state) => (state.enabled ? state.lookaheadMs / 1000 : 0),
   name: "Gate",
+  sidechain: true,
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
@@ -119,8 +121,9 @@ export function gateCurve(state: GateState) {
 
 /**
  * The source of the gate's `AudioWorklet`, processor `audioui-gate`: the
- * manifest of `@audio/dynamics-gate`, played by `manifestWorklet`. Every
- * parameter makes it again.
+ * manifest of `@audio/dynamics-gate`, played by `manifestWorklet`, the
+ * signal on its first input and the key on its second. Every parameter
+ * changes as it plays; the look-ahead makes it again.
  */
 export const GATE_WORKLET = manifestWorklet({
   kernels: GATE_KERNELS,

@@ -63,50 +63,58 @@ function alpha (thetaDeg) {
  *   y[n] = b0*x[n] + b1*x[n-1] - a1*y[n-1]
  * DC gain is exactly 1 (no shadow at 0 Hz, for any alpha); gain at Nyquist
  * -> alpha, matching the continuous filter's high-frequency asymptote.
+ * Written out in \`block\` for each ear, its memory x1, y1 in the state's typed array.
  */
-function headShadow (x, a, K, kappa, st) {
-	let b0 = (K + a * kappa) / (K + kappa)
-	let b1 = (K - a * kappa) / (K + kappa)
-	let a1 = (K - kappa) / (K + kappa)
-	let y = b0 * x + b1 * st.x1 - a1 * st.y1
-	st.x1 = x; st.y1 = y
-	return y
-}
+
+// Delay ring sized from the physics: max |ITD| = (a/c)(1 + pi/2), plus headroom.
+const ringSize = (headRadius, fs) => max(8, ceil((headRadius / C_SOUND) * (1 + PI / 2) * fs) + 4)
 
 /**
- * @param {Float64Array} left - modified in place
- * @param {Float64Array} right - modified in place
- * @param {object} params - { azimuth: deg -180..180 (0 front, +right) default 0,
- *   distance: m default 1, headRadius: m default 0.0875, mix: 0..1 default 1, fs }
+ * The state a host keeps for \`block\`, made once: the ring, long enough for the largest head radius it will be asked
+ * for, and [write position, smoothed azimuth (NaN until the first block), the ring's length in use (0 until then), the
+ * head radius the last block ended on, x1 and y1 of the left ear's shadow filter, then the right's], the values a
+ * block reads, [azimuth, distance, headRadius, mix, fs], which the host writes before each block, and \`rows\` frames
+ * of the distance (\`d\`) and the mix (\`m\`) for a block in which they move.
  */
-function binaural (left, right, params) {
-	let azimuth = params.azimuth ?? 0
-	let distance = params.distance ?? 1
-	let headRadius = params.headRadius ?? 0.0875
-	let mix = params.mix ?? 1
-	let fs = params.fs || 44100
+const state = (maxRadius, fs, rows = 0) => ({ ring: new Float64Array(ringSize(maxRadius, fs)), st: Float64Array.of(0, NaN, 0, NaN, 0, 0, 0, 0), v: new Float64Array(5), d: new Float64Array(rows), m: new Float64Array(rows) })
 
-	if (mix <= 0) return [left, right]   // identity — skip the wet path entirely (bit-exact)
+/**
+ * One block of \`left\`, \`right\` in place, at the values in s.v. A new head radius glides across the block from the one
+ * the last block ended on (it moves the delay reads). The ring is used up to the length the larger radius needs, and
+ * grows in place for a larger one, every sample keeping its age (the length enters the rounding of the read position,
+ * so a ring of another length would move the output's last bits); past the ring \`state\` made, it is made anew, larger.
+ * \`moving\`: 1 while the distance moves, then read from s.d a sample, 2 while the mix does (s.m), 3 while both do; the
+ * values in s.v throughout otherwise.
+ */
+function block (s, left, right, moving = 0) {
+	let v = s.v, st = s.st, azimuth = v[0], distance = v[1], mix = v[3], fs = v[4]
+	if (mix <= 0 && !(moving & 2)) return   // identity — skip the wet path entirely (bit-exact)
 
-	// Delay ring sized from the physics: max |ITD| = (a/c)(1 + pi/2), plus headroom.
-	let ringSize = max(8, ceil((headRadius / C_SOUND) * (1 + PI / 2) * fs) + 4)
-	if (!params._ring || params._ring.length < ringSize) {
-		params._ring = new Float64Array(ringSize)
-		params._wp = 0
+	let to = v[2], from = st[3] === st[3] ? st[3] : to, glide = to - from
+	let need = ringSize(max(from, to), fs), n = st[2], wp = st[0]
+	if (need > n) {
+		if (need > s.ring.length) { let r = new Float64Array(need); r.set(s.ring); s.ring = r }
+		if (n) { s.ring.copyWithin(wp + need - n, wp, n); s.ring.fill(0, wp, wp + need - n) }
+		n = need
 	}
-	let ring = params._ring, n = ring.length, wp = params._wp
-	let filtL = params._filtL ?? (params._filtL = { x1: 0, y1: 0 })
-	let filtR = params._filtR ?? (params._filtR = { x1: 0, y1: 0 })
-	if (params._az == null) params._az = azimuth   // snap on first use — nothing to smooth from yet
-	let az = params._az
+	let ring = s.ring
+	if (st[1] !== st[1]) st[1] = azimuth   // snap on first use — nothing to smooth from yet
+	let az = st[1]
 	let azK = 1 - exp(-1 / (AZ_SMOOTH_TAU * fs))    // one-pole coefficient, click-free azimuth jumps
 
-	let K = 2 * C_SOUND / headRadius   // head-shadow base frequency * 2 (eq. 4: omega0 = c/a)
 	let kappa = 2 * fs                 // bilinear-transform constant
-	let distGain = 1 / (distance || 1)
+	// the source's gain at its distance: the inverse distance law clamped at the reference distance of 1 m, 1/max(d, 1)
+	// (OpenAL 1.1, §3.4.2 Inverse Distance Clamped Model; Web Audio API, §1.27 DistanceModelType "inverse", refDistance
+	// 1), so no distance boosts the source: 1/d alone has a pole at 0, a gain of 100 at 1 cm. A NaN reads as 1 m
+	let distGain = 1 / (distance > 1 ? distance : 1), dRow = s.d, mRow = s.m
+	let x1L = st[4], y1L = st[5], x1R = st[6], y1R = st[7]
 
 	for (let i = 0, l = left.length; i < l; i++) {
+		let headRadius = from + glide * (i + 1) / l
+		let K = 2 * C_SOUND / headRadius   // head-shadow base frequency * 2 (eq. 4: omega0 = c/a)
 		let dryL = left[i], dryR = right[i]
+		if (moving & 1) distGain = 1 / (dRow[i] > 1 ? dRow[i] : 1)
+		if (moving & 2) mix = mRow[i]
 		let mid = (dryL + dryR) * 0.5 * distGain
 
 		az += (azimuth - az) * azK   // smoothed azimuth — everything below tracks this, not the raw target
@@ -125,8 +133,12 @@ function binaural (left, right, params) {
 		let xR = ring[r0] * (1 - rf) + ring[r1] * rf
 		let xL = ring[l0] * (1 - lf) + ring[l1] * lf
 
-		let wetR = headShadow(xR, alpha(thR), K, kappa, filtR)
-		let wetL = headShadow(xL, alpha(thL), K, kappa, filtL)
+		// the head-shadow filter (above), y = b0*x + b1*x1 - a1*y1, for each ear
+		let aR = alpha(thR), aL = alpha(thL), a1 = (K - kappa) / (K + kappa)
+		let wetR = (K + aR * kappa) / (K + kappa) * xR + (K - aR * kappa) / (K + kappa) * x1R - a1 * y1R
+		x1R = xR; y1R = wetR
+		let wetL = (K + aL * kappa) / (K + kappa) * xL + (K - aL * kappa) / (K + kappa) * x1L - a1 * y1L
+		x1L = xL; y1L = wetL
 
 		left[i] = dryL * (1 - mix) + wetL * mix
 		right[i] = dryR * (1 - mix) + wetR * mix
@@ -134,8 +146,36 @@ function binaural (left, right, params) {
 		wp = (wp + 1) % n
 	}
 
-	params._az = az
-	params._wp = wp
+	st[0] = wp; st[1] = az; st[2] = n; st[3] = to
+	st[4] = x1L; st[5] = y1L; st[6] = x1R; st[7] = y1R
+}
+
+/**
+ * Seconds the output takes to fall 60 dB after the input stops: the farther ear's delay, (a/c)(1 + pi/2), then the
+ * head-shadow pole's decay, ln(1000)/-ln|p| samples for a pole of radius |p| (J. O. Smith: its time constant
+ * τ = -1/ln|p| samples, "Introduction to Digital Filters", Time Constant of One Pole; t60 = ln(1000)·τ, "Mathematics of
+ * the DFT", Audio Decay Time), p = (K - kappa)/(K + kappa) as above.
+ */
+function tail (headRadius, fs) {
+	let K = 2 * C_SOUND / headRadius, kappa = 2 * fs, p = abs((K - kappa) / (K + kappa))
+	return (headRadius / C_SOUND) * (1 + PI / 2) + (p > 0 ? Math.log(1000) / -Math.log(p) / fs : 0)
+}
+
+/**
+ * @param {Float64Array} left - modified in place
+ * @param {Float64Array} right - modified in place
+ * @param {object} params - { azimuth: deg -180..180 (0 front, +right) default 0,
+ *   distance: m default 1 (gain 1/max(distance, 1)), headRadius: m default 0.0875, mix: 0..1 default 1, fs }
+ */
+function binaural (left, right, params) {
+	let headRadius = params.headRadius ?? 0.0875, fs = params.fs || 44100
+	let s = params._state ??= state(headRadius, fs), v = s.v
+	v[0] = params.azimuth ?? 0
+	v[1] = params.distance ?? 1
+	v[2] = headRadius
+	v[3] = params.mix ?? 1
+	v[4] = fs
+	block(s, left, right)
 	return [left, right]
 }
 

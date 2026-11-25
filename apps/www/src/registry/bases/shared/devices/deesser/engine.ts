@@ -27,7 +27,7 @@ export interface DeesserEngine extends EffectEngine<DeesserState> {
  *
  * The de-esser is the audio.js one, loaded from a blob. Until it is ready the
  * highs pass, then the signal fades over to it. Every parameter is set as a
- * value, not a glide, since each makes the model again, which fades it in.
+ * value, and changes as it plays.
  */
 export function createDeesserEngine(
   ctx: BaseAudioContext,

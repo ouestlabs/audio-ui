@@ -1,7 +1,7 @@
 /**
  * audio.js kernels, each module as published, in its own scope, for an
  * `AudioWorklet`, which cannot import them:
- * - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`
+ * - `@audio/effect-subbass` 1.3.1 (MIT, Dmitry Iv.): `subbass`
  */
 export const BASS_ENHANCER_KERNELS = `const subbass = (() => {
 /**
@@ -13,15 +13,16 @@ export const BASS_ENHANCER_KERNELS = `const subbass = (() => {
 
 let { sin, tanh, PI } = Math
 
-// state-variable filter tick: returns [lp, bp, hp], mutates s = {l, b}
+// state-variable filter tick: mutates s = [l, b], the lowpass and bandpass legs
 function svf (s, x, f, q) {
-	s.l += f * s.b
-	let h = x - s.l - q * s.b
-	s.b += f * h
-	return [s.l, s.b, h]
+	s[0] += f * s[1]
+	let h = x - s[0] - q * s[1]
+	s[1] += f * h
 }
 
-function subbass (data, params = {}) {
+// \`lanes\`, when given, holds amount, drive and keep for each sample of \`data\`, M apart (the /audio manifest's glide of
+// moving values), in place of the params'
+function subbass (data, params = {}, lanes, M) {
 	let fc = params.fc ?? params.freq ?? 80  // sub cutoff, Hz — harmonics built from below here (\`freq\`: former name)
 	let amount = params.amount ?? 0.5        // harmonic level 0..1
 	let drive = params.drive ?? 0.5          // waveshaper intensity 0..1
@@ -29,10 +30,11 @@ function subbass (data, params = {}) {
 	let fs = params.fs || 44100
 
 	if (!params._sub) {
-		params._sub = { l: 0, b: 0 }           // sub extraction LP
-		params._out = { l: 0, b: 0 }           // harmonic band BP
+		params._sub = new Float64Array(2)      // sub extraction LP
+		params._out = new Float64Array(2)      // harmonic band BP
 		params._dc = 0
 	}
+	let s = params._sub, o = params._out, dc = params._dc
 	let f1 = 2 * sin(PI * Math.min(fc, fs / 4) / fs)
 	let f2 = 2 * sin(PI * Math.min(fc * 2.5, fs / 4) / fs)
 	let g = 1 + drive * 6
@@ -40,16 +42,19 @@ function subbass (data, params = {}) {
 
 	for (let i = 0, l = data.length; i < l; i++) {
 		let x = data[i]
-		let [sub] = svf(params._sub, x, f1, 1.2)
+		svf(s, x, f1, 1.2)
+		let sub = s[0]                         // lowpass output
+		let gi = lanes ? 1 + lanes[M + i] * 6 : g
 		// even harmonics from |x| rectification + odd from tanh — full series
-		let h = tanh(sub * g) * 0.6 + Math.abs(sub) * g * 0.4
-		params._dc += aDc * (h - params._dc)   // DC-block the rectifier output
-		h -= params._dc
+		let h = tanh(sub * gi) * 0.6 + Math.abs(sub) * gi * 0.4
+		dc += aDc * (h - dc)                   // DC-block the rectifier output
+		h -= dc
 		// keep harmonics in the speaker-friendly band around 2–5× fc
-		svf(params._out, h, f2, 0.8)
-		let harm = params._out.b               // bandpass output
-		data[i] = x - (1 - keep) * sub + amount * 2 * harm
+		svf(o, h, f2, 0.8)
+		let harm = o[1]                        // bandpass output
+		data[i] = x - (1 - (lanes ? lanes[2 * M + i] : keep)) * sub + (lanes ? lanes[i] : amount) * 2 * harm
 	}
+	params._dc = dc
 	return data
 }
 

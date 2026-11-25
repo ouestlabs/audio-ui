@@ -7,12 +7,7 @@ export interface RollScale {
 }
 
 /** The steps of each scale, as semitones above the root. */
-export const SCALES = {
-  ...NOTE_SCALES,
-  locrian: [0, 1, 3, 5, 6, 8, 10],
-  lydian: [0, 2, 4, 6, 7, 9, 11],
-  phrygian: [0, 1, 3, 5, 7, 8, 10],
-} as const satisfies Record<string, readonly number[]>;
+export const SCALES = NOTE_SCALES satisfies Record<string, readonly number[]>;
 
 /** The name of a scale of `SCALES`. */
 export type ScaleName = keyof typeof SCALES;

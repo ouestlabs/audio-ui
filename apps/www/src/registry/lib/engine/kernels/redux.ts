@@ -1,8 +1,8 @@
 /**
  * audio.js kernels, each module as published, in its own scope, for an
  * `AudioWorklet`, which cannot import them:
- * - `@audio/effect-bitcrusher` 1.1.5 (MIT, Dmitry Iv.): `bitcrusher`
- * - `@audio/effect-noiseshaper` 1.1.5 (MIT, Dmitry Iv.): `noiseShaping`
+ * - `@audio/effect-bitcrusher` 1.1.7 (MIT, Dmitry Iv.): `bitcrusher`
+ * - `@audio/effect-noiseshaper` 1.1.7 (MIT, Dmitry Iv.): `noiseShaping`
  */
 export const REDUX_KERNELS = `const bitcrusher = (() => {
 /**

@@ -1,10 +1,10 @@
+import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
+import { loadWorklet } from "@/lib/engine/worklet";
 import {
   COMPRESSOR_MODELS_WORKLET,
   type CompressorState,
   compressorSettings,
 } from "@/components/audio-ui/devices/compressor/device";
-import type { DeviceReadings, EffectEngine } from "@/lib/engine/device";
-import { loadWorklet } from "@/lib/engine/worklet";
 
 /** How fast a parameter follows a change, as a time constant in seconds: fast enough to feel direct, slow enough not to click. */
 const RAMP_SECONDS = 0.01;

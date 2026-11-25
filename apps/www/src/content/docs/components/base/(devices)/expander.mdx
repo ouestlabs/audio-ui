@@ -39,7 +39,7 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB being taken off, read per frame
 ```
 
-The browser has no expander node. The engine plays the processor of `@audio/dynamics-expander`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. The mode, the threshold, the ratio, the knee and the range change as it plays. A new attack or release builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `engine.reduction` reads what it takes off, so it reads 0 upward.
+The browser has no expander node. The engine plays the processor of `@audio/dynamics-expander`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. Every value changes as it plays. `engine.reduction` reads what it takes off, so it reads 0 upward.
 
 ## How close the curve is
 

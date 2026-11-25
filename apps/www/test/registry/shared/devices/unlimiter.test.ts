@@ -8,6 +8,7 @@ import {
   unlimiterSettings,
   unlimiterUnused,
 } from "@/registry/bases/shared/devices/unlimiter/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -51,7 +52,7 @@ describe("unlimiterDevice", () => {
         adaptive,
       };
       const run = unlimit({
-        currentTime: 0,
+        ...MANIFEST_HOST,
         maxBlockSize: BLOCK,
         maxChannels: 2,
         params: values,

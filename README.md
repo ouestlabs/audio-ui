@@ -7,6 +7,7 @@ Accessible, composable Audio UI components for the web, in React, Vue, Svelte or
 - **Primitives.** Headless, accessible parts with the behavior built in and the styling left to you, written once on the UI SDK kernel and copied into your project for React, Vue, Svelte or the web.
 - **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
 - **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
+- **Built on [audio.js](https://audio.js.org).** The engine's decoders, effects, analysis and MIDI files come from audio.js; audio/ui is the interface on top of it.
 
 Docs and demos: **https://www.audio-ui.dev**
 
@@ -55,6 +56,7 @@ The full list of checks, and how to add a component to the registry, are in [CON
 
 ## Resources
 
+- [audio.js](https://audio.js.org): the audio layer the engine builds on
 - [shadcn/ui registry](https://ui.shadcn.com/docs/registry)
 - [Fumadocs](https://fumadocs.dev/)
 

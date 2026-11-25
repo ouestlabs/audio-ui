@@ -123,8 +123,7 @@ export function expanderCurve(state: ExpanderState) {
 /**
  * The source of the expander's `AudioWorklet`, processor `audioui-expander`:
  * the manifest of `@audio/dynamics-expander`, played by `manifestWorklet`.
- * The mode, the threshold, the ratio, the knee and the range change as it
- * plays; the attack and the release make it again.
+ * Every parameter changes as it plays.
  */
 export const EXPANDER_WORKLET = manifestWorklet({
   kernels: EXPANDER_KERNELS,

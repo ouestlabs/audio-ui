@@ -1,0 +1,6 @@
+{
+  "title": "Polaris-1",
+  "description": "A drive compiled to WebAssembly: one JavaScript file run by jz, and knobs drawn from its description.",
+  "category": "Effects",
+  "uses": ["knob-web"]
+}

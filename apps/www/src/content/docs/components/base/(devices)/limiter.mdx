@@ -37,7 +37,7 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB being taken off, read per frame
 ```
 
-The limiter is the processor of `@audio/dynamics-limiter`'s manifest as published, in an `AudioWorklet`. Until the worklet is ready, the signal passes at the input gain. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `engine.reduction` reads the gain it takes off, measured from its output against its input as late.
+The limiter is the processor of `@audio/dynamics-limiter`'s manifest as published, in an `AudioWorklet`. Until the worklet is ready, the signal passes at the input gain. The ceiling and the release change as it plays. A new look-ahead or true peak, which set its delay, builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `engine.reduction` reads the gain it takes off, measured from its output against its input as late.
 
 Its latency is the look-ahead, plus 96 samples with True peak on, and the device declares it, so a host that compensates latency keeps it in time. Measured on noise pushed 20 dB over the ceiling:
 

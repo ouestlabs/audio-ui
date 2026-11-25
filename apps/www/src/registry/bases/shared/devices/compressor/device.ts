@@ -1,7 +1,10 @@
 import { type DeviceState, defineDevice } from "@/engine/device";
 import { compressor, fet, opto, varimu, vca } from "@/engine/dsp";
 import { COMPRESSOR_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
+import {
+  MANIFEST_HOST,
+  manifestWorklet,
+} from "@/registry/lib/devices/manifest-worklet";
 
 /**
  * A compressor as a device: its parameters and what they mean, with no panel
@@ -196,7 +199,7 @@ export function modelCurve(
   const levels: number[] = [];
   for (let db = CURVE_FROM_DB; db <= CURVE_TO_DB; db += 1) {
     const run = COMPRESSOR_MODELS[model]({
-      currentTime: 0,
+      ...MANIFEST_HOST,
       maxBlockSize: BLOCK,
       maxChannels: 1,
       params: values,

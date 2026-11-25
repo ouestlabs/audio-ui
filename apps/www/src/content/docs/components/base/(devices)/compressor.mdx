@@ -30,13 +30,13 @@ Brings loud parts down. Above the threshold, the level rises by one decibel for 
 
 | Model | Package | Detector | Character |
 | --- | --- | --- | --- |
-| Smooth | `@audio/dynamics-compressor` | peak | The default. The gain reduction is smoothed in decibels, so the attack and the release hold at any depth of compression. Threshold, ratio and knee move as it plays. |
+| Smooth | `@audio/dynamics-compressor` | peak | The default. The gain reduction is smoothed in decibels, so the attack and the release hold at any depth of compression. |
 | VCA | `@audio/dynamics-vca` | peak | Clean and precise, with a near-hard knee. |
 | FET | `@audio/dynamics-fet` | peak | Very fast, made for short attacks and high ratios. |
 | Opto | `@audio/dynamics-opto` | RMS | A wide soft knee, and a release that slows the longer it has been reducing. It has no Release of its own. |
 | Vari-Mu | `@audio/dynamics-varimu` | RMS, of its own output | A very soft knee, and a ratio that rises as it is pushed. It has no Ratio of its own. |
 
-Every model takes the knobs as they are set. The model runs in an `AudioWorklet`, the processor of its package's manifest as published, and Make-up goes on after it. A change to a value the model is built with (all of them on VCA, FET, Opto and Vari-Mu, the attack and the release on Smooth) builds it again, at most every 50 ms: the new one first plays the last 100 ms of sound, so it starts where the old one was, then takes over in a 30 ms fade.
+Every model takes the knobs as they are set. The model runs in an `AudioWorklet`, the processor of its package's manifest as published, and Make-up goes on after it. Every value changes as it plays, smoothed by the package, so a knob turned is heard as it goes; a new model takes over in a 30 ms fade, after first playing the last 100 ms of sound, so it starts where the old one was.
 
 ## Panel
 

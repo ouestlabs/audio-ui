@@ -1,0 +1,234 @@
+/* POLARIS-1: a drive in a small box. One light, top right.
+   Materials: a midnight-blue enclosure, a cream screen print, three knobs drawn by the knob's custom elements.
+   Plain CSS: change the tokens on .polaris-cabinet first. */
+
+.polaris-cabinet {
+  --body: #1b2438;
+  --body-hi: #263250;
+  --print: #efe6cf;
+  --print-dim: #9aa3b8;
+  --cap: #e9e2cf;
+  --cap-ink: #1b2438;
+  --arc: #f2b54a;
+  --lamp: #ff5a3c;
+  --focus: #f2b54a;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  /* The stage follows the theme; the box on it keeps its paint. */
+  background: radial-gradient(
+    ellipse at 50% 0,
+    color-mix(in oklab, var(--foreground) 7%, var(--background)),
+    var(--background) 70%
+  );
+}
+
+.polaris {
+  box-sizing: border-box;
+  display: grid;
+  gap: 1.4rem;
+  align-content: start;
+  width: min(100%, 30rem);
+  height: max-content;
+  padding: 1.25rem 1.4rem 1.1rem;
+  margin-block: auto;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  color: var(--print);
+  background: linear-gradient(180deg, var(--body-hi), var(--body));
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    inset 0 -3px 0 rgb(0 0 0 / 0.3),
+    0 24px 50px rgb(0 0 0 / 0.5);
+}
+
+.polaris-header {
+  display: flex;
+  gap: 1rem;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.polaris-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.22em;
+}
+
+.polaris-name span {
+  color: var(--arc);
+}
+
+.polaris-tagline {
+  margin: 0.35rem 0 0;
+  font-size: 0.55rem;
+  color: var(--print-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+}
+
+.polaris-play {
+  display: inline-flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.6rem 1.1rem;
+  font:
+    700 0.65rem / 1 "Arial Narrow",
+    Arial,
+    sans-serif;
+  color: var(--cap-ink);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  background: linear-gradient(180deg, #f6f0e0, var(--cap));
+  border: 0;
+  border-radius: 4px;
+  box-shadow:
+    0 3px 0 #8c846f,
+    0 4px 8px rgb(0 0 0 / 0.4);
+}
+
+.polaris-play:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.polaris-play[aria-pressed="true"],
+.polaris-play:active {
+  box-shadow:
+    0 1px 0 #8c846f,
+    inset 0 2px 5px rgb(0 0 0 / 0.25);
+  translate: 0 2px;
+}
+
+.polaris-play:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.polaris-lamp {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #5e2219;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.polaris-lamp[data-on] {
+  background: radial-gradient(circle at 40% 35%, #ffd9cf, var(--lamp) 55%);
+  box-shadow: 0 0 6px 1px rgb(255 90 60 / 0.75);
+}
+
+/* The panel ui/panel.ts draws: a column per parameter, its name over its knob, its value under it. */
+.polaris-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: 1rem;
+  justify-items: center;
+}
+
+.polaris-cell {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: center;
+}
+
+.polaris-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+}
+
+.polaris-readout {
+  font:
+    600 0.7rem / 1 ui-monospace,
+    "SF Mono",
+    Menlo,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--print-dim);
+}
+
+.polaris-knob {
+  position: relative;
+  width: 4.5rem;
+  height: 4.5rem;
+}
+
+.polaris-control {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  border-radius: 50%;
+}
+
+.polaris-control:active {
+  cursor: grabbing;
+}
+
+.polaris-control:has(:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* The cap, under the arcs */
+.polaris-control::before {
+  position: absolute;
+  inset: 18%;
+  content: "";
+  background: radial-gradient(
+    circle at 40% 30%,
+    #fbf6e8,
+    var(--cap) 60%,
+    #c9c0a8
+  );
+  border-radius: 50%;
+  box-shadow:
+    0 3px 6px rgb(0 0 0 / 0.45),
+    inset 0 -2px 3px rgb(0 0 0 / 0.15);
+}
+
+.polaris-track,
+.polaris-indicator,
+.polaris-thumb {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.polaris-track {
+  color: rgb(255 255 255 / 0.14);
+}
+
+.polaris-indicator {
+  color: var(--arc);
+}
+
+/* The thumb only holds the range input, which takes focus: it is not drawn. */
+.polaris-thumb input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.polaris-note {
+  margin: 0;
+  font-size: 0.65rem;
+  line-height: 1.5;
+  color: var(--print-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .polaris-play {
+    transition: none;
+  }
+}

@@ -55,3 +55,25 @@ export function madeProcessor(source: string, model: string, rate: number) {
     });
   return { posted, processor };
 }
+
+interface Manifest {
+  params: Record<string, { default: unknown; type: string }>;
+}
+
+/** What a host gives a manifest's own processor: every parameter it declares, at its default unless `values` sets it, a number as a one-sample array. */
+export function published(
+  manifest: Manifest,
+  values: Record<string, unknown>
+): Record<string, never> {
+  return Object.fromEntries(
+    Object.entries(manifest.params).map(([name, param]) => {
+      const value = values[name] ?? param.default;
+      return [
+        name,
+        param.type === "number" && !(value instanceof Float32Array)
+          ? Float32Array.of(Number(value))
+          : value,
+      ];
+    })
+  ) as Record<string, never>;
+}

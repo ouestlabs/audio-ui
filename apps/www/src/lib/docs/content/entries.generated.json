@@ -1333,9 +1333,14 @@
     "description": "The source of an AudioWorklet processor that plays one of several audio.js manifests (the audio.js of an @audio/* package): the model sent by message, a parameter it reads as it plays changed at once, a model made again for one it is made with, warmed on the last 100 ms and faded in, its state brought back to rest on silence, and a meter of the gain it takes off.",
     "exports": [
       {
+        "kind": "const",
+        "name": "MANIFEST_HOST",
+        "summary": "What a host gives an audio.js manifest besides its parameters, for a device that plays one off the clock: no buffers, nowhere to emit to, and a transport at rest."
+      },
+      {
         "kind": "function",
         "name": "manifestWorklet",
-        "summary": "The source of an `AudioWorklet` processor that plays one of several audio.js manifests: the `audio.js` of an `@audio/*` package, a processor made from its parameters, which flags `restart` the ones it is made with."
+        "summary": "The source of an `AudioWorklet` processor that plays one of several audio.js manifests: the `audio.js` of an `@audio/*` package, a processor made from its parameters, which mark `restart` the ones it is made with (`restart: true`, or `flags: [\"restart\"]` in older packages)."
       }
     ],
     "files": [

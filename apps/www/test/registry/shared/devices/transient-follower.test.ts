@@ -5,6 +5,7 @@ import {
   transientDevice,
   transientSettings,
 } from "@/registry/bases/shared/devices/transient/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -39,7 +40,7 @@ describe("the transient shaper's model", () => {
     const { processor } = madeProcessor(TRANSIENT_WORKLET, "shaper", RATE);
     const first = parametersOf();
     const run = transientShaper({
-      currentTime: 0,
+      ...MANIFEST_HOST,
       maxBlockSize: BLOCK,
       maxChannels: 2,
       params: first,
