@@ -2,6 +2,48 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
+    categories: ["knob"],
+    description: "knob example, in the Hardware skin",
+    files: [
+      {
+        path: "components/knob/react/knob-hardware-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-hardware-demo",
+    registryDependencies: ["@audio-ui/skin-hardware"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
+    description: "fader example, in the Hardware skin",
+    files: [
+      {
+        path: "components/fader/react/fader-hardware-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-hardware-demo",
+    registryDependencies: ["@audio-ui/skin-hardware"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "meter example, in the Hardware skin",
+    files: [
+      {
+        path: "components/meter/react/meter-hardware-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-hardware-demo",
+    registryDependencies: [
+      "@audio-ui/skin-hardware",
+      "@audio-ui/use-simulated-levels",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["synth", "hardware", "parameter-field"],
     description:
       "A small synth's panel with every audio control together: Power plays an arpeggio at the tempo through the oscillator's waveform, a low-pass filter (cutoff and resonance knobs), the gain and the transpose fields, into the master fader; the screen shows the value last touched, the LED lights on each beat",
