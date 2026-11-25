@@ -627,6 +627,9 @@
   "export-dialog": [
     "components/audio-ui/export-dialog.tsx"
   ],
+  "fader-hardware-demo": [
+    "components/examples/fader-hardware-demo.tsx"
+  ],
   "fader-pan-demo": [
     "components/examples/fader-pan-demo.tsx"
   ],
@@ -761,6 +764,9 @@
   "knob-filter-control-demo": [
     "components/examples/knob-filter-control-demo.tsx"
   ],
+  "knob-hardware-demo": [
+    "components/examples/knob-hardware-demo.tsx"
+  ],
   "knob-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/knob/knob.ts",
@@ -836,6 +842,9 @@
   ],
   "menubar": [
     "components/ui/menubar.tsx"
+  ],
+  "meter-hardware-demo": [
+    "components/examples/meter-hardware-demo.tsx"
   ],
   "meter-levels": [
     "components/audio-ui/meter/levels.ts",
@@ -1360,6 +1369,11 @@
   ],
   "simulated-levels": [
     "lib/simulated-levels.ts"
+  ],
+  "skin-hardware": [
+    "components/audio-ui/skins/hardware/knob.tsx",
+    "components/audio-ui/skins/hardware/fader.tsx",
+    "components/audio-ui/skins/hardware/vu-meter.tsx"
   ],
   "slider": [
     "components/ui/slider.tsx"

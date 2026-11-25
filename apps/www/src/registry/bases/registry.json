@@ -7,13 +7,13 @@
       "name": "envelope"
     },
     {
-      "count": 7,
+      "count": 8,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
     },
     {
-      "count": 43,
+      "count": 44,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -31,7 +31,7 @@
       "name": "parameter-field"
     },
     {
-      "count": 6,
+      "count": 7,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
       "name": "meter"
@@ -181,5 +181,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 123
+  "totalComponents": 126
 }

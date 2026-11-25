@@ -32,7 +32,9 @@ import {
   SHIPPED_PRIMITIVES,
   sharedDependencies,
 } from "../src/registry/bases/primitives.ts";
+import { HARDWARE_CSS } from "../src/registry/bases/shared/audio-ui/skins/hardware-css.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
+import { skinSheet } from "./skin-css.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
@@ -801,6 +803,10 @@ function itemOf(name: string, base: string): SourceItem | undefined {
 const startedAt = Date.now();
 console.log("Building static registry...");
 await buildManifests();
+await Bun.write(
+  `${REGISTRY}/styles/skins/hardware.css`,
+  skinSheet(HARDWARE_CSS)
+);
 console.log(`  Internal registry namespace: ${NAMESPACE}`);
 
 const cnClassesByStyle = new Map(

@@ -88,4 +88,43 @@ Set them on any element to restyle what it holds, in both color schemes:
 
 A token changes a color, never a behavior: the controls keep their keyboard, pointer and ARIA whatever they wear.
 
+## Skins
+
+A skin is tokens, materials and drawn faces. It changes how a control looks, never its props, events or ARIA.
+
+The Hardware skin is a matte body, a dark inset screen, one accent and printed scales.
+
+<Install name="skin-hardware" />
+
+Put `skin-hardware` on the element that holds the panel, and use the faces in place of the elements. Each face takes the same props.
+
+| Face | In place of | Drawn as |
+| --- | --- | --- |
+| `HardwareKnob` | `Knob` | A matte cap in a socket, a grip line, a printed scale of eleven ticks or your `marks` |
+| `HardwareFader` | `Fader` | A narrow slot, a ribbed cap, a printed scale: dB for a range that reaches -48, else its ends and middle |
+| `HardwareVuMeter` | `Meter` | A needle dial per channel from -20 to +3 VU, with a clip lamp. 0 VU is -18 dB |
+
+```tsx
+import { HardwareKnob } from "@/components/audio-ui/skins/hardware/knob"
+
+<div className="skin-hardware audio-body rounded-xl p-6">
+  <HardwareKnob aria-label="Drive" defaultValue={30} />
+</div>
+```
+
+The faces draw their own parts, so `thumbMarks` of the fader and `marks`, `peakMarks` and `scale` of the meter do not change them.
+
+### Materials
+
+| Class | Material |
+| --- | --- |
+| `audio-body` | The matte panel |
+| `audio-screen` | A dark screen set into the body |
+| `audio-cap` | What the hand holds, lit from above |
+| `audio-groove` | The slot a value runs in |
+| `audio-print` | Lettering printed on the body |
+| `audio-lamp`, `audio-lamp-on` | A lamp, off and lit |
+
+The skin adds three tokens to the audio tokens: `--audio-body`, `--audio-screen` and `--audio-screen-ink`.
+
 For general customization guidelines such as adding your own custom colors or switching between utility classes and variables, please refer to the [official shadcn/ui documentation](https://ui.shadcn.com/docs/theming).

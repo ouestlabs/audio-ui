@@ -1,4 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
+import { HARDWARE_CSS } from "./skins/hardware-css.ts";
 
 /** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
 const ENVELOPE_SHAKE = {
@@ -24,6 +25,37 @@ const ENVELOPE_SHAKE = {
 };
 
 export const audioUi: RegistryItem[] = [
+  {
+    css: HARDWARE_CSS,
+    dependencies: [],
+    description:
+      "The Hardware skin: a matte body, a dark inset screen and one accent as tokens and materials on .skin-hardware, with a capped knob, a ribbed fader and a needle VU meter that keep the props of Knob, Fader and Meter.",
+    files: [
+      {
+        path: "audio-ui/skins/hardware/knob.tsx",
+        target: "components/audio-ui/skins/hardware/knob.tsx",
+        type: "registry:ui",
+      },
+      {
+        path: "audio-ui/skins/hardware/fader.tsx",
+        target: "components/audio-ui/skins/hardware/fader.tsx",
+        type: "registry:ui",
+      },
+      {
+        path: "audio-ui/skins/hardware/vu-meter.tsx",
+        target: "components/audio-ui/skins/hardware/vu-meter.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "skin-hardware",
+    registryDependencies: [
+      "@audio-ui/knob",
+      "@audio-ui/fader",
+      "@audio-ui/meter",
+      "@audio-ui/needle-meter",
+    ],
+    type: "registry:ui",
+  },
   {
     dependencies: [],
     description:

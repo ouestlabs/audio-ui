@@ -2,6 +2,8 @@ import * as React from "react";
 import { ComponentSource } from "@/components/code/source/component-source";
 import { ComponentPreviewTabs } from "@/components/preview/component/component-preview-tabs";
 import { PreviewLoading } from "@/components/preview/frame/preview-frame";
+import { useSkin } from "@/hooks/use-skin";
+import { HARDWARE_DEMOS } from "@/lib/docs/content/skinned-demos";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryComponent } from "@/lib/registry/core/registry";
@@ -11,7 +13,7 @@ import type { IconLibraryName } from "@/registry/config";
 const DEFAULT_STYLE_NAME = "ui-sdk-nova";
 
 export function ComponentPreview({
-  name,
+  name: digitalName,
   type,
   className,
   previewClassName,
@@ -34,6 +36,12 @@ export function ComponentPreview({
   previewClassName?: string;
   code?: string;
 }) {
+  const [skin] = useSkin();
+  // The preview and its code both follow the skin.
+  const name =
+    skin === "hardware"
+      ? (HARDWARE_DEMOS[digitalName] ?? digitalName)
+      : digitalName;
   const Component = getRegistryComponent(name, styleName);
   // The code without its own copy button: the panel's bar copies it.
   const source = React.useCallback(
