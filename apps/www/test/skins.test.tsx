@@ -10,6 +10,12 @@ const { Knob } = await import("@/registry/bases/shared/audio-ui/elements/knob");
 const { HardwareKnob } = await import(
   "@/registry/bases/shared/audio-ui/skins/hardware/knob"
 );
+const { Fader } = await import(
+  "@/registry/bases/shared/audio-ui/elements/fader"
+);
+const { HardwareFader } = await import(
+  "@/registry/bases/shared/audio-ui/skins/hardware/fader"
+);
 const { HARDWARE_CSS } = await import(
   "@/registry/bases/shared/audio-ui/skins/hardware-css"
 );
@@ -65,5 +71,30 @@ describe("the Hardware skin", () => {
     const digital = accessibility(<Knob {...props} />);
     expect(digital.length).toBeGreaterThan(0);
     expect(accessibility(<HardwareKnob {...props} />)).toEqual(digital);
+  });
+
+  test.each(["vertical", "horizontal"] as const)(
+    "its %s fader says what the fader says",
+    (orientation) => {
+      const props = {
+        "aria-label": "Volume",
+        defaultValue: -6,
+        editableValue: true,
+        formatValue: (value: number) => `${value} dB`,
+        max: 6,
+        min: -60,
+        orientation,
+      } as const;
+      const digital = accessibility(<Fader {...props} />);
+      expect(digital.length).toBeGreaterThan(0);
+      expect(accessibility(<HardwareFader {...props} />)).toEqual(digital);
+    }
+  );
+
+  test("its fader keeps the fader's own range", () => {
+    const digital = accessibility(<Fader aria-label="Volume" />);
+    expect(accessibility(<HardwareFader aria-label="Volume" />)).toEqual(
+      digital
+    );
   });
 });
