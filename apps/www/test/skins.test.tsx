@@ -16,6 +16,12 @@ const { Fader } = await import(
 const { HardwareFader } = await import(
   "@/registry/bases/shared/audio-ui/skins/hardware/fader"
 );
+const { Meter } = await import(
+  "@/registry/bases/shared/audio-ui/elements/meter"
+);
+const { HardwareVuMeter } = await import(
+  "@/registry/bases/shared/audio-ui/skins/hardware/vu-meter"
+);
 const { HARDWARE_CSS } = await import(
   "@/registry/bases/shared/audio-ui/skins/hardware-css"
 );
@@ -96,5 +102,16 @@ describe("the Hardware skin", () => {
     expect(accessibility(<HardwareFader aria-label="Volume" />)).toEqual(
       digital
     );
+  });
+
+  test("its VU meter says what the meter says, channel by channel", () => {
+    const props = {
+      "aria-label": "Output",
+      value: [-12, -6],
+      warnThreshold: -12,
+    } as const;
+    const digital = accessibility(<Meter {...props} />);
+    expect(digital.length).toBeGreaterThan(0);
+    expect(accessibility(<HardwareVuMeter {...props} />)).toEqual(digital);
   });
 });

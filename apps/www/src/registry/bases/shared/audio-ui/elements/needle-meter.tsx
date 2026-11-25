@@ -88,6 +88,16 @@ const ZONE_ARC = arcBetween(
 );
 const TIP = pointOn(0, RADIUS - 6);
 
+/** The standard VU dial in a `200 110` view box, for what draws a needle of its own. */
+export const VU_DIAL = {
+  angleOf,
+  arc: SCALE_ARC,
+  pivot: { x: PIVOT_X, y: PIVOT_Y },
+  scale: SCALE,
+  tip: TIP,
+  zone: ZONE_ARC,
+};
+
 export interface NeedleMeterProps {
   "aria-label": string;
   className?: string;
