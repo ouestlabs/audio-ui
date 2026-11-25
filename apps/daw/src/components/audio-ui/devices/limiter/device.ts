@@ -94,7 +94,8 @@ export function limiterCurve(state: LimiterState) {
 /**
  * The source of the limiter's `AudioWorklet`, processor
  * `audioui-limiter`: the manifest of `@audio/dynamics-limiter`, played by
- * `manifestWorklet`. Every parameter makes it again.
+ * `manifestWorklet`. The ceiling and the release change as it plays; the
+ * look-ahead and the true peak make it again.
  */
 export const LIMITER_WORKLET = manifestWorklet({
   kernels: LIMITER_KERNELS,

@@ -145,7 +145,7 @@ export function companderCurve(state: CompanderState) {
 /**
  * The source of the compander's `AudioWorklet`, processor
  * `audioui-compander`: the manifest of `@audio/dynamics-compand`, played by
- * `manifestWorklet`. Every parameter makes it again.
+ * `manifestWorklet`. Every parameter changes as it plays.
  */
 export const COMPANDER_WORKLET = manifestWorklet({
   kernels: COMPANDER_KERNELS,

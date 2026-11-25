@@ -107,9 +107,8 @@ export function duckerCurve(state: DuckerState) {
 /**
  * The source of the ducker's `AudioWorklet`, processor `audioui-ducker`: the
  * manifest of `@audio/dynamics-ducker`, played by `manifestWorklet`, the
- * sound on its first input and the key on its second. The threshold, the
- * ratio, the knee and the range change as it plays; the attack and the
- * release make it again.
+ * sound on its first input and the key on its second. Every parameter
+ * changes as it plays.
  */
 export const DUCKER_WORKLET = manifestWorklet({
   kernels: DUCKER_KERNELS,

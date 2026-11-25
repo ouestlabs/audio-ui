@@ -27,8 +27,9 @@ export interface LimiterEngine extends EffectEngine<LimiterState> {
  *
  * The limiter is the audio.js one, loaded from a blob. Until it is ready the
  * signal passes at the input gain, then it fades over to the limiter. Off, the
- * signal goes round it. Every parameter is set as a value, not a glide, since
- * each makes the model again, which fades it in.
+ * signal goes round it. Every parameter is set as a value: the ceiling and
+ * the release change as it plays, and a new look-ahead or true peak makes the
+ * model again, which fades it in.
  */
 export function createLimiterEngine(
   ctx: BaseAudioContext,

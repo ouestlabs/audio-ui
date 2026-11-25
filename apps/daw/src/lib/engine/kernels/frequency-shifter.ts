@@ -22,7 +22,9 @@ function hilbertCoefs (N) {
 	return h
 }
 
-function frequencyShifter (data, params = {}) {
+// \`mixes\`, when given, holds the mix for each sample of \`data\` (the /audio manifest's glide of a moving mix), in place
+// of params.mix
+function frequencyShifter (data, params = {}, mixes) {
 	let shift = params.shift ?? 100      // Hz (+up, -down)
 	let mix   = params.mix   ?? 1        // wet/dry
 	let taps  = params.taps  || 65       // Hilbert FIR length (odd)
@@ -63,7 +65,8 @@ function frequencyShifter (data, params = {}) {
 		// Blend against the group-delay-aligned dry (\`real\`, M samples back) — an
 		// undelayed dry would comb with the wet at mix < 1. Output delay is a
 		// constant M at every mix, matching the declared atom latency.
-		data[i] = real * (1 - mix) + y * mix
+		let m = mixes ? mixes[i] : mix
+		data[i] = real * (1 - m) + y * m
 		p = (p + 1) % N
 	}
 
