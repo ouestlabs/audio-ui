@@ -10,7 +10,7 @@ const MARKS = [
 
 export default function KnobHardwareDemo() {
   return (
-    <div className="skin-hardware audio-body flex gap-6 rounded-xl px-8 py-6">
+    <div className="skin-hardware audio-body flex items-center gap-6 rounded-xl px-8 py-6">
       <HardwareKnob
         aria-label="Level"
         defaultValue={50}

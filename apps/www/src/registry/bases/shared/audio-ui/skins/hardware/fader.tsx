@@ -18,7 +18,13 @@ const SILENCE = -60;
 function printedMarks(min: number, max: number): FaderMark[] {
   if (min <= DECIBEL_FLOOR && max <= 24) {
     const levels = DECIBELS.filter((level) => level > min && level <= max);
-    return [...levels, { label: min <= SILENCE ? "-∞" : min, value: min }];
+    return [
+      ...levels.map((value) => ({
+        label: value > 0 ? `+${value}` : value,
+        value,
+      })),
+      { label: min <= SILENCE ? "-∞" : min, value: min },
+    ];
   }
   return [min, (min + max) / 2, max].map((value) => ({ label: value, value }));
 }

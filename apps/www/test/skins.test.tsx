@@ -97,6 +97,14 @@ describe("the Hardware skin", () => {
     }
   );
 
+  test("its fader prints a number at each graduation in dB", () => {
+    const { container } = render(<HardwareFader aria-label="Volume" />);
+    const scale = container.querySelector("[data-slot=fader-scale]");
+    expect(
+      [...(scale?.children ?? [])].map((mark) => mark.textContent)
+    ).toEqual(["+6", "0", "-6", "-12", "-24", "-48", "-∞"]);
+  });
+
   test("its fader keeps the fader's own range", () => {
     const digital = accessibility(<Fader aria-label="Volume" />);
     expect(accessibility(<HardwareFader aria-label="Volume" />)).toEqual(
