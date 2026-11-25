@@ -1361,6 +1361,11 @@
   "simulated-levels": [
     "lib/simulated-levels.ts"
   ],
+  "skin-hardware": [
+    "components/audio-ui/skins/hardware/knob.tsx",
+    "components/audio-ui/skins/hardware/fader.tsx",
+    "components/audio-ui/skins/hardware/vu-meter.tsx"
+  ],
   "slider": [
     "components/ui/slider.tsx"
   ],
