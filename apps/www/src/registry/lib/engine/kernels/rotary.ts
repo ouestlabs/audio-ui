@@ -5,8 +5,8 @@
  * - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `butterworth`
  * - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `linkwitzRiley`
  * - `@audio/eq-crossover` 1.0.2 (MIT, Dmitry Iv.): `crossover`
- * - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `step`, `state`
- * - `@audio/effect-rotary` 0.1.2 (MIT, Dmitry Iv.): `rotary`
+ * - `@audio/biquad` 1.3.0 (MIT, Dmitry Iv.): `step`, `state`
+ * - `@audio/effect-rotary` 0.2.1 (MIT, Dmitry Iv.): `rotary`
  */
 export const ROTARY_KERNELS = `const polesSos = (() => {
 /**
@@ -632,48 +632,45 @@ const { step, state } = (() => {
 
 const PI2 = Math.PI * 2
 
-function base (fc, Q, fs) {
-	let w = PI2 * fc / fs
-	return { cw: Math.cos(w), sw: Math.sin(w), alpha: Math.sin(w) / (2 * Q) }
-}
-const norm = (b0, b1, b2, a0, a1, a2) => ({ b0: b0 / a0, b1: b1 / a0, b2: b2 / a0, a1: a1 / a0, a2: a2 / a0 })
+// Each design writes its section into \`c\` when one is given (a retune that allocates nothing), else into a new object
+const norm = (c, b0, b1, b2, a0, a1, a2) => { c.b0 = b0 / a0; c.b1 = b1 / a0; c.b2 = b2 / a0; c.a1 = a1 / a0; c.a2 = a2 / a0; return c }
 
-function lowpass (fc, Q = Math.SQRT1_2, fs = 44100) {
-	let { cw, alpha } = base(fc, Q, fs)
-	return norm((1 - cw) / 2, 1 - cw, (1 - cw) / 2, 1 + alpha, -2 * cw, 1 - alpha)
+function lowpass (fc, Q = Math.SQRT1_2, fs = 44100, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
+	return norm(c, (1 - cw) / 2, 1 - cw, (1 - cw) / 2, 1 + alpha, -2 * cw, 1 - alpha)
 }
-function highpass (fc, Q = Math.SQRT1_2, fs = 44100) {
-	let { cw, alpha } = base(fc, Q, fs)
-	return norm((1 + cw) / 2, -(1 + cw), (1 + cw) / 2, 1 + alpha, -2 * cw, 1 - alpha)
+function highpass (fc, Q = Math.SQRT1_2, fs = 44100, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
+	return norm(c, (1 + cw) / 2, -(1 + cw), (1 + cw) / 2, 1 + alpha, -2 * cw, 1 - alpha)
 }
-function bandpass (fc, Q = 1, fs = 44100) {  // constant 0 dB peak gain
-	let { cw, alpha } = base(fc, Q, fs)
-	return norm(alpha, 0, -alpha, 1 + alpha, -2 * cw, 1 - alpha)
+function bandpass (fc, Q = 1, fs = 44100, c = {}) {  // constant 0 dB peak gain
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
+	return norm(c, alpha, 0, -alpha, 1 + alpha, -2 * cw, 1 - alpha)
 }
-function notch (fc, Q = 1, fs = 44100) {
-	let { cw, alpha } = base(fc, Q, fs)
-	return norm(1, -2 * cw, 1, 1 + alpha, -2 * cw, 1 - alpha)
+function notch (fc, Q = 1, fs = 44100, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
+	return norm(c, 1, -2 * cw, 1, 1 + alpha, -2 * cw, 1 - alpha)
 }
-function allpass (fc, Q = Math.SQRT1_2, fs = 44100) {
-	let { cw, alpha } = base(fc, Q, fs)
-	return norm(1 - alpha, -2 * cw, 1 + alpha, 1 + alpha, -2 * cw, 1 - alpha)
+function allpass (fc, Q = Math.SQRT1_2, fs = 44100, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
+	return norm(c, 1 - alpha, -2 * cw, 1 + alpha, 1 + alpha, -2 * cw, 1 - alpha)
 }
-function peaking (fc, Q = 1, fs = 44100, dB = 0) {
-	let { cw, alpha } = base(fc, Q, fs)
+function peaking (fc, Q = 1, fs = 44100, dB = 0, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), alpha = Math.sin(w) / (2 * Q)
 	let A = 10 ** (dB / 40)
-	return norm(1 + alpha * A, -2 * cw, 1 - alpha * A, 1 + alpha / A, -2 * cw, 1 - alpha / A)
+	return norm(c, 1 + alpha * A, -2 * cw, 1 - alpha * A, 1 + alpha / A, -2 * cw, 1 - alpha / A)
 }
-function lowshelf (fc, Q = Math.SQRT1_2, fs = 44100, dB = 0) {
-	let { cw, sw } = base(fc, Q, fs)
+function lowshelf (fc, Q = Math.SQRT1_2, fs = 44100, dB = 0, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), sw = Math.sin(w)
 	let A = 10 ** (dB / 40), s = Math.sqrt(A) * sw / Q
-	return norm(
+	return norm(c,
 		A * ((A + 1) - (A - 1) * cw + s), 2 * A * ((A - 1) - (A + 1) * cw), A * ((A + 1) - (A - 1) * cw - s),
 		(A + 1) + (A - 1) * cw + s, -2 * ((A - 1) + (A + 1) * cw), (A + 1) + (A - 1) * cw - s)
 }
-function highshelf (fc, Q = Math.SQRT1_2, fs = 44100, dB = 0) {
-	let { cw, sw } = base(fc, Q, fs)
+function highshelf (fc, Q = Math.SQRT1_2, fs = 44100, dB = 0, c = {}) {
+	let w = PI2 * fc / fs, cw = Math.cos(w), sw = Math.sin(w)
 	let A = 10 ** (dB / 40), s = Math.sqrt(A) * sw / Q
-	return norm(
+	return norm(c,
 		A * ((A + 1) + (A - 1) * cw + s), -2 * A * ((A - 1) + (A + 1) * cw), A * ((A + 1) + (A - 1) * cw - s),
 		(A + 1) - (A - 1) * cw + s, 2 * ((A - 1) - (A + 1) * cw), (A + 1) - (A - 1) * cw - s)
 }
@@ -763,6 +760,183 @@ function cascadeMagnitude (sos, f, fs = 44100) {
 	return mag
 }
 
+/**
+ * Seconds a section (or an SOS cascade) rings once its input stops, until it stays 60 dB under the input: the tail of
+ * CONTRACT.md. After any input bounded by 1 stops, the output k frames on is at most the sum of |h| from frame k of the
+ * impulse response h, so the frames until that rest is under 1e-3 are a tail no input exceeds; a held tone at the
+ * resonance, or a DC step, comes within a few percent of it. One section's rest is found in closed form (ring1); a
+ * cascade's h is summed as process() runs the sections, the rest past where the sum stops bounded from their states by
+ * their poles (rest2). 0 where the ring is 128 frames or under (no tail needed, CONTRACT.md); Infinity for a pole on or
+ * past the unit circle, or a cascade's rest still over 1e-3 at 2^22 frames.
+ */
+function tail (sos, fs = 44100) {
+	let S = Array.isArray(sos) ? sos : [sos], n = S.length, L = new Float64Array(n), z = new Float64Array(2 * n)
+	// what a section passes on, at most: the sum of its own |h|, b0 and then the ring of its state after the impulse
+	for (let i = 0; i < n; i++) {
+		let { b0, b1, b2, a1, a2 } = S[i], h1 = b1 - a1 * b0
+		L[i] = Math.abs(b0) + rest2(a1, a2, h1, b2 - a2 * b0 - a1 * h1)
+		if (!(L[i] < Infinity)) return Infinity
+	}
+	// one section: past frame 0 its h is the free ring from h1, h2, the frames until its rest is under 1e-3 found in
+	// closed form, at a cost that does not grow with the ring
+	if (n === 1) {
+		let { b0, b1, b2, a1, a2 } = S[0], h1 = b1 - a1 * b0, N = ring1(a1, a2, h1, b2 - a2 * b0 - a1 * h1, 1e-3)
+		return N <= 128 ? 0 : N / fs
+	}
+	// the cascade's rest from its states: each section's own ring, and on it what the sections before still feed it
+	let rest = () => {
+		let u = 0
+		for (let i = 0; i < n; i++) u = rest2(S[i].a1, S[i].a2, z[2 * i], z[2 * i + 1] - S[i].a1 * z[2 * i]) + (u > 0 ? L[i] * u : 0)
+		return u
+	}
+	// frames k to k + m of h through the sections, as process() runs them; the sum of their |h|
+	let run = (k, m) => {
+		let sum = 0
+		for (let end = k + m; k < end; k++) {
+			let x = k === 0 ? 1 : 0
+			for (let i = 0; i < n; i++) {
+				let c = S[i], y = c.b0 * x + z[2 * i]
+				z[2 * i] = c.b1 * x - c.a1 * y + z[2 * i + 1]
+				z[2 * i + 1] = c.b2 * x - c.a2 * y
+				x = y
+			}
+			sum += Math.abs(x)
+		}
+		return sum
+	}
+	let total = 0, k = 0, r
+	do { total += run(k, 256); k += 256; r = rest() } while (!(r <= 1e-4) && k < 1 << 22)
+	if (!(r <= 1e-3)) return Infinity
+	// from the impulse again: the first frame from which what is left (the sum past it and the bound on the rest) is
+	// under 1e-3. The ring is the frames before it, after the input's last
+	z.fill(0)
+	let left = total + r, keep = new Float64Array(2 * n), N = 0
+	for (; ; N += 256) { keep.set(z); let m = run(N, 256); if (left - m <= 1e-3) { z.set(keep); break } left -= m }
+	while (left > 1e-3) left -= run(N++, 1)
+	return N - 1 <= 128 ? 0 : (N - 1) / fs
+}
+
+// A bound on Σ|y_j|, j ≥ 0, for y_j = −a1·y_{j−1} − a2·y_{j−2}: the ring of a section's poles from y0 and y1. With p, q
+// the roots of z² + a1·z + a2 and r the larger radius, y_j = y0·pʲ + (y1 − p·y0)·(qʲ − pʲ)/(q − p), and that last ratio
+// is at most j·r^(j−1) however close p and q are: Σ ≤ |y0|/(1 − r) + |y1 − p·y0|/(1 − r)². A conjugate pair r·e^(±iθ)
+// rings as E·rʲ·cos(jθ + φ), E² = 4(y1² + a1·y0·y1 + a2·y0²)/(4a2 − a1²): Σ ≤ E/(1 − r). Two real roots ring as their
+// two parts, each bounded by its own geometric sum. The least of those that apply
+function rest2 (a1, a2, y0, y1) {
+	if (y0 === 0 && y1 === 0) return 0
+	let d = a1 * a1 - 4 * a2, s = Math.sqrt(Math.abs(d)), Y0 = Math.abs(y0)
+	if (d < 0) {
+		let r = Math.sqrt(a2)
+		if (!(r < 1)) return Infinity
+		return Math.min(Math.sqrt(4 * (y1 * y1 + a1 * y0 * y1 + a2 * y0 * y0) / -d) / (1 - r), Y0 / (1 - r) + Math.hypot(y1 + a1 / 2 * y0, s / 2 * y0) / (1 - r) ** 2)
+	}
+	let p = (s - a1) / 2, q = (-s - a1) / 2, r = Math.max(Math.abs(p), Math.abs(q))
+	if (!(r < 1)) return Infinity
+	let u = Y0 / (1 - r) + Math.min(Math.abs(y1 - p * y0), Math.abs(y1 - q * y0)) / (1 - r) ** 2
+	return s > 0 ? Math.min(u, Math.abs(y1 - q * y0) / s / (1 - Math.abs(p)) + Math.abs(y1 - p * y0) / s / (1 - Math.abs(q))) : u
+}
+
+// The first frame m from which Σ_{j≥m} |y_j| is at most \`eps\`, y_j = −a1·y_{j−1} − a2·y_{j−2} from y0, y1 (the ring of one
+// section once its input stops), from closed forms, so the cost does not grow with the ring. Infinity for a root on or
+// past the unit circle.
+// - A conjugate pair r·e^(±iθ) rings as E·rʲ·cos(jθ + φ) (ringPair). |cos| is the same with π − θ for θ, so θ ≤ π/2.
+//   Where it turns slowly against its decay (θ under 64·(1 − r)), the sum over each stretch of one sign is the geometric
+//   Re(e^(iφ)·Σ zʲ), z = r·e^(iθ): exact. Where it turns fast, the stretches are many and |cos x| is summed by its
+//   Fourier series, 2/π + (4/π)·Σ (−1)^(k+1)·cos(2kx)/(4k² − 1), a geometric sum at each k, to k = 64 with the rest
+//   bounded: within 0.8 % of the sum.
+// - Two real roots p, q (|q| ≤ |p|): |y_j| = |p|ʲ·|A + B·ρʲ|, ρ = q/p, whose sign changes at most once over the even j
+//   and once over the odd, each stretch a geometric sum (sumTwo). Repeated, or within 1e-9 of it: |p|ʲ·|C + D·j|, one
+//   change (sumLin)
+function ring1 (a1, a2, y0, y1, eps) {
+	if (y0 === 0 && y1 === 0) return 0
+	if (a1 === 0 && a2 === 0) return Math.abs(y0) + Math.abs(y1) <= eps ? 0 : Math.abs(y1) <= eps ? 1 : 2   // no poles: y0, y1, then 0
+	let d = a1 * a1 - 4 * a2
+	if (d < 0) {
+		let r = Math.sqrt(a2)
+		if (!(r < 1)) return Infinity
+		let c = -a1 / (2 * r), sn = Math.sqrt(-d) / (2 * r)
+		if (sn > 1e-9) return ringPair(r, c, sn, y0, y1, eps)
+	}
+	let s = Math.sqrt(Math.max(d, 0)), p = (s - a1) / 2, q = (-s - a1) / 2
+	if (Math.abs(q) > Math.abs(p)) { let t = p; p = q; q = t }
+	if (!(Math.abs(p) < 1)) return Infinity
+	let A, B, D = 0, rho = 0
+	if (Math.abs(p - q) > 1e-9 * Math.max(1e-300, Math.abs(p))) { A = (y1 - q * y0) / (p - q); B = (p * y0 - y1) / (p - q); rho = q / p }
+	else { A = y0; D = p ? y1 / p - y0 : 0; B = 0 }
+	let P = Math.abs(p), sum = m => D ? sumLin(P, A, D, m) : rho >= 0 ? sumTwo(P, A, B, rho, m, 1) : sumTwo(P, A, B, -rho, m + (m & 1), 2) + sumTwo(P, A, -B, -rho, m + 1 - (m & 1), 2)
+	// the rest only falls: the least m with sum(m) ≤ eps, between 0 and where the plain bound is under eps
+	if (sum(0) <= eps) return 0
+	let hi = 1
+	while (sum(hi) > eps) { hi *= 2; if (hi > 2 ** 52) return Infinity }
+	let lo = hi >> 1
+	while (hi - lo > 1) { let mid = Math.floor((lo + hi) / 2); if (sum(mid) > eps) lo = mid; else hi = mid }
+	return hi
+}
+
+// Σ_{j ≥ m, j ≡ m mod st} P^j·|A + B·σ^j| (0 ≤ σ ≤ 1, P < 1): A + B·σ^j keeps its sign but for one change, where σ^j = −A/B
+function sumTwo (P, A, B, sig, m, st) {
+	let g = (x, a, b) => { // Σ x^j over j = a, a + st, … below b (b may be Infinity)
+		if (x === 0) return a === 0 ? 1 : 0
+		let n = b === Infinity ? Infinity : Math.ceil((b - a) / st), xa = x ** a, xs = x ** st
+		return n === Infinity ? xa / (1 - xs) : xa * (1 - x ** (st * n)) / (1 - xs)
+	}
+	let seg = (a, b) => Math.abs(A * g(P, a, b) + B * g(P * sig, a, b)), cut = Infinity, t = -A / B
+	if (sig === 0) cut = m === 0 ? st : Infinity   // σ^0 = 1, then 0: the first term apart
+	else if (B !== 0 && t > 0 && t < 1 && sig < 1) { let j = Math.log(t) / Math.log(sig); cut = m + Math.max(0, Math.ceil((j - m) / st)) * st }
+	return cut <= m || cut === Infinity ? seg(m, Infinity) : seg(m, cut) + seg(cut, Infinity)
+}
+
+// Σ_{j ≥ m} P^j·|C + D·j|: one change of sign, at j = −C/D
+function sumLin (P, C, D, m) {
+	let G = a => P ** a / (1 - P), H = a => P ** a * (a - (a - 1) * P) / (1 - P) ** 2   // Σ_{j≥a} P^j, Σ_{j≥a} j·P^j
+	let seg = (a, b) => Math.abs(C * (G(a) - (b === Infinity ? 0 : G(b))) + D * (H(a) - (b === Infinity ? 0 : H(b))))
+	let j = Math.ceil(-C / D)
+	return j > m && j < Infinity ? seg(m, j) + seg(j, Infinity) : seg(m, Infinity)
+}
+
+// ring1 for a conjugate pair of radius r, cos θ = c, sin θ = sn
+function ringPair (r, c, sn, y0, y1, eps) {
+	let E = Math.hypot(y0, (y0 * c - y1 / r) / sn), ph = Math.atan2((y0 * c - y1 / r) / sn, y0), th = Math.atan2(sn, c)
+	if (th > Math.PI / 2) { th = Math.PI - th; ph = -ph }   // |cos(jθ + φ)| = |cos(j(π − θ) − φ)|
+	if (th >= 64 * (1 - r)) {
+		// turning fast: Σ_(t≥0) rᵗ·|cos(x + tθ)| = (2/π)/(1 − r) + (4/π)·Σ_k (−1)^(k+1)·Re(e^(2ikx)/(1 − r·e^(2ikθ)))/(4k² − 1),
+		// summed to k = 64; the rest of the series is at most (2/π)/(129·(1 − r)) and is added whole, so S(m) is at most
+		// E·r^m times that, at the phase x = mθ + φ
+		let wr = new Float64Array(65), wi = new Float64Array(65)
+		for (let k = 1; k <= 64; k++) { let cr = 1 - r * Math.cos(2 * k * th), ci = -r * Math.sin(2 * k * th), dd = cr * cr + ci * ci; wr[k] = cr / dd; wi[k] = -ci / dd }
+		let S = m => {
+			let x = m * th + ph, er = Math.cos(2 * x), ei = Math.sin(2 * x), pr = 1, pi = 0, f = 2 / Math.PI / (1 - r) * (1 + 1 / 129)
+			for (let k = 1; k <= 64; k++) { let t = pr * er - pi * ei; pi = pr * ei + pi * er; pr = t; f += (k & 1 ? 4 : -4) / Math.PI / (4 * k * k - 1) * (pr * wr[k] - pi * wi[k]) }
+			return E * r ** m * f
+		}
+		if (S(0) <= eps) return 0
+		let lo = 0, hi = Math.ceil(Math.log(eps * (1 - r) / E) / Math.log(r)) + 1
+		while (S(hi) > eps) hi *= 2
+		while (hi - lo > 1) { let mid = Math.floor((lo + hi) / 2); if (S(mid) > eps) lo = mid; else hi = mid }
+		return hi
+	}
+	// turning slowly: stretches between the zeros of cos at x = π/2 + kπ, x = jθ + φ (φ moved into (−π/2, π/2])
+	while (ph > Math.PI / 2) ph -= Math.PI
+	while (ph <= -Math.PI / 2) ph += Math.PI
+	let cs = Math.cos(th), si = Math.sin(th), den = (1 - r * cs) ** 2 + (r * si) ** 2, wr = (1 - r * cs) / den, wi = r * si / den
+	// Σ over [a, b) of rʲ·cos(jθ + φ): Re((r^a·e^(i·x_a) − r^b·e^(i·x_b))·w), w = 1/(1 − r·e^(iθ))
+	let pc = j => r ** j * Math.cos(j * th + ph), ps = j => r ** j * Math.sin(j * th + ph)
+	let part = (a, b) => E * Math.abs((pc(a) - (b === Infinity ? 0 : pc(b))) * wr - (ps(a) - (b === Infinity ? 0 : ps(b))) * wi)
+	let starts = [0], sums = [], end = Math.log(1e-9 * eps * (1 - r) / E) / Math.log(r)
+	for (let k = 0; ; k++) {
+		let a = starts[k], b = Math.max(a + 1, Math.ceil((Math.PI / 2 + k * Math.PI - ph) / th))
+		if (b > end) { sums.push(part(a, Infinity) + E * r ** a / (1 - r) * 1e-9); break }
+		sums.push(part(a, b)); starts.push(b)
+	}
+	let k = sums.length - 1, rest = 0
+	while (k >= 0 && rest + sums[k] <= eps) rest += sums[k--]
+	if (k < 0) return 0
+	// the crossing in stretch k: the least m in (a, b] with the stretch from m on and the rest under eps
+	let a = starts[k], b = k + 1 < starts.length ? starts[k + 1] : Infinity, lo = a, hi = b === Infinity ? a + 1 : b
+	if (b === Infinity) while (part(hi, Infinity) > eps) hi = a + 2 * (hi - a)
+	while (hi - lo > 1) { let mid = Math.floor((lo + hi) / 2); if (part(mid, b) + rest > eps) lo = mid; else hi = mid }
+	return hi
+}
+
 return { step, state };
 })();
 
@@ -784,7 +958,7 @@ const crossoverFn = crossover;
  * back to mono internally, then writes distinct L/R.
  */
 
-let { cos, floor, exp, PI } = Math
+let { cos, sin, tan, floor, exp, PI } = Math
 let PI2 = 2 * PI
 
 // Leslie 122 rotor rates (Hz) — DAFx-02 §2 / manufacturer lore.
@@ -799,10 +973,47 @@ function readDelay (buf, N, ptr, d) {
 	return a + frac * (b - a)
 }
 
+// x through one band's sections, each with its state. A function of its own: as a loop inside the sample loop it had
+// V8 box a number at every sample
+function band (sos, st, x) {
+	for (let s = 0; s < sos.length; s++) x = step(sos[s], st[s], x)
+	return x
+}
+
+// the LR4 crossover at fc written over the sections crossoverFn made, so a live split allocates nothing: each band two
+// copies of digital-filter's 2nd-order Butterworth section (its bilinear form at the prototype pole −sin(π/4) +
+// j cos(π/4), as @audio/eq-crossover designs it; a test holds the two equal), with its edge sections at 0 and Nyquist.
+// fc and fs arrive in \`split\`, a typed array: V8 does not inline this function, and a split between whole hertz passed
+// as an argument was boxed at each call, 16 bytes a block while the crossover moves
+const split = new Float64Array(2)
+function lr4 (sos, split) {
+	let fc = split[0], fs = split[1], lo = sos[0][0], hi = sos[1][0]
+	if (fc <= 0 || fc >= fs / 2) {
+		let pass = fc > 0
+		lo.b0 = pass ? 1 : 0; lo.b1 = lo.b2 = lo.a1 = lo.a2 = 0
+		hi.b0 = pass ? 0 : 1; hi.b1 = hi.b2 = hi.a1 = hi.a2 = 0
+	} else {
+		let sigma = -sin(PI / 4), omega = cos(PI / 4), pmag2 = sigma * sigma + omega * omega, bs = -2 * sigma
+		let K = 1 / tan(PI * fc / fs), A = K * K + bs * K + pmag2
+		lo.b0 = pmag2 / A; lo.b1 = 2 * pmag2 / A; lo.b2 = pmag2 / A; lo.a1 = 2 * (pmag2 - K * K) / A; lo.a2 = (K * K - bs * K + pmag2) / A
+		let B1 = bs / pmag2, B0 = 1 / pmag2, H = K * K + B1 * K + B0
+		hi.b0 = K * K / H; hi.b1 = -2 * K * K / H; hi.b2 = K * K / H; hi.a1 = 2 * (B0 - K * K) / H; hi.a2 = (K * K - B1 * K + B0) / H
+	}
+	same(sos[0][1], lo); same(sos[1][1], hi)
+}
+const same = (to, from) => { to.b0 = from.b0; to.b1 = from.b1; to.b2 = from.b2; to.a1 = from.a1; to.a2 = from.a2 }
+
 function rotary (left, right, params = {}) {
+	rotaryInPlace(left, right, params)
+	return [left, right]
+}
+
+// rotary without the pair it returns: what a host's block loop calls, as it may allocate nothing. \`mixes\`, when given,
+// holds the mix for each frame (the /audio manifest's glide of a moving mix), in place of params.mix
+function rotaryInPlace (left, right, params = {}, mixes) {
 	if (left.length !== right.length) throw new RangeError('channel lengths must match')
 	let mix = params.mix == null ? 1 : params.mix
-	if (mix <= 0) return [left, right] // exact bypass — zero latency, nothing to compensate
+	if (mix <= 0 && !mixes) return // exact bypass — zero latency, nothing to compensate
 
 	let fs = params.fs || 44100
 	let xoFreq = params.crossover == null ? 800 : params.crossover
@@ -836,15 +1047,16 @@ function rotary (left, right, params = {}) {
 	let d0DrumN = d0Drum * fs
 
 	// crossover coefficients — designed once and cached on params (per-block hosts call
-	// this in the realtime path: no allocation there); redesigned only when the split
+	// this in the realtime path: no allocation there); redesigned in place only when the split
 	// frequency or sample rate actually moves. LR4 section count is fixed for a single
 	// split, so the persistent filter *state* (below) stays valid across a redesign.
 	if (!params._sos || params._sosFreq !== xoFreq || params._sosFs !== fs) {
-		params._sos = crossoverFn([xoFreq], 4, fs) // [low, high] = [drum band, horn band]
+		if (!params._sos || !Number.isFinite(xoFreq)) params._sos = crossoverFn([xoFreq], 4, fs) // [low, high] = [drum band, horn band]
+		else { split[0] = xoFreq; split[1] = fs; lr4(params._sos, split) }
 		params._sosFreq = xoFreq
 		params._sosFs = fs
 	}
-	let [lowSOS, highSOS] = params._sos
+	let lowSOS = params._sos[0], highSOS = params._sos[1]
 
 	if (!params._hornBuf) {
 		// sized once for depth ∈ [0,1] worst case (2·d0); independent of live depth/xoFreq.
@@ -872,13 +1084,19 @@ function rotary (left, right, params = {}) {
 	// heavier drum spins up/down slower than the lighter horn).
 	let hornCoef = 1 - exp(-1 / (hornInertia * fs))
 	let drumCoef = 1 - exp(-1 / (drumInertia * fs))
+	// depth and micSpread move the reads (depth the directivity gains too), so a new value is reached across this call
+	// from the one the last call ended on, as the chorus's depth and phase are: a host ramps a smoothed value in short
+	// calls, and this joins its steps into one line
+	// where the last call ended, for this one to glide from: NaN before the first call (only finite values are kept,
+	// in a Float64Array: kept as numbers on the params object, they boxed in V8 once two instances had run)
+	let ended = params._glide ??= new Float64Array(2).fill(NaN)
+	let depthFrom = ended[0] === ended[0] ? ended[0] : depth, depthGlide = depth - depthFrom
+	let spreadFrom = ended[1] === ended[1] ? ended[1] : micSpread, spreadGlide = micSpread - spreadFrom
 
 	for (let i = 0, l = left.length; i < l; i++) {
 		let mono = (left[i] + right[i]) * 0.5
 
-		let lo = mono, hi = mono
-		for (let s = 0; s < lowSOS.length; s++) lo = step(lowSOS[s], lpState[s], lo)
-		for (let s = 0; s < highSOS.length; s++) hi = step(highSOS[s], hpState[s], hi)
+		let lo = band(lowSOS, lpState, mono), hi = band(highSOS, hpState, mono)
 
 		hornF += (hornTarget - hornF) * hornCoef
 		drumF += (drumTarget - drumF) * drumCoef
@@ -891,24 +1109,26 @@ function rotary (left, right, params = {}) {
 		drumBuf[drumPtr] = lo
 
 		// mic L @ angle 0, mic R @ angle micSpread — same rotor phase, shifted per mic.
+		let dp = depthFrom + depthGlide * (i + 1) / l, sp = spreadFrom + spreadGlide * (i + 1) / l
 		let hAngleL = hornPhase, dAngleL = drumPhase
-		let hAngleR = hornPhase + micSpread, dAngleR = drumPhase + micSpread
+		let hAngleR = hornPhase + sp, dAngleR = drumPhase + sp
 
-		let hDelL = d0HornN * (1 + depth * cos(hAngleL))
-		let dDelL = d0DrumN * (1 + depth * cos(dAngleL))
-		let hDelR = d0HornN * (1 + depth * cos(hAngleR))
-		let dDelR = d0DrumN * (1 + depth * cos(dAngleR))
+		let hDelL = d0HornN * (1 + dp * cos(hAngleL))
+		let dDelL = d0DrumN * (1 + dp * cos(dAngleL))
+		let hDelR = d0HornN * (1 + dp * cos(hAngleR))
+		let dDelR = d0DrumN * (1 + dp * cos(dAngleR))
 
-		let hGainL = 1 + depth * hornM * cos(hAngleL)
-		let dGainL = 1 + depth * drumM * cos(dAngleL)
-		let hGainR = 1 + depth * hornM * cos(hAngleR)
-		let dGainR = 1 + depth * drumM * cos(dAngleR)
+		let hGainL = 1 + dp * hornM * cos(hAngleL)
+		let dGainL = 1 + dp * drumM * cos(dAngleL)
+		let hGainR = 1 + dp * hornM * cos(hAngleR)
+		let dGainR = 1 + dp * drumM * cos(dAngleR)
 
 		let wetL = hGainL * readDelay(hornBuf, hornN, hornPtr, hDelL) + dGainL * readDelay(drumBuf, drumN, drumPtr, dDelL)
 		let wetR = hGainR * readDelay(hornBuf, hornN, hornPtr, hDelR) + dGainR * readDelay(drumBuf, drumN, drumPtr, dDelR)
 
-		left[i] = mono * (1 - mix) + wetL * mix
-		right[i] = mono * (1 - mix) + wetR * mix
+		let m = mixes ? mixes[i] : mix
+		left[i] = mono * (1 - m) + wetL * m
+		right[i] = mono * (1 - m) + wetR * m
 
 		hornPtr = (hornPtr + 1) % hornN
 		drumPtr = (drumPtr + 1) % drumN
@@ -917,8 +1137,9 @@ function rotary (left, right, params = {}) {
 	params._hornPtr = hornPtr; params._drumPtr = drumPtr
 	params._hornPhase = hornPhase; params._drumPhase = drumPhase
 	params._hornF = hornF; params._drumF = drumF
-
-	return [left, right]
+	// kept only when finite, so the next call never glides from a value that is not finite
+	if (left.length && Number.isFinite(depth)) ended[0] = depth
+	if (left.length && Number.isFinite(micSpread)) ended[1] = micSpread
 }
 
 return rotary;

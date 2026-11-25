@@ -3,7 +3,10 @@ import { type DeviceState, defineDevice } from "@/engine/device";
 import { deesser } from "@/engine/dsp";
 import { formatFrequency } from "@/engine/format";
 import { DEESSER_KERNELS } from "@/engine/kernels";
-import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
+import {
+  MANIFEST_HOST,
+  manifestWorklet,
+} from "@/registry/lib/devices/manifest-worklet";
 
 /** The Q of each biquad of the crossover the panel's curve draws: two of them in a row are a Linkwitz-Riley filter, whose low and high halves add back to a flat response. */
 export const CROSSOVER_Q = Math.SQRT1_2;
@@ -22,6 +25,7 @@ export const deesserDevice = defineDevice({
   latency: (state, sampleRate) =>
     state.enabled
       ? deesser.latency({
+          ...MANIFEST_HOST,
           params: { lookahead: Float32Array.of(5) },
           sampleRate,
         }) / sampleRate
@@ -151,7 +155,8 @@ function cutShare(state: DeesserState): (hz: number) => number {
 /**
  * The source of the de-esser's `AudioWorklet`, processor
  * `audioui-deesser`: the manifest of `@audio/dynamics-deesser`, played by
- * `manifestWorklet`, its mode a parameter. Every parameter makes it again.
+ * `manifestWorklet`, its mode a parameter. Every parameter changes as it
+ * plays; only a new look-ahead would make it again.
  */
 export const DEESSER_WORKLET = manifestWorklet({
   kernels: DEESSER_KERNELS,

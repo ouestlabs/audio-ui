@@ -7,18 +7,21 @@ import {
   limiterDevice,
   limiterSettings,
 } from "@/registry/bases/shared/devices/limiter/device";
-import { madeProcessor, type Processor } from "./manifest-processor";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
+import { madeProcessor, type Processor, published } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
 const defaults = limiterDevice.defaults();
 const lookahead = defaults;
+const PREROLL = Math.ceil(0.1 * RATE);
+const FADE = Math.round(0.03 * RATE);
 
-/** A stereo sine at `amplitude`, frames `start` on. */
-const sine = (start: number, amplitude: number) =>
+/** A stereo sine at `amplitude`, `frames` long from frame `start`. */
+const sine = (start: number, amplitude: number, frames = BLOCK) =>
   [220, 330].map(
     (hz) =>
-      new Float32Array(BLOCK).map(
+      new Float32Array(frames).map(
         (_, frame) =>
           amplitude * Math.sin((2 * Math.PI * hz * (start + frame)) / RATE)
       ) as Float32Array
@@ -42,6 +45,34 @@ function played(
   return out;
 }
 
+/** The package's own processor at `state`, made as the worklet makes it, and how to play a block of any length through it. */
+function packaged(state = lookahead) {
+  const {
+    ceiling,
+    lookahead: ahead,
+    release,
+  } = limiterSettings(state).modelParams;
+  const values = published(limiter, {
+    ceiling,
+    lookahead: ahead,
+    release,
+    truePeak: state.truePeak,
+  });
+  const run = limiter({
+    ...MANIFEST_HOST,
+    maxBlockSize: BLOCK,
+    maxChannels: 2,
+    params: values,
+    sampleRate: RATE,
+  });
+  return (input: Float32Array[]) => {
+    const frames = input[0]?.length ?? 0;
+    const out = [new Float32Array(frames), new Float32Array(frames)];
+    run([input], [out], values);
+    return out;
+  };
+}
+
 describe("the limiter's model", () => {
   test("plays the processor of @audio/dynamics-limiter as published, sample for sample", () => {
     for (const truePeak of [false, true]) {
@@ -52,23 +83,24 @@ describe("the limiter's model", () => {
         lookahead: ahead,
         release,
       } = limiterSettings(state).modelParams;
+      const reference = published(limiter, {
+        ceiling,
+        lookahead: ahead,
+        release,
+        truePeak,
+      });
       const run = limiter({
-        currentTime: 0,
+        ...MANIFEST_HOST,
         maxBlockSize: BLOCK,
         maxChannels: 2,
-        params: {
-          ceiling: Float32Array.of(ceiling),
-          lookahead: Float32Array.of(ahead),
-          release: Float32Array.of(release),
-          truePeak,
-        },
+        params: reference,
         sampleRate: RATE,
       });
       let worst = 0;
       for (let block = 0; block < 40; block += 1) {
         const input = sine(block * BLOCK, 1.5);
         const expected = [new Float32Array(BLOCK), new Float32Array(BLOCK)];
-        run([input], [expected], {});
+        run([input], [expected], reference);
         const out = played(processor, input, state);
         for (const channel of [0, 1] as const) {
           for (let frame = 0; frame < BLOCK; frame += 1) {
@@ -83,6 +115,72 @@ describe("the limiter's model", () => {
       }
       expect({ truePeak, worst }).toEqual({ truePeak, worst: 0 });
     }
+  });
+
+  test("a parameter flagged restart makes the model again: it hears the last 100 ms, takes over in a fade, then plays as a fresh one would", () => {
+    const { processor } = madeProcessor(LIMITER_WORKLET, "brickwall", RATE);
+    const after = { ...lookahead, lookaheadMs: 2 };
+    const at = 40;
+    const old = packaged();
+    for (let block = 0; block < at; block += 1) {
+      played(processor, sine(block * BLOCK, 1.5));
+      old(sine(block * BLOCK, 1.5));
+    }
+    // A fresh processor at the new look-ahead, fed what the worklet held.
+    const fresh = packaged(after);
+    const held = sine(at * BLOCK - PREROLL, 1.5, PREROLL);
+    for (let from = 0; from < PREROLL; from += BLOCK) {
+      fresh(held.map((channel) => channel.subarray(from, from + BLOCK)));
+    }
+    let afterFade = 0;
+    let inFade = 0;
+    for (let block = at; block < at + 30; block += 1) {
+      const input = sine(block * BLOCK, 1.5);
+      const out = played(processor, input, after);
+      const coming = fresh(input);
+      const going = old(input);
+      for (let frame = 0; frame < BLOCK; frame += 1) {
+        const time = (block - at) * BLOCK + frame;
+        for (const channel of [0, 1] as const) {
+          const sample = out[channel]?.[frame] ?? 0;
+          const next = coming[channel]?.[frame] ?? 0;
+          if (time >= FADE) {
+            afterFade = Math.max(afterFade, Math.abs(sample - next));
+          } else {
+            // A line from the old one to the new.
+            const share = time / FADE;
+            const line =
+              (going[channel]?.[frame] ?? 0) * (1 - share) + next * share;
+            inFade = Math.max(inFade, Math.abs(sample - line));
+          }
+        }
+      }
+    }
+    expect(afterFade).toBe(0);
+    expect(inFade).toBeLessThan(1e-6);
+  });
+
+  test("a change that makes a model again waits 50 ms after the last one, so a knob turned all along is heard as it goes", () => {
+    const { processor } = madeProcessor(LIMITER_WORKLET, "brickwall", RATE);
+    const internal = processor as unknown as { playing: unknown };
+    // A new look-ahead every block.
+    const taken: number[] = [];
+    let playing: unknown = null;
+    for (let block = 0; block < 200; block += 1) {
+      played(processor, sine(block * BLOCK, 1.5), {
+        ...lookahead,
+        lookaheadMs: 5 + block * 0.01,
+      });
+      if (internal.playing !== playing) {
+        ({ playing } = internal);
+        taken.push(block);
+      }
+    }
+    const gaps = taken
+      .slice(1)
+      .map((block, index) => block - (taken[index] ?? 0));
+    expect(Math.min(...gaps)).toBe(Math.ceil((0.05 * RATE) / BLOCK));
+    expect(taken.length).toBeGreaterThan(8);
   });
 
   test("lets no sample over the ceiling, however hard it is pushed", () => {

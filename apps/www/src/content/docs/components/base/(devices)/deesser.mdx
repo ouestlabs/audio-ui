@@ -32,7 +32,7 @@ Softens the sharp s and t of a voice. When the highs above a frequency get loud,
 | Band | the same | a band around the frequency, as wide as the Q |
 | Wide band | the same | the whole sound, while the s lasts |
 
-Split, Band and Wide band are the modes of `@audio/dynamics-deesser`, its processor as published in an `AudioWorklet`. They hear the sound 5 ms ahead of what they cut, so an s is taken down from its start: the device's [latency](/docs/devices#latency) is 5 ms. Until the worklet is ready, the highs pass unchanged. A change to one of their values builds the model again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. Their knee, attack and release are the package's: 6 dB, 1 ms and 15 ms.
+Split, Band and Wide band are the modes of `@audio/dynamics-deesser`, its processor as published in an `AudioWorklet`. They hear the sound 5 ms ahead of what they cut, so an s is taken down from its start: the device's [latency](/docs/devices#latency) is 5 ms. Until the worklet is ready, the highs pass unchanged. Their values change as they play. Their knee, attack and release are the package's: 6 dB, 1 ms and 15 ms.
 
 ## Panel
 

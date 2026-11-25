@@ -1,13 +1,13 @@
 ---
 title: Gate
-description: "A gate device: threshold, hysteresis, floor, attack, hold, release and look-ahead, a panel that draws its transfer curve, a Web Audio engine and tools for agents."
+description: "A gate device: threshold, hysteresis, floor, attack, hold, release and look-ahead, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="ui-sdk-nova" name="block-gate" />
 
-Cuts the sound between hits. Above the threshold the signal passes, and below it the signal is turned down to the floor. It is the gate of [audio.js](https://audio.js.org), which closes only under a lower threshold than the one it opens at. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Cuts the sound between hits. Above the threshold the signal passes, and below it the signal is turned down to the floor. It is the gate of [audio.js](https://audio.js.org), which closes only under a lower threshold than the one it opens at. A key connected to the sidechain, such as a kick, opens and closes it in place of the sound: it is only listened to, never heard. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -35,4 +35,4 @@ The panel draws the transfer curve against the straight line of a clean sound, w
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The browser has no gate node. The engine is the processor of `@audio/dynamics-gate`'s manifest as published, in an `AudioWorklet`, with its own look-ahead. Until the worklet is ready the gate stays open. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `gateSettings(state)` gives the numbers the engine puts on it.
+The browser has no gate node. The engine is the processor of `@audio/dynamics-gate`'s manifest as published, in an `AudioWorklet` with two inputs, the sound and the key, with its own look-ahead. With nothing on `engine.sidechain`, it follows the sound itself. Until the worklet is ready the gate stays open. The threshold, the hysteresis, the floor, the attack, the hold and the release change as it plays. A new look-ahead builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `gateSettings(state)` gives the numbers the engine puts on it.

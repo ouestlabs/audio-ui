@@ -14,7 +14,8 @@ interface Kernel {
   /**
    * A module only the modules after it call, such as a package's own helpers:
    * its names stay in a constant of its own, which they take theirs from, so
-   * a name two of them export does not clash.
+   * a name two of them export does not clash. It gives every name it exports,
+   * and `use` says which ones it must.
    */
   internal?: boolean;
   name: string;
@@ -323,7 +324,7 @@ export const KERNEL_SETS: readonly KernelSet[] = [
         file: "util.js",
         internal: true,
         name: "@audio/dynamics-deesser",
-        use: ["writer", "db2lin", "timeCoef", "smoother"],
+        use: ["writer", "db2lin", "timeCoef"],
       },
       {
         file: "deesser.js",
@@ -371,6 +372,12 @@ export const KERNEL_SETS: readonly KernelSet[] = [
         internal: true,
         name: "@audio/dynamics-ducker",
         use: ["db2lin", "lin2db"],
+      },
+      {
+        file: "ducker.js",
+        internal: true,
+        name: "@audio/dynamics-ducker",
+        use: "duckBlock",
       },
       { file: "audio.js", name: "@audio/dynamics-ducker", use: "ducker" },
     ],
@@ -561,6 +568,9 @@ const DEFAULT_EXPORT = /export default function ([A-Za-z_$][\w$]*)/;
 const EXPORT_LIST = /^export\s*\{[^}]*\};?[ \t]*\n?/gm;
 /** The keyword that exports a declaration, by default or by name: a scope of its own keeps it. */
 const EXPORT = /^export (default )?/gm;
+/** A declaration a module exports by name: an internal module gives every one, whichever the modules after it import. */
+const EXPORTED_DECLARATION =
+  /^export\s+(?:default\s+)?(?:async\s+)?(?:function\*?|const|let|var|class)\s+([A-Za-z_$][\w$]*)/gm;
 /** Where an npm author's email or web page starts: the name before it says who wrote it. */
 const CONTACT = /[<(]/;
 
@@ -695,6 +705,19 @@ function rootOf(name: string, file: string, base: string) {
   }
 }
 
+/** Every name an internal module exports, refused when one it is said to give is not among them. */
+function exportedBy(source: string, where: string, use: Kernel["use"]) {
+  const exported = Array.from(
+    source.matchAll(EXPORTED_DECLARATION),
+    (match) => match[1] ?? ""
+  );
+  const missing = namesOf(use).find((each) => !exported.includes(each));
+  if (missing) {
+    throw new Error(`${where} does not export ${missing}`);
+  }
+  return exported;
+}
+
 /** The file a set writes: each kernel's module as installed, in a scope of its own. */
 export async function kernelFile({ constant, kernels }: KernelSet) {
   const read = await Promise.all(
@@ -715,7 +738,9 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
     const body = withoutImports(source, `${name}/${file}`, path, held)
       .replace(EXPORT_LIST, "")
       .replace(EXPORT, "");
-    const names = namesOf(use);
+    const names = internal
+      ? exportedBy(source, `${name}/${file}`, use)
+      : namesOf(use);
     const scope = internal ? `module${index}` : undefined;
     const byDefault = DEFAULT_EXPORT.exec(source)?.[1];
     held.set(path, { byDefault, names, scope });

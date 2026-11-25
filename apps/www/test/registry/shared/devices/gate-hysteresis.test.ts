@@ -5,7 +5,8 @@ import {
   gateDevice,
   gateSettings,
 } from "@/registry/bases/shared/devices/gate/device";
-import { madeProcessor } from "./manifest-processor";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
+import { madeProcessor, published } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
@@ -37,18 +38,19 @@ describe("the gate's hysteresis model", () => {
       const state = { ...hysteresis, lookaheadMs };
       const { processor } = madeProcessor(GATE_WORKLET, "noise", RATE);
       const params = parametersOf(state);
+      const reference = published(gate, params);
       const run = gate({
-        currentTime: 0,
+        ...MANIFEST_HOST,
         maxBlockSize: BLOCK,
         maxChannels: 2,
-        params,
+        params: reference,
         sampleRate: RATE,
       });
       let worst = 0;
       for (let block = 0; block < 200; block += 1) {
         const input = bursts(block * BLOCK);
         const expected = [new Float32Array(BLOCK), new Float32Array(BLOCK)];
-        run([input], [expected], params);
+        run([input], [expected], reference);
         const out = [new Float32Array(BLOCK), new Float32Array(BLOCK)];
         processor.process([input], [out], params);
         for (const channel of [0, 1] as const) {
@@ -64,6 +66,70 @@ describe("the gate's hysteresis model", () => {
       }
       expect({ lookaheadMs, worst }).toEqual({ lookaheadMs, worst: 0 });
     }
+  });
+
+  test("a key on the sidechain opens and closes it in place of the signal, as the published processor does", () => {
+    const { processor } = madeProcessor(GATE_WORKLET, "noise", RATE);
+    // A short release, so it is shut well within a silence of the key.
+    const params = parametersOf({ ...hysteresis, holdMs: 10, releaseMs: 20 });
+    const reference = published(gate, params);
+    const run = gate({
+      ...MANIFEST_HOST,
+      maxBlockSize: BLOCK,
+      maxChannels: 2,
+      params: reference,
+      sampleRate: RATE,
+    });
+    // A steady quiet signal, opened only while the key bursts.
+    const quiet = (start: number) =>
+      [0, 1].map(
+        () =>
+          new Float32Array(BLOCK).map(
+            (_, frame) =>
+              0.01 * Math.sin((2 * Math.PI * 110 * (start + frame)) / RATE)
+          ) as Float32Array
+      );
+    let worst = 0;
+    let open = 0;
+    let shut = 0;
+    for (let block = 0; block < 200; block += 1) {
+      const input = quiet(block * BLOCK);
+      // Bursts of a kick-like sine, silence between.
+      const key = bursts(block * BLOCK).map((channel) =>
+        channel.map((sample, frame) =>
+          Math.floor((block * BLOCK + frame) / 4800) % 2 === 0 ? sample : 0
+        )
+      );
+      const expected = [new Float32Array(BLOCK), new Float32Array(BLOCK)];
+      run([input, key], [expected], reference);
+      const left = new Float32Array(BLOCK);
+      const out = [left, new Float32Array(BLOCK)];
+      processor.process([input, key], [out], params);
+      const loudest = Math.max(...left.map(Math.abs));
+      if (Math.floor((block * BLOCK) / 4800) % 2 === 0) {
+        open = Math.max(open, loudest);
+      } else if ((block * BLOCK) % 4800 > 4200) {
+        shut = Math.max(shut, loudest);
+      }
+      for (const channel of [0, 1] as const) {
+        for (let frame = 0; frame < BLOCK; frame += 1) {
+          worst = Math.max(
+            worst,
+            Math.abs(
+              (out[channel]?.[frame] ?? 0) - (expected[channel]?.[frame] ?? 0)
+            )
+          );
+        }
+      }
+    }
+    expect(worst).toBe(0);
+    // Open while the key plays, at the floor once it has stopped.
+    expect(open).toBeGreaterThan(0.009);
+    expect(shut).toBeLessThan(0.001);
+  });
+
+  test("takes a sidechain", () => {
+    expect(gateDevice.describe().sidechain).toBe(true);
   });
 
   test("closes the hysteresis under the threshold, its floor the range", () => {

@@ -7,6 +7,7 @@ import {
   duckerDevice,
   duckerSettings,
 } from "@/registry/bases/shared/devices/ducker/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -53,7 +54,7 @@ describe("duckerDevice", () => {
       )
     );
     const run = ducker({
-      currentTime: 0,
+      ...MANIFEST_HOST,
       maxBlockSize: BLOCK,
       maxChannels: 2,
       params: parameters,

@@ -8,6 +8,7 @@ import {
   deesserSettings,
   deesserUnused,
 } from "@/registry/bases/shared/devices/deesser/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -58,7 +59,7 @@ describe("the de-esser's models", () => {
       );
       const values = valuesOf(state);
       const run = deesser({
-        currentTime: 0,
+        ...MANIFEST_HOST,
         maxBlockSize: BLOCK,
         maxChannels: 2,
         params: values,

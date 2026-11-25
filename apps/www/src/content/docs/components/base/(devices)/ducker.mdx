@@ -38,6 +38,6 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB being taken off, read per frame
 ```
 
-The browser has no ducker node. The engine plays the processor of `@audio/dynamics-ducker`'s manifest as published, in an `AudioWorklet` with two inputs, the sound and the key, fed only while it plays: off, or until the worklet is ready, the sound goes round it. With nothing on the sidechain, it follows the sound itself, as a compressor would. The threshold, the ratio, the knee and the range change as it plays. A new attack or release builds it again: at most every 50 ms, the new one first playing the last 100 ms of the sound and of the key, then taking over in a 30 ms fade.
+The browser has no ducker node. The engine plays the processor of `@audio/dynamics-ducker`'s manifest as published, in an `AudioWorklet` with two inputs, the sound and the key, fed only while it plays: off, or until the worklet is ready, the sound goes round it. With nothing on the sidechain, it follows the sound itself, as a compressor would. Every value changes as it plays.
 
 Measured with a tone under an 80 Hz key, the sound is turned down to within 0.7 dB of the curve, at every level of the key: 7.5 dB drawn for a key at -20 dB, 6.8 dB heard.

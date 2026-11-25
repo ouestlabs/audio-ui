@@ -9,6 +9,7 @@ import {
   compressorUnused,
   modelCurve,
 } from "@/registry/bases/shared/devices/compressor/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor, type Processor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -56,7 +57,7 @@ function packaged(model: keyof typeof COMPRESSOR_MODELS, state = defaults) {
     ])
   );
   const run = manifest({
-    currentTime: 0,
+    ...MANIFEST_HOST,
     maxBlockSize: BLOCK,
     maxChannels: 2,
     params: values,
@@ -102,72 +103,6 @@ describe("the compressor's models", () => {
       }
       expect({ model, worst }).toEqual({ model, worst: 0 });
     }
-  });
-
-  test("a parameter flagged restart makes the model again: it hears the last 100 ms, takes over in a fade, then plays as a fresh one would", () => {
-    const { processor } = made("vca");
-    const after = { ...defaults, thresholdDb: -30 };
-    const at = 40;
-    const old = packaged("vca");
-    for (let block = 0; block < at; block += 1) {
-      played(processor, signal(block * BLOCK));
-      old.play(signal(block * BLOCK));
-    }
-    // A fresh processor at the new threshold, fed what the worklet held.
-    const fresh = packaged("vca", after);
-    const held = signal(at * BLOCK - PREROLL, PREROLL);
-    for (let from = 0; from < PREROLL; from += BLOCK) {
-      fresh.play(held.map((channel) => channel.subarray(from, from + BLOCK)));
-    }
-    let afterFade = 0;
-    let inFade = 0;
-    for (let block = at; block < at + 30; block += 1) {
-      const input = signal(block * BLOCK);
-      const out = played(processor, input, after);
-      const coming = fresh.play(input);
-      const going = old.play(input);
-      for (let frame = 0; frame < BLOCK; frame += 1) {
-        const time = (block - at) * BLOCK + frame;
-        for (const channel of [0, 1] as const) {
-          const sample = out[channel][frame] ?? 0;
-          const next = coming[channel][frame] ?? 0;
-          if (time >= FADE) {
-            afterFade = Math.max(afterFade, Math.abs(sample - next));
-          } else {
-            // A line from the old one to the new.
-            const share = time / FADE;
-            const line =
-              (going[channel][frame] ?? 0) * (1 - share) + next * share;
-            inFade = Math.max(inFade, Math.abs(sample - line));
-          }
-        }
-      }
-    }
-    expect(afterFade).toBe(0);
-    expect(inFade).toBeLessThan(1e-6);
-  });
-
-  test("a change that makes a model again waits 50 ms after the last one, so a knob turned all along is heard as it goes", () => {
-    const { processor } = made("fet");
-    const internal = processor as unknown as { playing: unknown };
-    // A new threshold every block.
-    const taken: number[] = [];
-    let playing: unknown = null;
-    for (let block = 0; block < 200; block += 1) {
-      played(processor, signal(block * BLOCK), {
-        ...defaults,
-        thresholdDb: -10 - block * 0.1,
-      });
-      if (internal.playing !== playing) {
-        ({ playing } = internal);
-        taken.push(block);
-      }
-    }
-    const gaps = taken
-      .slice(1)
-      .map((block, index) => block - (taken[index] ?? 0));
-    expect(Math.min(...gaps)).toBe(Math.ceil((0.05 * RATE) / BLOCK));
-    expect(taken.length).toBeGreaterThan(8);
   });
 
   test("a parameter its manifest reads as it plays changes at once, with no new model", () => {

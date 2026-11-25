@@ -38,6 +38,6 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB being taken off, read per frame
 ```
 
-The browser has no compander node. The engine plays the processor of `@audio/dynamics-compand`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade.
+The browser has no compander node. The engine plays the processor of `@audio/dynamics-compand`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. Every one of its values changes as it plays.
 
 Measured on a steady tone from -70 to -3 dB, the output sits within 0.2 dB of the curve.

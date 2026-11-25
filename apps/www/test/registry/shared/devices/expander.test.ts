@@ -7,7 +7,8 @@ import {
   expanderDevice,
   expanderSettings,
 } from "@/registry/bases/shared/devices/expander/device";
-import { madeProcessor } from "./manifest-processor";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
+import { madeProcessor, published } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
@@ -45,18 +46,10 @@ describe("expanderDevice", () => {
     const { processor } = madeProcessor(EXPANDER_WORKLET, "expander", RATE);
     const values = (state: typeof defaults) => {
       const { modelParams } = expanderSettings(state);
-      return {
-        ...Object.fromEntries(
-          Object.entries(modelParams).map(([name, value]) => [
-            name,
-            Float32Array.of(value),
-          ])
-        ),
-        mode: state.mode,
-      };
+      return published(expander, { ...modelParams, mode: state.mode });
     };
     const run = expander({
-      currentTime: 0,
+      ...MANIFEST_HOST,
       maxBlockSize: BLOCK,
       maxChannels: 2,
       params: values(defaults),

@@ -1,8 +1,8 @@
 /**
  * audio.js kernels, each module as published, in its own scope, for an
  * `AudioWorklet`, which cannot import them:
- * - `@audio/effect-autowah` 1.1.5 (MIT, Dmitry Iv.): `autoWah`
- * - `@audio/effect-wah` 1.1.5 (MIT, Dmitry Iv.): `wah`
+ * - `@audio/effect-autowah` 1.1.7 (MIT, Dmitry Iv.): `autoWah`
+ * - `@audio/effect-wah` 1.2.1 (MIT, Dmitry Iv.): `wah`
  */
 export const WAH_KERNELS = `const autoWah = (() => {
 /**
@@ -76,6 +76,22 @@ function wah (data, params = {}) {
 	let Q = params.Q == null ? 5 : params.Q
 	let fs = params.fs || 44100
 	let mode = params.mode || 'auto'
+	// stereo, in mode 'auto': channel c's LFO runs c × \`phase\` degrees ahead of channel 0's; default 0 moves the channels
+	// together, and 180 sweeps them opposite ways, as the LFO Phase of Ableton Live 12's Auto Filter: "The left and right
+	// modulation channels can be offset in degrees using the LFO Phase control. At 180°, the channels are perfectly out of
+	// phase, so that when one LFO reaches its peak, the other is at its minimum."
+	let offset = params.phase == null ? 0 : params.phase
+	let channel = params.channel || 0  // index of the channel this call processes
+	let lead = channel ? channel * offset * PI / 180 : 0  // rad; 0 on channel 0, so a mono signal never depends on phase
+	// a new lead is reached across this call from the one the last call ended on, so the sweep glides instead of jumping;
+	// a host ramps a smoothed \`phase\` in short calls, and this joins its steps into one line
+	// where the last call ended, for this one to glide from: NaN before the first call (only finite values are kept,
+	// in a Float64Array: kept as numbers on the params object, they boxed in V8 once two instances had run)
+	let ended = params._glide ??= new Float64Array(2).fill(NaN)
+	let from = ended[0] === ended[0] ? ended[0] : lead, glide = lead - from
+	// fc retunes the filter every sample, so a new fc glides across the call in the same way: a host ramps a smoothed fc
+	// in short calls, and the filter follows it sample by sample instead of stepping at each call
+	let fcFrom = ended[1] === ended[1] ? ended[1] : fc, fcGlide = fc - fcFrom
 
 	if (params._lp == null) {
 		params._lp = 0
@@ -87,14 +103,14 @@ function wah (data, params = {}) {
 	let k = 1 / Q, top = 0.49 * fs
 
 	for (let i = 0, l = data.length; i < l; i++) {
-		let freq
+		let freq, f0 = fcFrom + fcGlide * (i + 1) / l
 		if (mode === 'auto') {
-			let lfo = sin(phase)
+			let lfo = sin(phase + from + glide * (i + 1) / l)
 			phase += inc
 			if (phase > 2 * PI) phase -= 2 * PI
-			freq = fc * pow(2, depth * lfo)
+			freq = f0 * pow(2, depth * lfo)
 		} else {
-			freq = fc
+			freq = f0
 		}
 
 		// trapezoidal state-variable bandpass (Zavalishin, The Art of VA Filter Design, ch. 3–4; Simper 2013):
@@ -110,6 +126,9 @@ function wah (data, params = {}) {
 	params._lp = lp
 	params._bp = bp
 	params._phase = phase
+	// kept only when finite, so the next call never glides from a value that is not finite
+	if (data.length && Number.isFinite(lead)) ended[0] = lead
+	if (data.length && Number.isFinite(fc)) ended[1] = fc
 
 	return data
 }

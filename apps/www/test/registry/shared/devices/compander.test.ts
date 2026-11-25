@@ -6,6 +6,7 @@ import {
   companderDevice,
   companderSettings,
 } from "@/registry/bases/shared/devices/compander/device";
+import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -50,7 +51,7 @@ describe("companderDevice", () => {
       )
     );
     const run = compand({
-      currentTime: 0,
+      ...MANIFEST_HOST,
       maxBlockSize: BLOCK,
       maxChannels: 2,
       params: parameters,
