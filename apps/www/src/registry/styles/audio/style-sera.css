@@ -67,7 +67,7 @@
   }
 
   .cn-knob-mark-label {
-    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-foreground;
+    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-[color:var(--audio-readout,var(--foreground))];
   }
 
   .cn-knob-value {
@@ -104,7 +104,7 @@
   }
 
   .cn-fader-mark-label {
-    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-foreground;
+    @apply text-[10px] leading-none text-[color:var(--audio-print,var(--muted-foreground))] tabular-nums in-data-[active]:text-[color:var(--audio-readout,var(--foreground))];
   }
 
   .cn-fader-value {
@@ -112,7 +112,7 @@
   }
 
   .cn-fader-thumb {
-    @apply rounded-none border-none bg-primary transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
+    @apply rounded-none border-none bg-[color:var(--audio-cap,var(--primary))] transition-colors hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
   }
 
   .cn-fader-thumb-size-sm {

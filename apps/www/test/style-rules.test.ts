@@ -66,3 +66,32 @@ describe("a style's rules reach a project", () => {
     }
   });
 });
+
+// A knob's, a fader's or a meter's color set straight from the shadcn theme, which no audio token can change.
+const RAW_COLOR =
+  /(?<![\w[-])(?:bg|text)-(?:card|secondary|primary|input|foreground|background|muted-foreground|success|warning|destructive)(?:\/\d+)?(?![\w-])/;
+const TOKENED = /^\.cn-(?:knob|fader|meter)(?:-|\s|$)/;
+
+describe("the audio tokens", () => {
+  test("every color of a knob, a fader or a meter comes from an audio token, so a skin can change it", async () => {
+    const names = await Array.fromAsync(
+      new Bun.Glob("style-*.css").scan(STYLES)
+    );
+    const raw: string[] = [];
+    for (const name of names) {
+      const sheet = (await Bun.file(`${STYLES}/${name}`).text()).replace(
+        COMMENT,
+        ""
+      );
+      for (const [, selector = "", utilities = ""] of sheet.matchAll(
+        /([^{};]+)\{\s*@apply([^;]*);/g
+      )) {
+        const hook = selector.trim();
+        if (TOKENED.test(hook) && RAW_COLOR.test(utilities)) {
+          raw.push(`${name} ${hook}: ${utilities.match(RAW_COLOR)?.[0]}`);
+        }
+      }
+    }
+    expect(raw).toEqual([]);
+  });
+});

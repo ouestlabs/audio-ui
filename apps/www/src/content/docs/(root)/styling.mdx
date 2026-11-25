@@ -1,6 +1,6 @@
 ---
 title: Theme tokens
-description: The semantic color tokens audio/ui adds to the shadcn/ui theme, for states such as alerts and badges.
+description: "The color tokens audio/ui adds to the shadcn/ui theme: semantic states, and the audio tokens a skin sets to change the material of a control."
 ---
 
 ## Overview
@@ -56,5 +56,36 @@ To support advanced state communication, we extend the base palette with additio
   --invert-foreground: var(--color-zinc-50);
 }
 ```
+
+## Audio Tokens
+
+The knob, the fader and the meter take their colors from audio tokens, each named after the material it paints. None is defined by default: each falls back to the shadcn token it replaces, so an install looks the same until a token is set.
+
+| Token | Material | Paints | Default |
+| --- | --- | --- | --- |
+| `--audio-socket` | The ring a knob turns in | Knob control | `--secondary` |
+| `--audio-cap` | What the hand holds | Knob body, fader thumb | `--card` |
+| `--audio-groove` | The slot a value runs in | Fader track, meter channel | `--input` |
+| `--audio-accent` | The value | Knob arc and indicator, fader range and thumb mark, an active tick | `--primary` |
+| `--audio-print` | Scales printed on the panel | Ticks, scale labels, meter marks | `--muted-foreground` |
+| `--audio-readout` | A value shown on demand | Value chips, the active scale label, the meter's peak | `--foreground` |
+| `--audio-readout-ink` | The text on a readout | Value chips | `--background` |
+| `--audio-level` | A signal in range | Meter fill | `--success` |
+| `--audio-warn` | A signal near its limit | Meter fill | `--warning` |
+| `--audio-clip` | A signal over its limit | Meter fill | `--destructive` |
+
+Set them on any element to restyle what it holds, in both color schemes:
+
+```css title="app/globals.css"
+.hardware {
+  --audio-socket: oklch(0.9 0.01 85);
+  --audio-cap: oklch(0.97 0.01 85);
+  --audio-groove: oklch(0.32 0.01 85);
+  --audio-accent: oklch(0.66 0.2 40);
+  --audio-print: oklch(0.45 0.01 85);
+}
+```
+
+A token changes a color, never a behavior: the controls keep their keyboard, pointer and ARIA whatever they wear.
 
 For general customization guidelines such as adding your own custom colors or switching between utility classes and variables, please refer to the [official shadcn/ui documentation](https://ui.shadcn.com/docs/theming).
