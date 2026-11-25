@@ -348,17 +348,17 @@ export async function movesLikeAMarker(page: Page, marker: Locator) {
 }
 
 /** The line of a marker just put at the cursor falls on the playhead, not beside it. */
-export async function standsOnThePlayhead(page: Page, slot: string) {
+export async function standsOnThePlayhead(page: Page, part: string) {
   const [line, playhead] = await Promise.all(
-    [slot, "timeline-playhead"].map((name) =>
+    [`[data-part=${part}]`, "[data-slot=timeline-playhead]"].map((selector) =>
       page
-        .locator(`[data-slot=${name}]`)
+        .locator(selector)
         .first()
         .evaluate((element) => element.getBoundingClientRect().left)
     )
   );
   assert(
     Math.abs((line ?? 0) - (playhead ?? 0)) < 1,
-    `${slot} stands at ${line}, the playhead at ${playhead}`
+    `${part} stands at ${line}, the playhead at ${playhead}`
   );
 }
