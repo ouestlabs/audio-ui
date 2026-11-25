@@ -42,7 +42,8 @@ export const HARDWARE_CSS = {
     "--card-foreground": "var(--audio-print)",
     "--foreground": "var(--audio-print)",
     "--muted-foreground": "var(--audio-print)",
-    "--muted": "color-mix(in oklab, black 8%, var(--audio-body))",
+    // What a pressed button is filled with: toward the lettering, so it shows on a light body and a dark one.
+    "--muted": "color-mix(in oklab, var(--audio-print) 18%, var(--audio-body))",
     "--border":
       "color-mix(in oklab, var(--audio-print) 22%, var(--audio-body))",
     "--input": "color-mix(in oklab, var(--audio-print) 28%, var(--audio-body))",
@@ -51,21 +52,32 @@ export const HARDWARE_CSS = {
     "--ring": "var(--audio-accent)",
     color: "var(--audio-print)",
   },
-  // A graph is a screen set in the body.
+  // A graph and an XY pad are screens set in the body.
+  ".skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad])":
+    {
+      "--background": "var(--audio-screen)",
+      "--card": "var(--audio-screen)",
+      "--foreground": "var(--audio-screen-ink)",
+      "--muted-foreground":
+        "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
+      "--muted":
+        "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
+      "--border":
+        "color-mix(in oklab, var(--audio-screen-ink) 18%, var(--audio-screen))",
+      "background-color": "var(--audio-screen)",
+      color: "var(--audio-screen-ink)",
+    },
+  // Only the graph is sunk by a shadow: the pad draws its hover and focus rings with its own.
   ".skin-hardware [data-slot=device-frame] [data-slot=plot]": {
-    "--card": "var(--audio-screen)",
-    "--foreground": "var(--audio-screen-ink)",
-    "--muted-foreground":
-      "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
-    "--muted":
-      "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
-    "--border":
-      "color-mix(in oklab, var(--audio-screen-ink) 18%, var(--audio-screen))",
-    "background-color": "var(--audio-screen)",
-    color: "var(--audio-screen-ink)",
     "box-shadow": "inset 0 2px 6px rgb(0 0 0 / 0.55)",
     "border-radius": "6px",
   },
+  // The pad is the inner one of its two slots. Its grid is drawn faint, so its lines start brighter.
+  ".skin-hardware [data-slot=device-frame] [data-slot=xypad] > [data-slot=xypad]":
+    {
+      "--border":
+        "color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen))",
+    },
   "@utility audio-body": {
     "background-color": "var(--audio-body)",
     color: "var(--audio-print)",
