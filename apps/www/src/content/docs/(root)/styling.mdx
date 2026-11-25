@@ -101,7 +101,7 @@ Put `skin-hardware` on the element that holds the panel, and use the faces in pl
 | Face | In place of | Drawn as |
 | --- | --- | --- |
 | `HardwareKnob` | `Knob` | A matte cap in a socket, a grip line, a printed scale of eleven ticks or your `marks` |
-| `HardwareFader` | `Fader` | A narrow slot, a ribbed cap, a printed scale: dB for a range that reaches -48, else its ends and middle |
+| `HardwareFader` | `Fader` | A narrow slot, a ribbed cap, a printed scale: dB for a range that reaches -48, else its ends and middle. A `sm` fader prints only your `marks` |
 | `HardwareVuMeter` | `Meter` | A needle dial per channel from -20 to +3 VU, with a clip lamp. 0 VU is -18 dB |
 
 ```tsx
@@ -111,6 +111,21 @@ import { HardwareKnob } from "@/components/audio-ui/skins/hardware/knob"
   <HardwareKnob aria-label="Drive" defaultValue={30} />
 </div>
 ```
+
+### Device panels
+
+Wrap device panels in `HardwareSkin`: their frame takes the matte body, their graphs and XY pads become screens, and their knobs and faders are drawn with the faces. The panels themselves do not change.
+
+```tsx
+import { HardwareSkin } from "@/components/audio-ui/skins/hardware/skin"
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel"
+
+<HardwareSkin>
+  <CompressorPanel onValueChange={setState} value={state} />
+</HardwareSkin>
+```
+
+`--audio-grid` is the width of a column of a panel with no groups, `4.5rem` by default. For faces of your own, give `DeviceFacesProvider` from `@/components/audio-ui/device-faces` a `Knob` or a `Fader` with the element's props.
 
 The faces draw their own parts, so `thumbMarks` of the fader and `marks`, `peakMarks` and `scale` of the meter do not change them.
 

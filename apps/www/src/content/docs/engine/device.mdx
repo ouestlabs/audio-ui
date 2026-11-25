@@ -7,7 +7,7 @@ description: "A device as a description: defineDevice and its parameters, a stat
 
 ## Usage
 
-`defineDevice` describes an effect or an instrument by its parameters, with no sound and no view in it. What comes back holds everything that reads or changes a state of it:
+`defineDevice` describes an effect or an instrument by its parameters, with no sound and no view in it. Optional `groups`, each a `label` and parameter ids, say how a panel gathers them; an id the device does not have, or one in two groups, throws. What comes back holds everything that reads or changes a state of it:
 
 ```ts
 import { defineDevice } from "@/lib/engine/device";

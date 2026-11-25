@@ -15,13 +15,6 @@ import {
 } from "@/registry/bases/shared/devices/guitar/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do. */
-const GROUPS = [
-  { label: "String", parameters: ["tone", "decay", "mute"] },
-  { label: "Body", parameters: ["body"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 interface GuitarPanelProps {
   /** The notes held now, such as on a MIDI keyboard: their keys light up as they are played. */
   activeNotes?: readonly number[];
@@ -73,7 +66,6 @@ function GuitarPanel({
       >
         <DevicePanel
           device={guitarDevice}
-          groups={GROUPS}
           onValueChange={onValueChange}
           value={value}
         />

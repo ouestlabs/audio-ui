@@ -176,6 +176,35 @@ const operator = <const N extends FmOperator>(
 export const fmSynthDevice = defineDevice({
   description:
     "A four-operator FM synth: four sines at ratios of the pitch, each with its level and its envelope, wired by eight algorithms, with feedback and a vibrato. Electric pianos, bells, basses, brass, marimbas and clavs.",
+  groups: [
+    {
+      label: "Global",
+      parameters: [
+        "algorithm",
+        "feedback",
+        "attack",
+        "release",
+        "vibrato",
+        "volume",
+      ],
+    },
+    {
+      label: "Operator 1",
+      parameters: ["ratio1", "level1", "decay1", "sustain1"],
+    },
+    {
+      label: "Operator 2",
+      parameters: ["ratio2", "level2", "decay2", "sustain2"],
+    },
+    {
+      label: "Operator 3",
+      parameters: ["ratio3", "level3", "decay3", "sustain3"],
+    },
+    {
+      label: "Operator 4",
+      parameters: ["ratio4", "level4", "decay4", "sustain4"],
+    },
+  ],
   id: "audioui.fm-synth",
   kind: "instrument",
   name: "FM Synth",

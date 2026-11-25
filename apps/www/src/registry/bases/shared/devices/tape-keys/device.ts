@@ -57,6 +57,10 @@ const control = <const Id extends string>(
 export const tapeKeysDevice = defineDevice({
   description:
     "A tape-replay keyboard: 35 keys, each a strip of tape with one note on it, on three tracks, flutes, strings and a choir, that runs out after eight seconds, with the tape's speed, wow and flutter, and a tone control.",
+  groups: [
+    { label: "Tape", parameters: ["speed", "wow", "tone"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.tape-keys",
   kind: "instrument",
   name: "Tape Keys",

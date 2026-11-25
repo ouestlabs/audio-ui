@@ -225,6 +225,7 @@ const tremolo = defineDevice({
   id: "acme.tremolo",
   name: "Tremolo",
   description: "Moves the level up and down.",
+  groups: [{ label: "Motion", parameters: ["rate", "depth"] }],
   parameters: [
     { id: "on", kind: "toggle", label: "Active", default: true },
     { id: "rate", label: "Rate", min: 0.5, max: 20, scale: "log", step: 0.5, unit: "Hz", default: 5 },
@@ -235,7 +236,7 @@ const tremolo = defineDevice({
 <DevicePanel device={tremolo} onValueChange={setState} value={state} />;
 ```
 
-`DevicePanel` makes a knob for each number, a toggle for each switch and a row of buttons for each choice, such as a waveform or a filter type. A face of your own, such as a curve or a spectrum, is optional.
+`DevicePanel` makes a knob for each number, a toggle for each switch and a row of buttons for each choice, such as a waveform or a filter type. `groups` gathers parameters under a name, in the order drawn, and what is in no group follows them. A face of your own, such as a curve or a spectrum, is optional.
 
 An instrument is the same with `kind: "instrument"`. Its parameters shape the sound, and its engine adds `noteOn` and `noteOff` next to `update`. The [pocket synth](/docs/components/base/pocket-synth) is the example: its panel is controlled and sends notes out, so it plays through any engine.
 

@@ -4,6 +4,7 @@ import { midiToHz } from "@/engine/pitch";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { WaveformSelect } from "@/registry/bases/shared/audio-ui/elements/waveform-select";
 import { XYPad } from "@/registry/bases/shared/audio-ui/elements/xypad";
+import { useDeviceFaces } from "@/registry/bases/shared/audio-ui/panels/device-faces";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -112,6 +113,7 @@ function PocketSynthPanel({
     [onValueChange, value]
   );
 
+  const Face = useDeviceFaces().Fader ?? Fader;
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -170,7 +172,7 @@ function PocketSynthPanel({
             >
               Volume
             </span>
-            <Fader
+            <Face
               aria-describedby={faderValueId}
               aria-labelledby={faderLabelId}
               id={faderId}

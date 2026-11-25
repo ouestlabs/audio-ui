@@ -13,13 +13,6 @@ import {
 import { cn } from "@/registry/lib/utils";
 import type { PadOnDetails } from "@/registry/primitives/pad/pad";
 
-/** The controls by what they do. */
-const GROUPS = [
-  { label: "Drum", parameters: ["voice", "tune"] },
-  { label: "Sound", parameters: ["decay", "tone", "snap"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 interface DrumSynthPanelProps {
   /** The notes held now, such as on a MIDI keyboard or from a sequencer: while any is, the pad lights up. */
   activeNotes?: readonly number[];
@@ -74,7 +67,6 @@ function DrumSynthPanel({
       >
         <DevicePanel
           device={drumSynthDevice}
-          groups={GROUPS}
           onValueChange={onValueChange}
           value={value}
         />

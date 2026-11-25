@@ -29,7 +29,7 @@ export const audioUi: RegistryItem[] = [
     css: HARDWARE_CSS,
     dependencies: [],
     description:
-      "The Hardware skin: a matte body, a dark inset screen and one accent as tokens and materials on .skin-hardware, with a capped knob, a ribbed fader and a needle VU meter that keep the props of Knob, Fader and Meter.",
+      "The Hardware skin: a matte body, a dark inset screen and one accent as tokens and materials on .skin-hardware, with a capped knob, a ribbed fader and a needle VU meter that keep the props of Knob, Fader and Meter. HardwareSkin dresses the device panels inside it.",
     files: [
       {
         path: "audio-ui/skins/hardware/knob.tsx",
@@ -46,6 +46,11 @@ export const audioUi: RegistryItem[] = [
         target: "components/audio-ui/skins/hardware/vu-meter.tsx",
         type: "registry:ui",
       },
+      {
+        path: "audio-ui/skins/hardware/skin.tsx",
+        target: "components/audio-ui/skins/hardware/skin.tsx",
+        type: "registry:ui",
+      },
     ],
     name: "skin-hardware",
     registryDependencies: [
@@ -53,6 +58,7 @@ export const audioUi: RegistryItem[] = [
       "@audio-ui/fader",
       "@audio-ui/meter",
       "@audio-ui/needle-meter",
+      "@audio-ui/device-panel",
     ],
     type: "registry:ui",
   },
@@ -484,11 +490,16 @@ export const audioUi: RegistryItem[] = [
         path: "audio-ui/panels/device-panel.tsx",
         type: "registry:ui",
       },
+      {
+        path: "audio-ui/panels/device-faces.tsx",
+        type: "registry:ui",
+      },
     ],
     name: "device-panel",
     registryDependencies: [
       "@audio-ui/device-signal",
       "@audio-ui/knob",
+      "@audio-ui/fader",
       "@audio-ui/waveform-select",
       "@audio-ui/filter-type-select",
       "@shadcn/toggle",

@@ -80,6 +80,11 @@ const control = <const Id extends string>(
 export const drumSynthDevice = defineDevice({
   description:
     "A synthesized drum: a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal from oscillators and noise, with its tuning, how long it rings, how bright it is and how sharp its attack, louder and brighter the harder it is hit.",
+  groups: [
+    { label: "Drum", parameters: ["voice", "tune"] },
+    { label: "Sound", parameters: ["decay", "tone", "snap"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.drum-synth",
   kind: "instrument",
   name: "Drum Synth",

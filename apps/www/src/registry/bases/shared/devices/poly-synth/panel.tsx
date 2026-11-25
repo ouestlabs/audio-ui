@@ -24,18 +24,6 @@ import {
 } from "@/registry/bases/shared/devices/poly-synth/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do, as the synth's panel lays them out. */
-const GROUPS = [
-  {
-    label: "Oscillators",
-    parameters: ["saw", "pulse", "width", "sub", "noise"],
-  },
-  { label: "Filter", parameters: ["cutoff", "resonance", "contour", "keys"] },
-  { label: "Envelope", parameters: ["attack", "decay", "sustain", "release"] },
-  { label: "Vibrato", parameters: ["rate", "vibrato"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 /** What the title bar holds, next to the presets: the chorus, a switch of three. */
 const HEADER_CONTROLS = ["chorus"] as const;
 const CHORUS = polySynthDevice.parameters.find(
@@ -172,7 +160,6 @@ function PolySynthPanel({
           className="grid-cols-5"
           device={polySynthDevice}
           exclude={HEADER_CONTROLS}
-          groups={GROUPS}
           onValueChange={change}
           value={value}
         />

@@ -38,10 +38,21 @@ const SIZES = {
     vertical: "h-11 w-7",
   },
   lg: { horizontal: "h-8 w-12", vertical: "h-12 w-8" },
-  sm: { horizontal: "h-6 w-9", vertical: "h-9 w-6" },
+  // The footprint of the digital cap: a bank of small faders has no more room.
+  sm: { horizontal: "h-4 w-5", vertical: "h-5 w-4" },
 };
 
 const RIBS = [0, 1, 2, 3, 4];
+
+/** The scale as drawn: the marks given, else the printed one. A small fader stands in a bank and has no room for one. */
+function scaleOf(
+  marks: FaderProps["marks"],
+  size: FaderProps["size"],
+  min: number,
+  max: number
+) {
+  return marks ?? (size === "sm" ? [] : printedMarks(min, max));
+}
 
 /** The cap, ribbed across the travel, its middle rib in the accent. */
 function RibbedThumb(
@@ -100,10 +111,13 @@ export function HardwareFader({
   ...props
 }: FaderProps) {
   const vertical = orientation === "vertical";
+  const scale = scaleOf(marks, size, min, max);
   return (
     <FaderPrimitive.Root
       className={cn(
-        "group/fader relative data-disabled:cursor-not-allowed data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=horizontal]:pb-6 data-[orientation=vertical]:ps-10",
+        "group/fader relative data-disabled:cursor-not-allowed data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full",
+        scale.length > 0 &&
+          "data-[orientation=horizontal]:pb-6 data-[orientation=vertical]:ps-10",
         className
       )}
       max={max}
@@ -111,7 +125,14 @@ export function HardwareFader({
       orientation={orientation}
       {...props}
     >
-      <FaderPrimitive.Control className="relative flex w-full touch-none select-none items-center transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:pointer-events-none data-[orientation=vertical]:h-full data-[orientation=horizontal]:min-h-11 data-[orientation=vertical]:min-h-[var(--fader-min-height,10rem)] data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32 data-[orientation=vertical]:w-11 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-disabled:opacity-50">
+      <FaderPrimitive.Control
+        className={cn(
+          "relative flex w-full touch-none select-none items-center transition-opacity duration-150 ease-out motion-reduce:transition-none data-disabled:pointer-events-none data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-[var(--fader-min-height,10rem)] data-[orientation=horizontal]:w-full data-[orientation=horizontal]:min-w-32 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-center data-disabled:opacity-50",
+          size === "sm"
+            ? "data-[orientation=horizontal]:min-h-5 data-[orientation=vertical]:w-5"
+            : "data-[orientation=horizontal]:min-h-11 data-[orientation=vertical]:w-11"
+        )}
+      >
         <FaderPrimitive.Track
           className="audio-groove relative grow cursor-pointer select-none rounded-full data-[orientation=horizontal]:h-1 data-[orientation=vertical]:w-1 data-[orientation=horizontal]:w-full"
           data-slot="fader-track"
@@ -126,7 +147,7 @@ export function HardwareFader({
           )}
           data-slot="fader-scale"
         >
-          {(marks ?? printedMarks(min, max)).map((mark) => {
+          {scale.map((mark) => {
             const { label, value } = markOf(mark);
             return (
               <FaderPrimitive.Mark

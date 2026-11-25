@@ -83,6 +83,11 @@ const control = <const Id extends string>(
 export const organDevice = defineDevice({
   description:
     "A tonewheel organ: nine drawbars of sines at the organ's harmonics, a percussion, a key click, an overdrive and a rotary speaker. Jazz, gospel, rock, church and flute registrations.",
+  groups: [
+    { label: "Percussion", parameters: ["percussion", "harmonic", "decay"] },
+    { label: "Tone", parameters: ["click", "drive"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.organ",
   kind: "instrument",
   name: "Organ",

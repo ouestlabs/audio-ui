@@ -21,6 +21,13 @@ export type Band = (typeof BANDS)[number];
 export const multibandDevice = defineDevice({
   description:
     "Compresses three bands apart: the signal is split at two frequencies into low, mid and high, each with its own threshold and ratio, with an attack and a release shared by the three and an output gain. A loud bass does not pump the highs.",
+  groups: [
+    { label: "Low", parameters: ["lowThresholdDb", "lowRatio"] },
+    { label: "Mid", parameters: ["midThresholdDb", "midRatio"] },
+    { label: "High", parameters: ["highThresholdDb", "highRatio"] },
+    { label: "Time", parameters: ["attackMs", "releaseMs"] },
+    { label: "Output", parameters: ["outputDb"] },
+  ],
   id: "audioui.multiband",
   name: "Multiband compressor",
   parameters: [

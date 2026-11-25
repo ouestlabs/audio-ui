@@ -65,6 +65,19 @@ const control = <const Id extends string>(
 export const polySynthDevice = defineDevice({
   description:
     "An eighties polyphonic synth: a saw, a pulse, a sub oscillator and noise into a resonant low-pass filter that an envelope opens, with a vibrato and a stereo chorus. Brass, strings, pads, plucks and basses.",
+  groups: [
+    {
+      label: "Oscillators",
+      parameters: ["saw", "pulse", "width", "sub", "noise"],
+    },
+    { label: "Filter", parameters: ["cutoff", "resonance", "contour", "keys"] },
+    {
+      label: "Envelope",
+      parameters: ["attack", "decay", "sustain", "release"],
+    },
+    { label: "Vibrato", parameters: ["rate", "vibrato"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.poly-synth",
   kind: "instrument",
   name: "Poly Synth",

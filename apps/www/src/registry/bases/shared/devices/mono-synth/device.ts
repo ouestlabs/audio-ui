@@ -76,6 +76,19 @@ const control = <const Id extends string>(
 export const monoSynthDevice = defineDevice({
   description:
     "A monophonic analog synth: a saw, square or triangle oscillator, a sub oscillator and noise into a resonant low-pass filter that an envelope opens, with a glide and a vibrato. Basses, leads and acid lines, one note at a time.",
+  groups: [
+    {
+      label: "Oscillators",
+      parameters: ["tune", "osc", "width", "sub", "noise"],
+    },
+    { label: "Filter", parameters: ["cutoff", "resonance", "contour"] },
+    {
+      label: "Envelope",
+      parameters: ["attack", "decay", "sustain", "release"],
+    },
+    { label: "Pitch", parameters: ["glide", "rate", "depth"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.mono-synth",
   kind: "instrument",
   name: "Mono Synth",

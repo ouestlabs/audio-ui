@@ -299,3 +299,29 @@ describe("format", () => {
     expect(compressor.format("reverb" as never, 1)).toBe("");
   });
 });
+
+describe("a device's groups", () => {
+  const define = (groups: { label: string; parameters: "gain"[] }[]) =>
+    defineDevice({
+      description: "d",
+      groups,
+      id: "test.groups",
+      name: "Groups",
+      parameters: [{ default: 0, id: "gain", label: "Gain", max: 1, min: 0 }],
+    });
+
+  test("are kept as written, none by default", () => {
+    const groups = [{ label: "Level", parameters: ["gain" as const] }];
+    expect(define(groups).groups).toEqual(groups);
+    expect(define([]).groups).toEqual([]);
+  });
+
+  test("name parameters the device has, each once", () => {
+    expect(() =>
+      define([{ label: "Level", parameters: ["nope" as "gain"] }])
+    ).toThrow(DeviceDefinitionError);
+    expect(() =>
+      define([{ label: "Level", parameters: ["gain", "gain"] }])
+    ).toThrow(DeviceDefinitionError);
+  });
+});

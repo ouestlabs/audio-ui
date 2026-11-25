@@ -25,18 +25,6 @@ import {
 } from "@/registry/bases/shared/devices/mono-synth/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do, as the synth's panel lays them out. */
-const GROUPS = [
-  {
-    label: "Oscillators",
-    parameters: ["tune", "osc", "width", "sub", "noise"],
-  },
-  { label: "Filter", parameters: ["cutoff", "resonance", "contour"] },
-  { label: "Envelope", parameters: ["attack", "decay", "sustain", "release"] },
-  { label: "Pitch", parameters: ["glide", "rate", "depth"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 /** What the title bar holds, next to the presets: the oscillator's wave and the range of the keyboard. */
 const HEADER_CONTROLS = ["wave", "range"] as const;
 const RANGE = monoSynthDevice.parameters.find(
@@ -216,7 +204,6 @@ function MonoSynthPanel({
           device={monoSynthDevice}
           disabled={value.wave === "square" ? NONE : NOT_SQUARE}
           exclude={HEADER_CONTROLS}
-          groups={GROUPS}
           onValueChange={change}
           value={value}
         />

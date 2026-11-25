@@ -23,14 +23,6 @@ import {
 } from "@/registry/bases/shared/devices/string-machine/device";
 import { cn } from "@/registry/lib/utils";
 
-/** The controls by what they do, as the machine's panel lays them out. */
-const GROUPS = [
-  { label: "Registers", parameters: ["violin", "viola", "cello", "bass"] },
-  { label: "Tone", parameters: ["bright", "ensemble"] },
-  { label: "Bow", parameters: ["attack", "release"] },
-  { label: "Output", parameters: ["volume"] },
-] as const;
-
 const PRESET_NAMES = STRING_MACHINE_PRESETS.map((preset) => ({
   label: preset.name,
   value: preset.name,
@@ -131,7 +123,6 @@ function StringMachinePanel({
       >
         <DevicePanel
           device={stringMachineDevice}
-          groups={GROUPS}
           onValueChange={change}
           value={value}
         />

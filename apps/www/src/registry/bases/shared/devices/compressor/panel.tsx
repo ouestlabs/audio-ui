@@ -36,15 +36,6 @@ const MIN_DB = -60;
 const MAX_DB = 6;
 const DB_TICKS = [-48, -24, 0];
 const UNITY = (inputDb: number) => inputDb;
-/** What the knobs gather: the curve, the timing, the output. */
-const GROUPS = [
-  { label: "Curve", parameters: ["thresholdDb", "ratio", "kneeDb"] },
-  { label: "Time", parameters: ["attackMs", "releaseMs"] },
-  {
-    label: "Output",
-    parameters: ["makeupDb", "mix"],
-  },
-] as const;
 const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
 const MODELS =
   compressorDevice.parameters.find((parameter) => parameter.id === "model")
@@ -161,7 +152,6 @@ function CompressorPanel({
             device={compressorDevice}
             disabled={unused}
             exclude={IN_THE_TITLE_BAR}
-            groups={GROUPS}
             onValueChange={onValueChange}
             value={value}
           />

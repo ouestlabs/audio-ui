@@ -58,6 +58,11 @@ const control = <const Id extends string>(
 export const guitarDevice = defineDevice({
   description:
     "A plucked guitar string: a pick strikes it and it rings, its highs dying first, through the body's warmth and a tone control, with how long it rings and how much the palm mutes it.",
+  groups: [
+    { label: "String", parameters: ["tone", "decay", "mute"] },
+    { label: "Body", parameters: ["body"] },
+    { label: "Output", parameters: ["volume"] },
+  ],
   id: "audioui.guitar",
   kind: "instrument",
   name: "Guitar",
