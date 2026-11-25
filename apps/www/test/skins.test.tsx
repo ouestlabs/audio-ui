@@ -116,6 +116,15 @@ describe("the Hardware skin", () => {
     ).toEqual(["+6", "0", "-6", "-12", "-24", "-48", "-∞"]);
   });
 
+  test("its small fader, one of a bank, prints only the marks given", () => {
+    const { container } = render(
+      <HardwareFader aria-label="Drawbar" size="sm" />
+    );
+    expect(
+      container.querySelector("[data-slot=fader-scale]")?.children
+    ).toHaveLength(0);
+  });
+
   test("its fader keeps the fader's own range", () => {
     const digital = accessibility(<Fader aria-label="Volume" />);
     expect(accessibility(<HardwareFader aria-label="Volume" />)).toEqual(
