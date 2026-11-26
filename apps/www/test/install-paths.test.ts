@@ -9,7 +9,9 @@ import { expect, test } from "bun:test";
  */
 
 const ROOT = `${import.meta.dir}/../../..`;
-const AUDIO_UI_IMPORT = /@\/components\/audio-ui\/([a-z0-9/-]+)/g;
+// A Vue or Svelte component is a file named in PascalCase, imported with its extension.
+const AUDIO_UI_IMPORT =
+  /@\/components\/audio-ui\/([A-Za-z0-9/-]+(?:\.(?:vue|svelte))?)/g;
 // `import { A, B as C } from "@/components/audio-ui/<file>"`, possibly over several lines.
 const NAMED_IMPORT =
   /import\s+(?:type\s+)?\{([^}]+)\}\s+from\s+"@\/components\/audio-ui\/([a-z0-9/-]+)"/g;
@@ -126,7 +128,9 @@ const imports = (text: string) =>
   [...text.matchAll(AUDIO_UI_IMPORT)].map((match) => match[1] ?? "");
 const missing = (names: string[]) =>
   [...new Set(names)].filter(
-    (name) => !installed.has(`components/audio-ui/${name}`)
+    // A component file keeps its extension in an import (`Knob.vue`), never in a target.
+    (name) =>
+      !installed.has(`components/audio-ui/${name.replace(EXTENSION, "")}`)
   );
 
 async function readAll(pattern: string, cwd: string) {
@@ -314,7 +318,10 @@ test("an item's own imports come with it when it is installed", () => {
           ? INSTALL_FOLDERS[folder] + specifier.slice(folder.length)
           : "";
         // A folder is imported by its index: `@/lib/engine/time`.
-        const needed = owners.get(target) ?? owners.get(`${target}/index`);
+        const needed =
+          owners.get(target) ??
+          owners.get(`${target}/index`) ??
+          owners.get(target.replace(EXTENSION, ""));
         if (!needed) {
           problems.push(`${item.name}: ${specifier} is installed by no item`);
         } else if (!needed.some((owner) => brought.has(owner))) {

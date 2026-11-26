@@ -398,7 +398,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "fader-vue-demo",
-    registryDependencies: ["@audio-ui/fader-vue"],
+    registryDependencies: ["@audio-ui/fader-element-vue"],
     type: "registry:example",
   },
   {
@@ -411,7 +411,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "fader-svelte-demo",
-    registryDependencies: ["@audio-ui/fader-svelte"],
+    registryDependencies: ["@audio-ui/fader-element-svelte"],
     type: "registry:example",
   },
   {
@@ -537,7 +537,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-vue-demo",
-    registryDependencies: ["@audio-ui/knob-vue"],
+    registryDependencies: ["@audio-ui/knob-element-vue"],
     type: "registry:example",
   },
   {
@@ -550,7 +550,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-svelte-demo",
-    registryDependencies: ["@audio-ui/knob-svelte"],
+    registryDependencies: ["@audio-ui/knob-element-svelte"],
     type: "registry:example",
   },
   {
@@ -902,7 +902,10 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "meter-vue-demo",
-    registryDependencies: ["@audio-ui/meter-vue", "@audio-ui/simulated-levels"],
+    registryDependencies: [
+      "@audio-ui/meter-element-vue",
+      "@audio-ui/simulated-levels",
+    ],
     type: "registry:example",
   },
   {
@@ -916,7 +919,7 @@ export const components: RegistryItem[] = [
     ],
     name: "meter-svelte-demo",
     registryDependencies: [
-      "@audio-ui/meter-svelte",
+      "@audio-ui/meter-element-svelte",
       "@audio-ui/simulated-levels",
     ],
     type: "registry:example",

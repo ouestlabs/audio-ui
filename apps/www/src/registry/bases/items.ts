@@ -370,6 +370,40 @@ export function primitiveItems(
 }
 
 /**
+ * A styled element in Vue and in Svelte, `<name>-element-vue` and
+ * `<name>-element-svelte`: the framework's component over the primitive's
+ * adapter, installed beside it. It draws no style of its own: its look is the
+ * element's sheet, plain CSS on its parts (`/css/<style>/<name>.css`).
+ */
+export function styledItems(
+  name: string,
+  component: string,
+  description: string
+): RegistryItem[] {
+  return (["vue", "svelte"] as const).map((framework) => {
+    const svelte = framework === "svelte";
+    const type = svelte ? "registry:component" : "registry:ui";
+    const root = svelte ? "~/src/lib/components/" : "components/";
+    const file = `${component}.${framework}`;
+    return {
+      categories: [name, framework],
+      dependencies: [],
+      description: `${description} Its ${framework} component, drawn by the element's sheet.`,
+      files: [
+        fileOf(
+          `audio-ui/elements/${framework}/${file}`,
+          type,
+          `${root}audio-ui/${name}/${file}`
+        ),
+      ],
+      name: `${name}-element-${framework}`,
+      registryDependencies: [`@audio-ui/${name}-${framework}`],
+      type,
+    };
+  });
+}
+
+/**
  * The files the rest of the registry reads of the primitives, one item each:
  * installed to `components/audio-ui/`, where the adapters write the same
  * files, which the CLI skips as identical.

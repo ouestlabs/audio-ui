@@ -1,4 +1,4 @@
 [test]
-preload = ["./test/setup.ts", "./test/primitives/svelte-plugin.ts"]
+preload = ["./test/setup.ts", "./test/primitives/svelte-plugin.ts", "./test/primitives/vue-plugin.ts"]
 # The primitives' suite runs in Svelte's browser build: `bun run test:primitives`.
 pathIgnorePatterns = ["test/primitives/**"]
