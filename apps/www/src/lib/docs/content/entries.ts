@@ -1,5 +1,5 @@
-import { REACT_LIBS } from "@/lib/docs/content/framework-paths";
 import manifest from "@/lib/docs/content/entries.generated.json";
+import { REACT_LIBS } from "@/lib/docs/content/framework-paths";
 import packageModules from "@/lib/docs/content/package-modules.generated.json";
 
 /** A hook or a lib as its entry page heads it: what `scripts/build-entries.ts` reads from the registry and the sources. */
