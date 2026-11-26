@@ -32,6 +32,17 @@ Each `add` adds the sheets it writes to the index. A project with no shadcn them
 
 In React, a component that needs `cn` gets `lib/utils.ts`, which re-exports it from the [`cn`](https://github.com/shadcn-ui/cn) package, unless the project has one.
 
+## Libraries and the engine
+
+What makes the sound installs the same way, in every framework: the libraries and the modules of the [engine](/docs/engine) and of WebGL are plain TypeScript.
+
+```bash
+npx @audio-ui/cli add engine-time
+npx @audio-ui/cli add web-audio
+```
+
+Each one lands in `lib/`, with the modules it imports and the npm packages they use.
+
 ## Imports
 
 The files import each other through your project's alias, read from the `paths` of your tsconfig, such as `@/components/audio-ui/knob/vue`. In SvelteKit they use `$lib`. A project with no alias gets relative imports.
