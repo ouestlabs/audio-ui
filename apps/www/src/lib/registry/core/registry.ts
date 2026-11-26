@@ -349,6 +349,13 @@ async function frameworkDemo(
     mount = (element, fn) =>
       (fn as (element: HTMLElement) => () => void)(element);
   }
+  const { mountInShadow, styledElementOf } = await import("./mount-styled");
+  const styled = styledElementOf(path);
+  if (styled) {
+    const inPage = mount;
+    mount = (element, given) =>
+      mountInShadow(element, styled, (target) => inPage(target, given));
+  }
   return {
     default: () => React.createElement(FrameworkDemo, { demo, mount }),
   };

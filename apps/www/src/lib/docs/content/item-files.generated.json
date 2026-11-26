@@ -628,6 +628,12 @@
   "export-dialog": [
     "components/audio-ui/export-dialog.tsx"
   ],
+  "fader-element-svelte": [
+    "~/src/lib/components/audio-ui/fader/Fader.svelte"
+  ],
+  "fader-element-vue": [
+    "components/audio-ui/fader/Fader.vue"
+  ],
   "fader-hardware-demo": [
     "components/examples/fader-hardware-demo.tsx"
   ],
@@ -765,6 +771,12 @@
   "knob-demo": [
     "components/examples/knob-demo.tsx"
   ],
+  "knob-element-svelte": [
+    "~/src/lib/components/audio-ui/knob/Knob.svelte"
+  ],
+  "knob-element-vue": [
+    "components/audio-ui/knob/Knob.vue"
+  ],
   "knob-filter-control-demo": [
     "components/examples/knob-filter-control-demo.tsx"
   ],
@@ -849,6 +861,12 @@
   ],
   "menubar": [
     "components/ui/menubar.tsx"
+  ],
+  "meter-element-svelte": [
+    "~/src/lib/components/audio-ui/meter/Meter.svelte"
+  ],
+  "meter-element-vue": [
+    "components/audio-ui/meter/Meter.vue"
   ],
   "meter-hardware-demo": [
     "components/examples/meter-hardware-demo.tsx"

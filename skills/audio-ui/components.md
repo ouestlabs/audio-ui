@@ -15,6 +15,8 @@ import { Meter } from "@/components/audio-ui/meter";
 
 Without the styled component, the headless primitive installs from the same registry, one item per framework (`@audio-ui/knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): `npx shadcn@latest add @audio-ui/knob-react` copies it to `components/audio-ui/knob/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"` gives its parts (`Knob.Root`, `Knob.Thumb`…). Its page: `https://www.audio-ui.dev/docs/components/base/knob#usage`.
 
+In Vue and Svelte, the knob, the fader and the meter also come styled: `knob-element-vue`, `knob-element-svelte`, `fader-element-vue`, `fader-element-svelte`, `meter-element-vue` and `meter-element-svelte`. Each is one component over the headless adapter, with the props of the React element but `editableValue` (`<Knob>` from `@/components/audio-ui/knob/Knob.vue`, or from `$lib/components/audio-ui/knob/Knob.svelte`). It carries no classes: its look is plain CSS on its parts, `https://www.audio-ui.dev/css/<style>/knob.css` for a style (`nova`, `vega`…), with the theme's tokens from `https://www.audio-ui.dev/css/theme.css` when the project has no shadcn theme. In plain HTML, the custom elements take the same sheet: set `data-size`, `data-marks` and `data-readout` on the root as the element would.
+
 ## Elements
 
 The pieces of any audio interface: controls, keyboards and displays. Each takes a value and reports changes, so it drives any engine.

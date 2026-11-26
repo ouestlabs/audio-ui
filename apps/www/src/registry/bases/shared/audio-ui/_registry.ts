@@ -1,4 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
+import { styledItems } from "../../items";
 import { HARDWARE_CSS } from "./skins/hardware-css.ts";
 import { NEU_CSS } from "./skins/neu-css.ts";
 
@@ -26,6 +27,21 @@ const ENVELOPE_SHAKE = {
 };
 
 export const audioUi: RegistryItem[] = [
+  ...styledItems(
+    "knob",
+    "Knob",
+    "A rotary control for one parameter: a dial, its arc, a needle, graduations and a readout."
+  ),
+  ...styledItems(
+    "fader",
+    "Fader",
+    "A linear control for one parameter: a track, its range, a ribbed thumb, graduations and a readout."
+  ),
+  ...styledItems(
+    "meter",
+    "Meter",
+    "A level meter: a channel per level, its fill, a held peak and a scale in dB."
+  ),
   {
     css: HARDWARE_CSS,
     dependencies: [],

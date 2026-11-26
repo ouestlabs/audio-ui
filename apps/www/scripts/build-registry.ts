@@ -47,7 +47,8 @@ import {
 import { HARDWARE_CSS } from "../src/registry/bases/shared/audio-ui/skins/hardware-css.ts";
 import { NEU_CSS } from "../src/registry/bases/shared/audio-ui/skins/neu-css.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
-import { portableSheet } from "./portable-css.ts";
+import { THEMES } from "../src/registry/themes.ts";
+import { portableSheet, themeSheet } from "./portable-css.ts";
 import { skinSheet } from "./skin-css.ts";
 
 // ---------------------------------------------------------------------------
@@ -842,6 +843,14 @@ for (const classes of cnClassesByStyle.values()) {
       classes.set(hook, "");
     }
   }
+}
+// The default theme's tokens, for a page with no shadcn theme.
+const NEUTRAL = THEMES.find((theme) => theme.name === "neutral");
+if (NEUTRAL?.cssVars) {
+  await Bun.write(
+    `${PROJECT_ROOT}/public/css/theme.css`,
+    await themeSheet("neutral", NEUTRAL.cssVars)
+  );
 }
 // The elements as plain CSS on their parts, one sheet a style: what Vue, Svelte and custom elements read.
 const PORTABLE = [

@@ -17,10 +17,10 @@ export const knobParts = {
   "knob-body": "cn-knob-body absolute z-0",
   "knob-track":
     "cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full opacity-22",
-  "knob-arc":
+  "knob-indicator":
     "cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full",
   "knob-thumb": "pointer-events-none absolute inset-0 z-2",
-  "knob-indicator": "cn-knob-indicator block size-full",
+  "knob-needle": "cn-knob-indicator block size-full",
   "knob-mark-tick":
     "cn-knob-mark-tick -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2",
   "knob-mark-label":
@@ -120,10 +120,7 @@ function Knob({
           className={knobParts["knob-track"]}
           data-slot="knob-track"
         />
-        <KnobPrimitive.Indicator
-          className={knobParts["knob-arc"]}
-          data-slot="knob-arc"
-        />
+        <KnobPrimitive.Indicator className={knobParts["knob-indicator"]} />
         <KnobPrimitive.Thumb
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}
@@ -136,8 +133,8 @@ function Knob({
         >
           <svg
             aria-hidden="true"
-            className={knobParts["knob-indicator"]}
-            data-slot="knob-indicator"
+            className={knobParts["knob-needle"]}
+            data-slot="knob-needle"
             viewBox="0 0 48 48"
           >
             <line

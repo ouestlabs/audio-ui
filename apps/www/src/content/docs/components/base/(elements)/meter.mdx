@@ -208,6 +208,53 @@ npm install class-variance-authority
 
 </ForFrameworks>
 
+<ForFrameworks only="vue svelte web">
+
+### 5. The styled component
+
+Optional: the meter as the registry draws it in React, with no classes and no Tailwind. Its look is one sheet of plain CSS on its parts, a sheet for each style (`nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `rhea`, `sera`). Copy the sheet of your style into your project, with the theme's tokens when the page has no shadcn theme.
+
+```html
+<link rel="stylesheet" href="/css/theme.css" />
+<link rel="stylesheet" href="/css/nova/meter.css" />
+```
+
+Both are served at `https://www.audio-ui.dev/css/`.
+
+<FrameworkTabs defaultValue="vue">
+
+<TabsList>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="vue">
+
+One component over the adapter, with the props of the React meter.
+
+<ItemFiles name="meter-element-vue" />
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+One component over the adapter, with the props of the React meter.
+
+<ItemFiles name="meter-element-svelte" />
+
+</TabsContent>
+
+<TabsContent value="web">
+
+The custom elements take the same sheet. Write the parts the example above writes, and set `data-size` and `data-marks` on `audio-ui-meter`, as the styled component does.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ForFrameworks>
+
 </TabsContent>
 
 <TabsContent value="agent">
