@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Adds audio/ui components to a React, Vue, Svelte or plain web project: the files are copied into the project, and they are yours.",
   "keywords": [
     "audio-ui",
