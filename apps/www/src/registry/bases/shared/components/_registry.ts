@@ -1108,6 +1108,34 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
+    description:
+      "A live waveform, scrolling with a made-up voice: no microphone, no sound.",
+    files: [
+      {
+        path: "components/waveform/react/waveform-live-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-live-demo",
+    registryDependencies: ["@audio-ui/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description:
+      "A live waveform in the Vue adapter, drawn by the waveform's sheet, scrolling with a made-up voice.",
+    files: [
+      {
+        path: "components/waveform/vue/waveform-live-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-live-vue-demo",
+    registryDependencies: ["@audio-ui/waveform-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
     description: "waveform example, in the Vue adapter",
     files: [
       {

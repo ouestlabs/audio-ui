@@ -9,6 +9,10 @@ base: base
 
 <ComponentPreview styleName="ui-sdk-nova" name="waveform-vue-demo" />
 
+A live waveform, scrolling with a made-up voice:
+
+<ComponentPreview styleName="ui-sdk-nova" name="waveform-live-vue-demo" />
+
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
@@ -253,6 +257,9 @@ By hand:
 
 Both are served at `https://www.audio-ui.dev/css/`, with the skins in `/css/skins/`.
 
+The live waveform and the bar visualizer are the same root, told apart by an attribute the sheet reads: `data-variant="live"` on a root holding a `Canvas`, or `data-variant="bars"` on a root holding `Bars` and their `Bar`s, with `data-orientation` (`horizontal` or `vertical`) and `data-align` (`start`, `center` or `end`) for where the bars grow from.
+
+
 </ForFrameworks>
 
 </TabsContent>
@@ -295,6 +302,14 @@ import {
   variant="playhead"
 />
 ```
+
+A live waveform, scrolling with a made-up voice:
+
+<ForFrameworks only="react">
+
+<ComponentPreview styleName="ui-sdk-nova" name="waveform-live-demo" />
+
+</ForFrameworks>
 
 **A microphone, scrolling as it comes in:**
 

@@ -169,6 +169,14 @@ const ELEMENTS = [
           <Wave.WaveformHover />
         </Wave.Waveform>
       ),
+    // The live waveform and the bars are the same root as the waveform, in the same sheet.
+    also: () =>
+      render(
+        <>
+          <Wave.LiveWaveform aria-label="Input" />
+          <Wave.BarVisualizer aria-label="Bands" orientation="vertical" />
+        </>
+      ),
   },
 ] as const;
 
@@ -176,9 +184,15 @@ describe.each([...ELEMENTS])(
   "the $name, as plain CSS on its parts",
   (element) => {
     test("the React element draws every part the sheet styles, by its slot", () => {
-      const { container } = element.render();
+      const containers = [
+        element.render().container,
+        ...("also" in element ? [element.also().container] : []),
+      ];
       for (const part of Object.keys(element.parts)) {
-        expect(container.querySelector(partSelector(part))).not.toBeNull();
+        const drawn = containers.some(
+          (container) => container.querySelector(partSelector(part)) !== null
+        );
+        expect(drawn ? part : `${part} missing`).toBe(part);
       }
     });
 
