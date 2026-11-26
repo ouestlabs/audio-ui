@@ -545,6 +545,12 @@
   "envelope-adsr-demo": [
     "components/examples/envelope-adsr-demo.tsx"
   ],
+  "envelope-element-svelte": [
+    "~/src/lib/components/audio-ui/envelope/Envelope.svelte"
+  ],
+  "envelope-element-vue": [
+    "components/audio-ui/envelope/Envelope.vue"
+  ],
   "envelope-geometry": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/envelope/geometry.ts"
@@ -1004,6 +1010,14 @@
   "pad-demo": [
     "components/examples/pad-demo.tsx"
   ],
+  "pad-element-svelte": [
+    "~/src/lib/components/audio-ui/pad/Pad.svelte",
+    "~/src/lib/components/audio-ui/pad/PadItem.svelte"
+  ],
+  "pad-element-vue": [
+    "components/audio-ui/pad/Pad.vue",
+    "components/audio-ui/pad/PadItem.vue"
+  ],
   "pad-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/pad/pad.ts",
@@ -1057,6 +1071,12 @@
   ],
   "piano-active-notes-demo": [
     "components/examples/piano-active-notes-demo.tsx"
+  ],
+  "piano-element-svelte": [
+    "~/src/lib/components/audio-ui/piano/Piano.svelte"
+  ],
+  "piano-element-vue": [
+    "components/audio-ui/piano/Piano.vue"
   ],
   "piano-react": [
     "components/audio-ui/primitive.ts",
@@ -1913,6 +1933,12 @@
   ],
   "xypad-bipolar-range-demo": [
     "components/examples/xypad-bipolar-range-demo.tsx"
+  ],
+  "xypad-element-svelte": [
+    "~/src/lib/components/audio-ui/xypad/XYPad.svelte"
+  ],
+  "xypad-element-vue": [
+    "components/audio-ui/xypad/XYPad.vue"
   ],
   "xypad-live-value-demo": [
     "components/examples/xypad-live-value-demo.tsx"

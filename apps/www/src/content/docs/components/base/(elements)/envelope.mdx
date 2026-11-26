@@ -100,16 +100,16 @@ npx shadcn@latest add @audio-ui/primitives-css
 
 <TabsContent value="cli">
 
-The [CLI](/docs/cli) finds your framework in `package.json` and writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` (under `src/lib/` in SvelteKit). It installs the kernel's packages:
+The [CLI](/docs/cli) finds your framework in `package.json` and writes the styled component with what draws it: the primitive, its adapter, `primitive.ts` and the sheet of your style, with an index to import once. It installs the kernel's packages:
 
 ```bash
 npx @audio-ui/cli add envelope
 ```
 
-The optional styles are one more name:
+Or the primitive alone, to style yourself:
 
 ```bash
-npx @audio-ui/cli add primitives-css
+npx @audio-ui/cli add envelope --headless
 ```
 
 </TabsContent>
@@ -231,6 +231,61 @@ npm install class-variance-authority
 ```
 
 <ItemFiles name="envelope" />
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+### 5. The styled component
+
+Optional: the envelope as the registry draws it in React, with no classes and no Tailwind. Its look is one sheet of plain CSS on its parts, a sheet for each style (`nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `rhea`, `sera`). Copy the sheet of your style into your project, with the theme's tokens when the page has no shadcn theme.
+
+The [CLI](/docs/cli) writes the component, its adapter, the sheet and an index to import once:
+
+```bash
+npx @audio-ui/cli add envelope
+```
+
+By hand:
+
+```html
+<link rel="stylesheet" href="/css/theme.css" />
+<link rel="stylesheet" href="/css/nova/envelope.css" />
+```
+
+Both are served at `https://www.audio-ui.dev/css/`.
+
+<FrameworkTabs defaultValue="vue">
+
+<TabsList>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="vue">
+
+One component over the adapter, with the props of the React envelope: the frame and its grid from `snap`, and the labels of the points and the segments.
+
+<ItemFiles name="envelope-element-vue" />
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+One component over the adapter, with the props of the React envelope: the frame and its grid from `snap`, and the labels of the points and the segments.
+
+<ItemFiles name="envelope-element-svelte" />
+
+</TabsContent>
+
+<TabsContent value="web">
+
+The custom elements make the points and the segments. Wrap `audio-ui-envelope` in the frame the example above writes, `data-slot="envelope-frame"` with `data-size` and the grid as its background.
+
+</TabsContent>
+
+</FrameworkTabs>
 
 </ForFrameworks>
 

@@ -32,6 +32,11 @@ import {
   SHIPPED_PRIMITIVES,
   sharedDependencies,
 } from "../src/registry/bases/primitives.ts";
+import { ENVELOPE_SHAKE } from "../src/registry/bases/shared/audio-ui/_registry.ts";
+import {
+  envelopeParts,
+  envelopeSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/envelope.tsx";
 import {
   faderParts,
   faderSizes,
@@ -44,11 +49,26 @@ import {
   meterParts,
   meterSizes,
 } from "../src/registry/bases/shared/audio-ui/elements/meter.tsx";
+import { padParts } from "../src/registry/bases/shared/audio-ui/elements/pad.tsx";
+import {
+  pianoParts,
+  pianoSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/piano.tsx";
+import {
+  xypadParts,
+  xypadSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/xypad.tsx";
 import { HARDWARE_CSS } from "../src/registry/bases/shared/audio-ui/skins/hardware-css.ts";
 import { NEU_CSS } from "../src/registry/bases/shared/audio-ui/skins/neu-css.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { THEMES } from "../src/registry/themes.ts";
-import { portableSheet, themeSheet } from "./portable-css.ts";
+import {
+  type CssObject,
+  type Parts,
+  portableSheet,
+  type Sizes,
+  themeSheet,
+} from "./portable-css.ts";
 import { plainSkinSheet, skinSheet } from "./skin-css.ts";
 
 // ---------------------------------------------------------------------------
@@ -858,21 +878,31 @@ if (NEUTRAL?.cssVars) {
   );
 }
 // The elements as plain CSS on their parts, one sheet a style: what Vue, Svelte and custom elements read.
-const PORTABLE = [
+const PORTABLE: [
+  name: string,
+  parts: Parts,
+  sizes: Sizes,
+  extra?: CssObject,
+][] = [
   ["knob", knobParts, knobSizes],
   ["fader", faderParts, faderSizes],
   ["meter", meterParts, meterSizes],
-] as const;
+  ["xypad", xypadParts, xypadSizes],
+  ["envelope", envelopeParts, envelopeSizes, ENVELOPE_SHAKE],
+  ["pad", padParts, {}],
+  ["piano", pianoParts, pianoSizes],
+];
 await Promise.all(
   STYLES.flatMap((style) =>
-    PORTABLE.map(async ([name, parts, sizes]) =>
+    PORTABLE.map(async ([name, parts, sizes, extra]) =>
       Bun.write(
         `${PROJECT_ROOT}/public/css/${style}/${name}.css`,
         await portableSheet(
           name,
           parts,
           sizes,
-          cnClassesByStyle.get(style) ?? new Map()
+          cnClassesByStyle.get(style) ?? new Map(),
+          extra
         )
       )
     )

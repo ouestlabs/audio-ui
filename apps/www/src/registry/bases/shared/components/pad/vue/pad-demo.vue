@@ -1,11 +1,12 @@
 <script lang="ts" setup>
+import Pad from "@/registry/bases/shared/audio-ui/elements/vue/Pad.vue";
+import PadItem from "@/registry/bases/shared/audio-ui/elements/vue/PadItem.vue";
 import {
   triggerHihat,
   triggerKick,
   triggerSnare,
 } from "@/registry/lib/drums/drum-synthesis";
 import { webAudio } from "@/registry/lib/web-audio";
-import { Pad } from "@/registry/primitives/pad/vue";
 
 const VOLUME = 0.7;
 /** How long the open hat rings, in seconds, unless the closed one chokes it. */
@@ -64,22 +65,20 @@ function choke(value: string, details: { reason: string }) {
 </script>
 
 <template>
-  <Pad.Root
+  <Pad
     aria-label="Drum pads"
-    class="grid w-full max-w-56 select-none grid-cols-[repeat(var(--pad-columns),minmax(0,1fr))] gap-2 data-disabled:opacity-50"
-    style="--pad-columns: 2"
+    style="max-width: 14rem"
     :columns="2"
     @pad-off="choke"
     @pad-on="strike"
   >
-    <Pad.Item
-      class="cn-pad-item flex aspect-square min-w-0 cursor-pointer items-end justify-start p-2 text-left font-medium text-xs data-disabled:pointer-events-none"
+    <PadItem
       v-for="pad in PADS"
       :key="pad.value"
       :choke-group="pad.chokeGroup"
       :value="pad.value"
     >
       {{ pad.label }}
-    </Pad.Item>
-  </Pad.Root>
+    </PadItem>
+  </Pad>
 </template>

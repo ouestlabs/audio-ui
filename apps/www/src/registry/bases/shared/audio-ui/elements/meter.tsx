@@ -10,7 +10,7 @@ import { Meter as MeterPrimitive } from "@/registry/primitives/meter/react";
  * every other framework. The root carries `data-orientation`, `data-size` and
  * `data-marks` when it has a scale.
  */
-export const meterParts = {
+export const meterParts = Object.freeze({
   // Room for the scale's labels beside the channels.
   meter:
     "cn-meter flex select-none gap-1 data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-fit data-[orientation=horizontal]:flex-col data-marks:data-[orientation=vertical]:me-8 data-marks:data-[orientation=horizontal]:mb-6",
@@ -25,16 +25,16 @@ export const meterParts = {
     "bg-current opacity-40 data-[orientation=horizontal]:h-1 data-[orientation=horizontal]:w-px data-[orientation=vertical]:h-px data-[orientation=vertical]:w-1.5",
   "meter-mark-label":
     "min-w-4 text-end data-[orientation=horizontal]:text-center",
-} as const;
+});
 
 /** The parts whose look changes with the meter's `data-size`, by size. */
-export const meterSizes = {
-  meter: {
+export const meterSizes = Object.freeze({
+  meter: Object.freeze({
     default: "cn-meter-size-default",
     lg: "cn-meter-size-lg",
     sm: "cn-meter-size-sm",
-  },
-} as const;
+  }),
+});
 
 const meterVariants = cva(meterParts.meter, {
   defaultVariants: { size: "default" },

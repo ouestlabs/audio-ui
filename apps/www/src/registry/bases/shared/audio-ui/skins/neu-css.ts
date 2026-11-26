@@ -97,7 +97,7 @@ export const NEU_CSS = {
     color: "var(--audio-print)",
   },
   // A graph and an XY pad are wells pressed into the plate.
-  ".skin-neu [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad])":
+  ".skin-neu [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad-control])":
     {
       "--background": "var(--audio-screen)",
       "--card": "var(--audio-screen)",

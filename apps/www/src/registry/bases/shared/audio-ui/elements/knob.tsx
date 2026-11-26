@@ -10,7 +10,7 @@ import { Knob as KnobPrimitive } from "@/registry/primitives/knob/react";
  * framework. The root carries `data-size`, `data-marks` (`ticks` or `labels`)
  * and `data-readout` (`auto` or `always`) for the parts to read.
  */
-export const knobParts = {
+export const knobParts = Object.freeze({
   knob: "cn-knob group/knob relative inline-flex outline-none data-disabled:cursor-not-allowed data-[marks=ticks]:mx-2 data-[marks=ticks]:mt-2 data-[marks=ticks]:not-data-readout:mb-2 data-[marks=labels]:mx-5 data-[marks=labels]:mt-5 data-[marks=labels]:not-data-readout:mb-5 data-readout:mb-8 data-[marks=labels]:data-readout:mb-12",
   "knob-control":
     "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-disabled:pointer-events-none data-disabled:opacity-50 data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize",
@@ -28,25 +28,25 @@ export const knobParts = {
   // The readout hangs under the dial, below the labels at the ends of the sweep. Shown on demand, it appears while the knob is hovered, turned or focused.
   "knob-value":
     "cn-knob-value pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap in-data-[marks=labels]:mt-6 data-editable:pointer-events-auto data-editable:cursor-text in-data-[readout=auto]:opacity-0 in-data-[readout=auto]:transition-opacity in-data-[readout=auto]:duration-150 in-data-[readout=auto]:ease-out in-data-[readout=auto]:motion-reduce:transition-none group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 data-editing:opacity-100",
-} as const;
+});
 
 /** The parts whose look changes with the knob's `data-size`, by size. */
-export const knobSizes = {
-  knob: {
+export const knobSizes = Object.freeze({
+  knob: Object.freeze({
     default: "cn-knob-size-default",
     lg: "cn-knob-size-lg",
     sm: "cn-knob-size-sm",
     xl: "cn-knob-size-xl",
     xs: "cn-knob-size-xs",
-  },
-  "knob-body": {
+  }),
+  "knob-body": Object.freeze({
     default: "cn-knob-body-size-default",
     lg: "cn-knob-body-size-lg",
     sm: "cn-knob-body-size-sm",
     xl: "cn-knob-body-size-xl",
     xs: "cn-knob-body-size-xs",
-  },
-} as const;
+  }),
+});
 
 const knobVariants = cva(knobParts.knob, {
   defaultVariants: { size: "default" },

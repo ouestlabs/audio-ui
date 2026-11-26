@@ -603,7 +603,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "envelope-vue-demo",
-    registryDependencies: ["@audio-ui/envelope-vue"],
+    registryDependencies: ["@audio-ui/envelope-element-vue"],
     type: "registry:example",
   },
   {
@@ -616,7 +616,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "envelope-svelte-demo",
-    registryDependencies: ["@audio-ui/envelope-svelte"],
+    registryDependencies: ["@audio-ui/envelope-element-svelte"],
     type: "registry:example",
   },
   {
@@ -668,7 +668,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "piano-vue-demo",
-    registryDependencies: ["@audio-ui/piano-vue"],
+    registryDependencies: ["@audio-ui/piano-element-vue"],
     type: "registry:example",
   },
   {
@@ -681,7 +681,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "piano-svelte-demo",
-    registryDependencies: ["@audio-ui/piano-svelte"],
+    registryDependencies: ["@audio-ui/piano-element-svelte"],
     type: "registry:example",
   },
   {
@@ -979,7 +979,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "xypad-vue-demo",
-    registryDependencies: ["@audio-ui/xypad-vue"],
+    registryDependencies: ["@audio-ui/xypad-element-vue"],
     type: "registry:example",
   },
   {
@@ -992,7 +992,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "xypad-svelte-demo",
-    registryDependencies: ["@audio-ui/xypad-svelte"],
+    registryDependencies: ["@audio-ui/xypad-element-svelte"],
     type: "registry:example",
   },
   {
@@ -2193,7 +2193,7 @@ export const components: RegistryItem[] = [
     ],
     name: "pad-vue-demo",
     registryDependencies: [
-      "@audio-ui/pad-vue",
+      "@audio-ui/pad-element-vue",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
     ],
@@ -2210,7 +2210,7 @@ export const components: RegistryItem[] = [
     ],
     name: "pad-svelte-demo",
     registryDependencies: [
-      "@audio-ui/pad-svelte",
+      "@audio-ui/pad-element-svelte",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
     ],

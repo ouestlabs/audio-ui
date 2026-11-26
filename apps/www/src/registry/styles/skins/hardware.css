@@ -42,7 +42,7 @@
   color: var(--audio-print);
 }
 
-.skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad]) {
+.skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad-control]) {
   --background: var(--audio-screen);
   --card: var(--audio-screen);
   --foreground: var(--audio-screen-ink);
@@ -58,7 +58,7 @@
   border-radius: calc(6px * var(--audio-roundness));
 }
 
-.skin-hardware [data-slot=device-frame] [data-slot=xypad] > [data-slot=xypad] {
+.skin-hardware [data-slot=device-frame] [data-slot=xypad-control] {
   --border: color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen));
 }
 

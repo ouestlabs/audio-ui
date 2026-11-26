@@ -4,7 +4,7 @@ import { HARDWARE_CSS } from "./skins/hardware-css.ts";
 import { NEU_CSS } from "./skins/neu-css.ts";
 
 /** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
-const ENVELOPE_SHAKE = {
+export const ENVELOPE_SHAKE = {
   "@keyframes envelope-shake": {
     "0%": {
       "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -41,6 +41,26 @@ export const audioUi: RegistryItem[] = [
     "meter",
     "Meter",
     "A level meter: a channel per level, its fill, a held peak and a scale in dB."
+  ),
+  ...styledItems(
+    "xypad",
+    "XYPad",
+    "A two-dimensional control for two parameters at once: a pad, its grid, a crosshair, a cursor and a value display."
+  ),
+  ...styledItems(
+    "envelope",
+    "Envelope",
+    "An editor for a breakpoint ramp: a frame with its grid, the curve and the area under it, a point to drag at each breakpoint and a handle to bend each segment."
+  ),
+  ...styledItems(
+    "pad",
+    ["Pad", "PadItem"],
+    "A grid of pads to strike, each sounding while held and flashing as hard as it was struck."
+  ),
+  ...styledItems(
+    "piano",
+    "Piano",
+    "A piano keyboard to play with the pointer or the keys: its white and black keys, lit while held."
   ),
   {
     css: HARDWARE_CSS,

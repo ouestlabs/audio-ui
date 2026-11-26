@@ -64,10 +64,10 @@ function choke(value, details) {
 /** Draws the pads into `element`, and returns what takes them away. */
 export default function padWebDemo(element) {
   element.innerHTML = `
-    <audio-ui-pad aria-label="Drum pads" class="grid w-full max-w-56 select-none grid-cols-[repeat(var(--pad-columns),minmax(0,1fr))] gap-2 data-disabled:opacity-50" columns="2" style="--pad-columns: 2">
+    <audio-ui-pad aria-label="Drum pads" columns="2" style="--pad-columns: 2; max-width: 14rem">
       ${PADS.map(
         (pad) =>
-          `<audio-ui-pad-item ${pad.chokeGroup ? `choke-group="${pad.chokeGroup}"` : ""} value="${pad.value}"><button class="cn-pad-item flex aspect-square min-w-0 cursor-pointer items-end justify-start p-2 text-left font-medium text-xs data-disabled:pointer-events-none">${pad.label}</button></audio-ui-pad-item>`
+          `<audio-ui-pad-item ${pad.chokeGroup ? `choke-group="${pad.chokeGroup}"` : ""} value="${pad.value}"><button>${pad.label}</button></audio-ui-pad-item>`
       ).join("")}
     </audio-ui-pad>`;
   const grid = element.querySelector("audio-ui-pad");

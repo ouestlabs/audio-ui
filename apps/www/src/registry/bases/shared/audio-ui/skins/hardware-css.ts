@@ -54,7 +54,7 @@ export const HARDWARE_CSS = {
     color: "var(--audio-print)",
   },
   // A graph and an XY pad are screens set in the body.
-  ".skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad])":
+  ".skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad-control])":
     {
       "--background": "var(--audio-screen)",
       "--card": "var(--audio-screen)",
@@ -74,10 +74,9 @@ export const HARDWARE_CSS = {
     "border-radius": corner(6),
   },
   // The pad is the inner one of its two slots. Its grid is drawn faint, so its lines start brighter.
-  ".skin-hardware [data-slot=device-frame] [data-slot=xypad] > [data-slot=xypad]":
-    {
-      "--border":
-        "color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen))",
-    },
+  ".skin-hardware [data-slot=device-frame] [data-slot=xypad-control]": {
+    "--border":
+      "color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen))",
+  },
   ...MATERIALS_CSS,
 };

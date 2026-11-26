@@ -14,6 +14,18 @@ const { Fader, faderParts } = await import(
 const { Meter, meterParts } = await import(
   "@/registry/bases/shared/audio-ui/elements/meter"
 );
+const { Envelope, envelopeParts } = await import(
+  "@/registry/bases/shared/audio-ui/elements/envelope"
+);
+const { Pad, PadItem, padParts } = await import(
+  "@/registry/bases/shared/audio-ui/elements/pad"
+);
+const { Piano, pianoParts } = await import(
+  "@/registry/bases/shared/audio-ui/elements/piano"
+);
+const { XYPad, xypadParts } = await import(
+  "@/registry/bases/shared/audio-ui/elements/xypad"
+);
 
 afterEach(cleanup);
 
@@ -31,6 +43,7 @@ const ELEMENTS = [
   {
     name: "knob",
     parts: knobParts,
+    root: { "data-marks": "labels", "data-size": "lg" },
     render: () =>
       render(
         <Knob
@@ -44,6 +57,7 @@ const ELEMENTS = [
   {
     name: "fader",
     parts: faderParts,
+    root: { "data-marks": "labels", "data-size": "lg" },
     render: () =>
       render(
         <Fader
@@ -57,9 +71,54 @@ const ELEMENTS = [
   {
     name: "meter",
     parts: meterParts,
+    root: { "data-marks": "labels", "data-size": "lg" },
     render: () =>
       render(
         <Meter aria-label="Output" marks={[-12, 0]} size="lg" value={[-6]} />
+      ),
+  },
+  {
+    name: "xypad",
+    parts: xypadParts,
+    root: { "data-fill": "", "data-size": "lg" },
+    render: () => render(<XYPad aria-label="Position" fill size="lg" />),
+  },
+  {
+    name: "envelope",
+    parts: envelopeParts,
+    root: { "data-size": "lg" },
+    // A point high enough has its label under it.
+    render: () =>
+      render(
+        <Envelope
+          aria-label="Envelope"
+          defaultValue={[
+            { x: 0, y: 0 },
+            { x: 0.5, y: 0.9 },
+            { x: 1, y: 0 },
+          ]}
+          size="lg"
+        />
+      ),
+  },
+  {
+    name: "pad",
+    parts: padParts,
+    root: {},
+    render: () =>
+      render(
+        <Pad aria-label="Drum pads">
+          <PadItem value="kick">Kick</PadItem>
+        </Pad>
+      ),
+  },
+  {
+    name: "piano",
+    parts: pianoParts,
+    root: { "data-size": "lg" },
+    render: () =>
+      render(
+        <Piano aria-label="Piano" maxPitch={62} minPitch={60} size="lg" />
       ),
   },
 ] as const;
@@ -77,9 +136,12 @@ describe.each([...ELEMENTS])(
 
     test("its look follows the root's attributes, which the React element sets", () => {
       const { container } = element.render();
-      const root = container.querySelector(`[data-slot=${element.name}]`);
-      expect(root?.getAttribute("data-size")).toBe("lg");
-      expect(root?.getAttribute("data-marks")).toBe("labels");
+      const root = container.querySelector(
+        `[data-slot=${Object.keys(element.parts)[0]}]`
+      );
+      for (const [name, value] of Object.entries(element.root)) {
+        expect(root?.getAttribute(name)).toBe(value);
+      }
     });
 
     test.each(STYLES)(
