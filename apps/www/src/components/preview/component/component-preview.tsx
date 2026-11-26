@@ -155,10 +155,10 @@ function Skinned({
     return <Component />;
   }
   if (frameworkOfDemo(name) !== "react") {
-    return <Component skin={shadowSkin(skin, chosenAxes(values))} />;
+    return <Component skin={shadowSkin(skin, chosenAxes(values), name)} />;
   }
   return (
-    <div className={skinFrameClass(skin)}>
+    <div className={skinFrameClass(skin, name)}>
       <Component />
     </div>
   );

@@ -120,6 +120,9 @@ export const HARDWARE_CSS = {
   ".skin-hardware [data-slot=knob-track]": { opacity: "0" },
   ".skin-hardware [data-slot=knob-needle]": { color: "var(--audio-print)" },
   ".skin-hardware [data-slot=knob]:not([data-marks])::before": PRINTED_SCALE,
+  // A graduation the value has passed is lit, its label with its tick: the readout's color is its screen's, dark on the body.
+  ".skin-hardware :is([data-slot=knob-mark], [data-slot=fader-mark])[data-active] :is([data-slot=knob-mark-label], [data-slot=fader-mark-label])":
+    { color: "var(--audio-accent)" },
   // The fader: a narrow slot and a ribbed cap, its middle rib in the accent. The slot shows no range.
   ".skin-hardware [data-slot=fader-track][data-orientation=vertical]": {
     width: "0.25rem",

@@ -84,6 +84,10 @@
   mask-composite: intersect;
 }
 
+.skin-hardware :is([data-slot=knob-mark], [data-slot=fader-mark])[data-active] :is([data-slot=knob-mark-label], [data-slot=fader-mark-label]) {
+  color: var(--audio-accent);
+}
+
 .skin-hardware [data-slot=fader-track][data-orientation=vertical] {
   width: 0.25rem;
   box-shadow: var(--audio-groove-shadow);
