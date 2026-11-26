@@ -179,6 +179,31 @@ export const HARDWARE_CSS = {
     "box-shadow": CAP,
   },
   ".skin-hardware [data-slot=pad-item]:focus-visible": { "box-shadow": FOCUS },
+  // The sequencer's steps are caps to press, lit in the accent; its velocity bars are screens.
+  ".skin-hardware [data-slot=sequencer]": {
+    "--muted": "var(--audio-cap)",
+    "--muted-foreground": "var(--audio-print)",
+    "--primary": "var(--audio-accent)",
+    "--primary-foreground": "oklch(0.15 0.01 40)",
+    "--border":
+      "color-mix(in oklab, var(--audio-print) 22%, var(--audio-body))",
+    "--ring": "var(--audio-accent)",
+    "--foreground": "var(--audio-print)",
+  },
+  ".skin-hardware [data-slot=sequencer-cell]": {
+    "background-image": "var(--audio-cap-image)",
+    "box-shadow": CAP,
+  },
+  ".skin-hardware [data-slot=sequencer-cell]:focus-visible": {
+    "box-shadow": FOCUS,
+  },
+  // The step being played keeps its ring over the cap's light, in the accent.
+  ".skin-hardware [data-slot=sequencer-cell][data-current]": {
+    "box-shadow": `${CAP}, 0 0 0 2px var(--audio-accent)`,
+  },
+  ".skin-hardware [data-slot=sequencer-velocity]": {
+    "--muted": "var(--audio-screen)",
+  },
   // The keyboard: ivory and ebony keys in the body, held in the accent.
   ".skin-hardware [data-slot=piano]": {
     "--piano-key-white": "oklch(0.95 0.012 85)",

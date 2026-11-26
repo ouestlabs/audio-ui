@@ -26,6 +26,9 @@ const { Piano, pianoParts } = await import(
 const Plot = await import("@/registry/bases/shared/audio-ui/elements/plot");
 const Wave = await import("@/registry/bases/shared/audio-ui/elements/waveform");
 const { createSource } = await import("@/registry/primitives/primitive");
+const { Sequencer, sequencerParts } = await import(
+  "@/registry/bases/shared/audio-ui/elements/sequencer"
+);
 const { XYPad, xypadParts } = await import(
   "@/registry/bases/shared/audio-ui/elements/xypad"
 );
@@ -176,6 +179,21 @@ const ELEMENTS = [
           <Wave.LiveWaveform aria-label="Input" />
           <Wave.BarVisualizer aria-label="Bands" orientation="vertical" />
         </>
+      ),
+  },
+  {
+    name: "sequencer",
+    parts: sequencerParts,
+    root: { "data-labels": "", "data-size": "sm" },
+    render: () =>
+      render(
+        <Sequencer
+          aria-label="Drums"
+          defaultValue={[[true, false, false, false]]}
+          rowLabels={["Kick"]}
+          showVelocity
+          size="sm"
+        />
       ),
   },
 ] as const;

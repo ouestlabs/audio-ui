@@ -8,7 +8,8 @@
     "pad",
     "piano",
     "plot",
-    "waveform"
+    "waveform",
+    "sequencer"
   ],
   "skins": [
     "hardware",

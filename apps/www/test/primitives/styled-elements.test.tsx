@@ -28,11 +28,16 @@ import {
   Piano,
   pianoParts,
 } from "@/registry/bases/shared/audio-ui/elements/piano";
+import {
+  Sequencer,
+  sequencerParts,
+} from "@/registry/bases/shared/audio-ui/elements/sequencer";
 import EnvelopeSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Envelope.svelte";
 import FaderSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Fader.svelte";
 import KnobSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Knob.svelte";
 import MeterSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Meter.svelte";
 import PianoSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Piano.svelte";
+import SequencerSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/Sequencer.svelte";
 import XYPadSvelte from "@/registry/bases/shared/audio-ui/elements/svelte/XYPad.svelte";
 import EnvelopeVue from "@/registry/bases/shared/audio-ui/elements/vue/Envelope.vue";
 import FaderVue from "@/registry/bases/shared/audio-ui/elements/vue/Fader.vue";
@@ -41,12 +46,14 @@ import MeterVue from "@/registry/bases/shared/audio-ui/elements/vue/Meter.vue";
 import PadVue from "@/registry/bases/shared/audio-ui/elements/vue/Pad.vue";
 import PadItemVue from "@/registry/bases/shared/audio-ui/elements/vue/PadItem.vue";
 import PianoVue from "@/registry/bases/shared/audio-ui/elements/vue/Piano.vue";
+import SequencerVue from "@/registry/bases/shared/audio-ui/elements/vue/Sequencer.vue";
 import XYPadVue from "@/registry/bases/shared/audio-ui/elements/vue/XYPad.vue";
 import {
   XYPad,
   xypadParts,
 } from "@/registry/bases/shared/audio-ui/elements/xypad";
 
+import { partSelector } from "../../scripts/portable-css.ts";
 import StyledPadSvelte from "./fixtures/styled-pad.svelte";
 
 afterEach(cleanup);
@@ -105,15 +112,10 @@ const rootAttributes = (container: Element, slot: string) => {
     "data-readout",
     "data-orientation",
     "data-fill",
+    "data-labels",
+    "data-shaded",
   ].map((name) => `${name}=${root?.getAttribute(name)}`);
 };
-
-const slots = (container: Element) =>
-  new Set(
-    [...container.querySelectorAll("[data-slot]")].map((node) =>
-      node.getAttribute("data-slot")
-    )
-  );
 
 async function inVue(component: unknown, props: Record<string, unknown>) {
   const container = document.body.appendChild(document.createElement("div"));
@@ -236,6 +238,24 @@ const ELEMENTS = [
     svelte: PianoSvelte,
     vue: PianoVue,
   },
+  {
+    name: "sequencer",
+    parts: sequencerParts,
+    props: {
+      "aria-label": "Drums",
+      defaultValue: [
+        [true, false, false, false],
+        [false, false, true, false],
+      ],
+      rowLabels: ["Kick", "Snare"],
+      shadeByVelocity: true,
+      showVelocity: true,
+      size: "sm",
+    },
+    react: Sequencer,
+    svelte: SequencerSvelte,
+    vue: SequencerVue,
+  },
 ];
 
 describe.each(ELEMENTS)("the styled $name", (element) => {
@@ -263,9 +283,10 @@ describe.each(ELEMENTS)("the styled $name", (element) => {
       expect(
         rootAttributes(container, Object.keys(element.parts)[0] ?? "")
       ).toEqual(expected.root);
-      const drawn = slots(container);
       for (const part of Object.keys(element.parts)) {
-        expect(drawn).toContain(part);
+        expect(
+          container.querySelector(partSelector(part)) ? part : `${part} missing`
+        ).toBe(part);
       }
       remove();
     }

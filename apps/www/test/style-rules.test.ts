@@ -53,7 +53,7 @@ describe("a style's rules reach a project", () => {
   test("a velocity's fill keeps its dim color until its step is on", async () => {
     const { content } = await served("sequencer");
     expect(content).toContain("bg-primary/30");
-    expect(content).toContain("group-data-on/velocity:bg-primary");
+    expect(content).toContain("group-data-on/sequencer-velocity:bg-primary");
   });
 
   test("the envelopes bring the shake they refuse with", async () => {

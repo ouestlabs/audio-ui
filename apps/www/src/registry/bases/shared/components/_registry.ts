@@ -2239,7 +2239,7 @@ export const components: RegistryItem[] = [
     ],
     name: "sequencer-vue-demo",
     registryDependencies: [
-      "@audio-ui/sequencer-vue",
+      "@audio-ui/sequencer-element-vue",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
       "@audio-ui/step-player",
@@ -2257,7 +2257,7 @@ export const components: RegistryItem[] = [
     ],
     name: "sequencer-svelte-demo",
     registryDependencies: [
-      "@audio-ui/sequencer-svelte",
+      "@audio-ui/sequencer-element-svelte",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
       "@audio-ui/step-player",

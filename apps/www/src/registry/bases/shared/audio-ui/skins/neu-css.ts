@@ -126,6 +126,35 @@ export const NEU_CSS = {
     "background-image": "none",
     "box-shadow": SUNKEN,
   },
+  // A step is pushed up out of the surface, pressed into it while on; a velocity bar is a well.
+  ".skin-neu [data-slot=sequencer]": {
+    "--muted": "var(--audio-shade)",
+    "--muted-foreground": "var(--audio-print)",
+    "--primary": "var(--audio-accent)",
+    "--primary-foreground": "var(--audio-body)",
+    "--ring": "var(--audio-accent)",
+    "--foreground": "var(--audio-print)",
+  },
+  ".skin-neu [data-slot=sequencer-cell]": {
+    "border-color": "transparent",
+    "background-image": FACE,
+    "box-shadow": RAISED,
+  },
+  ".skin-neu [data-slot=sequencer-cell]:focus-visible": { "box-shadow": FOCUS },
+  ".skin-neu [data-slot=sequencer-cell][aria-pressed=true]": {
+    "background-image": "none",
+    "box-shadow": SUNKEN,
+  },
+  // The step being played keeps its ring over the relief, raised or pressed, in the accent.
+  ".skin-neu [data-slot=sequencer-cell][data-current]": {
+    "box-shadow": `${RAISED}, 0 0 0 2px var(--audio-accent)`,
+  },
+  ".skin-neu [data-slot=sequencer-cell][data-current][aria-pressed=true]": {
+    "box-shadow": `${SUNKEN}, 0 0 0 2px var(--audio-accent)`,
+  },
+  ".skin-neu [data-slot=sequencer-velocity]": {
+    "box-shadow": SUNKEN,
+  },
   // The keyboard is a well of keys of the material: lighter for the white ones, deep for the black.
   ".skin-neu [data-slot=piano]": {
     "--piano-key-white": tone(0.05, 0.04),

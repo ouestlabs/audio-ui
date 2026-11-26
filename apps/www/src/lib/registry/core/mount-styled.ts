@@ -1,6 +1,6 @@
 /** The elements another framework draws from their sheet alone, by the folder of their demos. */
 const STYLED_DEMO =
-  /\/components\/(knob|fader|meter|xypad|envelope|pad|piano|plot|waveform)\/(?:vue|svelte|web)\//;
+  /\/components\/(knob|fader|meter|xypad|envelope|pad|piano|plot|waveform|sequencer)\/(?:vue|svelte|web)\//;
 
 /** The element a demo of another framework draws from its sheet, if it is one. */
 export const styledElementOf = (path: string) => STYLED_DEMO.exec(path)?.[1];

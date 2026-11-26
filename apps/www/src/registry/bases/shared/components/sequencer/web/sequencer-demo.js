@@ -54,18 +54,16 @@ export default function sequencerWebDemo(element) {
 
   element.innerHTML = `
     <style>
-      audio-ui-sequencer { display: flex; flex-direction: column; gap: 0.375rem; width: 100%; }
-      audio-ui-sequencer-row { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 0.25rem; }
-      audio-ui-sequencer-cell button { width: 100%; height: 2.25rem; border: 0; border-radius: var(--radius-sm); background: var(--muted); cursor: pointer; }
-      audio-ui-sequencer-cell button[aria-pressed="true"] { background: var(--primary); }
-      audio-ui-sequencer-cell button[data-current] { outline: 2px solid var(--ring); }
-      audio-ui-sequencer-velocity { display: block; position: relative; height: 2rem; cursor: ns-resize; background: linear-gradient(to top, var(--muted-foreground) calc(var(--sequencer-velocity) * 100%), transparent 0); }
+      /* The rows the custom element makes hold their cells and velocity bars side by side: a grid of the pattern's steps lays them out. The sheet draws each cell and bar. */
+      audio-ui-sequencer[data-slot] [data-slot=sequencer-row] { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 0.25rem; }
+      audio-ui-sequencer[data-slot] [data-slot=sequencer-cell] { height: 2.25rem; }
+      audio-ui-sequencer[data-slot] audio-ui-sequencer-velocity { position: relative; height: 2rem; cursor: ns-resize; background: linear-gradient(to top, var(--muted-foreground) calc(var(--sequencer-velocity) * 100%), transparent 0); }
     </style>
-    <div class="flex w-full flex-col gap-3">
+    <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%">
       <audio-ui-sequencer aria-label="Drum pattern" velocity-bars velocities='${JSON.stringify(velocities)}' value='${JSON.stringify(pattern)}'></audio-ui-sequencer>
-      <div class="flex items-center justify-between gap-2">
-        <button class="inline-flex h-8 items-center rounded-md border bg-background px-3 text-sm hover:bg-muted" data-action="toggle" type="button">Play</button>
-        <button class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted" data-action="clear" type="button">Clear</button>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem">
+        <button data-action="toggle" style="height: 2rem; padding: 0 0.75rem; border: 1px solid var(--border); border-radius: var(--radius, 0.5rem); background: var(--background); color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer" type="button">Play</button>
+        <button data-action="clear" style="height: 2rem; padding: 0 0.75rem; border: 0; border-radius: var(--radius, 0.5rem); background: transparent; color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer" type="button">Clear</button>
       </div>
     </div>`;
   const grid = element.querySelector("audio-ui-sequencer");
