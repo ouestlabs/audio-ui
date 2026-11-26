@@ -23,6 +23,7 @@ export function ComponentPreviewTabs({
   chromeLessOnMobile: _chromeLessOnMobile,
   component,
   expand = false,
+  file,
   hint,
   fitContent = false,
   name,
@@ -36,6 +37,8 @@ export function ComponentPreviewTabs({
   component: React.ReactNode;
   /** Adds a button that opens the preview at full size: for the editors made to take a screen. */
   expand?: boolean;
+  /** The file the code panel names, when it is not the registry's: a playground's printed code. */
+  file?: string;
   /** Lets the preview be as tall as what it shows, rather than a fixed height: for blocks. */
   fitContent?: boolean;
   /** How to use what is shown: said in the footer of the full-size view. */
@@ -48,7 +51,9 @@ export function ComponentPreviewTabs({
   const previewRef = React.useRef<HTMLDivElement>(null);
   // The file as the registry names it (`knob-demo.js`), known before anything loads: the bar never changes once drawn.
   const fileName =
-    getRegistryItemMetadata(name)?.files?.[0]?.path?.split("/").at(-1) ?? name;
+    file ??
+    getRegistryItemMetadata(name)?.files?.[0]?.path?.split("/").at(-1) ??
+    name;
 
   // Docs pages can mount a dozen+ live previews on one page (real audio
   // elements, pointer listeners, etc.). Defer mounting each one until it's

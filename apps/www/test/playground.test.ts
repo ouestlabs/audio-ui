@@ -1,0 +1,139 @@
+import { describe, expect, test } from "bun:test";
+import { compile } from "svelte/compiler";
+import { compileScript, compileTemplate, parse } from "vue/compiler-sfc";
+import {
+  codeOf,
+  type Framework,
+  PLAYGROUNDS,
+  type PlaygroundLook,
+  type PlaygroundName,
+  propsOf,
+  type Values,
+  webMarkup,
+} from "@/lib/docs/playground/playgrounds";
+
+const transpiler = new Bun.Transpiler({ loader: "tsx" });
+
+/** Every combination of a playground's settings. */
+function combinations(name: PlaygroundName): Values[] {
+  return PLAYGROUNDS[name].controls.reduce<Values[]>(
+    (all, control) =>
+      all.flatMap((values) =>
+        control.options.map((option) => ({ ...values, [control.name]: option }))
+      ),
+    [{}]
+  );
+}
+
+const compiles: Record<Framework, (code: string) => void> = {
+  react: (code) => {
+    transpiler.transformSync(code);
+  },
+  svelte: (code) => {
+    compile(code, { filename: "Example.svelte" });
+  },
+  vue: (code) => {
+    const { descriptor, errors } = parse(code, { filename: "Example.vue" });
+    if (errors.length > 0) {
+      throw new Error(String(errors[0]));
+    }
+    compileScript(descriptor, { id: "example", inlineTemplate: true });
+    const template = compileTemplate({
+      filename: "Example.vue",
+      id: "example",
+      source: descriptor.template?.content ?? "",
+    });
+    if (template.errors.length > 0) {
+      throw new Error(String(template.errors[0]));
+    }
+  },
+  web: () => undefined,
+};
+
+const BRONZE = ["--audio-shade", "oklch(0.62 0.06 60)"] as const;
+const NEU: PlaygroundLook = { axes: [BRONZE], skin: "neu" };
+const HARDWARE: PlaygroundLook = { axes: [], skin: "hardware" };
+const LOOKS = [undefined, NEU, HARDWARE];
+
+describe.each(Object.keys(PLAYGROUNDS) as PlaygroundName[])(
+  "the %s's playground",
+  (name) => {
+    test("starts as the element's demo: its own defaults are left out", () => {
+      const props = Object.fromEntries(propsOf(name, {}));
+      expect(props).not.toHaveProperty("valueLabel");
+      expect(props).not.toHaveProperty("orientation");
+    });
+
+    test.each(["react", "vue", "svelte"] as const)(
+      "prints %s code that compiles, for every setting, in every look",
+      (framework) => {
+        for (const look of LOOKS) {
+          for (const values of combinations(name)) {
+            const { code } = codeOf(name, framework, values, look);
+            expect(() => compiles[framework](code)).not.toThrow();
+          }
+        }
+      }
+    );
+
+    test("prints markup with the parts the sheet styles, for every setting", () => {
+      for (const values of combinations(name)) {
+        const markup = webMarkup(name, values);
+        expect(markup).toContain(`<audio-ui-${name} `);
+        expect(markup).toContain(`data-size="${values.size}"`);
+        expect(markup).not.toContain("undefined");
+      }
+    });
+  }
+);
+
+test("a knob with no scale has no marks, and its readout hidden has no value", () => {
+  const props = Object.fromEntries(
+    propsOf("knob", { readout: "hidden", scale: "none" })
+  );
+  expect(props).not.toHaveProperty("marks");
+  expect(props.valueLabel).toBe("hidden");
+  expect(webMarkup("knob", { readout: "hidden", scale: "none" })).not.toContain(
+    "knob-value"
+  );
+});
+
+describe("the look in the code", () => {
+  test("React's sets the skin and its axes as classes, and installs the skin with shadcn's CLI, which writes its CSS", () => {
+    const { code } = codeOf("knob", "react", {}, NEU);
+    expect(code).toStartWith("// npx shadcn add @audio-ui/skin-neu\n");
+    expect(code).toContain(
+      'className="skin-neu audio-body rounded-2xl px-10 py-8 [--audio-shade:oklch(0.62_0.06_60)]"'
+    );
+    expect(code).toContain('from "@/components/audio-ui/knob"');
+  });
+
+  test("React's Hardware draws its own face, which keeps the element's props", () => {
+    const { code } = codeOf("meter", "react", {}, HARDWARE);
+    expect(code).toContain(
+      'import { HardwareVuMeter } from "@/components/audio-ui/skins/hardware/vu-meter"'
+    );
+    expect(code).toContain('className="skin-hardware audio-body');
+  });
+
+  test.each(["vue", "svelte", "web"] as const)(
+    "%s's sets Neu on an element around it, the axes in its style, and says where its sheet is",
+    (framework) => {
+      const { code } = codeOf("fader", framework, {}, NEU);
+      expect(code).toContain(
+        'class="skin-neu audio-body" style="padding: 2rem 2.5rem; border-radius: 1rem; --audio-shade: oklch(0.62 0.06 60)"'
+      );
+      expect(code).toContain("The Neu skin");
+      expect(code).toContain("https://www.audio-ui.dev/css/skins/neu.css");
+    }
+  );
+
+  test.each(["vue", "svelte", "web"] as const)(
+    "%s's leaves Hardware out: its faces are written for React",
+    (framework) => {
+      expect(codeOf("knob", framework, {}, HARDWARE)).toEqual(
+        codeOf("knob", framework, {})
+      );
+    }
+  );
+});

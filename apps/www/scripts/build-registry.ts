@@ -49,7 +49,7 @@ import { NEU_CSS } from "../src/registry/bases/shared/audio-ui/skins/neu-css.ts"
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { THEMES } from "../src/registry/themes.ts";
 import { portableSheet, themeSheet } from "./portable-css.ts";
-import { skinSheet } from "./skin-css.ts";
+import { plainSkinSheet, skinSheet } from "./skin-css.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
@@ -825,6 +825,11 @@ await Bun.write(
 await Bun.write(
   `${REGISTRY}/styles/skins/neu.css`,
   skinSheet(NEU_CSS, "neu-css.ts")
+);
+// Neu outside Tailwind: Vue, Svelte and custom elements read it as it is. Hardware has faces written for React, so it has none.
+await Bun.write(
+  `${PROJECT_ROOT}/public/css/skins/neu.css`,
+  plainSkinSheet(NEU_CSS, "neu-css.ts")
 );
 console.log(`  Internal registry namespace: ${NAMESPACE}`);
 

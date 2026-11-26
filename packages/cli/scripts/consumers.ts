@@ -86,9 +86,9 @@ const APPS: App[] = [
 ];
 
 /** An app as create-vite writes it, the components added by the CLI, then its checks. Each step needs the one before. */
-async function checkApp(folder: string, app: App) {
+async function checkApp(folder: string, createVite: string, app: App) {
   const cwd = `${folder}/${app.template}`;
-  await $`bunx ${CREATE_VITE} ${app.template} --template ${app.template} --no-interactive`
+  await $`node ${createVite} ${app.template} --template ${app.template} --no-interactive`
     .cwd(folder)
     .quiet();
   await $`bun install`.cwd(cwd).quiet();
@@ -110,8 +110,13 @@ const failed = (error: unknown) =>
 
 const workspace = (await $`mktemp -d`.text()).trim();
 try {
+  // One copy of create-vite writes every app: three `bunx` at once race on Bun's cache (ENOENT copying from it).
+  const tools = `${workspace}/.tools`;
+  await $`mkdir -p ${tools}`.quiet();
+  await $`bun add ${CREATE_VITE}`.cwd(tools).quiet();
+  const createVite = `${tools}/node_modules/create-vite/index.js`;
   const results = await Promise.allSettled(
-    APPS.map((app) => checkApp(workspace, app))
+    APPS.map((app) => checkApp(workspace, createVite, app))
   );
   for (const [index, result] of results.entries()) {
     const template = APPS[index]?.template;

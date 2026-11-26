@@ -38,7 +38,7 @@ const { NEU_CSS } = await import(
   "@/registry/bases/shared/audio-ui/skins/neu-css"
 );
 const { AXES } = await import("@/registry/bases/shared/audio-ui/skins/axes");
-const { skinSheet } = await import("../scripts/skin-css.ts");
+const { plainSkinSheet, skinSheet } = await import("../scripts/skin-css.ts");
 
 afterEach(cleanup);
 
@@ -190,6 +190,15 @@ describe("the Neu skin", () => {
       `${import.meta.dir}/../src/registry/styles/skins/neu.css`
     ).text();
     expect(sheet).toBe(skinSheet(NEU_CSS, "neu-css.ts"));
+  });
+
+  test("it is served as plain CSS too, its materials as classes, for a project with no Tailwind", async () => {
+    const sheet = await Bun.file(
+      `${import.meta.dir}/../public/css/skins/neu.css`
+    ).text();
+    expect(sheet).toBe(plainSkinSheet(NEU_CSS, "neu-css.ts"));
+    expect(sheet).not.toContain("@utility");
+    expect(sheet).toContain(".audio-body {");
   });
 
   test("a device panel wears it, and says what it said", () => {
