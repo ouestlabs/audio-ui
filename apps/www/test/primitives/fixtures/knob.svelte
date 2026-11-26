@@ -3,11 +3,13 @@ import { Knob } from "@/registry/primitives/knob/svelte/index.ts";
 
 /** The knob the shared suite drives: its options, how it is named, and its provider. */
 let {
+  editable = false,
   label,
   options = {},
   provider,
   thumbLabel,
 }: {
+  editable?: boolean;
   label?: string;
   options?: Record<string, unknown>;
   provider?: { dragMode: "circular" | "revolution" | "vertical" };
@@ -25,7 +27,7 @@ let {
       <Knob.Indicator />
       <Knob.Thumb aria-label={thumbLabel} />
     </Knob.Control>
-    <Knob.Value />
+    <Knob.Value {editable} />
   </Knob.Root>
 {/snippet}
 

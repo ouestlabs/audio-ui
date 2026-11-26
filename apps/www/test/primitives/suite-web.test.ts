@@ -22,7 +22,7 @@ function attributes(options: KnobTree["options"]) {
 
 knobSuite(
   "custom elements",
-  async ({ label, options, thumbLabel }) => {
+  async ({ editable, label, options, thumbLabel }) => {
     const container = document.body.appendChild(document.createElement("div"));
     container.innerHTML = `
     <audio-ui-knob ${attributes(options)}>
@@ -32,7 +32,7 @@ knobSuite(
         <audio-ui-knob-indicator></audio-ui-knob-indicator>
         <audio-ui-knob-thumb ${thumbLabel ? `aria-label="${thumbLabel}"` : ""}></audio-ui-knob-thumb>
       </audio-ui-knob-control>
-      <audio-ui-knob-value></audio-ui-knob-value>
+      <audio-ui-knob-value${editable ? " editable" : ""}></audio-ui-knob-value>
     </audio-ui-knob>`;
     const knob = container.querySelector("audio-ui-knob") as HTMLElement;
     // The callbacks are the knob's events, a cancel its preventDefault().

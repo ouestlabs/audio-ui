@@ -9,6 +9,7 @@ let {
   "aria-describedby": describedBy,
   "aria-label": label,
   "aria-labelledby": labelledBy,
+  editableValue = false,
   formatValue,
   marks,
   orientation = "vertical",
@@ -20,6 +21,8 @@ let {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
+  /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+  editableValue?: boolean;
   /** Prints the value in the readout and in what screen readers announce, e.g. as `"-6 dB"`. */
   formatValue?: (value: number) => string;
   /** Graduations drawn beside the track: a ruler for the value. */
@@ -96,7 +99,7 @@ const ariaValueText = $derived(
         {/each}
       </div>
       {#if valueLabel !== "hidden"}
-        <Fader.Value>
+        <Fader.Value editable={editableValue}>
           {#snippet children(
             state
           )}

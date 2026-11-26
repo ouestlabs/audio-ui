@@ -149,6 +149,7 @@ const ELEMENTS = [
     props: {
       "aria-label": "Level",
       defaultValue: 30,
+      editableValue: true,
       formatValue: (value: number) => `${value} %`,
       marks: [0, { label: "50", value: 50 }, 100],
       size: "lg",
@@ -163,6 +164,7 @@ const ELEMENTS = [
     props: {
       "aria-label": "Volume",
       defaultValue: -6,
+      editableValue: true,
       formatValue: (value: number) => `${value} dB`,
       marks: [-60, { label: "0", value: 0 }, 6],
       max: 6,

@@ -255,7 +255,7 @@ Both are served at `https://www.audio-ui.dev/css/`.
 
 <TabsContent value="vue">
 
-One component over the adapter, with the props of the React knob but `editableValue`, which the Vue adapter does not offer yet.
+One component over the adapter, with the props of the React knob, `editableValue` included.
 
 <ItemFiles name="knob-element-vue" />
 
@@ -263,7 +263,7 @@ One component over the adapter, with the props of the React knob but `editableVa
 
 <TabsContent value="svelte">
 
-One component over the adapter, with the props of the React knob but `editableValue`, which the Svelte adapter does not offer yet.
+One component over the adapter, with the props of the React knob, `editableValue` included.
 
 <ItemFiles name="knob-element-svelte" />
 
@@ -483,6 +483,16 @@ On the focused knob:
 <KeyRow gesture={"`Home`"}>Set to `min`</KeyRow>
 <KeyRow gesture={"`End`"}>Set to `max`</KeyRow>
 </KeyTable>
+
+On an editable readout, given `editable` on `Value` (the `editable` attribute on `audio-ui-knob-value` in plain HTML, `editableValue` on the styled knob), in every framework:
+
+<KeyTable title="Editable readout">
+<KeyRow gesture={"Double click / `Enter` / `F2`"}>Lays a text field over the readout, its text selected</KeyRow>
+<KeyRow gesture={"`Enter` / leaving the field"}>Sets the number typed, as a change of the knob</KeyRow>
+<KeyRow gesture={"`Escape`"}>Keeps the value</KeyRow>
+</KeyTable>
+
+The readout carries `data-editable`, and `data-editing` while the field is open.
 
 ### Wheel
 

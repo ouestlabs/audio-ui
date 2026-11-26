@@ -21,6 +21,8 @@ export interface FaderOptions {
 
 /** What the suite asks a framework to render. */
 export interface FaderTree {
+  /** Whether the readout takes a typed value. */
+  editable?: boolean;
   label?: string;
   /** Where the graduations along the track sit. */
   marks?: number[];
@@ -111,6 +113,52 @@ const frame = () => new Promise((resolve) => setTimeout(resolve, 30));
 
 export function faderSuite(framework: string, mount: MountFader) {
   describe(`the fader in ${framework}`, () => {
+    test("an editable readout takes a typed value through a field laid over it, and Escape keeps the value", async () => {
+      const f = await render(
+        mount,
+        { defaultValue: 10, max: 100, min: 0 },
+        { editable: true, thumbLabel: "Level" }
+      );
+      const readout = f.container.querySelector(
+        '[data-slot="fader-value"]'
+      ) as HTMLElement;
+      expect(readout.tabIndex).toBe(0);
+      await f.act(() => {
+        readout.dispatchEvent(
+          new MouseEvent("dblclick", { bubbles: true, cancelable: true })
+        );
+      });
+      const field = readout.querySelector(
+        'input[type="text"]'
+      ) as HTMLInputElement;
+      expect(readout.hasAttribute("data-editing")).toBe(true);
+      field.value = "42";
+      await f.act(() => {
+        field.dispatchEvent(
+          new KeyboardEvent("keydown", { bubbles: true, key: "Enter" })
+        );
+      });
+      expect(f.changes.at(-1)?.[0]).toBe(42);
+      expect(readout.querySelector('input[type="text"]')).toBeNull();
+      await f.act(() => {
+        readout.dispatchEvent(
+          new KeyboardEvent("keydown", { bubbles: true, key: "Enter" })
+        );
+      });
+      const again = readout.querySelector(
+        'input[type="text"]'
+      ) as HTMLInputElement;
+      again.value = "7";
+      const before = f.changes.length;
+      await f.act(() => {
+        again.dispatchEvent(
+          new KeyboardEvent("keydown", { bubbles: true, key: "Escape" })
+        );
+      });
+      expect(f.changes.length).toBe(before);
+      f.unmount();
+    });
+
     test("a native range input, named by the thumb", async () => {
       const f = await render(mount);
       expect(f.input.type).toBe("range");

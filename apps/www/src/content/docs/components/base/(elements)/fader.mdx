@@ -256,7 +256,7 @@ Both are served at `https://www.audio-ui.dev/css/`.
 
 <TabsContent value="vue">
 
-One component over the adapter, with the props of the React fader but `editableValue`, which the Vue adapter does not offer yet.
+One component over the adapter, with the props of the React fader, `editableValue` included.
 
 <ItemFiles name="fader-element-vue" />
 
@@ -264,7 +264,7 @@ One component over the adapter, with the props of the React fader but `editableV
 
 <TabsContent value="svelte">
 
-One component over the adapter, with the props of the React fader but `editableValue`, which the Svelte adapter does not offer yet.
+One component over the adapter, with the props of the React fader, `editableValue` included.
 
 <ItemFiles name="fader-element-svelte" />
 
@@ -468,6 +468,16 @@ On the focused thumb:
 <KeyRow gesture={"`Home`"}>Set to `min`</KeyRow>
 <KeyRow gesture={"`End`"}>Set to `max`</KeyRow>
 </KeyTable>
+
+On an editable readout, given `editable` on `Value` (the `editable` attribute on `audio-ui-fader-value` in plain HTML, `editableValue` on the styled fader), in every framework:
+
+<KeyTable title="Editable readout">
+<KeyRow gesture={"Double click / `Enter` / `F2`"}>Lays a text field over the readout, its text selected</KeyRow>
+<KeyRow gesture={"`Enter` / leaving the field"}>Sets the number typed, as a change of the fader</KeyRow>
+<KeyRow gesture={"`Escape`"}>Keeps the value</KeyRow>
+</KeyTable>
+
+The readout carries `data-editable`, and `data-editing` while the field is open.
 
 ### Wheel
 

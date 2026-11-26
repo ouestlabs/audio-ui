@@ -1,8 +1,19 @@
 import { createParts } from "@ui-sdk/vue/primitive";
-import { defineComponent, h, type InjectionKey, inject, provide } from "vue";
+import {
+  defineComponent,
+  getCurrentInstance,
+  h,
+  type InjectionKey,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  watch,
+} from "vue";
 import {
   type ArcState,
   DEFAULT_ARC_STROKE_WIDTH,
+  editableReadout,
   type KnobPrimitiveOptions,
   type KnobPublicState,
   knob,
@@ -104,14 +115,29 @@ const Thumb = defineComponent(
 );
 
 const Value = defineComponent(
-  (_props, { attrs, slots }) =>
-    () =>
+  (props: { editable?: boolean }, { attrs, slots }) => {
+    const self = getCurrentInstance();
+    let detach: (() => void) | undefined;
+    // An editable readout lays a field over the text Vue keeps drawing.
+    const sync = () => {
+      detach?.();
+      detach = undefined;
+      const el = self?.subTree.el;
+      if (props.editable && el instanceof HTMLElement) {
+        detach = editableReadout(el, "knob");
+      }
+    };
+    onMounted(sync);
+    watch(() => props.editable, sync, { flush: "post" });
+    onBeforeUnmount(() => detach?.());
+    return () =>
       h(parts.Value, attrs, {
         default:
           slots.default ??
           (({ state }: { state: KnobPublicState }) => state.formatted),
-      }),
-  { inheritAttrs: false, name: "KnobValue" }
+      });
+  },
+  { inheritAttrs: false, name: "KnobValue", props: ["editable"] }
 );
 
 export const Knob = {

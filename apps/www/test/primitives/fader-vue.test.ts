@@ -2,7 +2,7 @@ import { createApp, h, nextTick } from "vue";
 import { Fader } from "@/registry/primitives/fader/vue/index.ts";
 import { faderSuite } from "./fader-suite.ts";
 
-faderSuite("Vue", async ({ label, marks, options, thumbLabel }) => {
+faderSuite("Vue", async ({ editable, label, marks, options, thumbLabel }) => {
   const container = document.body.appendChild(document.createElement("div"));
   const app = createApp({
     render: () =>
@@ -17,7 +17,7 @@ faderSuite("Vue", async ({ label, marks, options, thumbLabel }) => {
           ]),
           h(Fader.Thumb, { "aria-label": thumbLabel }),
         ]),
-        h(Fader.Value),
+        h(Fader.Value, { editable }),
       ]),
   });
   app.mount(container);
