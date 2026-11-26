@@ -3,7 +3,7 @@ import { AXES, AXIS_ORDER, lookDeclarations } from "@/lib/design-system/look";
 
 describe("the Look", () => {
   test("lists every axis, the material first", () => {
-    expect([...AXIS_ORDER].sort()).toEqual(Object.keys(AXES).sort());
+    expect<string[]>([...AXIS_ORDER].sort()).toEqual(Object.keys(AXES).sort());
     expect(AXIS_ORDER[0]).toBe("--audio-shade");
   });
 

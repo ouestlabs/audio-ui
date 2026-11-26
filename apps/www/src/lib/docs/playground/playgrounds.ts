@@ -109,6 +109,19 @@ const MARKS: Record<string, readonly Mark[] | undefined> = {
 
 const marksOf = (scale: string) => MARKS[scale];
 
+/** A setting as the playground offers it: a value its control does not list is its default, so nothing else reaches the code. */
+function setting(name: PlaygroundName, values: Values) {
+  return (control: string) => {
+    const options = PLAYGROUNDS[name].controls.find(
+      (each) => each.name === control
+    )?.options;
+    const value = values[control];
+    return value !== undefined && options?.includes(value)
+      ? value
+      : (PLAYGROUNDS[name].defaults[control] ?? "");
+  };
+}
+
 /** A prop and its value, in the order the code writes them. */
 export type Prop = readonly [name: string, value: unknown];
 
@@ -118,8 +131,7 @@ export type Prop = readonly [name: string, value: unknown];
  * A value equal to the element's own default is left out.
  */
 export function propsOf(name: PlaygroundName, values: Values): Prop[] {
-  const at = (control: string) =>
-    values[control] ?? PLAYGROUNDS[name].defaults[control] ?? "";
+  const at = setting(name, values);
   const props: (Prop | false)[] =
     name === "meter"
       ? [
@@ -251,8 +263,7 @@ export function webMarkup(name: PlaygroundName, values: Values) {
     string,
     unknown
   >;
-  const at = (control: string) =>
-    values[control] ?? PLAYGROUNDS[name].defaults[control] ?? "";
+  const at = setting(name, values);
   const scale = at("scale") === "none" ? undefined : at("scale");
   const readout = at("readout") === "hidden" ? undefined : at("readout");
   const data = [
@@ -340,18 +351,31 @@ export function codeOf(
   values: Values
 ): { code: string; file: string; language: string } {
   const props = propsOf(name, values);
+  const add = `npx @audio-ui/cli add ${name}`;
   switch (framework) {
     case "vue":
-      return { code: vue(name, props), file: "Example.vue", language: "vue" };
+      return {
+        code: `<!-- ${add} -->\n${vue(name, props)}`,
+        file: "Example.vue",
+        language: "vue",
+      };
     case "svelte":
       return {
-        code: svelte(name, props),
+        code: `<!-- ${add} -->\n${svelte(name, props)}`,
         file: "Example.svelte",
         language: "svelte",
       };
     case "web":
-      return { code: web(name, values), file: "index.html", language: "html" };
+      return {
+        code: `<!-- ${add} -->\n${web(name, values)}`,
+        file: "index.html",
+        language: "html",
+      };
     default:
-      return { code: react(name, props), file: "example.tsx", language: "tsx" };
+      return {
+        code: `// ${add}\n${react(name, props)}`,
+        file: "example.tsx",
+        language: "tsx",
+      };
   }
 }

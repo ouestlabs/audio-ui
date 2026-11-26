@@ -4,6 +4,7 @@ import { CopyPreset } from "@/components/customizer/actions/copy-preset";
 import { OpenPreset } from "@/components/customizer/actions/open-preset";
 import { RandomButton } from "@/components/customizer/actions/random-button";
 import { ResetButton } from "@/components/customizer/actions/reset-button";
+import { ComponentPickers } from "@/components/customizer/look/component-pickers";
 import {
   AxisPicker,
   SkinPicker,
@@ -170,9 +171,9 @@ export function CustomizerSidebarContent({
               </FieldGroup>
             </TabsContent>
             <TabsContent value="component">
-              <p className="p-3 text-site-muted-foreground text-sm">
-                The props of a component, on its page.
-              </p>
+              <FieldGroup className="flex flex-col gap-0">
+                <ComponentPickers anchorRef={anchorRef} isMobile={isMobile} />
+              </FieldGroup>
             </TabsContent>
           </Tabs>
         )}

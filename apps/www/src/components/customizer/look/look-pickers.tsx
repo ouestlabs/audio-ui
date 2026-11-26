@@ -20,8 +20,8 @@ interface PickerPlace {
   isMobile: boolean;
 }
 
-/** A picker of the Look: its name, the value chosen, and the list to choose from. */
-function LookPicker({
+/** A picker of the customizer: its name, the value chosen, and the list to choose from. */
+export function ChoicePicker({
   anchorRef,
   children,
   isMobile,
@@ -83,7 +83,7 @@ export function SkinPicker(place: PickerPlace) {
     [choose]
   );
   return (
-    <LookPicker
+    <ChoicePicker
       {...place}
       label="Skin"
       onValueChange={pick}
@@ -97,7 +97,7 @@ export function SkinPicker(place: PickerPlace) {
           </PickerRadioItem>
         ))}
       </PickerGroup>
-    </LookPicker>
+    </ChoicePicker>
   );
 }
 
@@ -115,7 +115,7 @@ export function AxisPicker({ axis, ...place }: PickerPlace & { axis: Axis }) {
     [set]
   );
   return (
-    <LookPicker
+    <ChoicePicker
       {...place}
       label={label}
       onValueChange={pick}
@@ -143,6 +143,6 @@ export function AxisPicker({ axis, ...place }: PickerPlace & { axis: Axis }) {
           </PickerRadioItem>
         ))}
       </PickerGroup>
-    </LookPicker>
+    </ChoicePicker>
   );
 }
