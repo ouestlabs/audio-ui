@@ -65,6 +65,8 @@ export interface AddResult {
   items: string[];
   /** The packages the files import that the project lacked. */
   packages: string[];
+  /** Package specs the registry gave that are not an npm name and version: never passed to the package manager. */
+  refused: string[];
 }
 
 // A package's name never starts with a dot, so a relative import is not one.
@@ -95,6 +97,17 @@ export const packageName = (spec: string) =>
   spec.startsWith("@")
     ? `@${spec.slice(1).split("@")[0]}`
     : (spec.split("@")[0] ?? spec);
+
+/**
+ * An npm package's name, scoped or not, with an exact version at most. The
+ * specs come from the registry, read over the network, and become a command's
+ * arguments: one that could be an option (`--registry=…`) or carry a
+ * character a shell reads (Windows runs the command through one) is refused.
+ */
+const PACKAGE_SPEC =
+  /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*(?:@[0-9a-z][0-9a-z.+-]*)?$/i;
+
+export const isPackageSpec = (spec: string) => PACKAGE_SPEC.test(spec);
 
 const ADD_COMMAND: Record<PackageManager, string[]> = {
   bun: ["bun", "add"],
@@ -223,22 +236,24 @@ async function sheetsOf(
   return relative(options.cwd, index);
 }
 
-/** Installs the packages the project lacks; returns the command when it was not run, or failed. */
+/** Installs the packages the project lacks; returns the command when it was not run, or failed, and the specs it refused. */
 async function install(
   packages: Set<string>,
   cwd: string,
   enabled: boolean | undefined
 ) {
   const installed = installedPackages(cwd);
-  const missing = [...packages].filter(
+  const needed = [...packages].filter(
     (spec) => !installed.has(packageName(spec))
   );
+  const missing = needed.filter(isPackageSpec);
+  const refused = needed.filter((spec) => !isPackageSpec(spec));
   if (missing.length === 0) {
-    return { missing };
+    return { missing, refused };
   }
   const command = [...ADD_COMMAND[detectPackageManager(cwd)], ...missing];
   const ok = enabled !== false && (await run(command, cwd));
-  return { command: ok ? undefined : command.join(" "), missing };
+  return { command: ok ? undefined : command.join(" "), missing, refused };
 }
 
 export async function add(options: AddOptions): Promise<AddResult> {
@@ -252,7 +267,7 @@ export async function add(options: AddOptions): Promise<AddResult> {
   writeItems(tree.items, config, options, report);
   const packages = packagesOf(tree.items, config, options.cwd, report);
   const index = await sheetsOf(tree.items, config, options, report);
-  const { command, missing } = await install(
+  const { command, missing, refused } = await install(
     packages,
     options.cwd,
     options.install
@@ -269,5 +284,6 @@ export async function add(options: AddOptions): Promise<AddResult> {
     installCommand: command,
     items: tree.items.map((item) => item.name),
     packages: missing,
+    refused,
   };
 }

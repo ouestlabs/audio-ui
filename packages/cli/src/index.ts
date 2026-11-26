@@ -72,6 +72,11 @@ function print(result: AddResult) {
   if (result.packages.length > 0 && !result.installCommand) {
     console.log(`Installed ${result.packages.join(", ")}.`);
   }
+  if (result.refused.length > 0) {
+    console.log(
+      `  ! Not installed, as no npm package is named so: ${result.refused.join(", ")}`
+    );
+  }
   if (result.installCommand) {
     console.log(
       `\nInstall the packages the files import:\n  ${result.installCommand}`
