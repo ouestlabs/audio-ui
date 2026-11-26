@@ -55,6 +55,9 @@ For the equalizer above, with its pink noise and spectrum, ready to run: `npx sh
   <ForFrameworks only="react">
     <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
   </ForFrameworks>
+  <ForFrameworks only="vue svelte web">
+    <TabsTrigger value="cli"><Icons.audioUi className="size-3.5" /> CLI</TabsTrigger>
+  </ForFrameworks>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
   <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
@@ -79,6 +82,26 @@ It writes the primitive, its adapter and `primitive.ts` into `components/audio-u
 
 ```bash component
 npx shadcn@latest add @audio-ui/primitives-css
+```
+
+</TabsContent>
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+<TabsContent value="cli">
+
+The [CLI](/docs/cli) finds your framework in `package.json` and writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` (under `src/lib/` in SvelteKit). It installs the kernel's packages:
+
+```bash
+npx @audio-ui/cli add plot
+```
+
+The optional styles are one more name:
+
+```bash
+npx @audio-ui/cli add primitives-css
 ```
 
 </TabsContent>

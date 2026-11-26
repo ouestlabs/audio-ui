@@ -54,6 +54,9 @@ The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. No
   <ForFrameworks only="react">
     <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
   </ForFrameworks>
+  <ForFrameworks only="vue svelte web">
+    <TabsTrigger value="cli"><Icons.audioUi className="size-3.5" /> CLI</TabsTrigger>
+  </ForFrameworks>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
   <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
@@ -78,6 +81,26 @@ It writes the primitive, its adapter and `primitive.ts` into `components/audio-u
 
 ```bash component
 npx shadcn@latest add @audio-ui/primitives-css
+```
+
+</TabsContent>
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+<TabsContent value="cli">
+
+The [CLI](/docs/cli) finds your framework in `package.json` and writes the styled component with what draws it: the primitive, its adapter, `primitive.ts` and the sheet of your style, with an index to import once. It installs the kernel's packages:
+
+```bash
+npx @audio-ui/cli add fader
+```
+
+Or the primitive alone, to style yourself:
+
+```bash
+npx @audio-ui/cli add fader --headless
 ```
 
 </TabsContent>
