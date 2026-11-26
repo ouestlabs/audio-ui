@@ -7,32 +7,17 @@ mock.module("@/lib/utils", () => ({
 }));
 
 const { Knob } = await import("@/registry/bases/shared/audio-ui/elements/knob");
-const { HardwareKnob } = await import(
-  "@/registry/bases/shared/audio-ui/skins/hardware/knob"
-);
 const { Fader } = await import(
   "@/registry/bases/shared/audio-ui/elements/fader"
-);
-const { HardwareFader } = await import(
-  "@/registry/bases/shared/audio-ui/skins/hardware/fader"
-);
-const { Meter } = await import(
-  "@/registry/bases/shared/audio-ui/elements/meter"
-);
-const { HardwareVuMeter } = await import(
-  "@/registry/bases/shared/audio-ui/skins/hardware/vu-meter"
-);
-const { HARDWARE_CSS } = await import(
-  "@/registry/bases/shared/audio-ui/skins/hardware-css"
-);
-const { HardwareSkin } = await import(
-  "@/registry/bases/shared/audio-ui/skins/hardware/skin"
 );
 const { DevicePanel } = await import(
   "@/registry/bases/shared/audio-ui/panels/device-panel"
 );
 const { compressorDevice } = await import(
   "@/registry/bases/shared/devices/compressor/device"
+);
+const { HARDWARE_CSS } = await import(
+  "@/registry/bases/shared/audio-ui/skins/hardware-css"
 );
 const { NEU_CSS } = await import(
   "@/registry/bases/shared/audio-ui/skins/neu-css"
@@ -73,134 +58,58 @@ function accessibility(element: ReactElement) {
   return tree;
 }
 
-describe("the Hardware skin", () => {
+/** A part of each element a skin dresses: its rules name them, so the skin reads the same in every framework. */
+const DRESSED = [
+  "knob-control",
+  "fader-thumb",
+  "xypad-control",
+  "envelope-frame",
+  "pad-item",
+  "piano",
+];
+
+const SKINS = [
+  { css: HARDWARE_CSS, name: "hardware" },
+  { css: NEU_CSS, name: "neu" },
+] as const;
+
+describe.each([...SKINS])("the $name skin", ({ css, name }) => {
+  const source = `${name}-css.ts`;
+
   test("the site's sheet is the registry's css", async () => {
     const sheet = await Bun.file(
-      `${import.meta.dir}/../src/registry/styles/skins/hardware.css`
+      `${import.meta.dir}/../src/registry/styles/skins/${name}.css`
     ).text();
-    expect(sheet).toBe(skinSheet(HARDWARE_CSS, "hardware-css.ts"));
+    expect(sheet).toBe(skinSheet(css, source));
   });
 
-  test("its knob says to assistive technology what the knob says", () => {
-    const props = {
-      "aria-label": "Level",
-      defaultValue: 30,
-      editableValue: true,
-      formatValue: (value: number) => `${value} %`,
-      marks: [0, { label: "50", value: 50 }, 100],
-    } as const;
-    const digital = accessibility(<Knob {...props} />);
-    expect(digital.length).toBeGreaterThan(0);
-    expect(accessibility(<HardwareKnob {...props} />)).toEqual(digital);
-  });
-
-  test.each(["vertical", "horizontal"] as const)(
-    "its %s fader says what the fader says",
-    (orientation) => {
-      const props = {
-        "aria-label": "Volume",
-        defaultValue: -6,
-        editableValue: true,
-        formatValue: (value: number) => `${value} dB`,
-        max: 6,
-        min: -60,
-        orientation,
-      } as const;
-      const digital = accessibility(<Fader {...props} />);
-      expect(digital.length).toBeGreaterThan(0);
-      expect(accessibility(<HardwareFader {...props} />)).toEqual(digital);
-    }
-  );
-
-  test("its fader prints a number at each graduation in dB", () => {
-    const { container } = render(<HardwareFader aria-label="Volume" />);
-    const scale = container.querySelector("[data-slot=fader-scale]");
-    expect(
-      [...(scale?.children ?? [])].map((mark) => mark.textContent)
-    ).toEqual(["+6", "0", "-6", "-12", "-24", "-48", "-∞"]);
-  });
-
-  test("its small fader, one of a bank, prints only the marks given", () => {
-    const { container } = render(
-      <HardwareFader aria-label="Drawbar" size="sm" />
-    );
-    expect(
-      container.querySelector("[data-slot=fader-scale]")?.children
-    ).toHaveLength(0);
-  });
-
-  test("its fader keeps the fader's own range", () => {
-    const digital = accessibility(<Fader aria-label="Volume" />);
-    expect(accessibility(<HardwareFader aria-label="Volume" />)).toEqual(
-      digital
-    );
-  });
-
-  test("its VU meter says what the meter says, channel by channel", () => {
-    const props = {
-      "aria-label": "Output",
-      value: [-12, -6],
-      warnThreshold: -12,
-    } as const;
-    const digital = accessibility(<Meter {...props} />);
-    expect(digital.length).toBeGreaterThan(0);
-    expect(accessibility(<HardwareVuMeter {...props} />)).toEqual(digital);
-  });
-
-  test("a device panel wears it, and says what it said", () => {
-    const panel = (
-      <DevicePanel
-        device={compressorDevice}
-        onValueChange={ignore}
-        value={compressorDevice.defaults()}
-      />
-    );
-    const digital = accessibility(panel);
-    expect(accessibility(<HardwareSkin>{panel}</HardwareSkin>)).toEqual(
-      digital
-    );
-
-    const { container } = render(<HardwareSkin>{panel}</HardwareSkin>);
-    expect(
-      container.querySelectorAll("[data-slot=knob-body].audio-cap").length
-    ).toBeGreaterThan(0);
-  });
-
-  test("a device panel gathers its knobs as the description says", () => {
-    const { container } = render(
-      <DevicePanel
-        device={compressorDevice}
-        exclude={["enabled", "model", "makeupDb", "mix"]}
-        onValueChange={ignore}
-        value={compressorDevice.defaults()}
-      />
-    );
-    // Output has nothing left to show, so it is not named.
-    expect(
-      [...container.querySelectorAll("[role=group][aria-label]")].map((group) =>
-        group.getAttribute("aria-label")
-      )
-    ).toEqual(["Compressor", "Curve", "Time"]);
-  });
-});
-
-describe("the Neu skin", () => {
-  test("the site's sheet is the registry's css", async () => {
+  test("it is served as plain CSS, its materials as classes, the one sheet every framework reads", async () => {
     const sheet = await Bun.file(
-      `${import.meta.dir}/../src/registry/styles/skins/neu.css`
+      `${import.meta.dir}/../public/css/skins/${name}.css`
     ).text();
-    expect(sheet).toBe(skinSheet(NEU_CSS, "neu-css.ts"));
-  });
-
-  test("it is served as plain CSS too, its materials as classes, for a project with no Tailwind", async () => {
-    const sheet = await Bun.file(
-      `${import.meta.dir}/../public/css/skins/neu.css`
-    ).text();
-    expect(sheet).toBe(plainSkinSheet(NEU_CSS, "neu-css.ts"));
+    expect(sheet).toBe(plainSkinSheet(css, source));
     expect(sheet).not.toContain("@utility");
     expect(sheet).toContain(".audio-body {");
   });
 
+  test("it is drawn on the elements' own parts: no face of its own, in any framework", () => {
+    const selectors = Object.keys(css).join("\n");
+    for (const part of DRESSED) {
+      expect(selectors).toContain(`[data-slot=${part}]`);
+    }
+  });
+
+  test("a knob and a fader in it say what they said", () => {
+    for (const element of [
+      <Knob aria-label="Level" defaultValue={30} key="knob" />,
+      <Fader aria-label="Volume" defaultValue={-6} key="fader" />,
+    ]) {
+      expect(
+        accessibility(<div className={`skin-${name}`}>{element}</div>)
+      ).toEqual(accessibility(element));
+    }
+  });
+
   test("a device panel wears it, and says what it said", () => {
     const panel = (
       <DevicePanel
@@ -209,9 +118,9 @@ describe("the Neu skin", () => {
         value={compressorDevice.defaults()}
       />
     );
-    expect(accessibility(<div className="skin-neu">{panel}</div>)).toEqual(
-      accessibility(panel)
-    );
+    expect(
+      accessibility(<div className={`skin-${name}`}>{panel}</div>)
+    ).toEqual(accessibility(panel));
   });
 });
 

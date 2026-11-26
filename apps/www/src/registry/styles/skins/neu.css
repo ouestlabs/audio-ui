@@ -46,6 +46,51 @@
   background-image: linear-gradient(to bottom, oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.45 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1)))), oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.08 * var(--audio-depth))));
 }
 
+.skin-neu :is([data-slot=xypad-control], [data-slot=envelope-frame]) {
+  --background: var(--audio-shade);
+  --card: var(--audio-shade);
+  --popover: var(--audio-cap);
+  --foreground: var(--audio-print);
+  --popover-foreground: var(--audio-print);
+  --muted-foreground: color-mix(in oklab, var(--audio-print) 75%, var(--audio-body));
+  --border: color-mix(in oklab, var(--audio-print) 18%, var(--audio-body));
+  --primary: var(--audio-accent);
+  --primary-foreground: var(--audio-body);
+  --ring: var(--audio-accent);
+  --tw-shadow: inset 0 calc(2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.45 * var(--audio-depth))), inset 0 calc(-1px * var(--audio-depth)) calc(2px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.8 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1))));
+  border-color: transparent;
+}
+
+.skin-neu [data-slot=pad-item] {
+  --muted: var(--audio-shade);
+  --muted-foreground: var(--audio-print);
+  --primary: var(--audio-accent);
+  --primary-foreground: var(--audio-body);
+  --ring: var(--audio-accent);
+  border-color: transparent;
+  background-image: linear-gradient(to bottom, oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.45 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1)))), oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.08 * var(--audio-depth))));
+  box-shadow: 0 calc(-2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.9 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1)))), 0 calc(3px * var(--audio-depth)) calc(7px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.5 * var(--audio-depth)));
+}
+
+.skin-neu [data-slot=pad-item]:focus-visible {
+  box-shadow: 0 calc(-2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.9 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1)))), 0 calc(3px * var(--audio-depth)) calc(7px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.5 * var(--audio-depth))), 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent);
+}
+
+.skin-neu [data-slot=pad-item][data-active] {
+  background-image: none;
+  box-shadow: inset 0 calc(2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.45 * var(--audio-depth))), inset 0 calc(-1px * var(--audio-depth)) calc(2px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.8 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1))));
+}
+
+.skin-neu [data-slot=piano] {
+  --piano-key-white: oklch(from var(--audio-shade) calc(l + 0.05 + 0.04 * clamp(0, (0.5 - l) * 1000, 1)) c h);
+  --piano-key-black: oklch(from var(--audio-shade) calc(l * 0.4) c h);
+  --card: var(--audio-shade);
+  --primary: var(--audio-accent);
+  --ring: var(--audio-accent);
+  --tw-shadow: inset 0 calc(2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.45 * var(--audio-depth))), inset 0 calc(-1px * var(--audio-depth)) calc(2px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.8 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1))));
+  border-color: transparent;
+}
+
 .skin-neu [data-slot=device-frame] {
   --card: var(--audio-body);
   --card-foreground: var(--audio-print);
@@ -63,14 +108,11 @@
   color: var(--audio-print);
 }
 
-.skin-neu [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad]) {
+.skin-neu [data-slot=device-frame] [data-slot=plot] {
   --background: var(--audio-screen);
   --card: var(--audio-screen);
   background-color: var(--audio-screen);
   border-color: transparent;
-}
-
-.skin-neu [data-slot=device-frame] [data-slot=plot] {
   box-shadow: inset 0 calc(2px * var(--audio-depth)) calc(4px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l * 0.63) calc(c * 1.5) h / calc(0.45 * var(--audio-depth))), inset 0 calc(-1px * var(--audio-depth)) calc(2px * var(--audio-depth)) oklch(from var(--audio-shade) calc(l + (1 - l) * 0.75) calc(c * 0.6) h / calc(calc(0.8 * var(--audio-depth)) * (1 - 0.8 * clamp(0, (0.5 - l) * 1000, 1))));
   border-radius: calc(8px * var(--audio-roundness));
 }

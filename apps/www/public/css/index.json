@@ -2,7 +2,15 @@
   "elements": [
     "knob",
     "fader",
-    "meter"
+    "meter",
+    "xypad",
+    "envelope",
+    "pad",
+    "piano"
+  ],
+  "skins": [
+    "hardware",
+    "neu"
   ],
   "styles": [
     "vega",

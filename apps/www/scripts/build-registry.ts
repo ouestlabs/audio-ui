@@ -32,6 +32,11 @@ import {
   SHIPPED_PRIMITIVES,
   sharedDependencies,
 } from "../src/registry/bases/primitives.ts";
+import { ENVELOPE_SHAKE } from "../src/registry/bases/shared/audio-ui/_registry.ts";
+import {
+  envelopeParts,
+  envelopeSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/envelope.tsx";
 import {
   faderParts,
   faderSizes,
@@ -44,11 +49,26 @@ import {
   meterParts,
   meterSizes,
 } from "../src/registry/bases/shared/audio-ui/elements/meter.tsx";
+import { padParts } from "../src/registry/bases/shared/audio-ui/elements/pad.tsx";
+import {
+  pianoParts,
+  pianoSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/piano.tsx";
+import {
+  xypadParts,
+  xypadSizes,
+} from "../src/registry/bases/shared/audio-ui/elements/xypad.tsx";
 import { HARDWARE_CSS } from "../src/registry/bases/shared/audio-ui/skins/hardware-css.ts";
 import { NEU_CSS } from "../src/registry/bases/shared/audio-ui/skins/neu-css.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { THEMES } from "../src/registry/themes.ts";
-import { portableSheet, themeSheet } from "./portable-css.ts";
+import {
+  type CssObject,
+  type Parts,
+  portableSheet,
+  type Sizes,
+  themeSheet,
+} from "./portable-css.ts";
 import { plainSkinSheet, skinSheet } from "./skin-css.ts";
 
 // ---------------------------------------------------------------------------
@@ -567,12 +587,14 @@ async function buildItem(
 
   // A barrel item (`@audio-ui/ui`, `@audio-ui/hooks`) has no files of its own,
   // it only aggregates registryDependencies for a one-shot install, and an
-  // alias for a lib that moved into a package only installs that package.
-  // Still emit them; skip only when there is nothing to serve at all.
+  // alias for a lib that moved into a package only installs that package, and
+  // a skin is its `css` alone. Still emit them; skip only when there is
+  // nothing to serve at all.
   if (
     files.length === 0 &&
     !item.registryDependencies?.length &&
-    !item.dependencies?.length
+    !item.dependencies?.length &&
+    !item.css
   ) {
     return null;
   }
@@ -826,7 +848,11 @@ await Bun.write(
   `${REGISTRY}/styles/skins/neu.css`,
   skinSheet(NEU_CSS, "neu-css.ts")
 );
-// Neu outside Tailwind: Vue, Svelte and custom elements read it as it is. Hardware has faces written for React, so it has none.
+// The skins outside Tailwind: what Vue, Svelte, custom elements and the CLI read, as they are.
+await Bun.write(
+  `${PROJECT_ROOT}/public/css/skins/hardware.css`,
+  plainSkinSheet(HARDWARE_CSS, "hardware-css.ts")
+);
 await Bun.write(
   `${PROJECT_ROOT}/public/css/skins/neu.css`,
   plainSkinSheet(NEU_CSS, "neu-css.ts")
@@ -858,30 +884,40 @@ if (NEUTRAL?.cssVars) {
   );
 }
 // The elements as plain CSS on their parts, one sheet a style: what Vue, Svelte and custom elements read.
-const PORTABLE = [
+const PORTABLE: [
+  name: string,
+  parts: Parts,
+  sizes: Sizes,
+  extra?: CssObject,
+][] = [
   ["knob", knobParts, knobSizes],
   ["fader", faderParts, faderSizes],
   ["meter", meterParts, meterSizes],
-] as const;
+  ["xypad", xypadParts, xypadSizes],
+  ["envelope", envelopeParts, envelopeSizes, ENVELOPE_SHAKE],
+  ["pad", padParts, {}],
+  ["piano", pianoParts, pianoSizes],
+];
 await Promise.all(
   STYLES.flatMap((style) =>
-    PORTABLE.map(async ([name, parts, sizes]) =>
+    PORTABLE.map(async ([name, parts, sizes, extra]) =>
       Bun.write(
         `${PROJECT_ROOT}/public/css/${style}/${name}.css`,
         await portableSheet(
           name,
           parts,
           sizes,
-          cnClassesByStyle.get(style) ?? new Map()
+          cnClassesByStyle.get(style) ?? new Map(),
+          extra
         )
       )
     )
   )
 );
-// What the CLI reads to know which elements have a sheet, in which styles.
+// What the CLI reads to know which elements have a sheet, in which styles, and which skins it serves.
 await Bun.write(
   `${PROJECT_ROOT}/public/css/index.json`,
-  `${JSON.stringify({ elements: PORTABLE.map(([name]) => name), styles: STYLES }, null, 2)}\n`
+  `${JSON.stringify({ elements: PORTABLE.map(([name]) => name), skins: ["hardware", "neu"], styles: STYLES }, null, 2)}\n`
 );
 const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
   STYLES.map((style) => ({

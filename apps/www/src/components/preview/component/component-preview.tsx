@@ -6,8 +6,15 @@ import {
   PlaygroundPreview,
   PlaygroundSource,
 } from "@/components/preview/playground/playground-preview";
-import { type SkinId, useSkin } from "@/hooks/use-skin";
-import { isDevicePreview, skinnedDemo } from "@/lib/docs/content/skinned-demos";
+import { useSkin } from "@/hooks/use-skin";
+import { useSkinAxes } from "@/hooks/use-skin-axes";
+import { chosenAxes } from "@/lib/design-system/look";
+import {
+  isDevicePreview,
+  isSkinnable,
+  shadowSkin,
+  skinFrameClass,
+} from "@/lib/docs/content/skin-frame";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import {
   codeOf,
@@ -16,25 +23,7 @@ import {
 } from "@/lib/docs/playground/playgrounds";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryComponent } from "@/lib/registry/core/registry";
-import { HardwareSkin } from "@/registry/bases/shared/audio-ui/skins/hardware/skin";
 import type { IconLibraryName } from "@/registry/config";
-
-/** A device's block in the skin chosen: it wears the skin as it is. */
-function DeviceSkin({
-  children,
-  skin,
-}: {
-  children: React.ReactNode;
-  skin: SkinId;
-}) {
-  if (skin === "hardware") {
-    return <HardwareSkin className="contents">{children}</HardwareSkin>;
-  }
-  if (skin === "neu") {
-    return <div className="skin-neu contents">{children}</div>;
-  }
-  return children;
-}
 
 const DEMO_FRAMEWORK = /-(vue|svelte|web)-demo$/;
 
@@ -84,7 +73,7 @@ function PlaygroundComponentPreview({
 const DEFAULT_STYLE_NAME = "ui-sdk-nova";
 
 export function ComponentPreview({
-  name: digitalName,
+  name,
   type,
   className,
   previewClassName,
@@ -114,7 +103,7 @@ export function ComponentPreview({
     return (
       <PlaygroundComponentPreview
         className={className}
-        name={digitalName}
+        name={name}
         playground={playground}
         previewClassName={previewClassName}
         {...props}
@@ -129,7 +118,7 @@ export function ComponentPreview({
       code={code}
       hideCode={hideCode}
       iconLibrary={iconLibrary}
-      name={digitalName}
+      name={name}
       previewClassName={previewClassName}
       styleName={styleName}
       type={type}
@@ -138,9 +127,46 @@ export function ComponentPreview({
   );
 }
 
-/** A preview of a registry item: its demo, or the skin's counterpart of it, and its source. */
+/**
+ * The demo in the skin the reader chose. A device's block wears it as it is;
+ * an element's demo stands on the skin's plate, in React on the page and in
+ * another framework in its shadow root, with the skin's sheet.
+ */
+function Skinned({
+  Component,
+  name,
+}: {
+  Component: React.ComponentType<{ skin?: ReturnType<typeof shadowSkin> }>;
+  name: string;
+}) {
+  const [skin] = useSkin();
+  const { values } = useSkinAxes();
+  if (skin === "digital") {
+    return <Component />;
+  }
+  if (isDevicePreview(name)) {
+    return (
+      <div className={`skin-${skin} contents`}>
+        <Component />
+      </div>
+    );
+  }
+  if (!isSkinnable(name)) {
+    return <Component />;
+  }
+  if (frameworkOfDemo(name) !== "react") {
+    return <Component skin={shadowSkin(skin, chosenAxes(values), name)} />;
+  }
+  return (
+    <div className={skinFrameClass(skin, name)}>
+      <Component />
+    </div>
+  );
+}
+
+/** A preview of a registry item: its demo, in the skin chosen, and its source. */
 function RegistryComponentPreview({
-  name: digitalName,
+  name,
   type: _type,
   className,
   previewClassName,
@@ -163,9 +189,6 @@ function RegistryComponentPreview({
   previewClassName?: string;
   code?: string;
 }) {
-  const [skin] = useSkin();
-  // The preview and its code both follow the skin.
-  const name = skinnedDemo(skin, digitalName);
   const Component = getRegistryComponent(name, styleName);
   // The code without its own copy button: the panel's bar copies it.
   const source = React.useCallback(
@@ -201,13 +224,7 @@ function RegistryComponentPreview({
       className={className}
       component={
         <React.Suspense fallback={<PreviewLoading />}>
-          {isDevicePreview(name) ? (
-            <DeviceSkin skin={skin}>
-              <Component />
-            </DeviceSkin>
-          ) : (
-            <Component />
-          )}
+          <Skinned Component={Component} name={name} />
         </React.Suspense>
       }
       expand={isExpandable(name)}

@@ -545,6 +545,12 @@
   "envelope-adsr-demo": [
     "components/examples/envelope-adsr-demo.tsx"
   ],
+  "envelope-element-svelte": [
+    "~/src/lib/components/audio-ui/envelope/Envelope.svelte"
+  ],
+  "envelope-element-vue": [
+    "components/audio-ui/envelope/Envelope.vue"
+  ],
   "envelope-geometry": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/envelope/geometry.ts"
@@ -633,12 +639,6 @@
   ],
   "fader-element-vue": [
     "components/audio-ui/fader/Fader.vue"
-  ],
-  "fader-hardware-demo": [
-    "components/examples/fader-hardware-demo.tsx"
-  ],
-  "fader-neu-demo": [
-    "components/examples/fader-neu-demo.tsx"
   ],
   "fader-pan-demo": [
     "components/examples/fader-pan-demo.tsx"
@@ -780,12 +780,6 @@
   "knob-filter-control-demo": [
     "components/examples/knob-filter-control-demo.tsx"
   ],
-  "knob-hardware-demo": [
-    "components/examples/knob-hardware-demo.tsx"
-  ],
-  "knob-neu-demo": [
-    "components/examples/knob-neu-demo.tsx"
-  ],
   "knob-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/knob/knob.ts",
@@ -868,15 +862,9 @@
   "meter-element-vue": [
     "components/audio-ui/meter/Meter.vue"
   ],
-  "meter-hardware-demo": [
-    "components/examples/meter-hardware-demo.tsx"
-  ],
   "meter-levels": [
     "components/audio-ui/meter/levels.ts",
     "components/audio-ui/meter/ballistics.ts"
-  ],
-  "meter-neu-demo": [
-    "components/examples/meter-neu-demo.tsx"
   ],
   "meter-react": [
     "components/audio-ui/primitive.ts",
@@ -1004,6 +992,14 @@
   "pad-demo": [
     "components/examples/pad-demo.tsx"
   ],
+  "pad-element-svelte": [
+    "~/src/lib/components/audio-ui/pad/Pad.svelte",
+    "~/src/lib/components/audio-ui/pad/PadItem.svelte"
+  ],
+  "pad-element-vue": [
+    "components/audio-ui/pad/Pad.vue",
+    "components/audio-ui/pad/PadItem.vue"
+  ],
   "pad-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/pad/pad.ts",
@@ -1057,6 +1053,12 @@
   ],
   "piano-active-notes-demo": [
     "components/examples/piano-active-notes-demo.tsx"
+  ],
+  "piano-element-svelte": [
+    "~/src/lib/components/audio-ui/piano/Piano.svelte"
+  ],
+  "piano-element-vue": [
+    "components/audio-ui/piano/Piano.vue"
   ],
   "piano-react": [
     "components/audio-ui/primitive.ts",
@@ -1397,12 +1399,6 @@
   ],
   "simulated-levels": [
     "lib/simulated-levels.ts"
-  ],
-  "skin-hardware": [
-    "components/audio-ui/skins/hardware/knob.tsx",
-    "components/audio-ui/skins/hardware/fader.tsx",
-    "components/audio-ui/skins/hardware/vu-meter.tsx",
-    "components/audio-ui/skins/hardware/skin.tsx"
   ],
   "slider": [
     "components/ui/slider.tsx"
@@ -1913,6 +1909,12 @@
   ],
   "xypad-bipolar-range-demo": [
     "components/examples/xypad-bipolar-range-demo.tsx"
+  ],
+  "xypad-element-svelte": [
+    "~/src/lib/components/audio-ui/xypad/XYPad.svelte"
+  ],
+  "xypad-element-vue": [
+    "components/audio-ui/xypad/XYPad.vue"
   ],
   "xypad-live-value-demo": [
     "components/examples/xypad-live-value-demo.tsx"

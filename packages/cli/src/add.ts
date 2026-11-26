@@ -1,6 +1,11 @@
 import { spawn } from "node:child_process";
 import { join, relative } from "node:path";
-import { readCssManifest, sheetElements, writeSheets } from "./css.ts";
+import {
+  readCssManifest,
+  sheetElements,
+  sheetSkins,
+  writeSheets,
+} from "./css.ts";
 import {
   componentsFolder,
   needsUtils,
@@ -205,29 +210,35 @@ function packagesOf(
   return packages;
 }
 
-/** Outside React, the sheets of the styled elements and their index: what the components are drawn by. */
+/**
+ * The sheets of a tree and their index: outside React, the styled elements'
+ * and the theme's tokens when the project has none; in every framework, the
+ * skins'. A headless add has no style, so no sheet.
+ */
 async function sheetsOf(
   items: RegistryItem[],
   config: Config,
   options: AddOptions,
   report: Written
 ) {
-  if (config.framework === "react" || options.headless) {
+  if (options.headless) {
     return;
   }
   const registry = options.registry ?? DEFAULT_REGISTRY;
-  const elements = sheetElements(
-    items,
-    config.framework,
-    await readCssManifest(registry)
-  );
-  if (elements.length === 0) {
+  const manifest = await readCssManifest(registry);
+  const react = config.framework === "react";
+  const elements = react
+    ? []
+    : sheetElements(items, config.framework, manifest);
+  const skins = sheetSkins(items, manifest);
+  if (elements.length + skins.length === 0) {
     return;
   }
+  const theme = !react && config.theme ? ["theme"] : [];
   const index = await writeSheets(
     registry,
     config,
-    elements,
+    [...theme, ...elements, ...skins],
     join(componentsFolder(config, options.cwd), "css"),
     options.cwd,
     options.overwrite ?? false,

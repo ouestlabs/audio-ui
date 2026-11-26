@@ -28,7 +28,6 @@ import { FieldGroup } from "@/components/ui/field";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useConfig } from "@/hooks/use-config";
 import { useCustomizerScope } from "@/hooks/use-customizer-scope";
-import { useFramework } from "@/hooks/use-framework";
 import { useSkin } from "@/hooks/use-skin";
 import { ELEMENT_CHOICES } from "@/lib/design-system/customizer-scope";
 import { FONT_HEADING_OPTIONS, FONTS } from "@/lib/design-system/fonts";
@@ -60,17 +59,10 @@ export function CustomizerSidebarContent({
 
   const strip = layout === "strip";
   const [skin] = useSkin();
-  const [framework] = useFramework();
   // The skin and, for a skin of material, the axes it is made of: Digital has none.
   const look = (
     <>
       <SkinPicker anchorRef={anchorRef} isMobile={isMobile} />
-      {skin === "hardware" && framework !== "react" && !strip ? (
-        <p className="px-2.5 pb-2 text-site-muted-foreground text-xs">
-          Hardware's faces are written for React: here the components keep their
-          own look.
-        </p>
-      ) : null}
       {skin === "digital"
         ? null
         : AXIS_ORDER.map((axis) => (

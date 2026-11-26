@@ -3,17 +3,46 @@ import { type ComponentProps, type CSSProperties, useCallback } from "react";
 import { cn } from "@/registry/lib/utils";
 import { Envelope as EnvelopePrimitive } from "@/registry/primitives/envelope/react";
 
-const envelopeVariants = cva("", {
-  defaultVariants: {
-    size: "default",
-  },
-  variants: {
-    size: {
-      default: "cn-envelope-size-default",
-      lg: "cn-envelope-size-lg",
-      sm: "cn-envelope-size-sm",
-    },
-  },
+/**
+ * How each part of the envelope is drawn, by its `data-slot`. A part's look
+ * follows its attributes, never the envelope's props: the React envelope
+ * applies these classes, and `registry:build` writes them as plain CSS on the
+ * parts for every other framework. The frame around the envelope carries
+ * `data-size`; a point's label, `data-below` when it sits under the point.
+ */
+export const envelopeParts = Object.freeze({
+  "envelope-frame":
+    "cn-envelope group/envelope-frame box-border w-full cursor-crosshair touch-none select-none p-3.5 has-data-disabled:pointer-events-none has-data-disabled:opacity-50",
+  envelope: "size-full data-disabled:cursor-not-allowed",
+  "envelope-graph": "size-full overflow-visible",
+  // The curve takes the paint of its svg (the area its fill, the line its stroke): the Vue and Svelte adapters draw it in the current color otherwise.
+  "envelope-fill":
+    "cn-envelope-fill [&_polyline]:[fill:inherit] [&_polyline]:[stroke:inherit]",
+  "envelope-line":
+    "cn-envelope-path [stroke-linejoin:round] [&_polyline]:[stroke:inherit]",
+  "envelope-segment":
+    "cn-envelope-curve group/envelope-segment cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope-frame:opacity-100 group-hover/envelope-frame:opacity-100 data-dragging:opacity-100",
+  "envelope-segment-value":
+    "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/envelope-segment:block",
+  "envelope-point":
+    "cn-envelope-point group/envelope-point size-4 cursor-grab data-dragging:bg-primary focus-visible:bg-primary touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing",
+  // Near the top the label goes under the point, so it stays inside the page.
+  "envelope-point-value":
+    "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute left-1/2 z-10 hidden whitespace-nowrap group-hover/envelope-point:block group-data-dragging/envelope-point:block group-focus-visible/envelope-point:block not-data-below:bottom-full not-data-below:mb-2 data-below:top-full data-below:mt-2",
+});
+
+/** The parts whose look changes with the frame's `data-size`, by size. */
+export const envelopeSizes = Object.freeze({
+  "envelope-frame": Object.freeze({
+    default: "cn-envelope-size-default",
+    lg: "cn-envelope-size-lg",
+    sm: "cn-envelope-size-sm",
+  }),
+});
+
+const envelopeVariants = cva(envelopeParts["envelope-frame"], {
+  defaultVariants: { size: "default" },
+  variants: { size: envelopeSizes["envelope-frame"] },
 });
 
 /** The frame's room for the end points, which the grid's lines are measured from. */
@@ -102,38 +131,46 @@ export function Envelope({
 
   return (
     <div
-      className={cn(
-        "cn-envelope group/envelope box-border w-full cursor-crosshair touch-none select-none p-3.5",
-        "has-data-disabled:pointer-events-none has-data-disabled:opacity-50",
-        envelopeVariants({ size }),
-        className
-      )}
-      data-slot="envelope"
+      className={cn(envelopeVariants({ size }), className)}
+      data-size={size ?? "default"}
+      data-slot="envelope-frame"
       style={gridLines(snap)}
     >
       <EnvelopePrimitive.Root
-        className="size-full data-disabled:cursor-not-allowed"
+        className={envelopeParts.envelope}
+        data-slot="envelope"
         role="group"
         snap={snap}
         {...props}
       >
         {({ value: points }) => (
           <>
-            <EnvelopePrimitive.Graph className="size-full overflow-visible">
-              <EnvelopePrimitive.Fill className="cn-envelope-fill" />
-              <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round]" />
+            <EnvelopePrimitive.Graph
+              className={envelopeParts["envelope-graph"]}
+              data-slot="envelope-graph"
+            >
+              <EnvelopePrimitive.Fill
+                className={envelopeParts["envelope-fill"]}
+                data-slot="envelope-fill"
+              />
+              <EnvelopePrimitive.Line
+                className={envelopeParts["envelope-line"]}
+                data-slot="envelope-line"
+              />
             </EnvelopePrimitive.Graph>
             {curves
               ? indexes(points.length - 1).map((index) => (
                   <EnvelopePrimitive.Segment
                     aria-label={`Curve ${index + 1}`}
-                    className="cn-envelope-curve group/segment cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
+                    className={envelopeParts["envelope-segment"]}
+                    data-slot="envelope-segment"
                     index={index}
                     key={index}
                   >
                     <span
                       aria-hidden="true"
-                      className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/segment:block"
+                      className={envelopeParts["envelope-segment-value"]}
+                      data-slot="envelope-segment-value"
                     >
                       {describeCurve(points[index]?.curve)}
                     </span>
@@ -148,20 +185,17 @@ export function Envelope({
               return (
                 <EnvelopePrimitive.Point
                   aria-label={`Point ${index + 1} of ${points.length}`}
-                  className="cn-envelope-point group/point size-4 cursor-grab data-dragging:bg-primary focus-visible:bg-primary touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing"
+                  className={envelopeParts["envelope-point"]}
+                  data-slot="envelope-point"
                   getAriaValueText={describe}
                   index={index}
                   key={index}
                 >
                   <span
                     aria-hidden="true"
-                    className={cn(
-                      "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute left-1/2 z-10 hidden whitespace-nowrap group-hover/point:block group-data-dragging/point:block group-focus-visible/point:block",
-                      // Near the top the label goes under the point, so it stays inside the page.
-                      point.y > LABEL_FLIP_ABOVE
-                        ? "top-full mt-2"
-                        : "bottom-full mb-2"
-                    )}
+                    className={envelopeParts["envelope-point-value"]}
+                    data-below={point.y > LABEL_FLIP_ABOVE ? "" : undefined}
+                    data-slot="envelope-point-value"
                   >
                     {describe(point)}
                   </span>

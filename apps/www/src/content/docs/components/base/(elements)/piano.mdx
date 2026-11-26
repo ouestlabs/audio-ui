@@ -62,6 +62,9 @@ The styled component, with sizes and themed keys, is one command:
   <ForFrameworks only="react">
     <TabsTrigger value="cli"><Icons.shadcn className="size-3.5" /> CLI</TabsTrigger>
   </ForFrameworks>
+  <ForFrameworks only="vue svelte web">
+    <TabsTrigger value="cli"><Icons.audioUi className="size-3.5" /> CLI</TabsTrigger>
+  </ForFrameworks>
   <TabsTrigger value="manual"><Icons.react className="size-3.5" /> Manual</TabsTrigger>
   <TabsTrigger value="agent"><Icons.sparkle className="size-3.5" /> Agent</TabsTrigger>
 </TabsList>
@@ -86,6 +89,26 @@ It writes the primitive, its adapter and `primitive.ts` into `components/audio-u
 
 ```bash component
 npx shadcn@latest add @audio-ui/primitives-css
+```
+
+</TabsContent>
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+<TabsContent value="cli">
+
+The [CLI](/docs/cli) finds your framework in `package.json` and writes the styled component with what draws it: the primitive, its adapter, `primitive.ts` and the sheet of your style, with an index to import once. It installs the kernel's packages:
+
+```bash
+npx @audio-ui/cli add piano
+```
+
+Or the primitive alone, to style yourself:
+
+```bash
+npx @audio-ui/cli add piano --headless
 ```
 
 </TabsContent>
@@ -207,6 +230,61 @@ npm install class-variance-authority
 ```
 
 <ItemFiles name="piano" />
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+### 5. The styled component
+
+Optional: the piano as the registry draws it in React, with no classes and no Tailwind. Its look is one sheet of plain CSS on its parts, a sheet for each style (`nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `rhea`, `sera`). Copy the sheet of your style into your project, with the theme's tokens when the page has no shadcn theme.
+
+The [CLI](/docs/cli) writes the component, its adapter, the sheet and an index to import once:
+
+```bash
+npx @audio-ui/cli add piano
+```
+
+By hand:
+
+```html
+<link rel="stylesheet" href="/css/theme.css" />
+<link rel="stylesheet" href="/css/nova/piano.css" />
+```
+
+Both are served at `https://www.audio-ui.dev/css/`.
+
+<FrameworkTabs defaultValue="vue">
+
+<TabsList>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="vue">
+
+One component over the adapter, with the props of the React piano.
+
+<ItemFiles name="piano-element-vue" />
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+One component over the adapter, with the props of the React piano.
+
+<ItemFiles name="piano-element-svelte" />
+
+</TabsContent>
+
+<TabsContent value="web">
+
+The custom elements take the same sheet. Set `data-size` on `audio-ui-piano`, as the styled component does.
+
+</TabsContent>
+
+</FrameworkTabs>
 
 </ForFrameworks>
 

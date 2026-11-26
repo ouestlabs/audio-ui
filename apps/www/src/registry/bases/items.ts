@@ -372,30 +372,33 @@ export function primitiveItems(
 /**
  * A styled element in Vue and in Svelte, `<name>-element-vue` and
  * `<name>-element-svelte`: the framework's component over the primitive's
- * adapter, installed beside it. It draws no style of its own: its look is the
+ * adapter, installed beside it, or its components for an element of several
+ * (`Pad` and `PadItem`). It draws no style of its own: its look is the
  * element's sheet, plain CSS on its parts (`/css/<style>/<name>.css`).
  */
 export function styledItems(
   name: string,
-  component: string,
+  components: string | readonly string[],
   description: string
 ): RegistryItem[] {
   return (["vue", "svelte"] as const).map((framework) => {
     const svelte = framework === "svelte";
     const type = svelte ? "registry:component" : "registry:ui";
     const root = svelte ? "~/src/lib/components/" : "components/";
-    const file = `${component}.${framework}`;
-    return {
-      categories: [name, framework],
-      dependencies: [],
-      description: `${description} Its ${framework} component, drawn by the element's sheet.`,
-      files: [
+    const files = (typeof components === "string" ? [components] : components)
+      .map((component) => `${component}.${framework}`)
+      .map((file) =>
         fileOf(
           `audio-ui/elements/${framework}/${file}`,
           type,
           `${root}audio-ui/${name}/${file}`
-        ),
-      ],
+        )
+      );
+    return {
+      categories: [name, framework],
+      dependencies: [],
+      description: `${description} Its ${framework} ${files.length > 1 ? "components" : "component"}, drawn by the element's sheet.`,
+      files,
       name: `${name}-element-${framework}`,
       registryDependencies: [`@audio-ui/${name}-${framework}`],
       type,

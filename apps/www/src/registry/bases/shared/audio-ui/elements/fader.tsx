@@ -10,7 +10,7 @@ import { Fader as FaderPrimitive } from "@/registry/primitives/fader/react";
  * every other framework. The root carries `data-orientation`, `data-size`,
  * `data-marks` (`ticks` or `labels`) and `data-readout` (`auto` or `always`).
  */
-export const faderParts = {
+export const faderParts = Object.freeze({
   fader:
     "group/fader relative data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-disabled:cursor-not-allowed data-[marks=ticks]:data-[orientation=horizontal]:pb-3 data-[marks=ticks]:data-[orientation=vertical]:ps-3 data-[marks=labels]:data-[orientation=horizontal]:pb-6 data-[marks=labels]:data-[orientation=vertical]:ps-10",
   "fader-control":
@@ -35,31 +35,31 @@ export const faderParts = {
   // Beside the thumb, shown on demand while the fader is hovered, dragged or focused.
   "fader-value":
     "cn-fader-value pointer-events-none absolute z-20 whitespace-nowrap data-editable:pointer-events-auto data-editable:cursor-text group-data-[orientation=vertical]/fader:start-full group-data-[orientation=vertical]/fader:top-1/2 group-data-[orientation=vertical]/fader:ms-2 group-data-[orientation=vertical]/fader:-translate-y-1/2 group-data-[orientation=horizontal]/fader:bottom-full group-data-[orientation=horizontal]/fader:left-1/2 group-data-[orientation=horizontal]/fader:mb-2 group-data-[orientation=horizontal]/fader:-translate-x-1/2 in-data-[readout=auto]:opacity-0 in-data-[readout=auto]:transition-opacity in-data-[readout=auto]:duration-150 in-data-[readout=auto]:ease-out in-data-[readout=auto]:motion-reduce:transition-none group-hover/fader:opacity-100 group-has-focus-visible/fader:opacity-100 group-has-data-dragging/fader:opacity-100 data-editing:opacity-100",
-} as const;
+});
 
 /** The parts whose look changes with the fader's `data-size`, by size. */
-export const faderSizes = {
-  "fader-track": {
+export const faderSizes = Object.freeze({
+  "fader-track": Object.freeze({
     default: "cn-fader-track-size-default",
     lg: "cn-fader-track-size-lg",
     sm: "cn-fader-track-size-sm",
-  },
-  "fader-thumb": {
+  }),
+  "fader-thumb": Object.freeze({
     default: "cn-fader-thumb-size-default",
     lg: "cn-fader-thumb-size-lg",
     sm: "cn-fader-thumb-size-sm",
-  },
-  "fader-thumb-inner": {
+  }),
+  "fader-thumb-inner": Object.freeze({
     default: "cn-fader-thumb-inner-size-default",
     lg: "cn-fader-thumb-inner-size-lg",
     sm: "cn-fader-thumb-inner-size-sm",
-  },
-  "fader-thumb-mark": {
+  }),
+  "fader-thumb-mark": Object.freeze({
     default: "cn-fader-thumb-mark-size-default",
     lg: "cn-fader-thumb-mark-size-lg",
     sm: "cn-fader-thumb-mark-size-sm",
-  },
-} as const;
+  }),
+});
 
 const sized = (part: keyof typeof faderSizes) =>
   cva(faderParts[part], {

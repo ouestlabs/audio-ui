@@ -99,41 +99,40 @@ test("a knob with no scale has no marks, and its readout hidden has no value", (
 });
 
 describe("the look in the code", () => {
-  test("React's sets the skin and its axes as classes, and installs the skin with shadcn's CLI, which writes its CSS", () => {
-    const { code } = codeOf("knob", "react", {}, NEU);
-    expect(code).toStartWith("// npx shadcn add @audio-ui/skin-neu\n");
-    expect(code).toContain(
-      'className="skin-neu audio-body rounded-2xl px-10 py-8 [--audio-shade:oklch(0.62_0.06_60)]"'
-    );
-    expect(code).toContain('from "@/components/audio-ui/knob"');
-  });
-
-  test("React's Hardware draws its own face, which keeps the element's props", () => {
-    const { code } = codeOf("meter", "react", {}, HARDWARE);
-    expect(code).toContain(
-      'import { HardwareVuMeter } from "@/components/audio-ui/skins/hardware/vu-meter"'
-    );
-    expect(code).toContain('className="skin-hardware audio-body');
-  });
-
-  test.each(["vue", "svelte", "web"] as const)(
-    "%s's sets Neu on an element around it, the axes in its style, and says where its sheet is",
+  test.each(["react", "vue", "svelte", "web"] as const)(
+    "%s's installs the skin with the CLI, as an item: its sheet joins the index",
     (framework) => {
-      const { code } = codeOf("fader", framework, {}, NEU);
-      expect(code).toContain(
-        'class="skin-neu audio-body" style="padding: 2rem 2.5rem; border-radius: 1rem; --audio-shade: oklch(0.62 0.06 60)"'
-      );
-      expect(code).toContain("The Neu skin");
-      expect(code).toContain("https://www.audio-ui.dev/css/skins/neu.css");
+      for (const look of [NEU, HARDWARE]) {
+        expect(codeOf("knob", framework, {}, look).code).toContain(
+          `npx @audio-ui/cli add knob skin-${look.skin}`
+        );
+      }
     }
   );
 
-  test.each(["vue", "svelte", "web"] as const)(
-    "%s's leaves Hardware out: its faces are written for React",
-    (framework) => {
-      expect(codeOf("knob", framework, {}, HARDWARE)).toEqual(
-        codeOf("knob", framework, {})
+  test("React's sets the skin and its axes as classes on the element it draws as it is", () => {
+    for (const look of [NEU, HARDWARE]) {
+      const { code } = codeOf("meter", "react", {}, look);
+      expect(code).toContain(
+        `className="skin-${look.skin} audio-body rounded-2xl px-10 py-8`
       );
+      expect(code).toContain(
+        'import { Meter } from "@/components/audio-ui/meter"'
+      );
+    }
+    expect(codeOf("knob", "react", {}, NEU).code).toContain(
+      "[--audio-shade:oklch(0.62_0.06_60)]"
+    );
+  });
+
+  test.each(["vue", "svelte", "web"] as const)(
+    "%s's sets the skin on an element around it, the axes in its style",
+    (framework) => {
+      for (const look of [NEU, HARDWARE]) {
+        expect(codeOf("fader", framework, {}, look).code).toContain(
+          `class="skin-${look.skin} audio-body" style="padding: 2rem 2.5rem; border-radius: 1rem${look.axes.length > 0 ? "; --audio-shade: oklch(0.62 0.06 60)" : ""}"`
+        );
+      }
     }
   );
 });

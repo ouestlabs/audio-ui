@@ -4,7 +4,7 @@ import { HARDWARE_CSS } from "./skins/hardware-css.ts";
 import { NEU_CSS } from "./skins/neu-css.ts";
 
 /** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
-const ENVELOPE_SHAKE = {
+export const ENVELOPE_SHAKE = {
   "@keyframes envelope-shake": {
     "0%": {
       "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -42,55 +42,44 @@ export const audioUi: RegistryItem[] = [
     "Meter",
     "A level meter: a channel per level, its fill, a held peak and a scale in dB."
   ),
+  ...styledItems(
+    "xypad",
+    "XYPad",
+    "A two-dimensional control for two parameters at once: a pad, its grid, a crosshair, a cursor and a value display."
+  ),
+  ...styledItems(
+    "envelope",
+    "Envelope",
+    "An editor for a breakpoint ramp: a frame with its grid, the curve and the area under it, a point to drag at each breakpoint and a handle to bend each segment."
+  ),
+  ...styledItems(
+    "pad",
+    ["Pad", "PadItem"],
+    "A grid of pads to strike, each sounding while held and flashing as hard as it was struck."
+  ),
+  ...styledItems(
+    "piano",
+    "Piano",
+    "A piano keyboard to play with the pointer or the keys: its white and black keys, lit while held."
+  ),
   {
     css: HARDWARE_CSS,
     dependencies: [],
     description:
-      "The Hardware skin: a matte body, a dark inset screen and one accent as tokens and materials on .skin-hardware, with a capped knob, a ribbed fader and a needle VU meter that keep the props of Knob, Fader and Meter. HardwareSkin dresses the device panels inside it.",
-    files: [
-      {
-        path: "audio-ui/skins/hardware/knob.tsx",
-        target: "components/audio-ui/skins/hardware/knob.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/fader.tsx",
-        target: "components/audio-ui/skins/hardware/fader.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/vu-meter.tsx",
-        target: "components/audio-ui/skins/hardware/vu-meter.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/skin.tsx",
-        target: "components/audio-ui/skins/hardware/skin.tsx",
-        type: "registry:ui",
-      },
-    ],
+      "The Hardware skin: a matte body, dark inset screens and one accent, as tokens and materials on .skin-hardware. The knob, the fader, the meter, the XY pad, the envelope, the pads, the piano and the device panels inside it are drawn from their own parts, in every framework: a capped knob with a printed scale, a ribbed fader cap in a narrow slot, a meter lit in segments, screens for the pad and the envelope, caps to strike, ivory and ebony keys.",
+    files: [],
     name: "skin-hardware",
-    registryDependencies: [
-      "@audio-ui/knob",
-      "@audio-ui/fader",
-      "@audio-ui/meter",
-      "@audio-ui/needle-meter",
-      "@audio-ui/device-panel",
-    ],
+    registryDependencies: [],
     type: "registry:ui",
   },
   {
     css: NEU_CSS,
     dependencies: [],
     description:
-      "The Neu skin: one material lit from above, as tokens and materials on .skin-neu derived from its shade. The knob, the fader, the meter and the device panels inside it are drawn from their own parts, pushed up out of the surface or pressed into it.",
+      "The Neu skin: one material lit from above, as tokens and materials on .skin-neu derived from its shade. The knob, the fader, the meter, the XY pad, the envelope, the pads, the piano and the device panels inside it are drawn from their own parts, in every framework, pushed up out of the surface or pressed into it.",
     files: [],
     name: "skin-neu",
-    registryDependencies: [
-      "@audio-ui/knob",
-      "@audio-ui/fader",
-      "@audio-ui/meter",
-    ],
+    registryDependencies: [],
     type: "registry:ui",
   },
   {

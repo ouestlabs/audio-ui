@@ -9,6 +9,45 @@ import { AXES, corner, level, MATERIALS_CSS, strength, tone } from "./axes.ts";
 
 const SCREEN_INK = "oklch(0.9 0.02 90)";
 
+/** A screen set in the body: the theme's colors read the screen's, so a part drawn from them changes with no rule of its own. */
+const SCREEN = {
+  "--background": "var(--audio-screen)",
+  "--card": "var(--audio-screen)",
+  "--popover": "var(--audio-screen)",
+  "--foreground": "var(--audio-screen-ink)",
+  "--popover-foreground": "var(--audio-screen-ink)",
+  "--muted-foreground":
+    "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
+  "--muted":
+    "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
+  // Its grid is drawn faint, so its lines start brighter.
+  "--border":
+    "color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen))",
+  "--primary": "var(--audio-accent)",
+  "--primary-foreground": "var(--audio-screen)",
+  "--ring": "var(--audio-accent)",
+  // Sunk in the body: its shadow joins the ring the part draws its hover and focus with.
+  "--tw-shadow": "var(--audio-screen-shadow)",
+  "border-color": "transparent",
+};
+
+/** A cap's light, and the ring its focus draws on top of it. */
+const CAP = "var(--audio-cap-shadow)";
+const FOCUS = `${CAP}, 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent)`;
+
+/** The printed scale of a knob given no marks: eleven ticks along its sweep, from 225° round to 135°, none in the gap below. */
+const PRINTED_SCALE = {
+  content: '""',
+  position: "absolute",
+  inset: "-0.5rem",
+  "border-radius": "9999px",
+  "pointer-events": "none",
+  background:
+    "repeating-conic-gradient(from 224deg, var(--audio-print) 0deg 2deg, transparent 2deg 27deg)",
+  mask: "radial-gradient(farthest-side, transparent calc(100% - 0.3rem), #000 calc(100% - 0.25rem)), conic-gradient(from 136deg, transparent 0deg 88deg, #000 0deg)",
+  "mask-composite": "intersect",
+};
+
 export const HARDWARE_CSS = {
   ".skin-hardware": {
     ...AXES,
@@ -53,31 +92,96 @@ export const HARDWARE_CSS = {
     "--ring": "var(--audio-accent)",
     color: "var(--audio-print)",
   },
-  // A graph and an XY pad are screens set in the body.
-  ".skin-hardware [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad] > [data-slot=xypad])":
-    {
-      "--background": "var(--audio-screen)",
-      "--card": "var(--audio-screen)",
-      "--foreground": "var(--audio-screen-ink)",
-      "--muted-foreground":
-        "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
-      "--muted":
-        "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
-      "--border":
-        "color-mix(in oklab, var(--audio-screen-ink) 18%, var(--audio-screen))",
-      "background-color": "var(--audio-screen)",
-      color: "var(--audio-screen-ink)",
-    },
-  // Only the graph is sunk by a shadow: the pad draws its hover and focus rings with its own.
+  // A device's graph is a screen set in the body.
   ".skin-hardware [data-slot=device-frame] [data-slot=plot]": {
+    "--background": "var(--audio-screen)",
+    "--card": "var(--audio-screen)",
+    "--foreground": "var(--audio-screen-ink)",
+    "--muted-foreground":
+      "color-mix(in oklab, var(--audio-screen-ink) 65%, var(--audio-screen))",
+    "--muted":
+      "color-mix(in oklab, var(--audio-screen-ink) 8%, var(--audio-screen))",
+    "--border":
+      "color-mix(in oklab, var(--audio-screen-ink) 18%, var(--audio-screen))",
+    "background-color": "var(--audio-screen)",
+    color: "var(--audio-screen-ink)",
     "box-shadow": "var(--audio-screen-shadow)",
     "border-radius": corner(6),
   },
-  // The pad is the inner one of its two slots. Its grid is drawn faint, so its lines start brighter.
-  ".skin-hardware [data-slot=device-frame] [data-slot=xypad] > [data-slot=xypad]":
+  // The knob: a matte cap lit from above in a dark socket, a needle in the lettering's color, its arc in the accent.
+  ".skin-hardware [data-slot=knob-control]": {
+    "--tw-shadow": `inset 0 1px 3px rgb(0 0 0 / ${strength(0.5)})`,
+  },
+  ".skin-hardware [data-slot=knob-body]": {
+    inset: "12%",
+    "background-image": "var(--audio-cap-image)",
+    "box-shadow": CAP,
+  },
+  ".skin-hardware [data-slot=knob-track]": { opacity: "0" },
+  ".skin-hardware [data-slot=knob-needle]": { color: "var(--audio-print)" },
+  ".skin-hardware [data-slot=knob]:not([data-marks])::before": PRINTED_SCALE,
+  // A graduation the value has passed is lit, its label with its tick: the readout's color is its screen's, dark on the body.
+  ".skin-hardware :is([data-slot=knob-mark], [data-slot=fader-mark])[data-active] :is([data-slot=knob-mark-label], [data-slot=fader-mark-label])":
+    { color: "var(--audio-accent)" },
+  // The fader: a narrow slot and a ribbed cap, its middle rib in the accent. The slot shows no range.
+  ".skin-hardware [data-slot=fader-track][data-orientation=vertical]": {
+    width: "0.25rem",
+    "box-shadow": "var(--audio-groove-shadow)",
+  },
+  ".skin-hardware [data-slot=fader-track][data-orientation=horizontal]": {
+    height: "0.25rem",
+    "box-shadow": "var(--audio-groove-shadow)",
+  },
+  ".skin-hardware [data-slot=fader-indicator]": { opacity: "0" },
+  ".skin-hardware [data-slot=fader-thumb]": {
+    "border-color": "transparent",
+    "border-radius": corner(3),
+    "background-image": "var(--audio-cap-image)",
+    "box-shadow": CAP,
+  },
+  ".skin-hardware [data-slot=fader-thumb]:has(:focus-visible)": {
+    "box-shadow": FOCUS,
+  },
+  ".skin-hardware [data-slot=fader-thumb-mark]": {
+    "background-color":
+      "color-mix(in oklab, var(--audio-print) 45%, transparent)",
+    opacity: "1",
+  },
+  ".skin-hardware :is([data-slot=fader-thumb-mark]:nth-child(2):nth-last-child(2), [data-slot=fader-thumb-mark]:nth-child(3):nth-last-child(3))":
+    { "background-color": "var(--audio-accent)" },
+  // The meter: its level lit in segments, as a row of lamps.
+  ".skin-hardware [data-slot=meter-channel][data-orientation=vertical] [data-slot=meter-indicator]":
     {
-      "--border":
-        "color-mix(in oklab, var(--audio-screen-ink) 45%, var(--audio-screen))",
+      mask: "repeating-linear-gradient(to top, #000 0 3px, transparent 3px 4px)",
     },
+  ".skin-hardware [data-slot=meter-channel][data-orientation=horizontal] [data-slot=meter-indicator]":
+    {
+      mask: "repeating-linear-gradient(to right, #000 0 3px, transparent 3px 4px)",
+    },
+  // The XY pad and the envelope are screens set in the body.
+  ".skin-hardware :is([data-slot=xypad-control], [data-slot=envelope-frame])":
+    SCREEN,
+  // A pad is a cap to strike: lit from above, flashing in the accent.
+  ".skin-hardware [data-slot=pad-item]": {
+    "--muted": "var(--audio-cap)",
+    "--muted-foreground": "var(--audio-print)",
+    "--primary": "var(--audio-accent)",
+    "--primary-foreground": "oklch(0.15 0.01 40)",
+    "--border":
+      "color-mix(in oklab, var(--audio-print) 22%, var(--audio-body))",
+    "--ring": "var(--audio-accent)",
+    "background-image": "var(--audio-cap-image)",
+    "box-shadow": CAP,
+  },
+  ".skin-hardware [data-slot=pad-item]:focus-visible": { "box-shadow": FOCUS },
+  // The keyboard: ivory and ebony keys in the body, held in the accent.
+  ".skin-hardware [data-slot=piano]": {
+    "--piano-key-white": "oklch(0.95 0.012 85)",
+    "--piano-key-black": "oklch(0.2 0.006 90)",
+    "--card": "var(--audio-body)",
+    "--primary": "var(--audio-accent)",
+    "--ring": "var(--audio-accent)",
+    "--tw-shadow": "var(--audio-screen-shadow)",
+  },
   ...MATERIALS_CSS,
 };

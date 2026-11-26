@@ -1,41 +1,5 @@
 [
   {
-    "categories": ["knob"],
-    "description": "knob example, in the Hardware skin",
-    "name": "knob-hardware-demo",
-    "title": "Knob hardware demo"
-  },
-  {
-    "categories": ["fader"],
-    "description": "fader example, in the Hardware skin",
-    "name": "fader-hardware-demo",
-    "title": "Fader hardware demo"
-  },
-  {
-    "categories": ["meter"],
-    "description": "meter example, in the Hardware skin",
-    "name": "meter-hardware-demo",
-    "title": "Meter hardware demo"
-  },
-  {
-    "categories": ["knob"],
-    "description": "knob example, in the Neu skin",
-    "name": "knob-neu-demo",
-    "title": "Knob neu demo"
-  },
-  {
-    "categories": ["fader"],
-    "description": "fader example, in the Neu skin",
-    "name": "fader-neu-demo",
-    "title": "Fader neu demo"
-  },
-  {
-    "categories": ["meter"],
-    "description": "meter example, in the Neu skin",
-    "name": "meter-neu-demo",
-    "title": "Meter neu demo"
-  },
-  {
     "categories": ["synth", "hardware", "parameter-field"],
     "description": "A small synth's panel with every audio control together: Power plays an arpeggio at the tempo through the oscillator's waveform, a low-pass filter (cutoff and resonance knobs), the gain and the transpose fields, into the master fader; the screen shows the value last touched, the LED lights on each beat",
     "name": "block-synth-panel",

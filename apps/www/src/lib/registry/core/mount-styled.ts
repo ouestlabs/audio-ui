@@ -1,5 +1,6 @@
 /** The elements another framework draws from their sheet alone, by the folder of their demos. */
-const STYLED_DEMO = /\/components\/(knob|fader|meter)\/(?:vue|svelte|web)\//;
+const STYLED_DEMO =
+  /\/components\/(knob|fader|meter|xypad|envelope|pad|piano)\/(?:vue|svelte|web)\//;
 
 /** The element a demo of another framework draws from its sheet, if it is one. */
 export const styledElementOf = (path: string) => STYLED_DEMO.exec(path)?.[1];
@@ -40,6 +41,9 @@ export function mountInShadow(
   const root = host.shadowRoot ?? host.attachShadow({ mode: "open" });
   const sheet = stylesheet();
   const target = document.createElement("div");
+  // A row as wide as the preview, centering what it holds as the React preview's frame does: an element of full width (a piano) keeps it.
+  target.style.cssText =
+    "display: flex; align-items: center; justify-content: center; width: 100%";
   const follow = () => {
     sheet.href = `/css/${styleOf()}/${element}.css`;
     target.classList.toggle(
