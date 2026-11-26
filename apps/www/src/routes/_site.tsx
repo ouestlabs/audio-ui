@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
+import { LookStyle } from "@/components/customizer/look/look-style";
 import { SiteFooter } from "@/components/site/layout/footer";
 import { SiteShell } from "@/components/site/layout/shell";
 import {
@@ -39,6 +40,7 @@ function SiteLayout() {
       {...previewFontAttrs}
       className="overscroll-behavior relative flex min-h-svh flex-col bg-site-muted/60 font-site-sans lg:[--header-height:0px] dark:bg-site-background [&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:[&_header]:bg-site-background"
     >
+      <LookStyle />
       <SiteHeader framed tree={pageTree} />
       <main className="flex min-h-0 flex-1 flex-col">
         <SiteShell

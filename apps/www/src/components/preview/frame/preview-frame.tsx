@@ -4,7 +4,6 @@ import { FrameworkPreviewSelect } from "@/components/preview/controls/framework-
 import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";
 import { MidiConnect } from "@/components/preview/controls/midi-connect";
 import { PlaySwitch } from "@/components/preview/controls/play-switch";
-import { SkinSelect } from "@/components/preview/controls/skin-select";
 import { SourceSelect } from "@/components/preview/controls/source-select";
 import { ExpandPreview } from "@/components/preview/frame/expand-preview";
 import type { PreviewHost } from "@/components/preview/frame/preview-host";
@@ -16,7 +15,6 @@ import {
 } from "@/components/site/layout/frame";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Spinner } from "@/components/ui/spinner";
-import { isSkinned } from "@/lib/docs/content/skinned-demos";
 import {
   takesMicrophone,
   takesMidi,
@@ -128,7 +126,6 @@ export function PreviewBar({
         </div>
       )}
       <div className="flex items-center gap-1.5">
-        {position === "header" && isSkinned(name) ? <SkinSelect /> : null}
         {takesPlay(name) ? (
           <ButtonGroup>
             <SourceSelect />

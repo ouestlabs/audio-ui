@@ -28,9 +28,3 @@ const PANELS = new Set(devices.map((item) => item.name));
 export const isDevicePreview = (name: string) =>
   name.startsWith("block-") &&
   PANELS.has(`${name.slice("block-".length)}-panel`);
-
-export const isSkinned = (name: string) =>
-  isDevicePreview(name) ||
-  Object.values(SKINNED_DEMOS).some(
-    (demos) => name in demos || Object.values(demos).includes(name)
-  );
