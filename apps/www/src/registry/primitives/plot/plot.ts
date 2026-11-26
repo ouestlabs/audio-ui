@@ -1030,6 +1030,7 @@ export const plot: PlotPrimitive = definePrimitive({
       >({
         attrs: (state: PlotState, { props }) => ({
           ...drawingAttrs(state),
+          "data-fill": flag(props.fillTo !== undefined),
           "data-fn": fnId(props.fn),
         }),
         props: { fillTo: "number", fn: "value", samples: "number" },
@@ -1311,7 +1312,11 @@ export const plot: PlotPrimitive = definePrimitive({
         },
         PathState
       >({
-        attrs: liveDrawingAttrs,
+        // An area, filled to `fillTo`, says so: a sheet tells it from the line by it.
+        attrs: (state: PlotState, { props }) => ({
+          ...liveDrawingAttrs(state),
+          "data-fill": flag(props.fillTo !== undefined),
+        }),
         // A live trace is drawn straight onto its path, frame by frame.
         bind: (el, part) => {
           const { source } = part.props;
