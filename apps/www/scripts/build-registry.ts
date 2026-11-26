@@ -805,7 +805,7 @@ console.log("Building static registry...");
 await buildManifests();
 await Bun.write(
   `${REGISTRY}/styles/skins/hardware.css`,
-  skinSheet(HARDWARE_CSS)
+  skinSheet(HARDWARE_CSS, "hardware-css.ts")
 );
 console.log(`  Internal registry namespace: ${NAMESPACE}`);
 

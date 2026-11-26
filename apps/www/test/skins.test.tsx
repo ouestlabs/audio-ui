@@ -74,7 +74,7 @@ describe("the Hardware skin", () => {
     const sheet = await Bun.file(
       `${import.meta.dir}/../src/registry/styles/skins/hardware.css`
     ).text();
-    expect(sheet).toBe(skinSheet(HARDWARE_CSS));
+    expect(sheet).toBe(skinSheet(HARDWARE_CSS, "hardware-css.ts"));
   });
 
   test("its knob says to assistive technology what the knob says", () => {

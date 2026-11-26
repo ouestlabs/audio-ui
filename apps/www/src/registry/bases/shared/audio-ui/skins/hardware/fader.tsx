@@ -64,7 +64,7 @@ function RibbedThumb(
       <span
         aria-hidden="true"
         className={cn(
-          "audio-cap absolute inset-0 flex items-center justify-center gap-[3px] rounded-[3px]",
+          "audio-cap absolute inset-0 flex items-center justify-center gap-[3px] rounded-[calc(3px*var(--audio-roundness,1))]",
           vertical ? "flex-col" : "flex-row"
         )}
       >
@@ -178,7 +178,7 @@ export function HardwareFader({
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           className={cn(
-            "absolute z-10 block shrink-0 cursor-grab select-none rounded-[3px] outline-none has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing data-disabled:pointer-events-none",
+            "absolute z-10 block shrink-0 cursor-grab select-none rounded-[calc(3px*var(--audio-roundness,1))] outline-none has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing data-disabled:pointer-events-none",
             SIZES[size ?? "default"][orientation]
           )}
           data-slot="fader-thumb"
