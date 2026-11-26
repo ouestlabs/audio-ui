@@ -15,41 +15,43 @@ import {
 } from "@/lib/docs/content/sections";
 import type { source } from "@/lib/docs/content/source";
 
-const STORAGE_KEY = "docs-sidebar-collapsed";
-const listeners = new Set<() => void>();
-
-/** The titles of the collapsed groups, as JSON: kept here when storage is out of reach (a private window). */
-let current: string | undefined;
-
-function read(): string {
-  if (current === undefined) {
-    try {
-      current = localStorage.getItem(STORAGE_KEY) ?? "[]";
-    } catch {
-      current = "[]";
+/** Titles of groups kept in the reader's browser, as JSON: kept in memory when storage is out of reach (a private window). */
+function titleStore(key: string) {
+  const listeners = new Set<() => void>();
+  let current: string | undefined;
+  const read = (): string => {
+    if (current === undefined) {
+      try {
+        current = localStorage.getItem(key) ?? "[]";
+      } catch {
+        current = "[]";
+      }
     }
-  }
-  return current;
-}
-
-function write(titles: string[]) {
-  current = JSON.stringify(titles);
-  try {
-    localStorage.setItem(STORAGE_KEY, current);
-  } catch {
-    // Storage is out of reach: the choice lasts until the page reloads.
-  }
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
+    return current;
   };
+  const write = (titles: string[]) => {
+    current = JSON.stringify(titles);
+    try {
+      localStorage.setItem(key, current);
+    } catch {
+      // Storage is out of reach: the choice lasts until the page reloads.
+    }
+    for (const listener of listeners) {
+      listener();
+    }
+  };
+  const subscribe = (listener: () => void) => {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  };
+  return { read, subscribe, write };
 }
+
+const collapsedStore = titleStore("docs-sidebar-collapsed");
+const openedStore = titleStore("docs-sidebar-opened");
+const serverSnapshot = () => "[]";
 
 function parse(json: string): string[] {
   try {
@@ -63,23 +65,40 @@ function parse(json: string): string[] {
 }
 
 /**
- * Which groups of a sidebar are folded: kept in the reader's browser and shared
- * by the docs sidebar, the components sidebar and the mobile menu, so a group
- * of one name is folded in all of them.
+ * Which groups of a sidebar the reader folded and opened: kept in their
+ * browser and shared by the docs sidebar, the components sidebar and the
+ * mobile menu, so a group of one name is folded in all of them.
  */
 export function useGroupFolding() {
-  const json = React.useSyncExternalStore(subscribe, read, () => "[]");
-  const collapsed = React.useMemo(() => new Set(parse(json)), [json]);
+  const collapsedJson = React.useSyncExternalStore(
+    collapsedStore.subscribe,
+    collapsedStore.read,
+    serverSnapshot
+  );
+  const openedJson = React.useSyncExternalStore(
+    openedStore.subscribe,
+    openedStore.read,
+    serverSnapshot
+  );
+  const collapsed = React.useMemo(
+    () => new Set(parse(collapsedJson)),
+    [collapsedJson]
+  );
+  const opened = React.useMemo(() => new Set(parse(openedJson)), [openedJson]);
   const setOpen = React.useCallback((title: string, open: boolean) => {
-    const titles = new Set(parse(read()));
+    const folded = new Set(parse(collapsedStore.read()));
+    const unfolded = new Set(parse(openedStore.read()));
     if (open) {
-      titles.delete(title);
+      folded.delete(title);
+      unfolded.add(title);
     } else {
-      titles.add(title);
+      folded.add(title);
+      unfolded.delete(title);
     }
-    write([...titles]);
+    collapsedStore.write([...folded]);
+    openedStore.write([...unfolded]);
   }, []);
-  return { collapsed, setOpen };
+  return { collapsed, opened, setOpen };
 }
 
 const EXCLUDED_FOLDERS = ["test"];
@@ -153,9 +172,9 @@ export function useSiteSections(tree: PageTree): SiteSection[] {
  * The docs sidebar's groups for the section being read (the Docs, the Core,
  * the Elements, React or the Registry), with whether each is open. A space
  * folds when the reader says so, remembered in their browser and shared by the
- * desktop sidebar and the mobile menu; every group is open on a first visit
- * and on the server, and the space of the page being read opens when the
- * reader lands on it.
+ * desktop sidebar and the mobile menu. Only the space of the page being read
+ * is open on a first visit and on the server, with the ones the reader opened:
+ * a docs page does not render every link of the docs.
  */
 export function useSidebarGroups(tree: PageTree) {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -177,7 +196,7 @@ export function useSidebarGroups(tree: PageTree) {
   const [framework] = useFramework();
   const otherThanReact = framework !== null && framework !== "react";
   const unused = otherThanReact ? REACT_FOLDERS : NO_FOLDERS;
-  const { collapsed, setOpen } = useGroupFolding();
+  const { collapsed, opened, setOpen } = useGroupFolding();
 
   const currentGroup = all.find((group) =>
     group.sections.some((part) =>
@@ -210,7 +229,8 @@ export function useSidebarGroups(tree: PageTree) {
             titled &&
             group.collapsible &&
             group.title &&
-            collapsed.has(group.title)
+            (collapsed.has(group.title) ||
+              !(group.title === currentTitle || opened.has(group.title)))
           ),
           // What the reader's framework is shown: a group or a part with no page left goes.
           sections: group.sections
