@@ -22,8 +22,12 @@ withDefaults(
 defineOptions({ inheritAttrs: false });
 
 // Each channel is named after the meter, and numbered when there are several.
-const channelLabel = (label: unknown, index: number, count: number) =>
-  typeof label === "string" && count > 1 ? `${label} ${index + 1}` : label;
+const channelLabel = (label: unknown, index: number, count: number) => {
+  if (typeof label !== "string") {
+    return;
+  }
+  return count > 1 ? `${label} ${index + 1}` : label;
+};
 
 const decibels = (formattedValue: string) => `${formattedValue} dB`;
 </script>

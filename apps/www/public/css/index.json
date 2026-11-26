@@ -1,0 +1,17 @@
+{
+  "elements": [
+    "knob",
+    "fader",
+    "meter"
+  ],
+  "styles": [
+    "vega",
+    "nova",
+    "maia",
+    "lyra",
+    "mira",
+    "luma",
+    "rhea",
+    "sera"
+  ]
+}

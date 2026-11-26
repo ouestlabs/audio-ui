@@ -873,6 +873,11 @@ await Promise.all(
     )
   )
 );
+// What the CLI reads to know which elements have a sheet, in which styles.
+await Bun.write(
+  `${PROJECT_ROOT}/public/css/index.json`,
+  `${JSON.stringify({ elements: PORTABLE.map(([name]) => name), styles: STYLES }, null, 2)}\n`
+);
 const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
   STYLES.map((style) => ({
     base,
