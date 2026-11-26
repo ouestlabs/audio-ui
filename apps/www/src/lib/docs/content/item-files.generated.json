@@ -1137,7 +1137,8 @@
     "components/audio-ui/piano-roll/web.ts"
   ],
   "piano-roll": [
-    "components/audio-ui/piano-roll.tsx"
+    "components/audio-ui/piano-roll.tsx",
+    "components/audio-ui/piano-roll-parts.ts"
   ],
   "piano-size-default-demo": [
     "components/examples/piano-size-default-demo.tsx"

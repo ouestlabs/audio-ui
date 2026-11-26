@@ -9,7 +9,13 @@ const PLAIN_CLASS = /^\.[a-zA-Z0-9_-]+$/;
 
 const served = async (item: string) => {
   const { css, files } = await Bun.file(`${SERVED}/${item}.json`).json();
-  return { content: files[0].content as string, css };
+  // Every file of the item: an element can keep its parts' classes in a file of their own.
+  return {
+    content: files
+      .map((file: { content: string }) => file.content)
+      .join("\n") as string,
+    css,
+  };
 };
 
 describe("a style's rules reach a project", () => {

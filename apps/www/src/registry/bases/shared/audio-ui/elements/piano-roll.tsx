@@ -10,6 +10,11 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  NOTE_HANDLE,
+  pianoRollParts,
+  STRETCH_HANDLE,
+} from "@/registry/bases/shared/audio-ui/elements/piano-roll-parts";
 import { useTimelineValues } from "@/registry/bases/shared/audio-ui/elements/timeline";
 import { cn } from "@/registry/lib/utils";
 import { Piano as PianoPrimitive } from "@/registry/primitives/piano/react";
@@ -107,10 +112,7 @@ function PianoRoll({ className, style, ...props }: PianoRollProps) {
   const timeline = useTimelineValues();
   return (
     <PianoRollPrimitive.Root
-      className={cn(
-        "cn-piano-roll group/piano-roll flex min-h-0 w-full min-w-0 flex-col overflow-hidden [--piano-roll-keys-width:3.5rem] data-disabled:opacity-50",
-        className
-      )}
+      className={cn(pianoRollParts["piano-roll"], className)}
       data-slot="piano-roll"
       {...timeline}
       {...props}
@@ -131,7 +133,7 @@ function PianoRollViewport({
   return (
     <TimelinePrimitive.Viewport
       className={cn(
-        "relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "relative flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain scrollbar-none [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="piano-roll-viewport"
@@ -200,10 +202,11 @@ function PianoRollKeys({
     <PianoRollPrimitive.Keys
       aria-label="Keys"
       className={cn(
-        "cn-piano-roll-keys flex-1 touch-none select-none",
+        pianoRollParts["piano-roll-keys"],
         pianoRollVariants({ size }),
         className
       )}
+      data-size={size ?? "default"}
       data-slot="piano-roll-keys"
       {...props}
     >
@@ -219,17 +222,21 @@ function PianoRollKeys({
           {({ pitches: rows }) =>
             rows.map((pitch) => (
               <PianoPrimitive.Key
-                className="cn-piano-roll-key inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
+                className={pianoRollParts["piano-roll-keys piano-key"]}
                 key={pitch}
                 pitch={pitch}
               >
                 {/* A key with a name of its own, such as a drum rack's pad, says it; else only C, where octaves are counted from, and folded, every row names itself. */}
                 {names?.[pitch] === undefined ? (
                   <PianoPrimitive.Label
-                    className={cn(
-                      pitch % 12 !== 0 &&
-                        "hidden group-data-folded/piano-roll:inline"
-                    )}
+                    className={
+                      pitch % 12 === 0
+                        ? pianoRollParts[
+                            "piano-roll-keys piano-label[data-octave]"
+                          ]
+                        : pianoRollParts["piano-roll-keys piano-label"]
+                    }
+                    data-octave={pitch % 12 === 0 ? "" : undefined}
                     pitch={pitch}
                   />
                 ) : (
@@ -296,10 +303,11 @@ function PianoRollGrid({
   return (
     <PianoRollPrimitive.Grid
       className={cn(
-        "cn-piano-roll-grid flex-1 touch-none select-none outline-none data-[mode=draw]:cursor-cell",
+        pianoRollParts["piano-roll-grid"],
         pianoRollVariants({ size }),
         className
       )}
+      data-size={size ?? "default"}
       data-slot="piano-roll-grid"
       style={{ ...gridLines(gridStep, accentStep), ...style }}
       {...props}
@@ -307,7 +315,7 @@ function PianoRollGrid({
       <PianoRollPrimitive.Rows>
         {(pitch) => (
           <PianoRollPrimitive.Row
-            className="cn-piano-roll-row"
+            className={pianoRollParts["piano-roll-row"]}
             key={pitch}
             pitch={pitch}
           />
@@ -317,24 +325,26 @@ function PianoRollGrid({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Note
-            className="cn-piano-roll-note cursor-grab touch-none select-none border border-primary bg-[color-mix(in_oklab,var(--primary)_calc(30%_+_var(--piano-roll-velocity)_*_60%),transparent)] opacity-[calc(0.4+var(--piano-roll-chance)*0.6)] outline-none active:cursor-grabbing data-muted:border-muted-foreground data-muted:bg-muted data-[selected]:border-foreground data-[selected]:bg-primary data-[selected]:ring-1 data-[selected]:ring-foreground data-muted:data-[selected]:bg-muted-foreground/40"
+            className={pianoRollParts["piano-roll-note"]}
             key={note.id}
             note={note}
           >
             <PianoRollPrimitive.NoteHandle
-              className="cn-piano-roll-note-handle absolute inset-y-0 w-[min(0.375rem,25%)] cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0"
+              className={NOTE_HANDLE}
               edge="start"
               note={note}
             />
             <PianoRollPrimitive.NoteHandle
-              className="cn-piano-roll-note-handle absolute inset-y-0 w-[min(0.375rem,25%)] cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0"
+              className={NOTE_HANDLE}
               edge="end"
               note={note}
             />
           </PianoRollPrimitive.Note>
         )}
       </PianoRollPrimitive.Notes>
-      <PianoRollPrimitive.Marquee className="cn-piano-roll-marquee z-10" />
+      <PianoRollPrimitive.Marquee
+        className={pianoRollParts["piano-roll-marquee"]}
+      />
       {children}
     </PianoRollPrimitive.Grid>
   );
@@ -410,11 +420,8 @@ function PianoRollVelocity({
   return (
     <PianoRollPrimitive.VelocityLane
       aria-label={level === "chance" ? "Chance" : "Velocity"}
-      className={cn(
-        "cn-piano-roll-velocity touch-none select-none data-[mode=draw]:cursor-crosshair",
-        className
-      )}
-      data-slot="piano-roll-velocity"
+      className={cn(pianoRollParts["piano-roll-velocity-lane"], className)}
+      data-slot="piano-roll-velocity-lane"
       level={level}
       style={{ ...gridLines(gridStep, accentStep), height, ...style }}
       {...props}
@@ -438,7 +445,7 @@ function PianoRollVelocity({
       <PianoRollPrimitive.Notes>
         {(note) => (
           <PianoRollPrimitive.Velocity
-            className="cn-piano-roll-velocity-bar w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0 group-data-[mode=draw]/piano-roll:cursor-crosshair"
+            className={pianoRollParts["piano-roll-velocity"]}
             key={note.id}
             level={level}
             note={note}
@@ -471,11 +478,7 @@ function PianoRollStretchHandle({
 }) {
   return (
     <PianoRollPrimitive.StretchHandle
-      className={cn(
-        "cn-piano-roll-stretch-handle z-10 w-2 cursor-ew-resize bg-primary data-[edge=end]:translate-x-1/2 data-[edge=start]:-translate-x-1/2",
-        className
-      )}
-      data-slot="piano-roll-stretch-handle"
+      className={cn(STRETCH_HANDLE, className)}
       {...props}
     />
   );
@@ -493,8 +496,7 @@ function PianoRollSelectionSpan({
 }) {
   return (
     <PianoRollPrimitive.SelectionSpan
-      className={cn("cn-piano-roll-selection", className)}
-      data-slot="piano-roll-selection"
+      className={cn(pianoRollParts["piano-roll-selection-span"], className)}
       {...props}
     />
   );

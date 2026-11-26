@@ -54,6 +54,7 @@ import {
   pianoParts,
   pianoSizes,
 } from "../src/registry/bases/shared/audio-ui/elements/piano.tsx";
+import { pianoRollParts } from "../src/registry/bases/shared/audio-ui/elements/piano-roll-parts.ts";
 import { plotParts } from "../src/registry/bases/shared/audio-ui/elements/plot.tsx";
 import { sequencerParts } from "../src/registry/bases/shared/audio-ui/elements/sequencer.tsx";
 import { waveformParts } from "../src/registry/bases/shared/audio-ui/elements/waveform.tsx";
@@ -903,6 +904,7 @@ const PORTABLE: [
   ["plot", plotParts, {}],
   ["waveform", waveformParts, {}],
   ["sequencer", sequencerParts, {}],
+  ["piano-roll", pianoRollParts, {}],
 ];
 await Promise.all(
   STYLES.flatMap((style) =>

@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 
+// The timeline the piano roll sits in draws its icons through the registry, which a test has no bundler for.
+mock.module("@/components/icon-placeholder", () => ({
+  IconPlaceholder: () => null,
+}));
 mock.module("@/lib/utils", () => ({
   cn: (...classes: unknown[]) => classes.filter(Boolean).join(" "),
 }));
@@ -26,6 +30,12 @@ const { Piano, pianoParts } = await import(
 const Plot = await import("@/registry/bases/shared/audio-ui/elements/plot");
 const Wave = await import("@/registry/bases/shared/audio-ui/elements/waveform");
 const { createSource } = await import("@/registry/primitives/primitive");
+const Roll = await import(
+  "@/registry/bases/shared/audio-ui/elements/piano-roll"
+);
+const RollParts = await import(
+  "@/registry/bases/shared/audio-ui/elements/piano-roll-parts"
+);
 const { Sequencer, sequencerParts } = await import(
   "@/registry/bases/shared/audio-ui/elements/sequencer"
 );
@@ -194,6 +204,38 @@ const ELEMENTS = [
           showVelocity
           size="sm"
         />
+      ),
+  },
+  {
+    name: "piano-roll",
+    parts: RollParts.pianoRollParts,
+    root: {},
+    render: () =>
+      render(
+        <Roll.PianoRoll
+          defaultValue={[
+            { id: "a", length: 4, pitch: 60, start: 0, velocity: 0.8 },
+          ]}
+          maxPitch={61}
+          minPitch={59}
+        >
+          <Roll.PianoRollKeys />
+          <Roll.PianoRollGrid>
+            <Roll.PianoRollStretchHandle edge="start" />
+            <Roll.PianoRollStretchHandle edge="end" />
+          </Roll.PianoRollGrid>
+          <Roll.PianoRollVelocity />
+        </Roll.PianoRoll>
+      ),
+    // The other sizes of the keys and the grid.
+    also: () =>
+      render(
+        <Roll.PianoRoll maxPitch={61} minPitch={59}>
+          <Roll.PianoRollKeys size="sm" />
+          <Roll.PianoRollGrid size="lg" />
+          <Roll.PianoRollKeys size="lg" />
+          <Roll.PianoRollGrid size="sm" />
+        </Roll.PianoRoll>
       ),
   },
 ] as const;
