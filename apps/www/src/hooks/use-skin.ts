@@ -3,6 +3,7 @@ import { createKeptChoice } from "@/hooks/use-kept-choice";
 export const SKINS = [
   { id: "digital", label: "Digital" },
   { id: "hardware", label: "Hardware" },
+  { id: "neu", label: "Neu" },
 ] as const;
 
 export type SkinId = (typeof SKINS)[number]["id"];

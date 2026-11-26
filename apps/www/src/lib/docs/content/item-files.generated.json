@@ -631,6 +631,9 @@
   "fader-hardware-demo": [
     "components/examples/fader-hardware-demo.tsx"
   ],
+  "fader-neu-demo": [
+    "components/examples/fader-neu-demo.tsx"
+  ],
   "fader-pan-demo": [
     "components/examples/fader-pan-demo.tsx"
   ],
@@ -768,6 +771,9 @@
   "knob-hardware-demo": [
     "components/examples/knob-hardware-demo.tsx"
   ],
+  "knob-neu-demo": [
+    "components/examples/knob-neu-demo.tsx"
+  ],
   "knob-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/knob/knob.ts",
@@ -850,6 +856,9 @@
   "meter-levels": [
     "components/audio-ui/meter/levels.ts",
     "components/audio-ui/meter/ballistics.ts"
+  ],
+  "meter-neu-demo": [
+    "components/examples/meter-neu-demo.tsx"
   ],
   "meter-react": [
     "components/audio-ui/primitive.ts",

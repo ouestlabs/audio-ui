@@ -179,7 +179,7 @@ export function HardwareVuMeter({
                     : ariaLabel
                 }
                 className={cn(
-                  "group/channel audio-screen relative rounded-md p-2",
+                  "group/channel audio-screen relative rounded-[calc(6px*var(--audio-roundness,1))] p-2",
                   SIZES[size ?? "default"]
                 )}
                 getAriaValueText={decibels}

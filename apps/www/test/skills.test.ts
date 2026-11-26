@@ -90,9 +90,11 @@ const registryNames = new Set(
 const engineModules = Object.keys(ENGINE_MODULES);
 const uiSource = (
   await Promise.all(
-    [`${ROOT}/apps/www/src/registry/primitives`].map((folder) =>
-      read("**/*.{ts,tsx}", folder)
-    )
+    [
+      `${ROOT}/apps/www/src/registry/primitives`,
+      // The skins, which define the axes and tokens a skill may name.
+      `${ROOT}/apps/www/src/registry/bases/shared/audio-ui/skins`,
+    ].map((folder) => read("**/*.{ts,tsx}", folder))
   )
 )
   .flat()

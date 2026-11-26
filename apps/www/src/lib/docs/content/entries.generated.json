@@ -2816,6 +2816,7 @@
     ],
     "usedBy": [
       "meter-hardware-demo",
+      "meter-neu-demo",
       "meter-size-default-demo",
       "needle-meter-demo"
     ]

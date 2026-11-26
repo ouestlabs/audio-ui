@@ -1,5 +1,6 @@
 import type { RegistryItem } from "shadcn/schema";
 import { HARDWARE_CSS } from "./skins/hardware-css.ts";
+import { NEU_CSS } from "./skins/neu-css.ts";
 
 /** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
 const ENVELOPE_SHAKE = {
@@ -59,6 +60,20 @@ export const audioUi: RegistryItem[] = [
       "@audio-ui/meter",
       "@audio-ui/needle-meter",
       "@audio-ui/device-panel",
+    ],
+    type: "registry:ui",
+  },
+  {
+    css: NEU_CSS,
+    dependencies: [],
+    description:
+      "The Neu skin: one material lit from above, as tokens and materials on .skin-neu derived from its shade. The knob, the fader, the meter and the device panels inside it are drawn from their own parts, pushed up out of the surface or pressed into it.",
+    files: [],
+    name: "skin-neu",
+    registryDependencies: [
+      "@audio-ui/knob",
+      "@audio-ui/fader",
+      "@audio-ui/meter",
     ],
     type: "registry:ui",
   },
