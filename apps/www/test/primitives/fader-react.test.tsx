@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Fader } from "@/registry/primitives/fader/react/index.tsx";
 import { faderSuite } from "./fader-suite.ts";
 
-faderSuite("React", async ({ label, marks, options, thumbLabel }) => {
+faderSuite("React", async ({ editable, label, marks, options, thumbLabel }) => {
   const container = document.body.appendChild(document.createElement("div"));
   const root = createRoot(container);
   await act(() => {
@@ -19,7 +19,7 @@ faderSuite("React", async ({ label, marks, options, thumbLabel }) => {
           </Fader.Track>
           <Fader.Thumb aria-label={thumbLabel} />
         </Fader.Control>
-        <Fader.Value />
+        <Fader.Value editable={editable} />
       </Fader.Root>
     );
   });

@@ -2,6 +2,7 @@ import { createParts, wrappedChild } from "@ui-sdk/web";
 import {
   arcOf,
   DEFAULT_ARC_STROKE_WIDTH,
+  editableReadout,
   indicatorSpan,
   type KnobState,
   knob,
@@ -93,7 +94,25 @@ function drawParts(
     subscribe: (listener: () => void) => () => void;
   }
 ) {
+  // A readout given `editable` lays a field over the text the knob keeps drawing.
+  const editable = new Map<Element, () => void>();
+  const bindEditable = () => {
+    for (const [readout, detach] of editable) {
+      if (!(readout.isConnected && readout.hasAttribute("editable"))) {
+        detach();
+        editable.delete(readout);
+      }
+    }
+    for (const readout of el.querySelectorAll<HTMLElement>(
+      "audio-ui-knob-value[editable]"
+    )) {
+      if (!editable.has(readout)) {
+        editable.set(readout, editableReadout(readout, "knob"));
+      }
+    }
+  };
   const draw = () => {
+    bindEditable();
     const view = viewOf(instance.get() as KnobState);
     for (const track of el.querySelectorAll("audio-ui-knob-track")) {
       drawArc(track, 0, 1);
@@ -107,7 +126,14 @@ function drawParts(
   };
   draw();
   queueMicrotask(draw);
-  return instance.subscribe(draw);
+  const unsubscribe = instance.subscribe(draw);
+  return () => {
+    unsubscribe();
+    for (const detach of editable.values()) {
+      detach();
+    }
+    editable.clear();
+  };
 }
 
 const jsonAttribute = (value: string | null) =>

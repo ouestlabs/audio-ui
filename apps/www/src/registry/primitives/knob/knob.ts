@@ -161,6 +161,8 @@ const displayed = (state: KnobState) =>
   state.draft ?? clamp(state.value, state.min, state.max);
 
 export type { ChangeDetails, CommitDetails } from "../primitive";
+/** The readout a reader types a value into, for the adapters that draw their own: React writes its field itself. */
+export { editableReadout } from "../primitive";
 
 const views = new WeakMap<KnobState, KnobSnapshot>();
 

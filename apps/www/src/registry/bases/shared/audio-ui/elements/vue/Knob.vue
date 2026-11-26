@@ -7,6 +7,8 @@ export type KnobMark = number | { label?: string; value: number };
 
 const props = withDefaults(
   defineProps<{
+    /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+    editableValue?: boolean;
     /** Prints the value in the readout and in what screen readers announce, e.g. as `"8.7 kHz"`. */
     formatValue?: (value: number) => string;
     /** Graduations drawn around the dial, on its scale. */
@@ -91,7 +93,7 @@ const ariaValueText = computed(() => {
         markLabel(mark)
       }}</span>
     </Knob.Mark>
-    <Knob.Value v-if="valueLabel !== 'hidden'">
+    <Knob.Value v-if="valueLabel !== 'hidden'" :editable="editableValue">
       <template #default="{ state }">{{
         formatValue ? formatValue(state.value) : state.formatted
       }}</template>

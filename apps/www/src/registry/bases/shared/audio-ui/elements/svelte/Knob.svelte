@@ -9,6 +9,7 @@ let {
   "aria-describedby": describedBy,
   "aria-label": label,
   "aria-labelledby": labelledBy,
+  editableValue = false,
   formatValue,
   marks,
   size = "default",
@@ -18,6 +19,8 @@ let {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;
+  /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+  editableValue?: boolean;
   /** Prints the value in the readout and in what screen readers announce, e.g. as `"8.7 kHz"`. */
   formatValue?: (value: number) => string;
   /** Graduations drawn around the dial, on its scale. */
@@ -87,7 +90,7 @@ const ariaValueText = $derived(
     </Knob.Mark>
   {/each}
   {#if valueLabel !== "hidden"}
-    <Knob.Value>
+    <Knob.Value editable={editableValue}>
       {#snippet children(
         state
       )}

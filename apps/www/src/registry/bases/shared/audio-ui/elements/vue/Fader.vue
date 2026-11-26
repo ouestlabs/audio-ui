@@ -7,6 +7,8 @@ export type FaderMark = number | { label?: string; value: number };
 
 const props = withDefaults(
   defineProps<{
+    /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
+    editableValue?: boolean;
     /** Prints the value in the readout and in what screen readers announce, e.g. as `"-6 dB"`. */
     formatValue?: (value: number) => string;
     /** Graduations drawn beside the track: a ruler for the value. */
@@ -105,7 +107,7 @@ const ariaValueText = computed(() => {
             :data-orientation="orientation"
           />
         </div>
-        <Fader.Value v-if="valueLabel !== 'hidden'">
+        <Fader.Value v-if="valueLabel !== 'hidden'" :editable="editableValue">
           <template #default="{ state }">{{
             formatValue ? formatValue(state.value) : state.formatted
           }}</template>

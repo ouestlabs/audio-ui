@@ -1,6 +1,17 @@
 import { createParts } from "@ui-sdk/vue/primitive";
-import { defineComponent, h } from "vue";
-import { type FaderPublicState, fader } from "@/primitives/fader";
+import {
+  defineComponent,
+  getCurrentInstance,
+  h,
+  onBeforeUnmount,
+  onMounted,
+  watch,
+} from "vue";
+import {
+  editableReadout,
+  type FaderPublicState,
+  fader,
+} from "@/primitives/fader";
 
 /** Which element each part is. */
 const parts = createParts(fader, {
@@ -43,14 +54,29 @@ const Thumb = defineComponent(
 );
 
 const Value = defineComponent(
-  (_props, { attrs, slots }) =>
-    () =>
+  (props: { editable?: boolean }, { attrs, slots }) => {
+    const self = getCurrentInstance();
+    let detach: (() => void) | undefined;
+    // An editable readout lays a field over the text Vue keeps drawing.
+    const sync = () => {
+      detach?.();
+      detach = undefined;
+      const el = self?.subTree.el;
+      if (props.editable && el instanceof HTMLElement) {
+        detach = editableReadout(el, "fader");
+      }
+    };
+    onMounted(sync);
+    watch(() => props.editable, sync, { flush: "post" });
+    onBeforeUnmount(() => detach?.());
+    return () =>
       h(parts.Value, attrs, {
         default:
           slots.default ??
           (({ state }: { state: FaderPublicState }) => state.formatted),
-      }),
-  { inheritAttrs: false, name: "FaderValue" }
+      });
+  },
+  { inheritAttrs: false, name: "FaderValue", props: ["editable"] }
 );
 
 export const Fader = {

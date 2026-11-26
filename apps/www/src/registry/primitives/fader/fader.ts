@@ -24,6 +24,8 @@ import {
 } from "../primitive";
 
 export type { ChangeDetails, CommitDetails } from "../primitive";
+/** The readout a reader types a value into, for the adapters that draw their own: React writes its field itself. */
+export { editableReadout } from "../primitive";
 
 /** Which way a fader's travel runs. */
 export type FaderOrientation = "horizontal" | "vertical";

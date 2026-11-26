@@ -1,5 +1,10 @@
 import { createParts, wrappedChild } from "@ui-sdk/web";
-import { type FaderState, fader, viewOf } from "@/primitives/fader";
+import {
+  editableReadout,
+  type FaderState,
+  fader,
+  viewOf,
+} from "@/primitives/fader";
 
 /** A thumb's attributes that name its input instead, so they are read once. */
 const INPUT_NAMES = ["aria-describedby", "aria-label", "aria-labelledby"];
@@ -42,7 +47,7 @@ function writeText(part: Element, text: string) {
 
 /**
  * What React renders as children, the fader draws here: the value's text,
- * on every change. The fader connects before its parts are parsed, so it
+ * on every change, and the field of an editable readout. The fader connects before its parts are parsed, so it
  * draws again once they bind.
  */
 function drawValue(
@@ -52,7 +57,25 @@ function drawValue(
     subscribe: (listener: () => void) => () => void;
   }
 ) {
+  // A readout given `editable` lays a field over the text the fader keeps drawing.
+  const editable = new Map<Element, () => void>();
+  const bindEditable = () => {
+    for (const [readout, detach] of editable) {
+      if (!(readout.isConnected && readout.hasAttribute("editable"))) {
+        detach();
+        editable.delete(readout);
+      }
+    }
+    for (const readout of el.querySelectorAll<HTMLElement>(
+      "audio-ui-fader-value[editable]"
+    )) {
+      if (!editable.has(readout)) {
+        editable.set(readout, editableReadout(readout, "fader"));
+      }
+    }
+  };
   const draw = () => {
+    bindEditable();
     const view = viewOf(instance.get() as FaderState);
     for (const value of el.querySelectorAll("audio-ui-fader-value")) {
       writeText(value, view.formatted);
@@ -60,7 +83,14 @@ function drawValue(
   };
   draw();
   queueMicrotask(draw);
-  return instance.subscribe(draw);
+  const unsubscribe = instance.subscribe(draw);
+  return () => {
+    unsubscribe();
+    for (const detach of editable.values()) {
+      detach();
+    }
+    editable.clear();
+  };
 }
 
 const jsonAttribute = (value: string | null) =>

@@ -491,3 +491,117 @@ export const definePrimitive = ((options: any) =>
     ...options,
     slots: (slot: unknown) => nameSlots(options.name, options.slots(slot)),
   })) as typeof definePrimitiveOf;
+
+/** The number a typed text means: "-6", "-6 dB" or "12,5". */
+const typedNumber = (text: string) => {
+  const parsed = Number.parseFloat(text.trim().replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const INPUT_STYLE =
+  "position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: inherit; background: inherit; color: inherit; font: inherit; text-align: center; box-sizing: border-box";
+
+/**
+ * Lets the reader type a value into a control's readout: a double click on
+ * it, or Enter or F2 while it has focus, lays a text field over it. Enter or
+ * leaving the field gives the control the number typed, through its native
+ * range input, as a drag would; Escape keeps the value. The framework keeps
+ * drawing the readout's text under the field. `root` is the control's slot
+ * (`knob`, `fader`). Returns what takes it away.
+ */
+export function editableReadout(readout: HTMLElement, root: string) {
+  let field: HTMLInputElement | null = null;
+  const positioned = readout.style.position;
+  const finish = (text: string | null) => {
+    if (!field) {
+      return;
+    }
+    field.remove();
+    field = null;
+    readout.removeAttribute("data-editing");
+    readout.style.position = positioned;
+    readout.focus({ preventScroll: true });
+    const typed = text === null ? null : typedNumber(text);
+    const input = readout
+      .closest(`[data-slot="${root}"]`)
+      ?.querySelector<HTMLInputElement>('input[type="range"]');
+    if (typed === null || !input) {
+      return;
+    }
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value"
+    )?.set?.call(input, String(typed));
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  const open = () => {
+    if (field || readout.closest("[data-disabled]")) {
+      return;
+    }
+    const text = readout.textContent?.trim() ?? "";
+    field = document.createElement("input");
+    field.type = "text";
+    field.inputMode = "decimal";
+    field.value = text;
+    field.size = Math.max(text.length, 3);
+    field.style.cssText = INPUT_STYLE;
+    const label = readout.getAttribute("aria-label");
+    if (label) {
+      field.setAttribute("aria-label", label);
+    }
+    field.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+      if (event.key === "Enter") {
+        event.preventDefault();
+        finish(field?.value ?? null);
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        finish(null);
+      }
+    });
+    field.addEventListener("blur", () => finish(field?.value ?? null));
+    if (getComputedStyle(readout).position === "static") {
+      readout.style.position = "relative";
+    }
+    readout.setAttribute("data-editing", "");
+    readout.appendChild(field);
+    field.focus({ preventScroll: true });
+    field.select();
+  };
+  // A readout inside a thumb or a control must not also reset or drag it.
+  const handleDoubleClick = (event: MouseEvent) => {
+    event.stopPropagation();
+    open();
+  };
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (
+      event.target === readout &&
+      (event.key === "Enter" || event.key === "F2")
+    ) {
+      event.preventDefault();
+      open();
+    }
+  };
+  const handlePointerDown = (event: PointerEvent) => event.stopPropagation();
+  const tabIndex = readout.getAttribute("tabindex");
+  readout.tabIndex = 0;
+  readout.setAttribute("aria-keyshortcuts", "Enter");
+  readout.setAttribute("data-editable", "");
+  readout.addEventListener("dblclick", handleDoubleClick);
+  readout.addEventListener("keydown", handleKeyDown);
+  readout.addEventListener("pointerdown", handlePointerDown);
+  return () => {
+    finish(null);
+    readout.removeEventListener("dblclick", handleDoubleClick);
+    readout.removeEventListener("keydown", handleKeyDown);
+    readout.removeEventListener("pointerdown", handlePointerDown);
+    readout.removeAttribute("aria-keyshortcuts");
+    readout.removeAttribute("data-editable");
+    if (tabIndex === null) {
+      readout.removeAttribute("tabindex");
+    } else {
+      readout.setAttribute("tabindex", tabIndex);
+    }
+  };
+}
