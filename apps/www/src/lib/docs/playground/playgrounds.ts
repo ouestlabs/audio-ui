@@ -200,30 +200,14 @@ export interface PlaygroundLook {
   skin: "hardware" | "neu";
 }
 
-/** The look a framework's code can carry: Hardware's faces are written for React, so another framework's leaves it out. */
-export const lookFor = (
-  framework: Framework,
-  look: PlaygroundLook | undefined
-) =>
-  look && (framework === "react" || look.skin === "neu") ? look : undefined;
-
-/** Hardware's faces: each keeps the props of the element it dresses. */
-const HARDWARE: Record<PlaygroundName, { component: string; file: string }> = {
-  fader: { component: "HardwareFader", file: "fader" },
-  knob: { component: "HardwareKnob", file: "knob" },
-  meter: { component: "HardwareVuMeter", file: "vu-meter" },
-};
-
 /** The classes of the element a skin is set on in React, the axes as properties of Tailwind. */
 export function reactFrame(look: PlaygroundLook) {
-  const room =
-    look.skin === "hardware"
-      ? "rounded-xl px-8 py-6"
-      : "rounded-2xl px-10 py-8";
   const axes = look.axes.map(
     ([property, css]) => `[${property}:${css.replaceAll(" ", "_")}]`
   );
-  return [`skin-${look.skin} audio-body ${room}`, ...axes].join(" ");
+  return [`skin-${look.skin} audio-body rounded-2xl px-10 py-8`, ...axes].join(
+    " "
+  );
 }
 
 /** The element a skin is set on outside React: its classes, and its room and the axes as a style. */
@@ -237,15 +221,6 @@ export function skinFrame(look: PlaygroundLook) {
     ].join("; "),
   };
 }
-
-const SKIN_NAME: Record<PlaygroundLook["skin"], string> = {
-  hardware: "Hardware",
-  neu: "Neu",
-};
-
-/** Where the site serves a skin as plain CSS, for a project with no Tailwind. */
-const skinSheet = (skin: string) =>
-  `https://www.audio-ui.dev/css/skins/${skin}.css`;
 
 /** An element, or the element a skin is set on around it, at an indent. */
 function framed(
@@ -271,13 +246,7 @@ function tag(open: string, attributes: string[], indent: string) {
 }
 
 function react(name: PlaygroundName, props: Prop[], look?: PlaygroundLook) {
-  const { component, file } =
-    look?.skin === "hardware"
-      ? {
-          component: HARDWARE[name].component,
-          file: `skins/hardware/${HARDWARE[name].file}`,
-        }
-      : { component: COMPONENT[name], file: name };
+  const component = COMPONENT[name];
   const attributes = props.map(([prop, value]) =>
     typeof value === "string"
       ? `${prop}="${value}"`
@@ -288,7 +257,7 @@ function react(name: PlaygroundName, props: Prop[], look?: PlaygroundLook) {
 ${tag(`<${component}`, attributes, "      ")}
     </div>`
     : tag(`<${component}`, attributes, "    ");
-  return `import { ${component} } from "@/components/audio-ui/${file}"
+  return `import { ${component} } from "@/components/audio-ui/${name}"
 
 export function Example() {
   return (
@@ -415,13 +384,10 @@ ${[channels, marks].filter(Boolean).join("\n")}
 }
 
 function web(name: PlaygroundName, values: Values, look?: PlaygroundLook) {
-  const skin = look
-    ? `\n<!-- The ${SKIN_NAME[look.skin]} skin's sheet, saved beside them from ${skinSheet(look.skin)} -->\n<link rel="stylesheet" href="./components/audio-ui/css/skin-${look.skin}.css" />`
-    : "";
   const markup = webMarkup(name, values);
-  return `<!-- Once, in the page: the custom elements and the sheets. -->
+  return `<!-- Once, in the page: the custom elements and the sheets, the skin's among them. -->
 <script type="module" src="./components/audio-ui/${name}/web.ts"></script>
-<link rel="stylesheet" href="./components/audio-ui/css/index.css" />${skin}
+<link rel="stylesheet" href="./components/audio-ui/css/index.css" />
 
 ${framed(look, "", (indent) => markup.replaceAll(/^/gm, indent))}
 `;
@@ -435,35 +401,30 @@ export function codeOf(
   look?: PlaygroundLook
 ): { code: string; file: string; language: string } {
   const props = propsOf(name, values);
-  const carried = lookFor(framework, look);
-  const add = `npx @audio-ui/cli add ${name}`;
-  // Outside React a skin is a plain sheet the reader keeps once in the app.
-  const comments = carried
-    ? `<!-- ${add} -->\n<!-- The ${SKIN_NAME[carried.skin]} skin, imported once in the app: ${skinSheet(carried.skin)} -->`
-    : `<!-- ${add} -->`;
+  // A skin installs as an item does, its sheet added to the index the app imports once.
+  const add = `npx @audio-ui/cli add ${name}${look ? ` skin-${look.skin}` : ""}`;
   switch (framework) {
     case "vue":
       return {
-        code: `${comments}\n${vue(name, props, carried)}`,
+        code: `<!-- ${add} -->\n${vue(name, props, look)}`,
         file: "Example.vue",
         language: "vue",
       };
     case "svelte":
       return {
-        code: `${comments}\n${svelte(name, props, carried)}`,
+        code: `<!-- ${add} -->\n${svelte(name, props, look)}`,
         file: "Example.svelte",
         language: "svelte",
       };
     case "web":
       return {
-        code: `<!-- ${add} -->\n${web(name, values, carried)}`,
+        code: `<!-- ${add} -->\n${web(name, values, look)}`,
         file: "index.html",
         language: "html",
       };
     default:
       return {
-        // In React a skin is CSS of Tailwind, which shadcn's CLI writes into the app's stylesheet, with the elements it dresses.
-        code: `// ${carried ? `npx shadcn add @audio-ui/skin-${carried.skin}` : add}\n${react(name, props, carried)}`,
+        code: `// ${add}\n${react(name, props, look)}`,
         file: "example.tsx",
         language: "tsx",
       };

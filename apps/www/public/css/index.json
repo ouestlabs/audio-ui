@@ -8,6 +8,10 @@
     "pad",
     "piano"
   ],
+  "skins": [
+    "hardware",
+    "neu"
+  ],
   "styles": [
     "vega",
     "nova",

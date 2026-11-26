@@ -587,12 +587,14 @@ async function buildItem(
 
   // A barrel item (`@audio-ui/ui`, `@audio-ui/hooks`) has no files of its own,
   // it only aggregates registryDependencies for a one-shot install, and an
-  // alias for a lib that moved into a package only installs that package.
-  // Still emit them; skip only when there is nothing to serve at all.
+  // alias for a lib that moved into a package only installs that package, and
+  // a skin is its `css` alone. Still emit them; skip only when there is
+  // nothing to serve at all.
   if (
     files.length === 0 &&
     !item.registryDependencies?.length &&
-    !item.dependencies?.length
+    !item.dependencies?.length &&
+    !item.css
   ) {
     return null;
   }
@@ -846,7 +848,11 @@ await Bun.write(
   `${REGISTRY}/styles/skins/neu.css`,
   skinSheet(NEU_CSS, "neu-css.ts")
 );
-// Neu outside Tailwind: Vue, Svelte and custom elements read it as it is. Hardware has faces written for React, so it has none.
+// The skins outside Tailwind: what Vue, Svelte, custom elements and the CLI read, as they are.
+await Bun.write(
+  `${PROJECT_ROOT}/public/css/skins/hardware.css`,
+  plainSkinSheet(HARDWARE_CSS, "hardware-css.ts")
+);
 await Bun.write(
   `${PROJECT_ROOT}/public/css/skins/neu.css`,
   plainSkinSheet(NEU_CSS, "neu-css.ts")
@@ -908,10 +914,10 @@ await Promise.all(
     )
   )
 );
-// What the CLI reads to know which elements have a sheet, in which styles.
+// What the CLI reads to know which elements have a sheet, in which styles, and which skins it serves.
 await Bun.write(
   `${PROJECT_ROOT}/public/css/index.json`,
-  `${JSON.stringify({ elements: PORTABLE.map(([name]) => name), styles: STYLES }, null, 2)}\n`
+  `${JSON.stringify({ elements: PORTABLE.map(([name]) => name), skins: ["hardware", "neu"], styles: STYLES }, null, 2)}\n`
 );
 const builds: StyleBuild[] = BASES.flatMap(({ name: base }) =>
   STYLES.map((style) => ({

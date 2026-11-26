@@ -33,6 +33,27 @@ const FACE = `linear-gradient(to bottom, ${light(0.45)}, ${shadow(0.08)})`;
 
 const INK = level(0.42, 0.42, "calc(c + 0.01)");
 
+/** A well pressed into the surface: the theme's colors read the material's, so a part drawn from them changes with no rule of its own. */
+const WELL = {
+  "--background": "var(--audio-shade)",
+  "--card": "var(--audio-shade)",
+  "--popover": "var(--audio-cap)",
+  "--foreground": "var(--audio-print)",
+  "--popover-foreground": "var(--audio-print)",
+  "--muted-foreground":
+    "color-mix(in oklab, var(--audio-print) 75%, var(--audio-body))",
+  "--border": "color-mix(in oklab, var(--audio-print) 18%, var(--audio-body))",
+  "--primary": "var(--audio-accent)",
+  "--primary-foreground": "var(--audio-body)",
+  "--ring": "var(--audio-accent)",
+  // Its shadow joins the ring the part draws its hover and focus with.
+  "--tw-shadow": SUNKEN,
+  "border-color": "transparent",
+};
+
+/** A raised part's light, and the ring its focus draws on top of it. */
+const FOCUS = `${RAISED}, 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent)`;
+
 export const NEU_CSS = {
   ".skin-neu": {
     ...AXES,
@@ -77,6 +98,34 @@ export const NEU_CSS = {
     "border-color": "transparent",
     "background-image": FACE,
   },
+  // The XY pad and the envelope are wells pressed into the surface.
+  ".skin-neu :is([data-slot=xypad-control], [data-slot=envelope-frame])": WELL,
+  // A pad is pushed up out of the surface, and pressed into it while struck.
+  ".skin-neu [data-slot=pad-item]": {
+    "--muted": "var(--audio-shade)",
+    "--muted-foreground": "var(--audio-print)",
+    "--primary": "var(--audio-accent)",
+    "--primary-foreground": "var(--audio-body)",
+    "--ring": "var(--audio-accent)",
+    "border-color": "transparent",
+    "background-image": FACE,
+    "box-shadow": RAISED,
+  },
+  ".skin-neu [data-slot=pad-item]:focus-visible": { "box-shadow": FOCUS },
+  ".skin-neu [data-slot=pad-item][data-active]": {
+    "background-image": "none",
+    "box-shadow": SUNKEN,
+  },
+  // The keyboard is a well of keys of the material: lighter for the white ones, deep for the black.
+  ".skin-neu [data-slot=piano]": {
+    "--piano-key-white": tone(0.05, 0.04),
+    "--piano-key-black": "oklch(from var(--audio-shade) calc(l * 0.4) c h)",
+    "--card": "var(--audio-shade)",
+    "--primary": "var(--audio-accent)",
+    "--ring": "var(--audio-accent)",
+    "--tw-shadow": SUNKEN,
+    "border-color": "transparent",
+  },
   // A device panel is a plate of the material: the theme's own colors read the skin's, so no panel changes.
   ".skin-neu [data-slot=device-frame]": {
     "--card": "var(--audio-body)",
@@ -96,16 +145,12 @@ export const NEU_CSS = {
     "box-shadow": RAISED,
     color: "var(--audio-print)",
   },
-  // A graph and an XY pad are wells pressed into the plate.
-  ".skin-neu [data-slot=device-frame] :is([data-slot=plot], [data-slot=xypad-control])":
-    {
-      "--background": "var(--audio-screen)",
-      "--card": "var(--audio-screen)",
-      "background-color": "var(--audio-screen)",
-      "border-color": "transparent",
-    },
-  // Only the graph is sunk by a shadow: the pad draws its hover and focus rings with its own.
+  // A device's graph is a well pressed into the plate.
   ".skin-neu [data-slot=device-frame] [data-slot=plot]": {
+    "--background": "var(--audio-screen)",
+    "--card": "var(--audio-screen)",
+    "background-color": "var(--audio-screen)",
+    "border-color": "transparent",
     "box-shadow": SUNKEN,
     "border-radius": corner(8),
   },

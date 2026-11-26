@@ -3,15 +3,13 @@ import { HighlightedCode } from "@/components/code/block/highlighted-code";
 import { useSkin } from "@/hooks/use-skin";
 import { useSkinAxes } from "@/hooks/use-skin-axes";
 import { chosenAxes } from "@/lib/design-system/look";
+import { shadowSkin, skinFrameClass } from "@/lib/docs/content/skin-frame";
 import {
   codeOf,
   type Framework,
-  lookFor,
   type PlaygroundLook,
   type PlaygroundName,
   propsOf,
-  reactFrame,
-  skinFrame,
   webMarkup,
 } from "@/lib/docs/playground/playgrounds";
 import { usePlayground, useShownPlayground } from "@/lib/docs/playground/store";
@@ -22,9 +20,6 @@ import {
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
-import { HardwareFader } from "@/registry/bases/shared/audio-ui/skins/hardware/fader";
-import { HardwareKnob } from "@/registry/bases/shared/audio-ui/skins/hardware/knob";
-import { HardwareVuMeter } from "@/registry/bases/shared/audio-ui/skins/hardware/vu-meter";
 
 type Props = Record<string, unknown>;
 
@@ -32,12 +27,6 @@ const DIGITAL: Record<PlaygroundName, ComponentType<Props>> = {
   fader: Fader as ComponentType<Props>,
   knob: Knob as ComponentType<Props>,
   meter: Meter as ComponentType<Props>,
-};
-
-const HARDWARE: Record<PlaygroundName, ComponentType<Props>> = {
-  fader: HardwareFader as ComponentType<Props>,
-  knob: HardwareKnob as ComponentType<Props>,
-  meter: HardwareVuMeter as ComponentType<Props>,
 };
 
 /** The skin the reader picked in the Look and the axes they set over it: none for Digital. */
@@ -57,15 +46,13 @@ function ReactPlayground({
   name: PlaygroundName;
   props: Props;
 }) {
-  if (!look) {
-    const Element = DIGITAL[name];
-    return <Element {...props} />;
-  }
-  const Element = (look.skin === "hardware" ? HARDWARE : DIGITAL)[name];
-  return (
-    <div className={reactFrame({ axes: [], skin: look.skin })}>
+  const Element = DIGITAL[name];
+  return look ? (
+    <div className={skinFrameClass(look.skin)}>
       <Element {...props} />
     </div>
+  ) : (
+    <Element {...props} />
   );
 }
 
@@ -183,7 +170,7 @@ export function PlaygroundPreview({
 }) {
   useShownPlayground(name);
   const [values] = usePlayground(name);
-  const look = lookFor(framework, useLook());
+  const look = useLook();
   const props = Object.fromEntries(propsOf(name, values));
   return framework === "react" ? (
     <ReactPlayground look={look} name={name} props={props} />
@@ -193,9 +180,7 @@ export function PlaygroundPreview({
       markup={webMarkup(name, values)}
       name={name}
       props={props}
-      skin={
-        look && { ...skinFrame(look), sheet: `/css/skins/${look.skin}.css` }
-      }
+      skin={look && shadowSkin(look.skin, look.axes)}
     />
   );
 }

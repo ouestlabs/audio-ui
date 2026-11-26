@@ -21,6 +21,7 @@ import { components } from "../../../registry/bases/shared/components/_registry"
 import { devices } from "../../../registry/bases/shared/devices/_registry";
 import { audioUi as sdkAudio } from "../../../registry/bases/ui-sdk/audio-ui/_registry";
 import { lib } from "../../../registry/lib/_registry";
+import type { ShadowSkin } from "./mount-styled";
 
 const WHITESPACE_REGEX = /\s+/;
 
@@ -319,18 +320,31 @@ const frameworkModules = import.meta.glob<{ default: unknown }>([
   "../../../registry/bases/*/components/**/*-demo.js",
 ]);
 
+type Mount = (
+  element: HTMLElement,
+  demo: never,
+  skin: ShadowSkin | undefined
+) => () => void;
+
 function FrameworkDemo({
   demo,
   mount,
+  skin,
 }: {
   demo: unknown;
-  mount: (element: HTMLElement, demo: never) => () => void;
+  mount: Mount;
+  skin?: ShadowSkin;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
+  // The skin travels as its text: the effect mounts the demo again when it changes.
+  const dressed = JSON.stringify(skin ?? null);
   React.useEffect(() => {
     const element = ref.current;
-    return element ? mount(element, demo as never) : undefined;
-  }, [demo, mount]);
+    const given = JSON.parse(dressed) as ShadowSkin | null;
+    return element
+      ? mount(element, demo as never, given ?? undefined)
+      : undefined;
+  }, [demo, dressed, mount]);
   return React.createElement("div", { className: "contents", ref });
 }
 
@@ -340,24 +354,25 @@ async function frameworkDemo(
   path: string
 ): Promise<{ default: React.ComponentType }> {
   const { default: demo } = await load();
-  let mount: (element: HTMLElement, demo: never) => () => void;
+  let inPage: (element: HTMLElement, demo: never) => () => void;
   if (path.endsWith(".vue")) {
-    mount = (await import("./mount-vue")).mountVue;
+    inPage = (await import("./mount-vue")).mountVue;
   } else if (path.endsWith(".svelte")) {
-    mount = (await import("./mount-svelte")).mountSvelte;
+    inPage = (await import("./mount-svelte")).mountSvelte;
   } else {
-    mount = (element, fn) =>
+    inPage = (element, fn) =>
       (fn as (element: HTMLElement) => () => void)(element);
   }
   const { mountInShadow, styledElementOf } = await import("./mount-styled");
   const styled = styledElementOf(path);
-  if (styled) {
-    const inPage = mount;
-    mount = (element, given) =>
-      mountInShadow(element, styled, (target) => inPage(target, given));
-  }
+  // A styled element is drawn in a shadow root, in the skin it is given.
+  const mount: Mount = styled
+    ? (element, given, skin) =>
+        mountInShadow(element, styled, (target) => inPage(target, given), skin)
+    : (element, given) => inPage(element, given);
   return {
-    default: () => React.createElement(FrameworkDemo, { demo, mount }),
+    default: ({ skin }: { skin?: ShadowSkin }) =>
+      React.createElement(FrameworkDemo, { demo, mount, skin }),
   };
 }
 

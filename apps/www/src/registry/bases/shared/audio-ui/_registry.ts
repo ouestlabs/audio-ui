@@ -66,51 +66,20 @@ export const audioUi: RegistryItem[] = [
     css: HARDWARE_CSS,
     dependencies: [],
     description:
-      "The Hardware skin: a matte body, a dark inset screen and one accent as tokens and materials on .skin-hardware, with a capped knob, a ribbed fader and a needle VU meter that keep the props of Knob, Fader and Meter. HardwareSkin dresses the device panels inside it.",
-    files: [
-      {
-        path: "audio-ui/skins/hardware/knob.tsx",
-        target: "components/audio-ui/skins/hardware/knob.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/fader.tsx",
-        target: "components/audio-ui/skins/hardware/fader.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/vu-meter.tsx",
-        target: "components/audio-ui/skins/hardware/vu-meter.tsx",
-        type: "registry:ui",
-      },
-      {
-        path: "audio-ui/skins/hardware/skin.tsx",
-        target: "components/audio-ui/skins/hardware/skin.tsx",
-        type: "registry:ui",
-      },
-    ],
+      "The Hardware skin: a matte body, dark inset screens and one accent, as tokens and materials on .skin-hardware. The knob, the fader, the meter, the XY pad, the envelope, the pads, the piano and the device panels inside it are drawn from their own parts, in every framework: a capped knob with a printed scale, a ribbed fader cap in a narrow slot, a meter lit in segments, screens for the pad and the envelope, caps to strike, ivory and ebony keys.",
+    files: [],
     name: "skin-hardware",
-    registryDependencies: [
-      "@audio-ui/knob",
-      "@audio-ui/fader",
-      "@audio-ui/meter",
-      "@audio-ui/needle-meter",
-      "@audio-ui/device-panel",
-    ],
+    registryDependencies: [],
     type: "registry:ui",
   },
   {
     css: NEU_CSS,
     dependencies: [],
     description:
-      "The Neu skin: one material lit from above, as tokens and materials on .skin-neu derived from its shade. The knob, the fader, the meter and the device panels inside it are drawn from their own parts, pushed up out of the surface or pressed into it.",
+      "The Neu skin: one material lit from above, as tokens and materials on .skin-neu derived from its shade. The knob, the fader, the meter, the XY pad, the envelope, the pads, the piano and the device panels inside it are drawn from their own parts, in every framework, pushed up out of the surface or pressed into it.",
     files: [],
     name: "skin-neu",
-    registryDependencies: [
-      "@audio-ui/knob",
-      "@audio-ui/fader",
-      "@audio-ui/meter",
-    ],
+    registryDependencies: [],
     type: "registry:ui",
   },
   {

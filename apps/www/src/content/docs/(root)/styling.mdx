@@ -90,7 +90,25 @@ A token changes a color, never a behavior: the controls keep their keyboard, poi
 
 ## Skins
 
-A skin is tokens, materials and drawn faces. It changes how a control looks, never its props, events or ARIA.
+A skin is tokens and materials, drawn on the elements' own parts: the knob, the fader, the meter, the XY pad, the envelope, the pads, the piano and the device panels. It changes how a control looks, never its props, events or ARIA, and it is one sheet: React, Vue, Svelte and plain HTML read the same rules, so a skin looks the same in each.
+
+Put the skin's class on the element that holds the controls, with `audio-body` for its surface:
+
+```tsx
+import { Knob } from "@/components/audio-ui/knob"
+
+<div className="skin-hardware audio-body rounded-2xl p-8">
+  <Knob aria-label="Drive" defaultValue={30} />
+</div>
+```
+
+In React, `<Install name="skin-hardware" />` writes the skin into your Tailwind stylesheet. In every framework, the [CLI](/docs/cli) writes it as its plain sheet, `css/skin-hardware.css`, last in the index the app imports once:
+
+```bash
+npx @audio-ui/cli add knob skin-hardware
+```
+
+Both sheets are served at `https://www.audio-ui.dev/css/skins/` for a project that copies them by hand.
 
 ### Axes
 
@@ -106,10 +124,10 @@ A skin derives its audio tokens from a few axes. Set them on the skin's own elem
 
 ```tsx
 <div
-  className="skin-hardware audio-body rounded-xl p-6"
+  className="skin-hardware audio-body rounded-2xl p-8"
   style={{ "--audio-shade": "oklch(0.55 0.08 60)", "--audio-accent": "oklch(0.8 0.15 90)" }}
 >
-  <HardwareKnob aria-label="Drive" defaultValue={30} />
+  <Knob aria-label="Drive" defaultValue={30} />
 </div>
 ```
 
@@ -117,42 +135,31 @@ The tokens are derived with relative colors (`oklch(from var(--audio-shade) …)
 
 ### Hardware
 
-The Hardware skin is a matte body, a dark inset screen, one accent and printed scales.
+The Hardware skin is a matte body, dark inset screens, one accent and printed scales.
 
 <Install name="skin-hardware" />
 
-Put `skin-hardware` on the element that holds the panel, and use the faces in place of the elements. Each face takes the same props.
+| Element | Drawn as |
+| --- | --- |
+| Knob | A matte cap lit from above in a dark socket, a needle in the lettering's color, its arc in the accent, and a printed scale of eleven ticks when it has no `marks` |
+| Fader | A narrow slot with no range, and a ribbed cap whose middle rib is in the accent |
+| Meter | Its level lit in segments, as a row of lamps, in the screen's ink, warning and clipping colors |
+| XY pad, envelope | Screens set in the body: their grid, curve and cursor in the screen's ink and the accent |
+| Pads | Caps to strike, lit from above, flashing in the accent |
+| Piano | Ivory and ebony keys in the body, held in the accent |
+| Device panels | Their frame takes the body, their graphs become screens |
 
-| Face | In place of | Drawn as |
-| --- | --- | --- |
-| `HardwareKnob` | `Knob` | A matte cap in a socket, a grip line, a printed scale of eleven ticks or your `marks` |
-| `HardwareFader` | `Fader` | A narrow slot, a ribbed cap, a printed scale: dB for a range that reaches -48, else its ends and middle. A `sm` fader prints only your `marks` |
-| `HardwareVuMeter` | `Meter` | A needle dial per channel from -20 to +3 VU, with a clip lamp. 0 VU is -18 dB |
+### Neu
 
-```tsx
-import { HardwareKnob } from "@/components/audio-ui/skins/hardware/knob"
+The Neu skin is one material lit from above: a knob is a dome pushed out of the surface, a pad is pushed up and pressed in while struck, a fader's groove, a meter's channel, the XY pad, the envelope and the keyboard are pressed into it, a device panel is a plate with its graphs sunk in.
 
-<div className="skin-hardware audio-body rounded-xl p-6">
-  <HardwareKnob aria-label="Drive" defaultValue={30} />
-</div>
-```
+<Install name="skin-neu" />
+
+Its shadows are the material multiplied by itself and its light the material screened with itself, so a warm shade casts warm shadows. `--audio-depth` sets how far the parts stand out.
 
 ### Device panels
 
-Wrap device panels in `HardwareSkin`: their frame takes the matte body, their graphs and XY pads become screens, and their knobs and faders are drawn with the faces. The panels themselves do not change.
-
-```tsx
-import { HardwareSkin } from "@/components/audio-ui/skins/hardware/skin"
-import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel"
-
-<HardwareSkin>
-  <CompressorPanel onValueChange={setState} value={state} />
-</HardwareSkin>
-```
-
-`--audio-grid` is the width of a column of a panel with no groups, `4.5rem` by default. For faces of your own, give `DeviceFacesProvider` from `@/components/audio-ui/device-faces` a `Knob` or a `Fader` with the element's props.
-
-The faces draw their own parts, so `thumbMarks` of the fader and `marks`, `peakMarks` and `scale` of the meter do not change them.
+A device panel inside a skin wears it as it is: its frame takes the body, its graphs and pads change with the theme's colors the skin sets. The panels themselves do not change. `--audio-grid` is the width of a column of a panel with no groups, `4.5rem` by default. For faces of your own, give `DeviceFacesProvider` from `@/components/audio-ui/device-faces` a `Knob` or a `Fader` with the element's props.
 
 ### Materials
 
@@ -166,23 +173,5 @@ The faces draw their own parts, so `thumbMarks` of the fader and `marks`, `peakM
 | `audio-lamp`, `audio-lamp-on` | A lamp, off and lit |
 
 The skin adds three tokens to the audio tokens: `--audio-body`, `--audio-screen` and `--audio-screen-ink`. Each material takes its light from the skin: `--audio-body-shadow`, `--audio-screen-shadow`, `--audio-cap-image`, `--audio-cap-shadow` and `--audio-groove-shadow`.
-
-### Neu
-
-The Neu skin is one material lit from above: a knob is a dome pushed out of the surface, a fader's groove and a meter's channel are pressed into it, a device panel is a plate with its graphs sunk in.
-
-<Install name="skin-neu" />
-
-It has no faces of its own: it draws the knob, the fader and the meter from their own parts. Put `skin-neu` on the element that holds them, device panels included.
-
-```tsx
-import { Knob } from "@/components/audio-ui/knob"
-
-<div className="skin-neu audio-body rounded-2xl p-8">
-  <Knob aria-label="Drive" defaultValue={30} />
-</div>
-```
-
-Its shadows are the material multiplied by itself and its light the material screened with itself, so a warm shade casts warm shadows. `--audio-depth` sets how far the parts stand out.
 
 For general customization guidelines such as adding your own custom colors or switching between utility classes and variables, please refer to the [official shadcn/ui documentation](https://ui.shadcn.com/docs/theming).

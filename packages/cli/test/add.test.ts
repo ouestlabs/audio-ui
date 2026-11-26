@@ -124,6 +124,20 @@ describe("in Vue", () => {
     );
   });
 
+  test("a skin is its sheet, imported last: an element added after it still goes before it", async () => {
+    const cwd = project(VUE);
+    await run(cwd, ["knob", "skin-neu"]);
+    expect(read(cwd, "src/components/audio-ui/css/skin-neu.css")).toBe(
+      read(REGISTRY, "css/skins/neu.css")
+    );
+    await run(cwd, ["fader"]);
+    const index = read(cwd, "src/components/audio-ui/css/index.css");
+    expect(index.indexOf("fader.css")).toBeLessThan(
+      index.indexOf("skin-neu.css")
+    );
+    expect(index.trimEnd().endsWith('@import "./skin-neu.css";')).toBe(true);
+  });
+
   test("the sheets gather in one index, which keeps what is in it", async () => {
     const cwd = project(VUE);
     await run(cwd, ["knob"]);
@@ -217,6 +231,17 @@ describe("in React", () => {
     const result = await run(cwd, ["knob"]);
     expect(read(cwd, "src/lib/utils.ts")).toBe("export const cn = () => '';\n");
     expect(result.packages).not.toContain("cn");
+  });
+
+  test("a skin is the same sheet as in every framework, with no theme: the element's look is its classes", async () => {
+    const cwd = project(REACT);
+    const result = await run(cwd, ["knob", "skin-hardware"]);
+    expect(result.index).toBe("src/components/audio-ui/css/index.css");
+    expect(read(cwd, "src/components/audio-ui/css/skin-hardware.css")).toBe(
+      read(REGISTRY, "css/skins/hardware.css")
+    );
+    const index = read(cwd, "src/components/audio-ui/css/index.css");
+    expect(index.match(/@import/g)).toHaveLength(1);
   });
 
   test("a project with a shadcn theme gets no theme of ours", async () => {
