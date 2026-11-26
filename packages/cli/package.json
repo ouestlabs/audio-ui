@@ -38,7 +38,8 @@
     "clean": "rm -rf dist node_modules .turbo",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "test": "bun test"
+    "test": "bun test",
+    "test:consumers": "bun scripts/consumers.ts"
   },
   "devDependencies": {
     "@types/bun": "1.4.2",
