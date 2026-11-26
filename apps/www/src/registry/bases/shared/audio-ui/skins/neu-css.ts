@@ -98,8 +98,18 @@ export const NEU_CSS = {
     "border-color": "transparent",
     "background-image": FACE,
   },
-  // The XY pad and the envelope are wells pressed into the surface.
-  ".skin-neu :is([data-slot=xypad-control], [data-slot=envelope-frame])": WELL,
+  // The XY pad, the envelope, the plot and the waveform are wells pressed into the surface.
+  ".skin-neu :is([data-slot=xypad-control], [data-slot=envelope-frame], [data-slot=plot], [data-slot=waveform-control])":
+    WELL,
+  // The waveform draws no surface of its own: in the material, it is a well too, its focus ring drawn over the well.
+  ".skin-neu [data-slot=waveform-control]": {
+    "background-color": "var(--audio-shade)",
+    "border-radius": corner(8),
+    "box-shadow": SUNKEN,
+  },
+  ".skin-neu [data-slot=waveform-control]:has(:focus-visible)": {
+    "box-shadow": `${SUNKEN}, 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent)`,
+  },
   // A pad is pushed up out of the surface, and pressed into it while struck.
   ".skin-neu [data-slot=pad-item]": {
     "--muted": "var(--audio-shade)",

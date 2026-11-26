@@ -18,18 +18,25 @@ export async function readCssManifest(registry: string): Promise<CssManifest> {
     : { elements: [], skins: [], styles: [] };
 }
 
-/** The elements of a tree its sheets draw: a styled component of Vue or Svelte, a custom element in plain web. */
+/**
+ * The elements of a tree its sheets draw: a styled component of Vue or
+ * Svelte, a custom element in plain web, or the adapter of a kit drawn from
+ * its sheet alone (the plot's parts, the waveform's), each element once.
+ */
 export function sheetElements(
   items: RegistryItem[],
   framework: Framework,
   manifest: CssManifest
 ): string[] {
-  const suffix = framework === "web" ? "-web" : `-element-${framework}`;
-  return items
-    .map((item) => item.name)
-    .filter((name) => name.endsWith(suffix))
-    .map((name) => name.slice(0, -suffix.length))
-    .filter((element) => manifest.elements.includes(element));
+  const suffixes =
+    framework === "web" ? ["-web"] : [`-element-${framework}`, `-${framework}`];
+  const elements = items.flatMap((item) => {
+    const suffix = suffixes.find((each) => item.name.endsWith(each));
+    return suffix ? [item.name.slice(0, -suffix.length)] : [];
+  });
+  return [...new Set(elements)].filter((element) =>
+    manifest.elements.includes(element)
+  );
 }
 
 /** The skins of a tree, as their sheets: `skin-neu` is the Neu skin's, the same in every framework. */

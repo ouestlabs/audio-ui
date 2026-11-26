@@ -23,21 +23,21 @@ const { Pad, PadItem, padParts } = await import(
 const { Piano, pianoParts } = await import(
   "@/registry/bases/shared/audio-ui/elements/piano"
 );
+const Plot = await import("@/registry/bases/shared/audio-ui/elements/plot");
+const Wave = await import("@/registry/bases/shared/audio-ui/elements/waveform");
+const { createSource } = await import("@/registry/primitives/primitive");
 const { XYPad, xypadParts } = await import(
   "@/registry/bases/shared/audio-ui/elements/xypad"
 );
+
+const { partSelector } = await import("../scripts/portable-css.ts");
+
+const blank = () => "";
 
 afterEach(cleanup);
 
 const STYLES = ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"];
 const SHEETS = `${import.meta.dir}/../public/css`;
-
-const slots = (container: HTMLElement) =>
-  new Set(
-    [...container.querySelectorAll("[data-slot]")].map((node) =>
-      node.getAttribute("data-slot")
-    )
-  );
 
 const ELEMENTS = [
   {
@@ -121,6 +121,55 @@ const ELEMENTS = [
         <Piano aria-label="Piano" maxPitch={62} minPitch={60} size="lg" />
       ),
   },
+  {
+    name: "plot",
+    parts: Plot.plotParts,
+    root: {},
+    render: () => {
+      const line = (x: number) => x;
+      const source = createSource<ArrayLike<number>>([0.2, 0.8]);
+      return render(
+        <Plot.Plot maxX={1} maxY={1}>
+          <Plot.PlotGrid x={{ ticks: [0.5] }} y={{ ticks: [0.5] }} />
+          <Plot.PlotGraph>
+            <Plot.PlotArea fillTo={0} fn={line} />
+            <Plot.PlotCurve fn={line} />
+            <Plot.PlotTraceArea fillTo={0} source={source} />
+            <Plot.PlotTrace source={source} />
+            <Plot.PlotBand axis="x" from={0.2} to={0.4} />
+            <Plot.PlotLine axis="x" value={0.5} />
+            <Plot.PlotDot value={{ x: 0.5, y: 0.5 }} />
+          </Plot.PlotGraph>
+          <Plot.PlotMark axis="x" value={0.5}>
+            half
+          </Plot.PlotMark>
+          <Plot.PlotHandle aria-label="Peak" value={{ x: 0.5, y: 0.5 }} />
+          <Plot.PlotCursor format={blank} />
+        </Plot.Plot>
+      );
+    },
+  },
+  {
+    name: "waveform",
+    parts: Wave.waveformParts,
+    root: {},
+    render: () =>
+      render(
+        <Wave.Waveform
+          aria-label="Track"
+          duration={10}
+          values={[0.2, 0.6, 0.4]}
+          variant="playhead"
+        >
+          <Wave.WaveformRegion value={[2, 4]}>
+            <Wave.WaveformRegionHandle aria-label="Start" edge="start" />
+            <Wave.WaveformRegionHandle aria-label="End" edge="end" />
+          </Wave.WaveformRegion>
+          <Wave.WaveformMarker value={5}>Verse</Wave.WaveformMarker>
+          <Wave.WaveformHover />
+        </Wave.Waveform>
+      ),
+  },
 ] as const;
 
 describe.each([...ELEMENTS])(
@@ -128,9 +177,8 @@ describe.each([...ELEMENTS])(
   (element) => {
     test("the React element draws every part the sheet styles, by its slot", () => {
       const { container } = element.render();
-      const drawn = slots(container);
       for (const part of Object.keys(element.parts)) {
-        expect(drawn).toContain(part);
+        expect(container.querySelector(partSelector(part))).not.toBeNull();
       }
     });
 
@@ -151,7 +199,7 @@ describe.each([...ELEMENTS])(
           `${SHEETS}/${style}/${element.name}.css`
         ).text();
         for (const part of Object.keys(element.parts)) {
-          expect(sheet).toContain(`[data-slot=${part}]`);
+          expect(sheet).toContain(partSelector(part));
         }
         // The sheet needs no Tailwind: no hook, no @apply, no group class is left.
         expect(sheet).not.toContain("@apply");

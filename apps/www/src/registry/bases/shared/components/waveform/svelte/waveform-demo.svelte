@@ -25,23 +25,16 @@ const describePosition = (value: number, duration: number) =>
 let loop = $state<readonly [number, number]>([48, 96]);
 </script>
 
-<div class="flex w-full min-w-0 flex-col gap-2">
-  <Waveform.Root
-    class="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed"
-    defaultValue={30}
-    duration={DURATION_SECONDS}
-    peaks={PEAKS}
-  >
+<div
+  style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; min-width: 0"
+>
+  <Waveform.Root defaultValue={30} duration={DURATION_SECONDS} peaks={PEAKS}>
     <Waveform.Control
       aria-label="Track progress"
-      class="cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress"
       getAriaValueText={describePosition}
     >
-      <Waveform.Canvas
-        class="cn-waveform-canvas block size-full [-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]"
-      />
+      <Waveform.Canvas />
       <Waveform.Region
-        class="cn-waveform-region pointer-events-none inset-y-0"
         onValueChange={(next) => {
           loop = next;
         }}
@@ -50,50 +43,31 @@ let loop = $state<readonly [number, number]>([48, 96]);
       >
         <Waveform.RegionHandle
           aria-label="Loop start"
-          class="cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0 after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3"
           edge="start"
           getAriaValueText={formatTime}
           region="loop"
         />
         <Waveform.RegionHandle
           aria-label="Loop end"
-          class="cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0 after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3"
           edge="end"
           getAriaValueText={formatTime}
           region="loop"
         />
       </Waveform.Region>
-      <Waveform.Marker
-        class="cn-waveform-marker pointer-events-none inset-y-0 w-px"
-        value={20}
-      >
-        <span
-          class="cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap"
-          >Verse</span
-        >
+      <Waveform.Marker value={20}>
+        <span data-slot="waveform-marker-label">Verse</span>
       </Waveform.Marker>
-      <Waveform.Marker
-        class="cn-waveform-marker pointer-events-none inset-y-0 w-px"
-        value={124}
-      >
-        <span
-          class="cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap"
-          >Chorus</span
-        >
+      <Waveform.Marker value={124}>
+        <span data-slot="waveform-marker-label">Chorus</span>
       </Waveform.Marker>
-      <Waveform.Hover
-        class="cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap"
-        format={formatTime}
-      />
-      <Waveform.Playhead
-        class="cn-waveform-playhead group-data-outside/waveform:hidden"
-      />
-      <Waveform.Thumb
-        class="cn-waveform-thumb group-data-outside/waveform:hidden"
-      />
+      <Waveform.Hover format={formatTime} />
+      <Waveform.Playhead />
+      <Waveform.Thumb />
     </Waveform.Control>
   </Waveform.Root>
-  <p class="text-muted-foreground text-sm tabular-nums">
+  <p
+    style="color: var(--muted-foreground); font-size: 0.875rem; font-variant-numeric: tabular-nums"
+  >
     Loop {formatTime(loop[0])} – {formatTime(loop[1])}
   </p>
 </div>

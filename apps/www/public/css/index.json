@@ -6,7 +6,9 @@
     "xypad",
     "envelope",
     "pad",
-    "piano"
+    "piano",
+    "plot",
+    "waveform"
   ],
   "skins": [
     "hardware",

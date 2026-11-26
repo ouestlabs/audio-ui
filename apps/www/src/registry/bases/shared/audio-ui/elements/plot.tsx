@@ -13,6 +13,41 @@ import { cn } from "@/registry/lib/utils";
 import { type PlotAxis, valueOn } from "@/registry/primitives/plot/plot";
 import { Plot as PlotPrimitive } from "@/registry/primitives/plot/react";
 
+/**
+ * How each part of the plot is drawn, by its `data-slot`. A part's look
+ * follows its attributes, never the plot's props: the React plot applies these
+ * classes, and `registry:build` writes them as plain CSS on the parts for
+ * every other framework. A curve or a trace given `fillTo` carries
+ * `data-fill`, an area; a mark its `data-axis`; a line of the cursor its
+ * `data-orientation`.
+ */
+export const plotParts = Object.freeze({
+  plot: "cn-plot relative h-48 w-full touch-none select-none data-disabled:opacity-50",
+  "plot-graph":
+    "cn-plot-graph absolute inset-0 overflow-hidden! rounded-[inherit]",
+  // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame. A halo in the surface colour keeps a label readable over the curve without hiding any of it.
+  "plot-grid":
+    "cn-plot-grid rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none [&>svg]:overflow-hidden! [&>svg]:rounded-[inherit] [&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30 [&_[data-part=label]]:z-1 [&_[data-part=label]]:px-0.5 [&_[data-part=label]]:[text-shadow:0_0_2px_var(--card),0_0_2px_var(--card),0_0_4px_var(--card)] [&_[data-part=label][data-axis=x]]:-translate-x-1/2 [&_[data-part=label][data-axis=x]]:bottom-1.5 [&_[data-part=label][data-axis=y]]:-translate-y-1/2 [&_[data-part=label][data-axis=y]]:left-2",
+  "plot-curve":
+    "cn-plot-curve fill-none [stroke-linecap:round] [stroke-linejoin:round]",
+  "plot-curve[data-fill]": "cn-plot-area stroke-none",
+  "plot-trace":
+    "cn-plot-trace fill-none [stroke-linecap:round] [stroke-linejoin:round]",
+  "plot-trace[data-fill]": "cn-plot-trace-area stroke-none",
+  "plot-dot": "cn-plot-dot size-2.5 rounded-full",
+  "plot-line": "cn-plot-line",
+  "plot-band": "cn-plot-band",
+  "plot-mark":
+    "cn-plot-mark text-[10px] tabular-nums leading-none data-[axis=x]:bottom-1.5 data-[axis=y]:left-2 data-[axis=x]:-translate-x-1/2 data-[axis=y]:-translate-y-1/2",
+  "plot-handle":
+    "cn-plot-handle size-4 cursor-grab outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
+  "plot-cursor": "group/plot-cursor",
+  "plot-cursor-line":
+    "cn-plot-cursor-line absolute opacity-0 data-[orientation=horizontal]:inset-x-0 data-[orientation=vertical]:inset-y-0 data-[orientation=horizontal]:top-(--plot-cursor-y) data-[orientation=vertical]:left-(--plot-cursor-x) data-[orientation=horizontal]:h-px data-[orientation=vertical]:w-px group-data-[active]/plot-cursor:opacity-100",
+  "plot-cursor-readout":
+    "cn-plot-cursor-readout top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[active]/plot-cursor:opacity-100",
+});
+
 type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
 type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
 
@@ -66,10 +101,7 @@ function Plot({
   return (
     <PlotAxes value={context}>
       <PlotPrimitive.Root
-        className={cn(
-          "cn-plot relative h-48 w-full touch-none select-none data-disabled:opacity-50",
-          className
-        )}
+        className={cn(plotParts.plot, className)}
         data-slot="plot"
         onValueChange={change}
         onValueCommitted={commit}
@@ -84,10 +116,7 @@ function Plot({
 function PlotGraph({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "cn-plot-graph absolute inset-0 overflow-hidden! rounded-[inherit]",
-        className
-      )}
+      className={cn(plotParts["plot-graph"], className)}
       data-slot="plot-graph"
       {...props}
     />
@@ -101,10 +130,7 @@ function PlotCurve({
 }: ComponentProps<typeof PlotPrimitive.Curve>) {
   return (
     <PlotPrimitive.Curve
-      className={cn(
-        "cn-plot-curve fill-none [stroke-linecap:round] [stroke-linejoin:round]",
-        className
-      )}
+      className={cn(plotParts["plot-curve"], className)}
       data-slot="plot-curve"
       {...props}
     />
@@ -118,8 +144,8 @@ function PlotArea({
 }: ComponentProps<typeof PlotPrimitive.Curve>) {
   return (
     <PlotPrimitive.Curve
-      className={cn("cn-plot-area stroke-none", className)}
-      data-slot="plot-area"
+      className={cn(plotParts["plot-curve[data-fill]"], className)}
+      data-slot="plot-curve"
       {...props}
     />
   );
@@ -132,10 +158,7 @@ function PlotTrace({
 }: ComponentProps<typeof PlotPrimitive.Trace>) {
   return (
     <PlotPrimitive.Trace
-      className={cn(
-        "cn-plot-trace fill-none [stroke-linecap:round] [stroke-linejoin:round]",
-        className
-      )}
+      className={cn(plotParts["plot-trace"], className)}
       data-slot="plot-trace"
       {...props}
     />
@@ -149,8 +172,8 @@ function PlotTraceArea({
 }: ComponentProps<typeof PlotPrimitive.Trace>) {
   return (
     <PlotPrimitive.Trace
-      className={cn("cn-plot-trace-area stroke-none", className)}
-      data-slot="plot-trace-area"
+      className={cn(plotParts["plot-trace[data-fill]"], className)}
+      data-slot="plot-trace"
       {...props}
     />
   );
@@ -163,7 +186,7 @@ function PlotDot({
 }: ComponentProps<typeof PlotPrimitive.Dot>) {
   return (
     <PlotPrimitive.Dot
-      className={cn("cn-plot-dot size-2.5 rounded-full", className)}
+      className={cn(plotParts["plot-dot"], className)}
       data-slot="plot-dot"
       {...props}
     />
@@ -177,7 +200,7 @@ function PlotLine({
 }: ComponentProps<typeof PlotPrimitive.Line>) {
   return (
     <PlotPrimitive.Line
-      className={cn("cn-plot-line", className)}
+      className={cn(plotParts["plot-line"], className)}
       data-slot="plot-line"
       {...props}
     />
@@ -196,20 +219,23 @@ type PlotCursorProps = Omit<
 function PlotCursor({ className, format, ...props }: PlotCursorProps) {
   return (
     <PlotPrimitive.Cursor
-      className={cn("group/cursor", className)}
+      className={cn(plotParts["plot-cursor"], className)}
       data-slot="plot-cursor"
       {...props}
     >
       <div
-        className="cn-plot-cursor-line absolute inset-y-0 w-px opacity-0 group-data-[active]/cursor:opacity-100"
-        style={{ left: "var(--plot-cursor-x)" }}
+        className={plotParts["plot-cursor-line"]}
+        data-orientation="vertical"
+        data-slot="plot-cursor-line"
       />
       <div
-        className="cn-plot-cursor-line absolute inset-x-0 h-px opacity-0 group-data-[active]/cursor:opacity-100"
-        style={{ top: "var(--plot-cursor-y)" }}
+        className={plotParts["plot-cursor-line"]}
+        data-orientation="horizontal"
+        data-slot="plot-cursor-line"
       />
       <PlotPrimitive.CursorReadout
-        className="cn-plot-cursor-readout top-1.5! right-2 left-auto! tabular-nums opacity-0 group-data-[active]/cursor:opacity-100"
+        className={plotParts["plot-cursor-readout"]}
+        data-slot="plot-cursor-readout"
         format={format}
       />
     </PlotPrimitive.Cursor>
@@ -223,17 +249,7 @@ function PlotGrid({
 }: ComponentProps<typeof PlotPrimitive.Grid>) {
   return (
     <PlotPrimitive.Grid
-      className={cn(
-        "cn-plot-grid rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none",
-        // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame.
-        "[&>svg]:overflow-hidden! [&>svg]:rounded-[inherit]",
-        "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",
-        // A halo in the surface colour keeps a label readable over the curve without hiding any of it.
-        "[&_[data-part=label]]:z-1 [&_[data-part=label]]:px-0.5 [&_[data-part=label]]:[text-shadow:0_0_2px_var(--card),0_0_2px_var(--card),0_0_4px_var(--card)]",
-        "[&_[data-part=label][data-axis=x]]:-translate-x-1/2 [&_[data-part=label][data-axis=x]]:bottom-1.5",
-        "[&_[data-part=label][data-axis=y]]:-translate-y-1/2 [&_[data-part=label][data-axis=y]]:left-2",
-        className
-      )}
+      className={cn(plotParts["plot-grid"], className)}
       data-slot="plot-grid"
       {...props}
     />
@@ -249,13 +265,7 @@ function PlotMark({
   return (
     <PlotPrimitive.Mark
       axis={axis}
-      className={cn(
-        "cn-plot-mark text-[10px] tabular-nums leading-none",
-        axis === "x"
-          ? "bottom-1.5 -translate-x-1/2"
-          : "left-2 -translate-y-1/2",
-        className
-      )}
+      className={cn(plotParts["plot-mark"], className)}
       data-slot="plot-mark"
       {...props}
     />
@@ -269,7 +279,7 @@ function PlotBand({
 }: ComponentProps<typeof PlotPrimitive.Band>) {
   return (
     <PlotPrimitive.Band
-      className={cn("cn-plot-band", className)}
+      className={cn(plotParts["plot-band"], className)}
       data-slot="plot-band"
       {...props}
     />
@@ -305,10 +315,7 @@ function PlotHandle({
   }, [context, name, onValueChange, onValueCommitted]);
   return (
     <PlotPrimitive.Handle
-      className={cn(
-        "cn-plot-handle size-4 cursor-grab outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 data-dragging:cursor-grabbing data-disabled:pointer-events-none",
-        className
-      )}
+      className={cn(plotParts["plot-handle"], className)}
       data-slot="plot-handle"
       handle={name}
       {...props}

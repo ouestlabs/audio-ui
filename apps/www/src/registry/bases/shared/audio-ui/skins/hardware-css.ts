@@ -158,9 +158,14 @@ export const HARDWARE_CSS = {
     {
       mask: "repeating-linear-gradient(to right, #000 0 3px, transparent 3px 4px)",
     },
-  // The XY pad and the envelope are screens set in the body.
-  ".skin-hardware :is([data-slot=xypad-control], [data-slot=envelope-frame])":
+  // The XY pad, the envelope, the plot and the waveform are screens set in the body.
+  ".skin-hardware :is([data-slot=xypad-control], [data-slot=envelope-frame], [data-slot=plot], [data-slot=waveform-control])":
     SCREEN,
+  // The waveform draws no surface of its own: in the body, it is a screen too.
+  ".skin-hardware [data-slot=waveform-control]": {
+    "background-color": "var(--audio-screen)",
+    "border-radius": corner(6),
+  },
   // A pad is a cap to strike: lit from above, flashing in the accent.
   ".skin-hardware [data-slot=pad-item]": {
     "--muted": "var(--audio-cap)",

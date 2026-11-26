@@ -16,6 +16,34 @@ import { Waveform as WaveformPrimitive } from "@/registry/primitives/waveform/re
 const EDGE_FADE =
   "[-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]";
 
+const HANDLE =
+  "cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0 after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3";
+
+/**
+ * How each part of the waveform is drawn, by its `data-slot`. A part's look
+ * follows its attributes, never the waveform's props: the React waveform
+ * applies these classes, and `registry:build` writes them as plain CSS on the
+ * parts for every other framework. The root carries `data-outside` while the
+ * playhead is out of view; a region's handle its `data-edge`.
+ */
+export const waveformParts = Object.freeze({
+  waveform: "group/waveform w-full min-w-0 data-disabled:cursor-not-allowed",
+  "waveform-control":
+    "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress",
+  "waveform-canvas": `cn-waveform-canvas block size-full ${EDGE_FADE}`,
+  "waveform-playhead":
+    "cn-waveform-playhead group-data-outside/waveform:hidden",
+  "waveform-thumb": "cn-waveform-thumb group-data-outside/waveform:hidden",
+  "waveform-region": "cn-waveform-region pointer-events-none inset-y-0",
+  "waveform-region-start": HANDLE,
+  "waveform-region-end": HANDLE,
+  "waveform-marker": "cn-waveform-marker pointer-events-none inset-y-0 w-px",
+  "waveform-marker-label":
+    "cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap",
+  "waveform-hover":
+    "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap",
+});
+
 type RootProps = ComponentProps<typeof WaveformPrimitive.Root>;
 type CanvasProps = ComponentProps<typeof WaveformPrimitive.Canvas>;
 type RegionCallbacks = Pick<RootProps, "onRegionChange" | "onRegionCommitted">;
@@ -76,7 +104,8 @@ function Waveform({
   return (
     <RegionHandlers value={regions}>
       <WaveformPrimitive.Root
-        className="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed"
+        className={waveformParts.waveform}
+        data-slot="waveform"
         onRegionChange={changeRegion}
         onRegionCommitted={commitRegion}
         peaks={values}
@@ -86,26 +115,25 @@ function Waveform({
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
-          className={cn(
-            "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1",
-            "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
-            "data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress",
-            className
-          )}
-          data-slot="waveform"
+          className={cn(waveformParts["waveform-control"], className)}
+          data-slot="waveform-control"
           getAriaValueText={getAriaValueText}
         >
           <WaveformPrimitive.Canvas
             barGap={barGap}
             barWidth={barWidth}
-            className={cn("cn-waveform-canvas block size-full", EDGE_FADE)}
+            className={waveformParts["waveform-canvas"]}
             variant={shape}
           />
           {children}
           {variant === "playhead" ? (
             <>
-              <WaveformPrimitive.Playhead className="cn-waveform-playhead group-data-outside/waveform:hidden" />
-              <WaveformPrimitive.Thumb className="cn-waveform-thumb group-data-outside/waveform:hidden" />
+              <WaveformPrimitive.Playhead
+                className={waveformParts["waveform-playhead"]}
+              />
+              <WaveformPrimitive.Thumb
+                className={waveformParts["waveform-thumb"]}
+              />
             </>
           ) : null}
         </WaveformPrimitive.Control>
@@ -149,10 +177,7 @@ function WaveformRegion({
   return (
     <RegionName value={name}>
       <WaveformPrimitive.Region
-        className={cn(
-          "cn-waveform-region pointer-events-none inset-y-0",
-          className
-        )}
+        className={cn(waveformParts["waveform-region"], className)}
         data-slot="waveform-region"
         region={name}
         {...props}
@@ -168,12 +193,7 @@ function WaveformRegionHandle({
   const region = use(RegionName);
   return (
     <WaveformPrimitive.RegionHandle
-      className={cn(
-        "cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0",
-        "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
-        className
-      )}
-      data-slot="waveform-region-handle"
+      className={cn(HANDLE, className)}
       region={region ?? ""}
       {...props}
     />
@@ -189,15 +209,15 @@ function WaveformMarker({
 }) {
   return (
     <WaveformPrimitive.Marker
-      className={cn(
-        "cn-waveform-marker pointer-events-none inset-y-0 w-px",
-        className
-      )}
+      className={cn(waveformParts["waveform-marker"], className)}
       data-slot="waveform-marker"
       {...props}
     >
       {children ? (
-        <span className="cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap">
+        <span
+          className={waveformParts["waveform-marker-label"]}
+          data-slot="waveform-marker-label"
+        >
           {children}
         </span>
       ) : null}
@@ -212,10 +232,7 @@ function WaveformHover({
 }: ComponentProps<typeof WaveformPrimitive.Hover>) {
   return (
     <WaveformPrimitive.Hover
-      className={cn(
-        "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap",
-        className
-      )}
+      className={cn(waveformParts["waveform-hover"], className)}
       data-slot="waveform-hover"
       {...props}
     />

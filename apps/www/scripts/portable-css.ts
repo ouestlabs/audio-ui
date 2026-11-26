@@ -32,6 +32,14 @@ function utilities(classes: string, hooks: ReadonlyMap<string, string>) {
 const rule = (selector: string, applied: string) =>
   applied ? `${selector} { @apply ${applied}; }` : "";
 
+const PART_KEY = /^([\w-]+)(.*)$/;
+
+/** A part's selector: its slot, and the attributes its key adds, as `plot-curve[data-fill]` for a curve drawn as an area. */
+export const partSelector = (key: string) => {
+  const [, slot, attributes] = PART_KEY.exec(key) ?? [key, key, ""];
+  return `[data-slot=${slot}]${attributes}`;
+};
+
 /** The rules of an element, before Tailwind compiles them. */
 export function partRules(
   parts: Parts,
@@ -42,10 +50,10 @@ export function partRules(
   const at = (slot: string, scope: string) =>
     slot === root
       ? `[data-slot=${root}]${scope}`
-      : `[data-slot=${root}]${scope} [data-slot=${slot}]`;
+      : `[data-slot=${root}]${scope} ${partSelector(slot)}`;
   return [
-    ...Object.entries(parts).map(([slot, classes]) =>
-      rule(`[data-slot=${slot}]`, utilities(classes, hooks))
+    ...Object.entries(parts).map(([key, classes]) =>
+      rule(partSelector(key), utilities(classes, hooks))
     ),
     ...Object.entries(sizes).flatMap(([slot, bySize]) =>
       Object.entries(bySize).map(([size, classes]) =>
