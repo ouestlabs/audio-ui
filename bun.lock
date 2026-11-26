@@ -361,6 +361,17 @@
         "wrangler": "catalog:",
       },
     },
+    "packages/cli": {
+      "name": "audio-ui",
+      "version": "0.0.0",
+      "bin": {
+        "audio-ui": "./dist/index.js",
+      },
+      "devDependencies": {
+        "@types/bun": "1.4.2",
+        "typescript": "^7.0.2",
+      },
+    },
     "packages/icons": {
       "name": "@audio-ui/icons",
       "version": "0.2.1",
@@ -1978,6 +1989,8 @@
     "astring": ["astring@1.9.0", "", { "bin": { "astring": "bin/astring" } }, "sha512-LElXdjswlqjWrPpJFg1Fx4wpkOCxj1TDHlSV4PlaRxHGWko024xICaa97ZkMfs6DRKlCguiAI+rbXv5GWwXIkg=="],
 
     "atomically": ["atomically@1.7.0", "", {}, "sha512-Xcz9l0z7y9yQ9rdDaxlmaI4uJHf/T8g9hOEzJcsEqX2SjCj4J20uK7+ldkDHMbpJDK76wF7xEIgxc/vSlsfw5w=="],
+
+    "audio-ui": ["audio-ui@workspace:packages/cli"],
 
     "axobject-query": ["axobject-query@4.1.0", "", {}, "sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ=="],
 
