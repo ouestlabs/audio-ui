@@ -80,10 +80,17 @@ export const axisChoices = Object.fromEntries(
   ])
 ) as Record<Axis, ReturnType<typeof createKeptChoice<string>>>;
 
-/** The axes a reader chose, as CSS declarations: what a skin's element takes over its own. */
-export function lookDeclarations(chosen: Partial<Record<Axis, string | null>>) {
+/** The axes a reader chose, each with its CSS value, in the Look's order. */
+export function chosenAxes(
+  chosen: Partial<Record<Axis, string | null>>
+): [Axis, string][] {
   return AXIS_ORDER.flatMap((axis) => {
     const option = AXES[axis].options.find((each) => each.id === chosen[axis]);
-    return option ? [`${axis}: ${option.css};`] : [];
+    return option ? [[axis, option.css] as [Axis, string]] : [];
   });
 }
+
+/** The axes a reader chose, as CSS declarations: what a skin's element takes over its own. */
+export const lookDeclarations = (
+  chosen: Partial<Record<Axis, string | null>>
+) => chosenAxes(chosen).map(([axis, css]) => `${axis}: ${css};`);

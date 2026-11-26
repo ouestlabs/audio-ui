@@ -194,6 +194,74 @@ const COMPONENT: Record<PlaygroundName, string> = {
   meter: "Meter",
 };
 
+/** The skin a playground is drawn in, and the axes the reader set over its own, each with its CSS value. */
+export interface PlaygroundLook {
+  axes: readonly (readonly [property: string, css: string])[];
+  skin: "hardware" | "neu";
+}
+
+/** The look a framework's code can carry: Hardware's faces are written for React, so another framework's leaves it out. */
+export const lookFor = (
+  framework: Framework,
+  look: PlaygroundLook | undefined
+) =>
+  look && (framework === "react" || look.skin === "neu") ? look : undefined;
+
+/** Hardware's faces: each keeps the props of the element it dresses. */
+const HARDWARE: Record<PlaygroundName, { component: string; file: string }> = {
+  fader: { component: "HardwareFader", file: "fader" },
+  knob: { component: "HardwareKnob", file: "knob" },
+  meter: { component: "HardwareVuMeter", file: "vu-meter" },
+};
+
+/** The classes of the element a skin is set on in React, the axes as properties of Tailwind. */
+export function reactFrame(look: PlaygroundLook) {
+  const room =
+    look.skin === "hardware"
+      ? "rounded-xl px-8 py-6"
+      : "rounded-2xl px-10 py-8";
+  const axes = look.axes.map(
+    ([property, css]) => `[${property}:${css.replaceAll(" ", "_")}]`
+  );
+  return [`skin-${look.skin} audio-body ${room}`, ...axes].join(" ");
+}
+
+/** The element a skin is set on outside React: its classes, and its room and the axes as a style. */
+export function skinFrame(look: PlaygroundLook) {
+  return {
+    className: `skin-${look.skin} audio-body`,
+    style: [
+      "padding: 2rem 2.5rem",
+      "border-radius: 1rem",
+      ...look.axes.map(([property, css]) => `${property}: ${css}`),
+    ].join("; "),
+  };
+}
+
+const SKIN_NAME: Record<PlaygroundLook["skin"], string> = {
+  hardware: "Hardware",
+  neu: "Neu",
+};
+
+/** Where the site serves a skin as plain CSS, for a project with no Tailwind. */
+const skinSheet = (skin: string) =>
+  `https://www.audio-ui.dev/css/skins/${skin}.css`;
+
+/** An element, or the element a skin is set on around it, at an indent. */
+function framed(
+  look: PlaygroundLook | undefined,
+  indent: string,
+  element: (indent: string) => string
+) {
+  if (!look) {
+    return element(indent);
+  }
+  const { className, style } = skinFrame(look);
+  return `${indent}<div class="${className}" style="${style}">
+${element(`${indent}  `)}
+${indent}</div>`;
+}
+
 /** A tag's attributes, one a line when they do not fit on one. */
 function tag(open: string, attributes: string[], indent: string) {
   const inline = `${open} ${attributes.join(" ")} />`;
@@ -202,24 +270,35 @@ function tag(open: string, attributes: string[], indent: string) {
     : `${indent}${open}\n${attributes.map((each) => `${indent}  ${each}`).join("\n")}\n${indent}/>`;
 }
 
-function react(name: PlaygroundName, props: Prop[]) {
-  const component = COMPONENT[name];
+function react(name: PlaygroundName, props: Prop[], look?: PlaygroundLook) {
+  const { component, file } =
+    look?.skin === "hardware"
+      ? {
+          component: HARDWARE[name].component,
+          file: `skins/hardware/${HARDWARE[name].file}`,
+        }
+      : { component: COMPONENT[name], file: name };
   const attributes = props.map(([prop, value]) =>
     typeof value === "string"
       ? `${prop}="${value}"`
       : `${prop}={${literal(value)}}`
   );
-  return `import { ${component} } from "@/components/audio-ui/${name}"
+  const element = look
+    ? `    <div className="${reactFrame(look)}">
+${tag(`<${component}`, attributes, "      ")}
+    </div>`
+    : tag(`<${component}`, attributes, "    ");
+  return `import { ${component} } from "@/components/audio-ui/${file}"
 
 export function Example() {
   return (
-${tag(`<${component}`, attributes, "    ")}
+${element}
   )
 }
 `;
 }
 
-function vue(name: PlaygroundName, props: Prop[]) {
+function vue(name: PlaygroundName, props: Prop[], look?: PlaygroundLook) {
   const component = COMPONENT[name];
   const attributes = props.map(([prop, value]) =>
     typeof value === "string"
@@ -231,12 +310,12 @@ import ${component} from "@/components/audio-ui/${name}/${component}.vue"
 </script>
 
 <template>
-${tag(`<${component}`, attributes, "  ")}
+${framed(look, "  ", (indent) => tag(`<${component}`, attributes, indent))}
 </template>
 `;
 }
 
-function svelte(name: PlaygroundName, props: Prop[]) {
+function svelte(name: PlaygroundName, props: Prop[], look?: PlaygroundLook) {
   const component = COMPONENT[name];
   const attributes = props.map(([prop, value]) =>
     typeof value === "string"
@@ -247,7 +326,7 @@ function svelte(name: PlaygroundName, props: Prop[]) {
 import ${component} from "$lib/components/audio-ui/${name}/${component}.svelte"
 </script>
 
-${tag(`<${component}`, attributes, "")}
+${framed(look, "", (indent) => tag(`<${component}`, attributes, indent))}
 `;
 }
 
@@ -335,45 +414,56 @@ ${[channels, marks].filter(Boolean).join("\n")}
 </audio-ui-fader>`;
 }
 
-function web(name: PlaygroundName, values: Values) {
+function web(name: PlaygroundName, values: Values, look?: PlaygroundLook) {
+  const skin = look
+    ? `\n<!-- The ${SKIN_NAME[look.skin]} skin's sheet, saved beside them from ${skinSheet(look.skin)} -->\n<link rel="stylesheet" href="./components/audio-ui/css/skin-${look.skin}.css" />`
+    : "";
+  const markup = webMarkup(name, values);
   return `<!-- Once, in the page: the custom elements and the sheets. -->
 <script type="module" src="./components/audio-ui/${name}/web.ts"></script>
-<link rel="stylesheet" href="./components/audio-ui/css/index.css" />
+<link rel="stylesheet" href="./components/audio-ui/css/index.css" />${skin}
 
-${webMarkup(name, values)}
+${framed(look, "", (indent) => markup.replaceAll(/^/gm, indent))}
 `;
 }
 
-/** The code of a playground for a framework, and the file it is shown as. */
+/** The code of a playground for a framework, in the look the reader set, and the file it is shown as. */
 export function codeOf(
   name: PlaygroundName,
   framework: Framework,
-  values: Values
+  values: Values,
+  look?: PlaygroundLook
 ): { code: string; file: string; language: string } {
   const props = propsOf(name, values);
+  const carried = lookFor(framework, look);
   const add = `npx @audio-ui/cli add ${name}`;
+  // Outside React a skin is a plain sheet the reader keeps once in the app.
+  const comments = carried
+    ? `<!-- ${add} -->\n<!-- The ${SKIN_NAME[carried.skin]} skin, imported once in the app: ${skinSheet(carried.skin)} -->`
+    : `<!-- ${add} -->`;
   switch (framework) {
     case "vue":
       return {
-        code: `<!-- ${add} -->\n${vue(name, props)}`,
+        code: `${comments}\n${vue(name, props, carried)}`,
         file: "Example.vue",
         language: "vue",
       };
     case "svelte":
       return {
-        code: `<!-- ${add} -->\n${svelte(name, props)}`,
+        code: `${comments}\n${svelte(name, props, carried)}`,
         file: "Example.svelte",
         language: "svelte",
       };
     case "web":
       return {
-        code: `<!-- ${add} -->\n${web(name, values)}`,
+        code: `<!-- ${add} -->\n${web(name, values, carried)}`,
         file: "index.html",
         language: "html",
       };
     default:
       return {
-        code: `// ${add}\n${react(name, props)}`,
+        // In React a skin is CSS of Tailwind, which shadcn's CLI writes into the app's stylesheet, with the elements it dresses.
+        code: `// ${carried ? `npx shadcn add @audio-ui/skin-${carried.skin}` : add}\n${react(name, props, carried)}`,
         file: "example.tsx",
         language: "tsx",
       };

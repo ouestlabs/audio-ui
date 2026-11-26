@@ -1,15 +1,24 @@
 import { type ComponentType, useEffect, useRef } from "react";
 import { HighlightedCode } from "@/components/code/block/highlighted-code";
 import { useSkin } from "@/hooks/use-skin";
+import { useSkinAxes } from "@/hooks/use-skin-axes";
+import { chosenAxes } from "@/lib/design-system/look";
 import {
   codeOf,
   type Framework,
+  lookFor,
+  type PlaygroundLook,
   type PlaygroundName,
   propsOf,
+  reactFrame,
+  skinFrame,
   webMarkup,
 } from "@/lib/docs/playground/playgrounds";
 import { usePlayground, useShownPlayground } from "@/lib/docs/playground/store";
-import { mountInShadow } from "@/lib/registry/core/mount-styled";
+import {
+  mountInShadow,
+  type ShadowSkin,
+} from "@/lib/registry/core/mount-styled";
 import { Fader } from "@/registry/bases/shared/audio-ui/elements/fader";
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
 import { Meter } from "@/registry/bases/shared/audio-ui/elements/meter";
@@ -31,30 +40,32 @@ const HARDWARE: Record<PlaygroundName, ComponentType<Props>> = {
   meter: HardwareVuMeter as ComponentType<Props>,
 };
 
-/** The element in React, in the skin the reader picked in the Look. */
+/** The skin the reader picked in the Look and the axes they set over it: none for Digital. */
+function useLook(): PlaygroundLook | undefined {
+  const [skin] = useSkin();
+  const { values } = useSkinAxes();
+  return skin === "digital" ? undefined : { axes: chosenAxes(values), skin };
+}
+
+/** The element in React, in the skin the reader picked in the Look. The page's own rule sets the axes (`LookStyle`). */
 function ReactPlayground({
+  look,
   name,
   props,
 }: {
+  look: PlaygroundLook | undefined;
   name: PlaygroundName;
   props: Props;
 }) {
-  const [skin] = useSkin();
-  if (skin === "hardware") {
-    const Element = HARDWARE[name];
-    return (
-      <div className="skin-hardware audio-body rounded-xl px-8 py-6">
-        <Element {...props} />
-      </div>
-    );
+  if (!look) {
+    const Element = DIGITAL[name];
+    return <Element {...props} />;
   }
-  const Element = DIGITAL[name];
-  return skin === "neu" ? (
-    <div className="skin-neu audio-body rounded-2xl px-10 py-8">
+  const Element = (look.skin === "hardware" ? HARDWARE : DIGITAL)[name];
+  return (
+    <div className={reactFrame({ axes: [], skin: look.skin })}>
       <Element {...props} />
     </div>
-  ) : (
-    <Element {...props} />
   );
 }
 
@@ -120,32 +131,38 @@ async function mounter(
   };
 }
 
-/** The element in another framework, in a shadow root that holds its sheet alone. Each change mounts it again. */
+/** The element in another framework, in a shadow root that holds its sheet alone, and its skin's. Each change mounts it again. */
 function FrameworkPlayground({
   framework,
   markup,
   name,
   props,
+  skin,
 }: {
   framework: Exclude<Framework, "react">;
   markup: string;
   name: PlaygroundName;
   props: Props;
+  skin: ShadowSkin | undefined;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  // The props and the markup travel in one key: the effect mounts the element again when it changes.
-  const key = JSON.stringify({ markup, props });
+  // The props, the markup and the skin travel in one key: the effect mounts the element again when it changes.
+  const key = JSON.stringify({ markup, props, skin });
   useEffect(() => {
     const element = host.current;
     if (!element) {
       return;
     }
-    const given = JSON.parse(key) as { markup: string; props: Props };
+    const given = JSON.parse(key) as {
+      markup: string;
+      props: Props;
+      skin?: ShadowSkin;
+    };
     let unmount: (() => void) | undefined;
     let gone = false;
     mounter(name, framework, given.props, given.markup).then((mount) => {
       if (!gone) {
-        unmount = mountInShadow(element, name, mount);
+        unmount = mountInShadow(element, name, mount, given.skin);
       }
     });
     return () => {
@@ -166,15 +183,19 @@ export function PlaygroundPreview({
 }) {
   useShownPlayground(name);
   const [values] = usePlayground(name);
+  const look = lookFor(framework, useLook());
   const props = Object.fromEntries(propsOf(name, values));
   return framework === "react" ? (
-    <ReactPlayground name={name} props={props} />
+    <ReactPlayground look={look} name={name} props={props} />
   ) : (
     <FrameworkPlayground
       framework={framework}
       markup={webMarkup(name, values)}
       name={name}
       props={props}
+      skin={
+        look && { ...skinFrame(look), sheet: `/css/skins/${look.skin}.css` }
+      }
     />
   );
 }
@@ -190,7 +211,7 @@ export function PlaygroundSource({
   onCode: (code: string) => void;
 }) {
   const [values] = usePlayground(name);
-  const { code, language } = codeOf(name, framework, values);
+  const { code, language } = codeOf(name, framework, values, useLook());
   useEffect(() => {
     onCode(code);
   }, [code, onCode]);
