@@ -1,0 +1,54 @@
+{
+  "name": "audio-ui",
+  "version": "0.0.0",
+  "description": "Adds audio/ui components to a React, Vue, Svelte or plain web project: the files are copied into the project, and they are yours.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "cli",
+    "components",
+    "registry",
+    "react",
+    "vue",
+    "svelte",
+    "web-components",
+    "knob",
+    "fader",
+    "meter"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/cli",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "audio-ui": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bun build src/index.ts --outdir dist --target node --format esm --banner '#!/usr/bin/env node'",
+    "clean": "rm -rf dist node_modules .turbo",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test",
+    "test:consumers": "bun scripts/consumers.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

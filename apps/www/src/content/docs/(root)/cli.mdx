@@ -1,0 +1,71 @@
+---
+title: CLI
+description: "Add audio/ui components to a React, Vue, Svelte or plain web project with one command: the files are copied in, and they are yours."
+---
+
+`audio-ui` copies a component into your project with everything it needs: the headless primitive, its adapter for your framework, the styled component, and, outside React, the sheet it is drawn by. It runs on Node 20 or later, and needs no setup.
+
+```bash
+npx audio-ui add knob
+```
+
+## What it writes
+
+The framework is found in your `package.json`, and each one gets the files written for it.
+
+| Framework | `npx audio-ui add knob` writes | Its look |
+| --- | --- | --- |
+| React | `components/audio-ui/knob.tsx`, over `knob/react.tsx` | Tailwind classes, in the style you picked |
+| Vue | `components/audio-ui/knob/Knob.vue`, over `knob/vue.ts` | `css/knob.css`, plain CSS on its parts |
+| Svelte | `src/lib/components/audio-ui/knob/Knob.svelte`, over `knob/svelte/` | `css/knob.css` |
+| Web | `components/audio-ui/knob/web.ts`, the custom elements | `css/knob.css` |
+
+Every framework also gets the primitive, `knob/knob.ts`, and `primitive.ts`, which the primitives share. The files land under `src/` when the project has one.
+
+Outside React, the sheets go in `components/audio-ui/css/` with `index.css`, which imports them all. Import it once, at the root of your app:
+
+```ts title="main.ts"
+import "./components/audio-ui/css/index.css"
+```
+
+Each `add` adds the sheets it writes to the index. A project with no shadcn theme also gets `theme.css`, the theme's tokens (`--foreground`, `--primary`…).
+
+In React, a component that needs `cn` gets `lib/utils.ts`, which re-exports it from the [`cn`](https://github.com/shadcn-ui/cn) package, unless the project has one.
+
+## Imports
+
+The files import each other through your project's alias, read from the `paths` of your tsconfig, such as `@/components/audio-ui/knob/vue`. In SvelteKit they use `$lib`. A project with no alias gets relative imports.
+
+## Packages
+
+The packages the files import are installed with your package manager, found by its lockfile: bun, pnpm, yarn or npm. The UI SDK kernel is pinned to the version the primitives are written for. `--no-install` prints the command instead.
+
+## Options
+
+| Option | |
+| --- | --- |
+| `--headless` | The primitive and its adapter alone, with no style: `knob-vue` in Vue |
+| `--framework <name>` | `react`, `vue`, `svelte` or `web`, in place of the one found |
+| `--style <name>` | The style to draw the components in: `nova` by default |
+| `--overwrite` | Replace the files of the project that differ from the registry's |
+| `--no-install` | Print the package manager's command instead of running it |
+| `--cwd <dir>` | The project's root, in place of the current folder |
+| `--registry <url>` | Another registry, or a folder that holds a copy of one |
+
+## audio-ui.json
+
+The first `add` writes what it found to `audio-ui.json`, at the project's root. Edit it to change what the next `add` does; `--framework` and `--style` change it too.
+
+```json title="audio-ui.json"
+{
+  "alias": "@",
+  "framework": "vue",
+  "root": "src",
+  "style": "nova",
+  "theme": true
+}
+```
+
+## Your files
+
+The CLI never replaces a file you changed. A file that is already there with the same content is left as it is, and one that differs is kept: `--overwrite` replaces it. Items that only React can run, such as the hooks, are refused in another framework.

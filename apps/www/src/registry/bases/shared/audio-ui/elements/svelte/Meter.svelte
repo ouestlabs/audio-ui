@@ -16,6 +16,8 @@ let {
   marks?: readonly number[];
   orientation?: "horizontal" | "vertical";
   peakMarks?: "visible" | "hidden";
+  /** How a level maps to the meter's length: the IEC 60268-18 curve, linear in dB, or your own. */
+  scale?: "iec" | "linear" | ((level: number) => number);
   size?: "sm" | "default" | "lg";
 } = $props();
 

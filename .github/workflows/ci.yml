@@ -33,7 +33,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bunx biome ci packages/icons apps/www/src/registry/lib/engine apps/www/src/registry/lib/webgl
+        run: bunx biome ci packages/icons packages/cli apps/www/src/registry/lib/engine apps/www/src/registry/lib/webgl
 
       - name: Build
         run: bun run build:pkg
@@ -48,6 +48,15 @@ jobs:
 
       - name: Test icons
         working-directory: packages/icons
+        run: bun test
+
+      - name: Typecheck the CLI
+        working-directory: packages/cli
+        run: bunx tsc --noEmit
+
+      # Against the registry the site serves, from its build in apps/www/public.
+      - name: Test the CLI
+        working-directory: packages/cli
         run: bun test
 
       - name: Primitives in React, Vue, Svelte and custom elements
@@ -74,3 +83,35 @@ jobs:
       - name: Test daw
         working-directory: apps/daw
         run: bun test
+
+  # Vite apps of each framework, the components added by the CLI from this
+  # registry, then vue-tsc, svelte-check, tsc and Vite's build. Not required:
+  # it installs from npm.
+  consumers:
+    name: Consumers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build the CLI
+        working-directory: packages/cli
+        run: bun run build:pkg
+
+      - name: Vue, Svelte and React apps
+        working-directory: packages/cli
+        run: bun run test:consumers
