@@ -1,5 +1,5 @@
 {
-  "name": "audio-ui",
+  "name": "@audio-ui/cli",
   "version": "0.0.0",
   "description": "Adds audio/ui components to a React, Vue, Svelte or plain web project: the files are copied into the project, and they are yours.",
   "keywords": [
@@ -28,7 +28,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "audio-ui": "./dist/index.js"
+    "audio-ui": "dist/index.js"
   },
   "files": [
     "dist"

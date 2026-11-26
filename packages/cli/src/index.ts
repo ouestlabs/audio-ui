@@ -17,7 +17,7 @@ const HELP = `audio-ui ${pkg.version}
 Adds audio/ui components to a project: the files are copied in, and they are yours.
 
 Usage
-  npx audio-ui add <name...> [options]
+  npx @audio-ui/cli add <name...> [options]
 
 Options
   --headless           the primitive alone, with no style

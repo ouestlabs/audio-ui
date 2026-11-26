@@ -1,14 +1,14 @@
-# audio-ui
+# @audio-ui/cli
 
-Adds [audio/ui](https://www.audio-ui.dev) components to a React, Vue, Svelte or plain web project. The files are copied into the project, and they are yours.
+Adds [audio/ui](https://www.audio-ui.dev) components to a React, Vue, Svelte or plain web project. The files are copied into the project, and they are yours. Installed, its command is `audio-ui`.
 
 ```bash
-npx audio-ui add knob
+npx @audio-ui/cli add knob
 ```
 
 It writes the headless primitive, its adapter for the project's framework and the styled component. Outside React it also writes the sheet the component is drawn by, plain CSS on its parts, with an `index.css` to import once at the root of the app. It installs the packages the files import with the project's package manager.
 
-| Framework | `npx audio-ui add knob` writes |
+| Framework | `npx @audio-ui/cli add knob` writes |
 | --- | --- |
 | React | `components/audio-ui/knob.tsx`, Tailwind classes |
 | Vue | `components/audio-ui/knob/Knob.vue` and `css/knob.css` |

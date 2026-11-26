@@ -3,17 +3,17 @@ title: CLI
 description: "Add audio/ui components to a React, Vue, Svelte or plain web project with one command: the files are copied in, and they are yours."
 ---
 
-`audio-ui` copies a component into your project with everything it needs: the headless primitive, its adapter for your framework, the styled component, and, outside React, the sheet it is drawn by. It runs on Node 20 or later, and needs no setup.
+`@audio-ui/cli` copies a component into your project with everything it needs: the headless primitive, its adapter for your framework, the styled component, and, outside React, the sheet it is drawn by. It runs on Node 20 or later, and needs no setup. Installed in a project or globally, its command is `audio-ui`.
 
 ```bash
-npx audio-ui add knob
+npx @audio-ui/cli add knob
 ```
 
 ## What it writes
 
 The framework is found in your `package.json`, and each one gets the files written for it.
 
-| Framework | `npx audio-ui add knob` writes | Its look |
+| Framework | `npx @audio-ui/cli add knob` writes | Its look |
 | --- | --- | --- |
 | React | `components/audio-ui/knob.tsx`, over `knob/react.tsx` | Tailwind classes, in the style you picked |
 | Vue | `components/audio-ui/knob/Knob.vue`, over `knob/vue.ts` | `css/knob.css`, plain CSS on its parts |
