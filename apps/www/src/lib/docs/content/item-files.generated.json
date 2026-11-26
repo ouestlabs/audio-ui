@@ -1813,6 +1813,12 @@
   "waveform-lane": [
     "components/audio-ui/waveform-lane.tsx"
   ],
+  "waveform-live-demo": [
+    "components/examples/waveform-live-demo.tsx"
+  ],
+  "waveform-live-vue-demo": [
+    "components/examples/waveform-live-demo.vue"
+  ],
   "waveform-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/waveform/waveform.ts",

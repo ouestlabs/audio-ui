@@ -379,6 +379,18 @@
   },
   {
     "categories": ["waveform"],
+    "description": "A live waveform, scrolling with a made-up voice: no microphone, no sound.",
+    "name": "waveform-live-demo",
+    "title": "Waveform live demo"
+  },
+  {
+    "categories": ["waveform"],
+    "description": "A live waveform in the Vue adapter, drawn by the waveform's sheet, scrolling with a made-up voice.",
+    "name": "waveform-live-vue-demo",
+    "title": "Waveform live vue demo"
+  },
+  {
+    "categories": ["waveform"],
     "description": "waveform example, in the Vue adapter",
     "name": "waveform-vue-demo",
     "title": "Waveform vue demo"
