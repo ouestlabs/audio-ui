@@ -3,40 +3,59 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/registry/lib/utils";
 import { Knob as KnobPrimitive } from "@/registry/primitives/knob/react";
 
-const knobVariants = cva(
-  "cn-knob relative inline-flex outline-none data-disabled:cursor-not-allowed",
-  {
-    defaultVariants: {
-      size: "default",
-    },
-    variants: {
-      size: {
-        default: "cn-knob-size-default",
-        lg: "cn-knob-size-lg",
-        sm: "cn-knob-size-sm",
-        xl: "cn-knob-size-xl",
-        xs: "cn-knob-size-xs",
-      },
-    },
-  }
-);
+/**
+ * How each part of the knob is drawn, by its `data-slot`. A part's look follows
+ * its attributes, never the knob's props: the React knob applies these classes,
+ * and `registry:build` writes them as plain CSS on the parts for every other
+ * framework. The root carries `data-size`, `data-marks` (`ticks` or `labels`)
+ * and `data-readout` (`auto` or `always`) for the parts to read.
+ */
+export const knobParts = {
+  knob: "cn-knob group/knob relative inline-flex outline-none data-disabled:cursor-not-allowed data-[marks=ticks]:mx-2 data-[marks=ticks]:mt-2 data-[marks=ticks]:not-data-readout:mb-2 data-[marks=labels]:mx-5 data-[marks=labels]:mt-5 data-[marks=labels]:not-data-readout:mb-5 data-readout:mb-8 data-[marks=labels]:data-readout:mb-12",
+  "knob-control":
+    "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-disabled:pointer-events-none data-disabled:opacity-50 data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize",
+  "knob-body": "cn-knob-body absolute z-0",
+  "knob-track":
+    "cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full opacity-22",
+  "knob-arc":
+    "cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full",
+  "knob-thumb": "pointer-events-none absolute inset-0 z-2",
+  "knob-indicator": "cn-knob-indicator block size-full",
+  "knob-mark-tick":
+    "cn-knob-mark-tick -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2",
+  "knob-mark-label":
+    "cn-knob-mark-label -top-6 absolute left-1/2 -translate-x-1/2 [rotate:calc(var(--knob-mark-angle)*-1)]",
+  // The readout hangs under the dial, below the labels at the ends of the sweep. Shown on demand, it appears while the knob is hovered, turned or focused.
+  "knob-value":
+    "cn-knob-value pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap in-data-[marks=labels]:mt-6 data-editable:pointer-events-auto data-editable:cursor-text in-data-[readout=auto]:opacity-0 in-data-[readout=auto]:transition-opacity in-data-[readout=auto]:duration-150 in-data-[readout=auto]:ease-out in-data-[readout=auto]:motion-reduce:transition-none group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 data-editing:opacity-100",
+} as const;
 
-const knobControlClassName =
-  "cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] focus-visible:outline-none active:cursor-grabbing data-disabled:pointer-events-none data-disabled:opacity-50";
+/** The parts whose look changes with the knob's `data-size`, by size. */
+export const knobSizes = {
+  knob: {
+    default: "cn-knob-size-default",
+    lg: "cn-knob-size-lg",
+    sm: "cn-knob-size-sm",
+    xl: "cn-knob-size-xl",
+    xs: "cn-knob-size-xs",
+  },
+  "knob-body": {
+    default: "cn-knob-body-size-default",
+    lg: "cn-knob-body-size-lg",
+    sm: "cn-knob-body-size-sm",
+    xl: "cn-knob-body-size-xl",
+    xs: "cn-knob-body-size-xs",
+  },
+} as const;
 
-const knobBodyVariants = cva("cn-knob-body absolute z-0", {
-  defaultVariants: {
-    size: "default",
-  },
-  variants: {
-    size: {
-      default: "cn-knob-body-size-default",
-      lg: "cn-knob-body-size-lg",
-      sm: "cn-knob-body-size-sm",
-      xl: "cn-knob-body-size-xl",
-      xs: "cn-knob-body-size-xs",
-    },
-  },
+const knobVariants = cva(knobParts.knob, {
+  defaultVariants: { size: "default" },
+  variants: { size: knobSizes.knob },
+});
+
+const knobBodyVariants = cva(knobParts["knob-body"], {
+  defaultVariants: { size: "default" },
+  variants: { size: knobSizes["knob-body"] },
 });
 
 /** A graduation around the dial: a value, or a value and its label. */
@@ -59,6 +78,16 @@ const markValue = (mark: KnobMark) =>
 const markLabel = (mark: KnobMark) =>
   typeof mark === "number" ? undefined : mark.label;
 
+/** What the scale holds, for the parts to leave it room: labels, ticks alone, or nothing. */
+function scaleOf(marks: readonly KnobMark[] | undefined) {
+  if (!marks) {
+    return;
+  }
+  return marks.some((mark) => markLabel(mark) !== undefined)
+    ? "labels"
+    : "ticks";
+}
+
 function Knob({
   "aria-describedby": ariaDescribedBy,
   "aria-label": ariaLabel,
@@ -72,44 +101,34 @@ function Knob({
   valueLabel = "auto",
   ...props
 }: KnobProps) {
-  const hasLabels = marks?.some((mark) => markLabel(mark) !== undefined);
   return (
     <KnobPrimitive.Root
-      className={cn(
-        knobVariants({ size }),
-        "group/knob",
-        marks && "m-2",
-        hasLabels && "m-5",
-        // The readout hangs under the dial: leave it room, or a panel clips it.
-        valueLabel !== "hidden" && (hasLabels ? "mb-12" : "mb-8"),
-        className
-      )}
+      className={cn(knobVariants({ size }), className)}
+      data-marks={scaleOf(marks)}
+      data-readout={valueLabel === "hidden" ? undefined : valueLabel}
+      data-size={size ?? "default"}
       data-slot="knob"
       dragMode={dragMode}
       {...props}
     >
       <KnobPrimitive.Control
-        className={cn(
-          knobControlClassName,
-          // Dragged up and down, it is a fader: the cursor says so, whichever way the mode was set.
-          "data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize"
-        )}
+        className={knobParts["knob-control"]}
         data-slot="knob-control"
       >
         <div className={knobBodyVariants({ size })} data-slot="knob-body" />
         <KnobPrimitive.Track
-          className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full opacity-22"
+          className={knobParts["knob-track"]}
           data-slot="knob-track"
         />
         <KnobPrimitive.Indicator
-          className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full"
+          className={knobParts["knob-arc"]}
           data-slot="knob-arc"
         />
         <KnobPrimitive.Thumb
           aria-describedby={ariaDescribedBy}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
-          className="pointer-events-none absolute inset-0 z-2"
+          className={knobParts["knob-thumb"]}
           data-slot="knob-thumb"
           getAriaValueText={
             formatValue ? (_formatted, value) => formatValue(value) : undefined
@@ -117,7 +136,8 @@ function Knob({
         >
           <svg
             aria-hidden="true"
-            className="cn-knob-indicator block size-full"
+            className={knobParts["knob-indicator"]}
+            data-slot="knob-indicator"
             viewBox="0 0 48 48"
           >
             <line
@@ -134,9 +154,15 @@ function Knob({
       </KnobPrimitive.Control>
       {marks?.map((mark) => (
         <KnobPrimitive.Mark key={markValue(mark)} value={markValue(mark)}>
-          <span className="cn-knob-mark-tick -top-2.5 absolute left-1/2 h-1.5 w-px -translate-x-1/2" />
+          <span
+            className={knobParts["knob-mark-tick"]}
+            data-slot="knob-mark-tick"
+          />
           {markLabel(mark) === undefined ? null : (
-            <span className="cn-knob-mark-label -top-6 absolute left-1/2 -translate-x-1/2 [rotate:calc(var(--knob-mark-angle)*-1)]">
+            <span
+              className={knobParts["knob-mark-label"]}
+              data-slot="knob-mark-label"
+            >
               {markLabel(mark)}
             </span>
           )}
@@ -144,14 +170,8 @@ function Knob({
       ))}
       {valueLabel === "hidden" ? null : (
         <KnobPrimitive.Value
-          className={cn(
-            "cn-knob-value absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap",
-            editableValue ? "cursor-text" : "pointer-events-none",
-            // Below the labels at the ends of the sweep, not over them.
-            hasLabels && "mt-6",
-            valueLabel === "auto" &&
-              "opacity-0 transition-opacity duration-150 ease-out group-hover/knob:opacity-100 group-has-focus-visible/knob:opacity-100 group-data-dragging/knob:opacity-100 data-editing:opacity-100 motion-reduce:transition-none"
-          )}
+          className={knobParts["knob-value"]}
+          data-editable={editableValue ? "" : undefined}
           data-slot="knob-value"
           editable={editableValue}
         >
