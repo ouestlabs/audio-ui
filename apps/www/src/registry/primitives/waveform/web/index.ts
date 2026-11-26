@@ -96,8 +96,9 @@ export const parts = createParts(waveform, {
     render: renderBars,
     tag: "audio-ui-waveform-bars",
   },
+  // The canvas inside is the part: its tag lays nothing out, so the canvas fills the control as it does in React.
   canvas: {
-    display: "block",
+    display: "contents",
     tag: "audio-ui-waveform-canvas",
     target: canvasOf,
   },
