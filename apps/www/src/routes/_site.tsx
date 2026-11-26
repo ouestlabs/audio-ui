@@ -39,13 +39,13 @@ function SiteLayout() {
       {...previewFontAttrs}
       className="overscroll-behavior relative flex min-h-svh flex-col bg-site-muted/60 font-site-sans lg:[--header-height:0px] dark:bg-site-background [&_header]:bg-[color-mix(in_oklab,var(--site-muted)_60%,var(--site-background))] dark:[&_header]:bg-site-background"
     >
-      <SiteHeader framed />
+      <SiteHeader framed tree={pageTree} />
       <main className="flex min-h-0 flex-1 flex-col">
         <SiteShell
-          closedEnd={<SiteBarContent part="end" />}
-          closedStart={<SiteBarContent part="start" />}
+          closedEnd={<SiteBarContent part="end" tree={pageTree} />}
+          closedStart={<SiteBarContent part="start" tree={pageTree} />}
           footer={<SiteFooter docs />}
-          header={<SiteSidebarHeader />}
+          header={<SiteSidebarHeader tree={pageTree} />}
           siteEnd={<SiteBarContent part="github" />}
           tree={pageTree}
         >

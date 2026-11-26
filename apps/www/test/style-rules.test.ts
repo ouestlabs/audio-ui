@@ -77,12 +77,12 @@ describe("the audio tokens", () => {
     const names = await Array.fromAsync(
       new Bun.Glob("style-*.css").scan(STYLES)
     );
+    const sheets = await Promise.all(
+      names.map((name) => Bun.file(`${STYLES}/${name}`).text())
+    );
     const raw: string[] = [];
-    for (const name of names) {
-      const sheet = (await Bun.file(`${STYLES}/${name}`).text()).replace(
-        COMMENT,
-        ""
-      );
+    for (const [index, name] of names.entries()) {
+      const sheet = (sheets[index] ?? "").replace(COMMENT, "");
       for (const [, selector = "", utilities = ""] of sheet.matchAll(
         /([^{};]+)\{\s*@apply([^;]*);/g
       )) {

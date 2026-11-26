@@ -15,11 +15,13 @@ import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Wordmark } from "@/components/site/navigation/wordmark";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
-import { source } from "@/lib/docs/content/source";
+import type { source } from "@/lib/docs/content/source";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
 
-type PageTreeNode = ReturnType<typeof source.getPageTree>["children"][number];
+// The tree the layout's loader reads on the server. Reading `source` here would ship every docs page and its demos to every page.
+type PageTree = ReturnType<typeof source.getPageTree>;
+type PageTreeNode = PageTree["children"][number];
 
 function collectCommandMenuPages(
   items: PageTreeNode[],
@@ -100,9 +102,8 @@ function SiteLogo() {
  * top of the navigation sidebar: the logo, the theme, the section menu, the
  * framework menu and the search. GitHub stays in the inset's bar.
  */
-export function SiteSidebarHeader() {
-  const pageTree = source.getPageTree();
-  const commandGroups = buildCommandMenuGroups(pageTree.children);
+export function SiteSidebarHeader({ tree }: { tree: PageTree }) {
+  const commandGroups = buildCommandMenuGroups(tree.children);
 
   return (
     <div className="flex shrink-0 flex-col gap-2 p-2 font-site-sans">
@@ -110,7 +111,7 @@ export function SiteSidebarHeader() {
         <SiteLogo />
         <SiteHeaderModeSwitcher />
       </div>
-      <SectionSelect tree={pageTree} />
+      <SectionSelect tree={tree} />
       <FrameworkSelect />
       <div className="*:w-full">
         <SiteHeaderCommandMenu
@@ -127,8 +128,10 @@ export function SiteSidebarHeader() {
  * that sidebar is shut: the section menu at the start, the search, GitHub and
  * the theme at the end.
  */
-export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
-  if (part === "github") {
+export function SiteBarContent(
+  props: { part: "github" } | { part: "end" | "start"; tree: PageTree }
+) {
+  if (props.part === "github") {
     return (
       <>
         <ExpandEditor />
@@ -138,20 +141,19 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
       </>
     );
   }
-  if (part === "start") {
+  if (props.part === "start") {
     return (
       <div className="flex items-center gap-2">
-        <SectionSelect compact tree={source.getPageTree()} />
+        <SectionSelect compact tree={props.tree} />
         <FrameworkSelect compact />
       </div>
     );
   }
-  const pageTree = source.getPageTree();
   return (
     <div className="flex items-center gap-2">
       <div className="shrink-0">
         <SiteHeaderCommandMenu
-          commandGroups={buildCommandMenuGroups(pageTree.children)}
+          commandGroups={buildCommandMenuGroups(props.tree.children)}
           navItems={siteConfig.navItems}
         />
       </div>
@@ -163,13 +165,15 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
 export function SiteHeader({
   framed = false,
   sticky = true,
+  tree,
 }: {
   /** The page has a framed layout: from `lg` its navigation sidebar holds the header's content, so there is no header. */
   framed?: boolean;
   sticky?: boolean;
+  /** The docs' pages, for the search and the mobile menu. Without it, they list the sections only. */
+  tree?: PageTree;
 } = {}) {
-  const pageTree = source.getPageTree();
-  const commandGroups = buildCommandMenuGroups(pageTree.children);
+  const commandGroups = tree ? buildCommandMenuGroups(tree.children) : [];
 
   return (
     <header
@@ -181,7 +185,9 @@ export function SiteHeader({
     >
       <div className="container-wrapper">
         <div className="flex h-[calc(var(--header-height)-1px)] items-center gap-3.5">
-          <SiteHeaderMobileNav navItems={siteConfig.navItems} tree={pageTree} />
+          {tree ? (
+            <SiteHeaderMobileNav navItems={siteConfig.navItems} tree={tree} />
+          ) : null}
           <Button
             className="hidden pl-2 md:flex"
             render={
