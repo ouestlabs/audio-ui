@@ -44,6 +44,49 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["knob"],
+    description: "knob example, in the Neu skin",
+    files: [
+      {
+        path: "components/knob/react/knob-neu-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "knob-neu-demo",
+    registryDependencies: ["@audio-ui/knob", "@audio-ui/skin-neu"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
+    description: "fader example, in the Neu skin",
+    files: [
+      {
+        path: "components/fader/react/fader-neu-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-neu-demo",
+    registryDependencies: ["@audio-ui/fader", "@audio-ui/skin-neu"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "meter example, in the Neu skin",
+    files: [
+      {
+        path: "components/meter/react/meter-neu-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-neu-demo",
+    registryDependencies: [
+      "@audio-ui/meter",
+      "@audio-ui/skin-neu",
+      "@audio-ui/use-simulated-levels",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["synth", "hardware", "parameter-field"],
     description:
       "A small synth's panel with every audio control together: Power plays an arpeggio at the tempo through the oscillator's waveform, a low-pass filter (cutoff and resonance knobs), the gain and the transpose fields, into the master fader; the screen shows the value last touched, the LED lights on each beat",

@@ -2,16 +2,30 @@ import * as React from "react";
 import { ComponentSource } from "@/components/code/source/component-source";
 import { ComponentPreviewTabs } from "@/components/preview/component/component-preview-tabs";
 import { PreviewLoading } from "@/components/preview/frame/preview-frame";
-import { useSkin } from "@/hooks/use-skin";
-import {
-  HARDWARE_DEMOS,
-  isDevicePreview,
-} from "@/lib/docs/content/skinned-demos";
+import { type SkinId, useSkin } from "@/hooks/use-skin";
+import { isDevicePreview, skinnedDemo } from "@/lib/docs/content/skinned-demos";
 import { getPreviewHint } from "@/lib/docs/menu/preview-hint";
 import { isBlock, isExpandable } from "@/lib/registry/catalog/is-block";
 import { getRegistryComponent } from "@/lib/registry/core/registry";
 import { HardwareSkin } from "@/registry/bases/shared/audio-ui/skins/hardware/skin";
 import type { IconLibraryName } from "@/registry/config";
+
+/** A device's block in the skin chosen: it wears the skin as it is. */
+function DeviceSkin({
+  children,
+  skin,
+}: {
+  children: React.ReactNode;
+  skin: SkinId;
+}) {
+  if (skin === "hardware") {
+    return <HardwareSkin className="contents">{children}</HardwareSkin>;
+  }
+  if (skin === "neu") {
+    return <div className="skin-neu contents">{children}</div>;
+  }
+  return children;
+}
 
 // Default styleName - matches the API default
 const DEFAULT_STYLE_NAME = "ui-sdk-nova";
@@ -42,10 +56,7 @@ export function ComponentPreview({
 }) {
   const [skin] = useSkin();
   // The preview and its code both follow the skin.
-  const name =
-    skin === "hardware"
-      ? (HARDWARE_DEMOS[digitalName] ?? digitalName)
-      : digitalName;
+  const name = skinnedDemo(skin, digitalName);
   const Component = getRegistryComponent(name, styleName);
   // The code without its own copy button: the panel's bar copies it.
   const source = React.useCallback(
@@ -81,10 +92,10 @@ export function ComponentPreview({
       className={className}
       component={
         <React.Suspense fallback={<PreviewLoading />}>
-          {skin === "hardware" && isDevicePreview(name) ? (
-            <HardwareSkin className="contents">
+          {isDevicePreview(name) ? (
+            <DeviceSkin skin={skin}>
               <Component />
-            </HardwareSkin>
+            </DeviceSkin>
           ) : (
             <Component />
           )}

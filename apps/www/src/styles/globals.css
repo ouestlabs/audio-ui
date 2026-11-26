@@ -5,6 +5,7 @@
 @import "shadcn/tailwind.css";
 @import "./default.css";
 @import "../registry/styles/skins/hardware.css";
+@import "../registry/styles/skins/neu.css";
 
 /* begin: shadcn/create styles */
 /* The default style is part of this sheet; the other seven are sheets of their own (style-*.css), loaded when a style is picked (see lib/design-system/style-css.ts). */

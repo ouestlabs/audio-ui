@@ -34,6 +34,10 @@ const { DevicePanel } = await import(
 const { compressorDevice } = await import(
   "@/registry/bases/shared/devices/compressor/device"
 );
+const { NEU_CSS } = await import(
+  "@/registry/bases/shared/audio-ui/skins/neu-css"
+);
+const { AXES } = await import("@/registry/bases/shared/audio-ui/skins/axes");
 const { skinSheet } = await import("../scripts/skin-css.ts");
 
 afterEach(cleanup);
@@ -177,5 +181,53 @@ describe("the Hardware skin", () => {
         group.getAttribute("aria-label")
       )
     ).toEqual(["Compressor", "Curve", "Time"]);
+  });
+});
+
+describe("the Neu skin", () => {
+  test("the site's sheet is the registry's css", async () => {
+    const sheet = await Bun.file(
+      `${import.meta.dir}/../src/registry/styles/skins/neu.css`
+    ).text();
+    expect(sheet).toBe(skinSheet(NEU_CSS, "neu-css.ts"));
+  });
+
+  test("a device panel wears it, and says what it said", () => {
+    const panel = (
+      <DevicePanel
+        device={compressorDevice}
+        onValueChange={ignore}
+        value={compressorDevice.defaults()}
+      />
+    );
+    expect(accessibility(<div className="skin-neu">{panel}</div>)).toEqual(
+      accessibility(panel)
+    );
+  });
+});
+
+describe("the axes", () => {
+  test.each([
+    ["Hardware", HARDWARE_CSS[".skin-hardware"]],
+    ["Neu", NEU_CSS[".skin-neu"]],
+  ])(
+    "%s starts from every axis, and from a shade and an accent of its own",
+    (_name, rules) => {
+      for (const axis of Object.keys(AXES)) {
+        expect(rules).toHaveProperty(axis);
+      }
+      expect(rules).toHaveProperty("--audio-shade");
+      expect(rules).toHaveProperty("--audio-accent");
+    }
+  );
+
+  test.each([
+    ["Hardware", HARDWARE_CSS[".dark .skin-hardware"]],
+    ["Neu", NEU_CSS[".dark .skin-neu"]],
+  ])("%s in the dark is the same skin on another shade", (_name, rules) => {
+    expect(Object.keys(rules).sort()).toEqual([
+      "--audio-accent",
+      "--audio-shade",
+    ]);
   });
 });

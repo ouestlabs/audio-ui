@@ -33,6 +33,7 @@ import {
   sharedDependencies,
 } from "../src/registry/bases/primitives.ts";
 import { HARDWARE_CSS } from "../src/registry/bases/shared/audio-ui/skins/hardware-css.ts";
+import { NEU_CSS } from "../src/registry/bases/shared/audio-ui/skins/neu-css.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { skinSheet } from "./skin-css.ts";
 
@@ -806,6 +807,10 @@ await buildManifests();
 await Bun.write(
   `${REGISTRY}/styles/skins/hardware.css`,
   skinSheet(HARDWARE_CSS, "hardware-css.ts")
+);
+await Bun.write(
+  `${REGISTRY}/styles/skins/neu.css`,
+  skinSheet(NEU_CSS, "neu-css.ts")
 );
 console.log(`  Internal registry namespace: ${NAMESPACE}`);
 
