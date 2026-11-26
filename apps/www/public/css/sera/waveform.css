@@ -245,6 +245,75 @@
   text-indent: var(--spacing, 0.25rem);
   white-space: nowrap;
 }
+[data-slot=waveform][data-variant=live] {
+  position: relative;
+  height: calc(var(--spacing, 0.25rem) * 16);
+}
+[data-slot=waveform][data-variant=live] [data-slot=waveform-canvas] {
+  pointer-events: none;
+  display: block;
+  width: 100%;
+  height: 100%;
+  mask-image: linear-gradient(to right,transparent,black 16px,black calc(100% - 16px),transparent);
+  --waveform-bar-radius: max(0px, min(var(--radius-sm), 3px));
+  --waveform-color: var(--primary);
+  -webkit-mask-image: linear-gradient(to right,transparent,black 16px,black calc(100% - 16px),transparent);
+}
+[data-slot=waveform][data-variant=bars] {
+  min-height: 0px;
+  min-width: 0px;
+  color: var(--primary);
+  &[data-orientation="horizontal"] {
+    height: calc(var(--spacing, 0.25rem) * 16);
+  }
+  &[data-orientation="horizontal"] {
+    width: 100%;
+  }
+  &[data-orientation="vertical"] {
+    height: 100%;
+  }
+  &[data-orientation="vertical"] {
+    width: calc(var(--spacing, 0.25rem) * 16);
+  }
+}
+[data-slot=waveform-bars] {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  gap: calc(var(--spacing, 0.25rem) * 0.75);
+  :where(*[data-align="center"]) & {
+    align-items: center;
+  }
+  :where(*[data-align="end"]) & {
+    align-items: flex-end;
+  }
+  :where(*[data-align="start"]) & {
+    align-items: flex-start;
+  }
+  :where(*[data-orientation="vertical"]) & {
+    flex-direction: column;
+  }
+}
+[data-slot=waveform-bar] {
+  min-height: 0px;
+  min-width: 0px;
+  flex: 1;
+  border-radius: 0;
+  background-color: currentcolor;
+  :where(*[data-orientation="horizontal"]) & {
+    height: calc(var(--waveform-level) * 100%);
+  }
+  :where(*[data-orientation="horizontal"]) & {
+    max-width: calc(var(--spacing, 0.25rem) * 1.5);
+  }
+  :where(*[data-orientation="vertical"]) & {
+    max-height: calc(var(--spacing, 0.25rem) * 1.5);
+  }
+  :where(*[data-orientation="vertical"]) & {
+    width: calc(var(--waveform-level) * 100%);
+  }
+}
 @property --tw-shadow {
   syntax: "*";
   inherits: false;

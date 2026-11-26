@@ -42,6 +42,16 @@ export const waveformParts = Object.freeze({
     "cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap",
   "waveform-hover":
     "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap",
+  // A live waveform and a bar visualizer are the same root, told apart by `data-variant`: a framework that names the root keeps the attribute.
+  "waveform[data-variant=live]": "cn-live-waveform relative",
+  "waveform[data-variant=live] waveform-canvas": `cn-live-waveform-canvas block size-full ${EDGE_FADE}`,
+  "waveform[data-variant=bars]":
+    "cn-bar-visualizer min-h-0 min-w-0 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full",
+  // The bars grow from where the root's `data-align` says.
+  "waveform-bars":
+    "cn-bar-visualizer-bars flex size-full justify-center in-data-[orientation=vertical]:flex-col in-data-[align=center]:items-center in-data-[align=end]:items-end in-data-[align=start]:items-start",
+  "waveform-bar":
+    "cn-bar-visualizer-bar min-h-0 min-w-0 flex-1 in-data-[orientation=horizontal]:h-[calc(var(--waveform-level)*100%)] in-data-[orientation=horizontal]:max-w-1.5 in-data-[orientation=vertical]:max-h-1.5 in-data-[orientation=vertical]:w-[calc(var(--waveform-level)*100%)]",
 });
 
 type RootProps = ComponentProps<typeof WaveformPrimitive.Root>;
@@ -266,15 +276,20 @@ function LiveWaveform({
 }: LiveWaveformProps) {
   return (
     <WaveformPrimitive.Root
-      className={cn("cn-live-waveform relative w-full min-w-0", className)}
-      data-slot="live-waveform"
+      className={cn(
+        waveformParts.waveform,
+        waveformParts["waveform[data-variant=live]"],
+        className
+      )}
+      data-slot="waveform"
+      data-variant="live"
       levels={source ?? undefined}
       loading={loading}
       role="img"
       {...props}
     >
       <WaveformPrimitive.Canvas
-        className={cn("cn-live-waveform-canvas block size-full", EDGE_FADE)}
+        className={waveformParts["waveform[data-variant=live] waveform-canvas"]}
         gain={gain}
         idle={idle}
         mirrored={mirrored}
@@ -318,25 +333,18 @@ function BarVisualizer({
 }: BarVisualizerProps) {
   return (
     <WaveformPrimitive.Root
-      className={cn(
-        "cn-bar-visualizer min-h-0 min-w-0 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full",
-        className
-      )}
+      className={cn(waveformParts["waveform[data-variant=bars]"], className)}
+      data-align={align}
       data-orientation={orientation}
-      data-slot="bar-visualizer"
+      data-slot="waveform"
+      data-variant="bars"
       levels={source ?? undefined}
       loading={loading}
       role="img"
       {...props}
     >
       <WaveformPrimitive.Bars
-        className={cn(
-          "cn-bar-visualizer-bars flex size-full justify-center",
-          orientation === "vertical" && "flex-col",
-          align === "start" && "items-start",
-          align === "center" && "items-center",
-          align === "end" && "items-end"
-        )}
+        className={waveformParts["waveform-bars"]}
         count={count}
         gain={gain}
         idle={idle}
@@ -345,12 +353,7 @@ function BarVisualizer({
       >
         {(index) => (
           <WaveformPrimitive.Bar
-            className={cn(
-              "cn-bar-visualizer-bar min-h-0 min-w-0 flex-1",
-              orientation === "vertical"
-                ? "max-h-1.5 w-[calc(var(--waveform-level)*100%)]"
-                : "h-[calc(var(--waveform-level)*100%)] max-w-1.5"
-            )}
+            className={waveformParts["waveform-bar"]}
             index={index}
             key={index}
           />

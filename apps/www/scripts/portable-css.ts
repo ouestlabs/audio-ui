@@ -34,11 +34,22 @@ const rule = (selector: string, applied: string) =>
 
 const PART_KEY = /^([\w-]+)(.*)$/;
 
-/** A part's selector: its slot, and the attributes its key adds, as `plot-curve[data-fill]` for a curve drawn as an area. */
-export const partSelector = (key: string) => {
-  const [, slot, attributes] = PART_KEY.exec(key) ?? [key, key, ""];
-  return `[data-slot=${slot}]${attributes}`;
-};
+const SPACES = /\s+/;
+
+/**
+ * A part's selector: its slot, and the attributes its key adds, as
+ * `plot-curve[data-fill]` for a curve drawn as an area; a key of several
+ * reads as a part inside another, as `waveform[data-variant=live]
+ * waveform-canvas` for the canvas of a live waveform.
+ */
+export const partSelector = (key: string) =>
+  key
+    .split(SPACES)
+    .map((part) => {
+      const [, slot, attributes] = PART_KEY.exec(part) ?? [part, part, ""];
+      return `[data-slot=${slot}]${attributes}`;
+    })
+    .join(" ");
 
 /** The rules of an element, before Tailwind compiles them. */
 export function partRules(
