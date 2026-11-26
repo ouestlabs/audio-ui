@@ -54,6 +54,8 @@ import {
   pianoParts,
   pianoSizes,
 } from "../src/registry/bases/shared/audio-ui/elements/piano.tsx";
+import { plotParts } from "../src/registry/bases/shared/audio-ui/elements/plot.tsx";
+import { waveformParts } from "../src/registry/bases/shared/audio-ui/elements/waveform.tsx";
 import {
   xypadParts,
   xypadSizes,
@@ -897,6 +899,8 @@ const PORTABLE: [
   ["envelope", envelopeParts, envelopeSizes, ENVELOPE_SHAKE],
   ["pad", padParts, {}],
   ["piano", pianoParts, pianoSizes],
+  ["plot", plotParts, {}],
+  ["waveform", waveformParts, {}],
 ];
 await Promise.all(
   STYLES.flatMap((style) =>

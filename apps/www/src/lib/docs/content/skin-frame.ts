@@ -3,12 +3,13 @@ import type { ShadowSkin } from "@/lib/registry/core/mount-styled";
 import { devices } from "@/registry/bases/shared/devices/_registry";
 
 /** The elements a skin dresses, in every framework: a preview of one wears the skin chosen. */
-const SKINNABLE = /^(knob|fader|meter|xypad|envelope|pad|piano)-(?!roll)/;
+const SKINNABLE =
+  /^(knob|fader|meter|xypad|envelope|pad|piano|plot|waveform)-(?!roll)/;
 
 export const isSkinnable = (name: string) => SKINNABLE.test(name);
 
-/** The elements as wide as their place: their plate is too. Every other plate holds its element and no more. */
-const FULL_WIDTH = /^(?:envelope|piano)-/;
+/** The elements as wide as their place (the envelope, the piano, the plot, the waveform): their plate is too. Every other plate holds its element and no more. */
+const FULL_WIDTH = /^(?:envelope|piano|plot|waveform)-/;
 
 const fullWidth = (name: string) => FULL_WIDTH.test(name);
 

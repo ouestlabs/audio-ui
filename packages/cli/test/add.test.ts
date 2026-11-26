@@ -138,6 +138,15 @@ describe("in Vue", () => {
     expect(index.trimEnd().endsWith('@import "./skin-neu.css";')).toBe(true);
   });
 
+  test("a kit is its adapter's parts, drawn by its sheet", async () => {
+    const cwd = project(VUE);
+    const result = await run(cwd, ["plot"]);
+    expect(result.items).toContain("plot-vue");
+    expect(read(cwd, "src/components/audio-ui/css/plot.css")).toBe(
+      read(REGISTRY, "css/nova/plot.css")
+    );
+  });
+
   test("the sheets gather in one index, which keeps what is in it", async () => {
     const cwd = project(VUE);
     await run(cwd, ["knob"]);

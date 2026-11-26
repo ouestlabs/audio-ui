@@ -130,7 +130,7 @@
   mask: repeating-linear-gradient(to right, #000 0 3px, transparent 3px 4px);
 }
 
-.skin-hardware :is([data-slot=xypad-control], [data-slot=envelope-frame]) {
+.skin-hardware :is([data-slot=xypad-control], [data-slot=envelope-frame], [data-slot=plot], [data-slot=waveform-control]) {
   --background: var(--audio-screen);
   --card: var(--audio-screen);
   --popover: var(--audio-screen);
@@ -144,6 +144,11 @@
   --ring: var(--audio-accent);
   --tw-shadow: var(--audio-screen-shadow);
   border-color: transparent;
+}
+
+.skin-hardware [data-slot=waveform-control] {
+  background-color: var(--audio-screen);
+  border-radius: calc(6px * var(--audio-roundness));
 }
 
 .skin-hardware [data-slot=pad-item] {

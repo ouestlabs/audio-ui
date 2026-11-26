@@ -21,22 +21,22 @@ function formatTime(seconds) {
 /** Draws the waveform into `element`, and returns what takes it away. The canvas and the inputs are made for you. */
 export default function waveformWebDemo(element) {
   element.innerHTML = `
-    <div class="flex w-full min-w-0 flex-col gap-2">
-      <audio-ui-waveform class="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed" default-value="30" duration="${DURATION_SECONDS}">
-        <audio-ui-waveform-control aria-label="Track progress" class="cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress">
-          <audio-ui-waveform-canvas class="cn-waveform-canvas block size-full [-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]"></audio-ui-waveform-canvas>
-          <audio-ui-waveform-region class="cn-waveform-region pointer-events-none inset-y-0" region="loop" value="[48,96]">
-            <audio-ui-waveform-region-start class="cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0 after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3" region="loop"></audio-ui-waveform-region-start>
-            <audio-ui-waveform-region-end class="cn-waveform-region-handle pointer-events-auto absolute inset-y-0 w-1.5 cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0 after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3" region="loop"></audio-ui-waveform-region-end>
+    <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; min-width: 0">
+      <audio-ui-waveform default-value="30" duration="${DURATION_SECONDS}">
+        <audio-ui-waveform-control aria-label="Track progress">
+          <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
+          <audio-ui-waveform-region region="loop" value="[48,96]">
+            <audio-ui-waveform-region-start region="loop"></audio-ui-waveform-region-start>
+            <audio-ui-waveform-region-end region="loop"></audio-ui-waveform-region-end>
           </audio-ui-waveform-region>
-          <audio-ui-waveform-marker class="cn-waveform-marker pointer-events-none inset-y-0 w-px" value="20"><span class="cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap">Verse</span></audio-ui-waveform-marker>
-          <audio-ui-waveform-marker class="cn-waveform-marker pointer-events-none inset-y-0 w-px" value="124"><span class="cn-waveform-marker-label absolute top-0 left-1 whitespace-nowrap">Chorus</span></audio-ui-waveform-marker>
-          <audio-ui-waveform-hover class="cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap"></audio-ui-waveform-hover>
-          <audio-ui-waveform-playhead class="cn-waveform-playhead group-data-outside/waveform:hidden"></audio-ui-waveform-playhead>
-          <audio-ui-waveform-thumb class="cn-waveform-thumb group-data-outside/waveform:hidden"></audio-ui-waveform-thumb>
+          <audio-ui-waveform-marker value="20"><span data-slot="waveform-marker-label">Verse</span></audio-ui-waveform-marker>
+          <audio-ui-waveform-marker value="124"><span data-slot="waveform-marker-label">Chorus</span></audio-ui-waveform-marker>
+          <audio-ui-waveform-hover></audio-ui-waveform-hover>
+          <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
+          <audio-ui-waveform-thumb></audio-ui-waveform-thumb>
         </audio-ui-waveform-control>
       </audio-ui-waveform>
-      <p class="text-muted-foreground text-sm tabular-nums" data-loop>Loop 0:48 – 1:36</p>
+      <p style="color: var(--muted-foreground); font-size: 0.875rem; font-variant-numeric: tabular-nums" data-loop>Loop 0:48 – 1:36</p>
     </div>`;
   const waveform = element.querySelector("audio-ui-waveform");
   const hover = element.querySelector("audio-ui-waveform-hover");

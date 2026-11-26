@@ -143,11 +143,14 @@ export function plotSuite(framework: string, mount: MountPlot) {
       expect(d.startsWith("M 0 1")).toBe(true);
       expect(d.endsWith("1 0")).toBe(true);
       expect(p.curve.tagName.toLowerCase()).not.toBe("path");
+      expect(p.curve.hasAttribute("data-fill")).toBe(false);
       p.unmount();
       const filled = await render(mount, {
         curve: { fillTo: 0, fn: (x) => x },
       });
       expect(pathOf(filled.curve).endsWith("Z")).toBe(true);
+      // A sheet tells the area from the line by it.
+      expect(filled.curve.hasAttribute("data-fill")).toBe(true);
       filled.unmount();
     });
 
@@ -219,7 +222,11 @@ export function plotSuite(framework: string, mount: MountPlot) {
       expect(pathOf(p.trace)).toBe("M 0 1 L 1 0");
       await p.act(() => source.set([100, 0]));
       expect(pathOf(p.trace)).toBe("M 0 0 L 1 1");
+      expect(p.trace.hasAttribute("data-fill")).toBe(false);
       p.unmount();
+      const filled = await render(mount, { trace: { fillTo: 0, source } });
+      expect(filled.trace.hasAttribute("data-fill")).toBe(true);
+      filled.unmount();
     });
 
     test("a dot sits at a point, and a live one moves with its source", async () => {
