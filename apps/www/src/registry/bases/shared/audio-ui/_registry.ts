@@ -58,6 +58,11 @@ export const audioUi: RegistryItem[] = [
     "A grid of pads to strike, each sounding while held and flashing as hard as it was struck."
   ),
   ...styledItems(
+    "sequencer",
+    "Sequencer",
+    "A step sequencer: a row of steps per sound, the beats marked, and a bar under each row for how loud each step plays."
+  ),
+  ...styledItems(
     "piano",
     "Piano",
     "A piano keyboard to play with the pointer or the keys: its white and black keys, lit while held."

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { onBeforeUnmount, ref } from "vue";
+import Sequencer from "@/registry/bases/shared/audio-ui/elements/vue/Sequencer.vue";
 import {
   triggerHihat,
   triggerKick,
@@ -7,7 +8,6 @@ import {
 } from "@/registry/lib/drums/drum-synthesis";
 import { createStepPlayer } from "@/registry/lib/drums/step-player";
 import { webAudio } from "@/registry/lib/web-audio";
-import { Sequencer } from "@/registry/primitives/sequencer/vue";
 
 const STEPS = 16;
 const BPM = 112;
@@ -66,72 +66,30 @@ onBeforeUnmount(() => player.stop());
 </script>
 
 <template>
-  <div class="flex w-full flex-col gap-3">
-    <Sequencer.Root
+  <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%">
+    <Sequencer
       aria-label="Drum pattern"
-      class="cn-sequencer w-full min-w-0 select-none data-disabled:opacity-50 grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1.5"
+      show-velocity
+      :row-labels="ROWS"
       :source="player.source"
       :value="pattern"
       :velocities="velocities"
       @value-change="(next) => { pattern = next; }"
       @velocity-change="(next) => { velocities = next; }"
+    />
+    <div
+      style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem"
     >
-      <template #default="{ state }">
-        <Sequencer.Row
-          class="col-span-2 grid grid-cols-subgrid items-center"
-          v-for="row in state.rows"
-          :key="row"
-          :aria-label="ROWS[row - 1]"
-          :index="row - 1"
-        >
-          <span
-            aria-hidden="true"
-            class="max-w-24 truncate text-muted-foreground text-xs"
-            >{{
-              ROWS[row - 1]
-            }}</span
-          >
-          <div class="flex min-w-0 flex-1 flex-col gap-1">
-            <div class="grid auto-cols-fr grid-flow-col gap-1">
-              <Sequencer.Cell
-                class="cn-sequencer-cell flex h-9 min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground"
-                v-for="step in state.steps"
-                :key="step"
-                :aria-label="`${ROWS[row - 1]}, step ${step}`"
-                :class="(step - 1) % 4 === 0 && 'cn-sequencer-cell-beat'"
-                :row="row - 1"
-                :step="step - 1"
-              />
-            </div>
-            <div class="grid auto-cols-fr grid-flow-col gap-1">
-              <Sequencer.Velocity
-                class="cn-sequencer-velocity group/velocity relative h-8 min-w-0 cursor-ns-resize touch-none outline-none"
-                v-for="step in state.steps"
-                :key="step"
-                :aria-label="`${ROWS[row - 1]}, step ${step} velocity`"
-                :row="row - 1"
-                :step="step - 1"
-              >
-                <span
-                  class="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]"
-                />
-              </Sequencer.Velocity>
-            </div>
-          </div>
-        </Sequencer.Row>
-      </template>
-    </Sequencer.Root>
-    <div class="flex items-center justify-between gap-2">
       <button
-        class="inline-flex h-8 items-center rounded-md border bg-background px-3 text-sm hover:bg-muted"
+        style="height: 2rem; padding: 0 0.75rem; border: 1px solid var(--border); border-radius: var(--radius, 0.5rem); background: var(--background); color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer"
         type="button"
         @click="toggle"
       >
         {{ playing ? "Stop" : "Play" }}
       </button>
       <button
-        class="inline-flex h-8 items-center rounded-md px-3 text-sm hover:bg-muted"
         data-agent-confirm="Clears every step of the pattern"
+        style="height: 2rem; padding: 0 0.75rem; border: 0; border-radius: var(--radius, 0.5rem); background: transparent; color: var(--foreground); font: inherit; font-size: 0.875rem; cursor: pointer"
         type="button"
         @click="pattern = EMPTY()"
       >

@@ -1355,6 +1355,12 @@
   "sequencer-demo": [
     "components/examples/sequencer-demo.tsx"
   ],
+  "sequencer-element-svelte": [
+    "~/src/lib/components/audio-ui/sequencer/Sequencer.svelte"
+  ],
+  "sequencer-element-vue": [
+    "components/audio-ui/sequencer/Sequencer.vue"
+  ],
   "sequencer-react": [
     "components/audio-ui/primitive.ts",
     "components/audio-ui/sequencer/sequencer.ts",

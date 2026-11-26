@@ -363,7 +363,7 @@
   }
 
   .cn-sequencer-velocity-fill {
-    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none group-data-on/velocity:bg-primary;
+    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none group-data-on/sequencer-velocity:bg-primary;
   }
 
   /* MARK: Pad (pad ← cn-sequencer-cell, flash mixes primary by --pad-velocity) */

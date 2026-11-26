@@ -166,6 +166,33 @@
   box-shadow: var(--audio-cap-shadow), 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent);
 }
 
+.skin-hardware [data-slot=sequencer] {
+  --muted: var(--audio-cap);
+  --muted-foreground: var(--audio-print);
+  --primary: var(--audio-accent);
+  --primary-foreground: oklch(0.15 0.01 40);
+  --border: color-mix(in oklab, var(--audio-print) 22%, var(--audio-body));
+  --ring: var(--audio-accent);
+  --foreground: var(--audio-print);
+}
+
+.skin-hardware [data-slot=sequencer-cell] {
+  background-image: var(--audio-cap-image);
+  box-shadow: var(--audio-cap-shadow);
+}
+
+.skin-hardware [data-slot=sequencer-cell]:focus-visible {
+  box-shadow: var(--audio-cap-shadow), 0 0 0 3px color-mix(in oklab, var(--audio-accent) 50%, transparent);
+}
+
+.skin-hardware [data-slot=sequencer-cell][data-current] {
+  box-shadow: var(--audio-cap-shadow), 0 0 0 2px var(--audio-accent);
+}
+
+.skin-hardware [data-slot=sequencer-velocity] {
+  --muted: var(--audio-screen);
+}
+
 .skin-hardware [data-slot=piano] {
   --piano-key-white: oklch(0.95 0.012 85);
   --piano-key-black: oklch(0.2 0.006 90);
