@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { ExpandEditor } from "@/components/site/home/expand-editor";
-import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
 import { DawLink } from "@/components/site/navigation/daw-link";
 import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { GitHubLink } from "@/components/site/navigation/github-link";
@@ -15,72 +14,13 @@ import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Wordmark } from "@/components/site/navigation/wordmark";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
+import { buildCommandMenuGroups } from "@/lib/docs/content/command-groups";
 import type { source } from "@/lib/docs/content/source";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
 
 // The tree the layout's loader reads on the server. Reading `source` here would ship every docs page and its demos to every page.
 type PageTree = ReturnType<typeof source.getPageTree>;
-type PageTreeNode = PageTree["children"][number];
-
-function collectCommandMenuPages(
-  items: PageTreeNode[],
-  seen: Set<string>,
-  pages: CommandMenuGroup["pages"]
-) {
-  for (const item of items) {
-    if (item.type === "folder" && item.children) {
-      collectCommandMenuPages(item.children, seen, pages);
-      continue;
-    }
-
-    if (item.type !== "page") {
-      continue;
-    }
-
-    const name = item.name?.toString() ?? "";
-    const key = name || item.url;
-
-    if (seen.has(key)) {
-      continue;
-    }
-
-    seen.add(key);
-    pages.push({
-      isComponent: item.url.includes("/components/"),
-      name,
-      url: item.url,
-    });
-  }
-}
-
-function buildCommandMenuGroup(node: PageTreeNode): CommandMenuGroup | null {
-  if (node.type !== "folder") {
-    return null;
-  }
-
-  const pages: CommandMenuGroup["pages"] = [];
-  collectCommandMenuPages(node.children, new Set<string>(), pages);
-
-  if (pages.length === 0) {
-    return null;
-  }
-
-  const groupName = node.name?.toString() ?? "";
-
-  return {
-    id: node.$id ?? groupName,
-    name: groupName,
-    pages,
-  };
-}
-
-function buildCommandMenuGroups(nodes: PageTreeNode[]) {
-  return nodes.flatMap<CommandMenuGroup>((node) => {
-    const group = buildCommandMenuGroup(node);
-    return group ? [group] : [];
-  });
-}
 
 function SiteLogo() {
   return (
