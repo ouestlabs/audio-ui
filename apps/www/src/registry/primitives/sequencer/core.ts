@@ -859,14 +859,11 @@ export const sequencer: SequencerPrimitive = definePrimitive({
           disabled: flag(state.disabled),
           max: "1",
           min: "0",
+          step: "any",
           style: css(VISUALLY_HIDDEN),
           type: "range",
           value: String(velocity),
         };
-      },
-      // `step` is set once, as a property: in the attributes it would share its name with this part's own `step` prop, which the custom element re-renders on without end.
-      bind: (el) => {
-        (el as HTMLInputElement).step = "any";
       },
       on: {
         change: (event, { api, el, props }) =>
