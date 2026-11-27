@@ -6,6 +6,7 @@ import {
 import { createChannelEqEngine } from "@/registry/bases/shared/devices/channel-eq/engine";
 import { ChannelEqPanel } from "@/registry/bases/shared/devices/channel-eq/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -22,9 +23,11 @@ export default function BlockChannelEq() {
     channelEqDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createChannelEqEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, channelEqDevice);

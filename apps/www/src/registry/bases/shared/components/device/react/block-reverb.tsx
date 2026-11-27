@@ -6,6 +6,7 @@ import {
 import { createReverbEngine } from "@/registry/bases/shared/devices/reverb/engine";
 import { ReverbPanel } from "@/registry/bases/shared/devices/reverb/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -21,9 +22,11 @@ export default function BlockReverb() {
     reverbDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createReverbEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, reverbDevice);

@@ -4,6 +4,7 @@
     "---Devices and engines---",
     "device-library",
     "device-signal",
+    "master-bus",
     "polyphony",
     "voice-pool",
     "rack",

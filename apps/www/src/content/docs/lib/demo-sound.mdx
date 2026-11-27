@@ -20,14 +20,15 @@ source.connect(output);
 source.start();
 ```
 
-A device chooses its own sound. `useDeviceLoop` plays one through an engine, gives back its tempo for a time parameter that syncs to it, and a session lets a preview's bar change the sound:
+A device chooses its own sound. `useDemoSound` renders it, with the kick that goes with it as a sidechain key when asked, for [`useDeviceLoop`](/docs/hooks/use-device-loop) to play through an engine, and a session lets a preview's bar change the sound:
 
 ```tsx
-import { useDemoSource } from "@/hooks/use-demo-source";
+import { useDemoSound } from "@/hooks/use-demo-source";
 import { useDeviceLoop } from "@/hooks/use-device-loop";
 
-// A de-esser plays the groove by default; a gate plays the chord and is keyed by the kick that goes with it.
-useDeviceLoop({ create, destination, source: "groove", state });
+// A de-esser plays the groove; a ducker plays the chord, keyed by the kick that goes with it.
+const sound = useDemoSound("chord", { key: true });
+useDeviceLoop({ create, destination, sound, state });
 ```
 
 `useDemoSource("groove")` returns the sound chosen in the nearest `AudioSessionProvider`, or `"groove"` when nobody has chosen. Outside a session it is always the default.

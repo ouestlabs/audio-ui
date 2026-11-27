@@ -6,6 +6,7 @@ import {
 import { createBinauralPannerEngine } from "@/registry/bases/shared/devices/binaural-panner/engine";
 import { BinauralPannerPanel } from "@/registry/bases/shared/devices/binaural-panner/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -21,9 +22,11 @@ export default function BlockBinauralPanner() {
     binauralPannerDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createBinauralPannerEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, binauralPannerDevice);

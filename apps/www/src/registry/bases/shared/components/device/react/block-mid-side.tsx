@@ -6,6 +6,7 @@ import {
 import { createMidSideEngine } from "@/registry/bases/shared/devices/mid-side/engine";
 import { MidSidePanel } from "@/registry/bases/shared/devices/mid-side/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -22,10 +23,11 @@ export default function BlockMidSide() {
     midSideDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createMidSideEngine,
     destination: master,
-    source: "groove",
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, midSideDevice);

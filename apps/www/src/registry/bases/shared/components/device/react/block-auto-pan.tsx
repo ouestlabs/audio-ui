@@ -6,6 +6,7 @@ import {
 import { createAutoPanEngine } from "@/registry/bases/shared/devices/auto-pan/engine";
 import { AutoPanPanel } from "@/registry/bases/shared/devices/auto-pan/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -21,9 +22,11 @@ export default function BlockAutoPan() {
     () => autoPanDevice.apply(autoPanDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine, tempo } = useDeviceLoop({
     create: createAutoPanEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, autoPanDevice);
