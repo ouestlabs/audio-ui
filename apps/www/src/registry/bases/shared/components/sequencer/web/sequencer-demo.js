@@ -70,8 +70,10 @@ export default function sequencerWebDemo(element) {
   if (grid) {
     grid.source = player.source;
   }
+  // The sequencer is controlled by its attributes: each change is written back, or it returns to the last pattern written.
   const onInput = (event) => {
     pattern = event.detail.value;
+    grid?.setAttribute("value", JSON.stringify(pattern));
   };
   const onClick = (event) => {
     const action = event.target
@@ -96,6 +98,7 @@ export default function sequencerWebDemo(element) {
   };
   const onVelocity = (event) => {
     velocities = event.detail.value;
+    grid?.setAttribute("velocities", JSON.stringify(velocities));
   };
   grid?.addEventListener("input", onInput);
   grid?.addEventListener("velocitychange", onVelocity);
