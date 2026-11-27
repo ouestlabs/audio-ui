@@ -31,9 +31,16 @@ function syncChildren(
   }
 }
 
-/** A part that belongs to a note or a row, with the attribute that names it. */
+/**
+ * A part that belongs to a note or a row, with the attribute that names it.
+ * It is made with the `data-slot` it gets: `data-slot` is a prop of every
+ * part (`nameSlots`), so the element observes it, and the kernel writing it
+ * first re-renders every part from inside the last: a roll's notes and rows
+ * would run past the call stack.
+ */
 function part(tag: string, attribute: string, key: string, extra = {}) {
   const element = document.createElement(tag);
+  element.setAttribute("data-slot", tag.slice("audio-ui-".length));
   element.setAttribute(attribute, key);
   for (const [name, value] of Object.entries(extra)) {
     element.setAttribute(name, String(value));

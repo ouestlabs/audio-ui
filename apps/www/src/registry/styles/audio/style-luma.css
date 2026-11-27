@@ -355,7 +355,7 @@
   }
 
   .cn-sequencer-cell-beat {
-    @apply bg-muted;
+    @apply not-aria-pressed:bg-muted;
   }
 
   .cn-sequencer-velocity {
