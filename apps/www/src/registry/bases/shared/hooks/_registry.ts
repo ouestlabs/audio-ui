@@ -193,8 +193,8 @@ export const hooks: RegistryItem[] = [
   hookItem("use-master-bus", {
     categories: ["audio", "synth", "sequencer"],
     description:
-      "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
-    registryDependencies: ["@audio-ui/web-audio"],
+      "A master output bus with a safety limiter on the page's context (master-bus), its volume following a value: every source connects into one gain node that a single fader governs.",
+    registryDependencies: ["@audio-ui/master-bus", "@audio-ui/web-audio"],
   }),
   hookItem("use-device-engines", {
     categories: ["hooks", "audio", "device"],

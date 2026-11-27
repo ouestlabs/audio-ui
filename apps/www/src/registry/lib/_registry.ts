@@ -6,6 +6,12 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "web-audio"],
     description: "Web Audio Lib",
   }),
+  libItem("master-bus", {
+    categories: ["lib", "audio", "web-audio"],
+    dependencies: [],
+    description:
+      "A master output bus on a context: a gain for the volume, then a safety limiter, then the destination. Every source connects to its input, so one control governs the level and a loud mix cannot clip the output.",
+  }),
   movedItem("device-engine", "device"),
   movedItem("audio-worklet", "worklet"),
   libItem("envelope-ramp", {

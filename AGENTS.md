@@ -84,7 +84,7 @@ Shared audio glue has one home each. Use it rather than writing a copy into a bl
 | Concern | Module |
 | --- | --- |
 | The page's `AudioContext`, and resuming it in the gesture that starts sound | `lib/web-audio` (`webAudio.getContext()`, `webAudio.resume()`); engines and libs take `ctx` instead, a hook given a node uses its context |
-| A screen's output: one gain and a safety limiter | `hooks/use-master-bus` |
+| A screen's output: one gain and a safety limiter | `lib/master-bus` (`createMasterBus(ctx, volume)`), `hooks/use-master-bus` in React |
 | Loading a worklet's source into a context, once per context | `@/lib/engine/worklet` (`loadWorklet`) |
 | What an engine is and is made of: its contract, a worklet stage, a feed, noise | `@/lib/engine/device` |
 | Anything an audio.js atom does (a decoder, an encoder, loudness, a pitch or a key, MIDI files) | the engine's modules (`@/engine/<module>`), never the atom imported in the registry |

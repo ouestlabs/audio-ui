@@ -1363,6 +1363,32 @@
   },
   {
     "dependencies": [],
+    "description": "A master output bus on a context: a gain for the volume, then a safety limiter, then the destination. Every source connects to its input, so one control governs the level and a loud mix cannot clip the output.",
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "MasterBus",
+        "summary": "A master output bus: the node every source connects to, its volume, and what takes it away."
+      },
+      {
+        "kind": "function",
+        "name": "createMasterBus",
+        "summary": "A master output bus on `ctx`: a gain for the volume, then a safety limiter, then the destination."
+      }
+    ],
+    "files": [
+      "lib/master-bus.ts"
+    ],
+    "from": "@/lib/master-bus",
+    "kind": "lib",
+    "name": "master-bus",
+    "registryDependencies": [],
+    "usedBy": [
+      "use-master-bus"
+    ]
+  },
+  {
+    "dependencies": [],
     "description": "A mixer on the Web Audio API: a channel per track and return, with its chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters, into a main track",
     "exports": [
       {
@@ -2479,12 +2505,12 @@
   },
   {
     "dependencies": [],
-    "description": "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
+    "description": "A master output bus with a safety limiter on the page's context (master-bus), its volume following a value: every source connects into one gain node that a single fader governs.",
     "exports": [
       {
         "kind": "function",
         "name": "useMasterBus",
-        "summary": "A master output bus: one persistent GainNode kept in sync with a volume control, then a safety limiter, then the shared AudioContext's destination."
+        "summary": "A master output bus on the page's context (`createMasterBus`), its volume kept in sync with `volume`."
       }
     ],
     "files": [
@@ -2494,6 +2520,7 @@
     "kind": "hook",
     "name": "use-master-bus",
     "registryDependencies": [
+      "master-bus",
       "web-audio"
     ],
     "usedBy": [

@@ -853,6 +853,9 @@
   "manifest-worklet": [
     "lib/manifest-worklet.ts"
   ],
+  "master-bus": [
+    "lib/master-bus.ts"
+  ],
   "menubar": [
     "components/ui/menubar.tsx"
   ],
