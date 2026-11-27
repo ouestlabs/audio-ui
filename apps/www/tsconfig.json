@@ -23,38 +23,38 @@
         "./src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
       "@/primitives/envelope": [
-        "./src/registry/primitives/envelope/envelope.ts"
+        "./src/registry/primitives/envelope/core.ts"
       ],
       "@/primitives/fader": [
-        "./src/registry/primitives/fader/fader.ts"
+        "./src/registry/primitives/fader/core.ts"
       ],
       "@/primitives/knob": [
-        "./src/registry/primitives/knob/knob.ts"
+        "./src/registry/primitives/knob/core.ts"
       ],
       "@/primitives/meter": [
-        "./src/registry/primitives/meter/meter.ts"
+        "./src/registry/primitives/meter/core.ts"
       ],
-      "@/primitives/pad": ["./src/registry/primitives/pad/pad.ts"],
+      "@/primitives/pad": ["./src/registry/primitives/pad/core.ts"],
       "@/primitives/piano": [
-        "./src/registry/primitives/piano/piano.ts"
+        "./src/registry/primitives/piano/core.ts"
       ],
       "@/primitives/piano-roll": [
-        "./src/registry/primitives/piano-roll/piano-roll.ts"
+        "./src/registry/primitives/piano-roll/core.ts"
       ],
       "@/primitives/plot": [
-        "./src/registry/primitives/plot/plot.ts"
+        "./src/registry/primitives/plot/core.ts"
       ],
       "@/primitives/sequencer": [
-        "./src/registry/primitives/sequencer/sequencer.ts"
+        "./src/registry/primitives/sequencer/core.ts"
       ],
       "@/primitives/timeline": [
-        "./src/registry/primitives/timeline/timeline.ts"
+        "./src/registry/primitives/timeline/core.ts"
       ],
       "@/primitives/waveform": [
-        "./src/registry/primitives/waveform/waveform.ts"
+        "./src/registry/primitives/waveform/core.ts"
       ],
       "@/primitives/xypad": [
-        "./src/registry/primitives/xypad/xypad.ts"
+        "./src/registry/primitives/xypad/core.ts"
       ],
       "@/engine/*": ["./src/registry/lib/engine/*/index.ts"],
       "@/webgl/*": ["./src/registry/lib/webgl/*/index.ts"],

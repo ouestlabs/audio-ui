@@ -21,27 +21,27 @@
         "../www/src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
       "@/primitives/envelope": [
-        "../www/src/registry/primitives/envelope/envelope.ts"
+        "../www/src/registry/primitives/envelope/core.ts"
       ],
-      "@/primitives/fader": ["../www/src/registry/primitives/fader/fader.ts"],
-      "@/primitives/knob": ["../www/src/registry/primitives/knob/knob.ts"],
-      "@/primitives/meter": ["../www/src/registry/primitives/meter/meter.ts"],
-      "@/primitives/pad": ["../www/src/registry/primitives/pad/pad.ts"],
-      "@/primitives/piano": ["../www/src/registry/primitives/piano/piano.ts"],
+      "@/primitives/fader": ["../www/src/registry/primitives/fader/core.ts"],
+      "@/primitives/knob": ["../www/src/registry/primitives/knob/core.ts"],
+      "@/primitives/meter": ["../www/src/registry/primitives/meter/core.ts"],
+      "@/primitives/pad": ["../www/src/registry/primitives/pad/core.ts"],
+      "@/primitives/piano": ["../www/src/registry/primitives/piano/core.ts"],
       "@/primitives/piano-roll": [
-        "../www/src/registry/primitives/piano-roll/piano-roll.ts"
+        "../www/src/registry/primitives/piano-roll/core.ts"
       ],
-      "@/primitives/plot": ["../www/src/registry/primitives/plot/plot.ts"],
+      "@/primitives/plot": ["../www/src/registry/primitives/plot/core.ts"],
       "@/primitives/sequencer": [
-        "../www/src/registry/primitives/sequencer/sequencer.ts"
+        "../www/src/registry/primitives/sequencer/core.ts"
       ],
       "@/primitives/timeline": [
-        "../www/src/registry/primitives/timeline/timeline.ts"
+        "../www/src/registry/primitives/timeline/core.ts"
       ],
       "@/primitives/waveform": [
-        "../www/src/registry/primitives/waveform/waveform.ts"
+        "../www/src/registry/primitives/waveform/core.ts"
       ],
-      "@/primitives/xypad": ["../www/src/registry/primitives/xypad/xypad.ts"],
+      "@/primitives/xypad": ["../www/src/registry/primitives/xypad/core.ts"],
       "@/engine/*": ["../www/src/registry/lib/engine/*/index.ts"]
     },
     "types": ["bun", "react", "react-dom"]

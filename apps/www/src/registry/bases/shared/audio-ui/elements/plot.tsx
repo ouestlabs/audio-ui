@@ -10,7 +10,7 @@ import {
   useRef,
 } from "react";
 import { cn } from "@/registry/lib/utils";
-import { type PlotAxis, valueOn } from "@/registry/primitives/plot/plot";
+import { type PlotAxis, valueOn } from "@/registry/primitives/plot/core";
 import { Plot as PlotPrimitive } from "@/registry/primitives/plot/react";
 
 /**

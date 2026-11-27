@@ -12,7 +12,7 @@ import { webAudio } from "@/registry/lib/web-audio";
 import type {
   PadOffDetails,
   PadOnDetails,
-} from "@/registry/primitives/pad/pad";
+} from "@/registry/primitives/pad/core";
 
 const VOLUME = 0.7;
 /** How fast a choked sound fades out, as a time constant in seconds. */

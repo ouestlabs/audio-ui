@@ -54,7 +54,19 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set<string>();
+// The packages we publish, by the name after `@audio-ui/`: `cli`, `icons`.
+const PACKAGES = new Set(
+  await Promise.all(
+    [
+      ...new Bun.Glob("*/package.json").scanSync({
+        absolute: true,
+        cwd: `${import.meta.dir}/../../../packages`,
+      }),
+    ].map(async (path) =>
+      ((await Bun.file(path).json()).name as string).replace("@audio-ui/", "")
+    )
+  )
+);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");

@@ -55,8 +55,8 @@ bun test
 
 ### The primitives (`apps/www/src/registry/primitives/`)
 
-- Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad: no package, files of the registry that the CLI copies into a project. `<name>/<name>.ts` is the primitive written by hand over `primitive.ts` (what every primitive shares), with only `@ui-sdk/*` as dependencies; beside it, the adapters (React, Vue, Svelte, custom elements) in `<name>/<framework>/`
-- A file imports a primitive as `@/primitives/<name>` (a tsconfig path, never installed): the registry build rewrites it to the path the file lands at. Import a primitive by a relative path or by that alias, never as `@/components/audio-ui/<name>/<name>`: the shadcn CLI shortens it to the file itself
+- Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad: no package, files of the registry that the CLI copies into a project. `<name>/core.ts` is the primitive written by hand over `primitive.ts` (what every primitive shares), with only `@ui-sdk/*` as dependencies; beside it, the adapters (React, Vue, Svelte, custom elements) in `<name>/<framework>/`
+- A file imports a primitive as `@/primitives/<name>` (a tsconfig path, never installed): the registry build rewrites it to where it installs, `@/components/audio-ui/<name>/core`. No installed file imports by a relative path that leaves its alias folder (`components/`, `hooks/`, `lib/`): `test/install-paths.test.ts` checks it
 - A file shared by several primitives (`primitive.ts`, `grid.ts`, `frame.ts`, `pitch.ts`…) only gains exports once released, since the CLI keeps the copy a project already holds: `test/shared-files.test.ts` fails when one loses an export
 
 ### `apps/www/src/registry/`: one registry tree

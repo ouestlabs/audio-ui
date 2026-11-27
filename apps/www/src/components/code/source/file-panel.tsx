@@ -31,7 +31,7 @@ export function FilePanel({
   name: string;
   /** Called with the code once it is loaded: for what holds several files, such as a stack's download. */
   onCode?: (code: string) => void;
-  /** Where the file lands (`components/audio-ui/knob/knob.ts`), or its name. */
+  /** Where the file lands (`components/audio-ui/knob/core.ts`), or its name. */
   path: string;
   /** The code, given where to report it once loaded. */
   source: (onCode: (code: string) => void) => ReactNode;
