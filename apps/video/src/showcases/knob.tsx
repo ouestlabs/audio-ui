@@ -1,5 +1,5 @@
 import { Knob } from "@/registry/bases/shared/audio-ui/elements/knob";
-import { START_ANGLE, SWEEP_ANGLE } from "@/registry/primitives/knob/knob";
+import { START_ANGLE, SWEEP_ANGLE } from "@/registry/primitives/knob/core";
 import { LOGO_NOTCH_ANGLE } from "../brand.tsx";
 import { activeRing, clamp, MOTION, pressed, ramp, tw } from "../motion.ts";
 

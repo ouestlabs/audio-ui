@@ -1,4 +1,5 @@
 import manifest from "@/lib/docs/content/entries.generated.json";
+import { REACT_LIBS } from "@/lib/docs/content/framework-paths";
 import packageModules from "@/lib/docs/content/package-modules.generated.json";
 
 /** A hook or a lib as its entry page heads it: what `scripts/build-entries.ts` reads from the registry and the sources. */
@@ -68,9 +69,14 @@ const MODULE_TAG = /<Module\s+from="([^"]+)"\s*\/>/g;
 export function entryMarkdown(entry: Entry): string {
   const list = (names: readonly string[]) =>
     names.map((name) => `\`${name}\``).join(", ") || "nothing";
+  // A hook, or a lib that needs React, has no install in the other frameworks.
+  const reactOnly = entry.kind === "hook" || REACT_LIBS.includes(entry.name);
   return [
     "```bash",
-    `npx shadcn@latest add @audio-ui/${entry.name}`,
+    `npx shadcn@latest add @audio-ui/${entry.name}${reactOnly ? "" : "  # React"}`,
+    ...(reactOnly
+      ? []
+      : [`npx @audio-ui/cli add ${entry.name}  # Vue, Svelte, web`]),
     "```",
     "",
     "```ts",

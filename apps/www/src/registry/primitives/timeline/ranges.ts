@@ -5,17 +5,17 @@ import {
   type SlotDefinition,
 } from "@ui-sdk/core";
 import { flag, sourceOf, VISUALLY_HIDDEN } from "../primitive";
-import { laneOf, placedOver } from "./layout";
-import {
-  createRangeController,
-  type RangeController,
-} from "./range-controller";
 import type {
   DescribePosition,
   TimelineApi,
   TimelinePublicState,
   TimelineState,
-} from "./timeline";
+} from "./core";
+import { laneOf, placedOver } from "./layout";
+import {
+  createRangeController,
+  type RangeController,
+} from "./range-controller";
 
 /**
  * The ranges of the timeline: a stretch laid over a lane, such as a loop or a

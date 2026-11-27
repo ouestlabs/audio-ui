@@ -9,7 +9,7 @@ test("a primitive written in the registry is shipped and aliased, and only those
     ...new Bun.Glob("*/*.ts").scanSync({ cwd: PRIMITIVES }),
   ].flatMap((path) => {
     const [folder, file] = path.split("/");
-    return file === `${folder}.ts` ? [folder] : [];
+    return file === "core.ts" ? [folder] : [];
   });
   const tsconfig = await Bun.file(`${import.meta.dir}/../tsconfig.json`).text();
   const aliased = new Map(
@@ -18,7 +18,7 @@ test("a primitive written in the registry is shipped and aliased, and only those
   expect([...SHIPPED_PRIMITIVES].sort()).toEqual(written.sort());
   for (const name of written) {
     expect(aliased.get(name)).toBe(
-      `./src/registry/primitives/${name}/${name}.ts`
+      `./src/registry/primitives/${name}/core.ts`
     );
   }
   expect([...aliased.keys()].sort()).toEqual(written.sort());

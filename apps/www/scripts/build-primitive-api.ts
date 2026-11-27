@@ -234,7 +234,7 @@ function exportsOf(adapter: string) {
 }
 
 function slotsOf(name: string): Promise<Record<string, any>> {
-  return import(join(PRIMITIVES, name, `${name}.ts`)).then((module) => {
+  return import(join(PRIMITIVES, name, "core.ts")).then((module) => {
     const description = Object.values(module).find(
       (value: any) => value?.options && value?.slots
     ) as { slots: Record<string, any> } | undefined;
@@ -253,7 +253,7 @@ async function apiOf(
   all: Map<string, Declared>
 ): Promise<PrimitiveApi> {
   const [source, web, vue, slots] = await Promise.all([
-    read(join(PRIMITIVES, name, `${name}.ts`)),
+    read(join(PRIMITIVES, name, "core.ts")),
     read(join(ADAPTERS, name, "web/index.ts")),
     read(join(ADAPTERS, name, "vue/index.ts")),
     slotsOf(name),

@@ -10,7 +10,7 @@ import { webAudio } from "@/registry/lib/web-audio";
 import type {
   PadOffDetails,
   PadOnDetails,
-} from "@/registry/primitives/pad/pad";
+} from "@/registry/primitives/pad/core";
 
 const VOLUME = 0.7;
 /** How long the open hat rings, in seconds, unless the closed one chokes it. */

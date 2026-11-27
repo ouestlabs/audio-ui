@@ -7,7 +7,7 @@ import {
   PlotTraceArea,
 } from "@/registry/bases/shared/audio-ui/elements/plot";
 import { cn } from "@/registry/lib/utils";
-import type { PlotSource } from "@/registry/primitives/plot/plot";
+import type { PlotSource } from "@/registry/primitives/plot/core";
 
 type PlotFrameProps = Omit<
   ComponentProps<typeof Plot>,

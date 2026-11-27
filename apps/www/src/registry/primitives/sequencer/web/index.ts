@@ -41,6 +41,7 @@ function makeCell(row: number, step: number) {
 /** A velocity bar, and the native range input inside it that takes the keys. */
 function makeVelocity(row: number, step: number) {
   const element = document.createElement(VELOCITY);
+  element.setAttribute("data-slot", "sequencer-velocity");
   element.setAttribute("cell", `${row}:${step}`);
   element.setAttribute("row", String(row));
   element.setAttribute("step", String(step));
@@ -57,6 +58,10 @@ function makeVelocity(row: number, step: number) {
   element.appendChild(part);
   return element;
 }
+
+// A row and a velocity bar are made with the `data-slot` they get: the kernel
+// writing it first re-renders every part from inside the last, and a 16-step
+// pattern's bars run past the call stack.
 
 /**
  * What React renders as children, the sequencer draws here: a row for each
@@ -77,6 +82,7 @@ function draw(
     const bars = el.hasAttribute("velocity-bars");
     syncChildren(el, ROW, rows, (row) => {
       const element = document.createElement(ROW);
+      element.setAttribute("data-slot", "sequencer-row");
       element.setAttribute("index", String(row));
       element.setAttribute("aria-label", `Row ${row + 1}`);
       return element;

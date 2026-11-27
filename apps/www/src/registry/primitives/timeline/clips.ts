@@ -18,13 +18,13 @@ import {
   type ClipTarget,
   createClipController,
 } from "./clip-controller";
-import { laneOf, placedOver, UNIT_PROPERTY, unitLength } from "./layout";
 import type {
   DescribePosition,
   TimelineApi,
   TimelinePublicState,
   TimelineState,
-} from "./timeline";
+} from "./core";
+import { laneOf, placedOver, UNIT_PROPERTY, unitLength } from "./layout";
 
 /**
  * The clips of the timeline: a stretch of a source laid on a lane. A clip is

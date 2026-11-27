@@ -66,7 +66,7 @@ describe("in Vue", () => {
     expect(result.items).toEqual(["knob-vue", "knob-element-vue"]);
     for (const file of [
       "src/components/audio-ui/primitive.ts",
-      "src/components/audio-ui/knob/knob.ts",
+      "src/components/audio-ui/knob/core.ts",
       "src/components/audio-ui/knob/vue.ts",
       "src/components/audio-ui/knob/Knob.vue",
     ]) {
