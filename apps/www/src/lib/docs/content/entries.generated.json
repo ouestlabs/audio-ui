@@ -816,8 +816,7 @@
       "block-mixer",
       "block-phaser",
       "block-vibe",
-      "use-demo-source",
-      "use-device-loop"
+      "use-demo-source"
     ]
   },
   {
@@ -2179,12 +2178,17 @@
   },
   {
     "dependencies": [],
-    "description": "The sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does. It tells the session its default, so a bar can offer the choice only where there is one. Outside a session it is always the default.",
+    "description": "The demo sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does, and useDemoSound, which renders it for use-device-loop once the session plays. Outside a session it is always the default.",
     "exports": [
       {
         "kind": "function",
         "name": "useDemoSource",
         "summary": "The sound a device plays: the one chosen in its session, such as from a preview's bar, else `fallback`, the one that shows best what the device does."
+      },
+      {
+        "kind": "function",
+        "name": "useDemoSound",
+        "summary": "The demo sound a device plays (`useDemoSource`), rendered for the page's context, with the kick that goes with it as a sidechain key when `key` is set: the `sound` of `useDeviceLoop`."
       }
     ],
     "files": [
@@ -2195,11 +2199,48 @@
     "name": "use-demo-source",
     "registryDependencies": [
       "demo-sound",
-      "use-audio-session"
+      "use-audio-session",
+      "use-device-loop",
+      "use-play-switch",
+      "web-audio"
     ],
     "usedBy": [
+      "block-auto-pan",
+      "block-bass-enhancer",
+      "block-binaural-panner",
+      "block-channel-eq",
+      "block-chorus",
+      "block-compander",
+      "block-compressor",
+      "block-deesser",
+      "block-delay",
       "block-device-chain",
-      "use-device-loop"
+      "block-distortion",
+      "block-ducker",
+      "block-equalizer",
+      "block-exciter",
+      "block-expander",
+      "block-filter",
+      "block-frequency-shifter",
+      "block-gate",
+      "block-graphic-eq",
+      "block-limiter",
+      "block-lofi",
+      "block-mid-side",
+      "block-multiband",
+      "block-overdrive",
+      "block-phaser",
+      "block-redux",
+      "block-reverb",
+      "block-rotary",
+      "block-saturator",
+      "block-stutter",
+      "block-tilt-eq",
+      "block-transient",
+      "block-unlimiter",
+      "block-utility",
+      "block-vibe",
+      "block-wah"
     ]
   },
   {
@@ -2240,8 +2281,13 @@
   },
   {
     "dependencies": [],
-    "description": "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
+    "description": "A sound of the app's looped through an effect's engine and out to a destination: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     "exports": [
+      {
+        "kind": "interface",
+        "name": "DeviceLoopSound",
+        "summary": "A sound to loop through a device: the buffer that is heard, the one that feeds its sidechain, and their tempo."
+      },
       {
         "kind": "interface",
         "name": "UseDeviceLoopOptions",
@@ -2250,7 +2296,7 @@
       {
         "kind": "function",
         "name": "useDeviceLoop",
-        "summary": "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does."
+        "summary": "A sound looped through an effect's engine and out to a destination."
       }
     ],
     "files": [
@@ -2260,8 +2306,6 @@
     "kind": "hook",
     "name": "use-device-loop",
     "registryDependencies": [
-      "demo-sound",
-      "use-demo-source",
       "use-device-engines",
       "use-play-switch",
       "web-audio"
@@ -2302,6 +2346,7 @@
       "block-utility",
       "block-vibe",
       "block-wah",
+      "use-demo-source",
       "use-pulses-through-compressor"
     ]
   },
@@ -2719,6 +2764,7 @@
       "block-mixer",
       "piano-roll-playback-demo",
       "spectrum-analyzer-demo",
+      "use-demo-source",
       "use-device-loop",
       "use-noise-through-eq"
     ]
@@ -3251,6 +3297,7 @@
       "sequencer-vue-demo",
       "sequencer-web-demo",
       "spectrum-analyzer-demo",
+      "use-demo-source",
       "use-device-loop",
       "use-master-bus",
       "use-microphone",

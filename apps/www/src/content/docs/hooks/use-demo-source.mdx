@@ -16,3 +16,11 @@ const name = useDemoSource("groove"); // one of DEMO_SOURCES
 ```
 
 The sounds are [`demo-sound`](/docs/lib/demo-sound)'s, made in code. Outside a session it is always `fallback`.
+
+`useDemoSound(fallback, { key })` renders that sound for the page's context, with the kick that goes with it when `key` is set: the `sound` of [`useDeviceLoop`](/docs/hooks/use-device-loop). It renders once the session's play switch is on, so no audio context is made before a press, and is `null` until then.
+
+```tsx
+import { useDemoSound } from "@/hooks/use-demo-source";
+
+const sound = useDemoSound("groove");
+```

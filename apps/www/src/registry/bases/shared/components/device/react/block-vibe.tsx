@@ -6,6 +6,7 @@ import {
 import { createVibeEngine } from "@/registry/bases/shared/devices/vibe/engine";
 import { VibePanel } from "@/registry/bases/shared/devices/vibe/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -17,9 +18,11 @@ const MASTER_VOLUME = 0.7;
 export default function BlockVibe() {
   const [state, setState] = useState<VibeState>(() => vibeDevice.defaults());
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createVibeEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, vibeDevice);

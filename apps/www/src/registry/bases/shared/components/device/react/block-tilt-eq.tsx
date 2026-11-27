@@ -6,6 +6,7 @@ import {
 import { createTiltEqEngine } from "@/registry/bases/shared/devices/tilt-eq/engine";
 import { TiltEqPanel } from "@/registry/bases/shared/devices/tilt-eq/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -21,9 +22,11 @@ export default function BlockTiltEq() {
     tiltEqDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createTiltEqEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, tiltEqDevice);

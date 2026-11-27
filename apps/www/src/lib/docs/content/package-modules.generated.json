@@ -2077,6 +2077,7 @@
       "demo-sound",
       "synced-rate",
       "use-arrangement",
+      "use-device-loop",
       "use-piano-roll-playback",
       "use-timeline-grid",
       "use-transport-clock"

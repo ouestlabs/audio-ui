@@ -6,6 +6,7 @@ import {
 import { createUtilityEngine } from "@/registry/bases/shared/devices/utility/engine";
 import { UtilityPanel } from "@/registry/bases/shared/devices/utility/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -19,9 +20,11 @@ export default function BlockUtility() {
     utilityDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createUtilityEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, utilityDevice);

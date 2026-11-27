@@ -6,6 +6,7 @@ import {
 import { createDuckerEngine } from "@/registry/bases/shared/devices/ducker/engine";
 import { DuckerPanel } from "@/registry/bases/shared/devices/ducker/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
 
@@ -29,11 +30,11 @@ export default function BlockDucker() {
     () => duckerDevice.apply(duckerDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("chord", { key: true });
   const { engine } = useDeviceLoop({
     create: createDuckerEngine,
     destination: master,
-    key: true,
-    source: "chord",
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, duckerDevice);
