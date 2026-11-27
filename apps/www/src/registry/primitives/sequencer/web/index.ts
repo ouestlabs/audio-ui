@@ -59,9 +59,10 @@ function makeVelocity(row: number, step: number) {
   return element;
 }
 
-// A row and a velocity bar are made with the `data-slot` they get: the kernel
-// writing it first re-renders every part from inside the last, and a 16-step
-// pattern's bars run past the call stack.
+// A row and a velocity bar are made with the `data-slot` they get: `data-slot`
+// is a prop of every part (`nameSlots`), so the element observes it, and the
+// kernel writing it first re-renders every part from inside the last: a
+// 16-step pattern's bars would run past the call stack.
 
 /**
  * What React renders as children, the sequencer draws here: a row for each

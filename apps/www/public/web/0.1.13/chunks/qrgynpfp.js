@@ -1,0 +1,2 @@
+function k(i){let e=0,n=null,t=!1,r=()=>{if(!t&&e===0)e=requestAnimationFrame(o)};function o(s){e=0;let a=n===null?0:Math.min(Math.max(0,s-n),100);if(n=s,i(a))r();else n=null}return{flush:()=>{if(t)return;cancelAnimationFrame(e),o(performance.now())},stop:()=>{t=!0,cancelAnimationFrame(e),e=0},wake:r}}function H(i,e){if(typeof IntersectionObserver>"u")return()=>{return};let n=new IntersectionObserver((t)=>{let r=t.at(-1);if(r)e(r.isIntersecting)});return n.observe(i),()=>n.disconnect()}
+export{k,H};
