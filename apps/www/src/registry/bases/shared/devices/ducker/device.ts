@@ -1,4 +1,8 @@
-import { type DeviceState, defineDevice } from "@/engine/device";
+import {
+  contractParams,
+  type DeviceState,
+  defineDevice,
+} from "@/engine/device";
 import { compressorGain } from "@/engine/dsp";
 import { DUCKER_KERNELS } from "@/engine/kernels";
 import { manifestWorklet } from "@/registry/lib/devices/manifest-worklet";
@@ -79,7 +83,7 @@ export const duckerDevice = defineDevice({
 
 export type DuckerState = DeviceState<typeof duckerDevice.parameters>;
 
-/** The numbers that go on the worklet for a state, in the manifest's units: the range as a cut. Off, the sound goes round it. */
+/** The numbers a state gives the processor of `@audio/dynamics-ducker`, in the manifest's units: the range as a cut. Off, the sound goes round it. */
 export function duckerSettings(state: DuckerState) {
   return {
     modelParams: {
@@ -104,14 +108,69 @@ export function duckerCurve(state: DuckerState) {
     Math.max(-rangeDb, compressorGain(keyDb, thresholdDb, ratio, kneeDb));
 }
 
+/** How long the ducker takes to come in or to go round the sound when it is turned on or off, in seconds. */
+const SWITCH_SECONDS = 0.01;
+
+/**
+ * The ducker as one audio.js processor, its parameters the device's own
+ * (`contractParams`): what the worklet plays and what a plugin host would read.
+ * It runs the processor of `@audio/dynamics-ducker` on the sound and the key,
+ * gives it the range as a cut, and goes round it while it is off, in a line.
+ */
+const DUCKER_PROCESSOR = `
+const duckerProcessor = (ctx) => {
+  const values = {};
+  for (const name in ducker.params) {
+    values[name] = new Float32Array(1);
+  }
+  const processed = [];
+  for (let channel = 0; channel < ctx.maxChannels; channel += 1) {
+    processed.push(new Float32Array(ctx.maxBlockSize));
+  }
+  const outputs = [processed];
+  const read = (params) => {
+    values.threshold[0] = params.thresholdDb[0];
+    values.ratio[0] = params.ratio[0];
+    values.knee[0] = params.kneeDb[0];
+    values.range[0] = -params.rangeDb[0];
+    values.attack[0] = params.attackMs[0];
+    values.release[0] = params.releaseMs[0];
+  };
+  read(ctx.params);
+  const run = ducker({ ...ctx, params: values });
+  const step = 1 / (${SWITCH_SECONDS} * ctx.sampleRate);
+  let amount = ctx.params.enabled ? 1 : 0;
+  return (inputs, [out], params) => {
+    const main = inputs[0];
+    read(params);
+    run(inputs, outputs, values);
+    const target = params.enabled ? 1 : 0;
+    let next = amount;
+    for (let channel = 0; channel < main.length; channel += 1) {
+      const dry = main[channel];
+      const wet = processed[channel];
+      next = amount;
+      for (let frame = 0; frame < dry.length; frame += 1) {
+        next = target > next ? Math.min(target, next + step) : Math.max(target, next - step);
+        out[channel][frame] = dry[frame] + next * (wet[frame] - dry[frame]);
+      }
+    }
+    amount = next;
+  };
+};
+duckerProcessor.params = ${JSON.stringify(contractParams(duckerDevice))};
+duckerProcessor.channels = ducker.channels;
+duckerProcessor.tail = ducker.tail;
+`;
+
 /**
  * The source of the ducker's `AudioWorklet`, processor `audioui-ducker`: the
- * manifest of `@audio/dynamics-ducker`, played by `manifestWorklet`, the
- * sound on its first input and the key on its second. Every parameter
- * changes as it plays.
+ * device's processor, played by `manifestWorklet`, the sound on its first input
+ * and the key on its second. Its parameters are the device's, by id, a toggle
+ * as 0 or 1, and every one changes as it plays.
  */
 export const DUCKER_WORKLET = manifestWorklet({
-  kernels: DUCKER_KERNELS,
-  models: { ducker: "ducker" },
+  kernels: `${DUCKER_KERNELS}\n${DUCKER_PROCESSOR}`,
+  models: { ducker: "duckerProcessor" },
   processor: "audioui-ducker",
 });

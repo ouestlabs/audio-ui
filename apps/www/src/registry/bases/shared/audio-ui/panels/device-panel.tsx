@@ -42,6 +42,8 @@ interface ControlProps<Parameter> {
   group?: string;
   /** Called with the whole new state. */
   onValueChange: (state: AnyState) => void;
+  /** Called once a change is done, with the state and the parameter's id. */
+  onValueCommitted?: (state: AnyState, id: string) => void;
   parameter: Parameter;
   value: AnyState;
 }
@@ -60,6 +62,7 @@ function NumberControl({
   disabled,
   group,
   onValueChange,
+  onValueCommitted,
   parameter,
   value,
 }: ControlProps<NumberParameter>) {
@@ -83,6 +86,14 @@ function NumberControl({
       onValueChange(device.set(value as never, parameter.id, next) as AnyState),
     [device, onValueChange, parameter.id, value]
   );
+  const commit = useCallback(
+    (next: number) =>
+      onValueCommitted?.(
+        device.set(value as never, parameter.id, next) as AnyState,
+        parameter.id
+      ),
+    [device, onValueCommitted, parameter.id, value]
+  );
   return (
     <div className="flex min-w-0 max-w-full flex-col items-center gap-0.5">
       <span
@@ -102,6 +113,7 @@ function NumberControl({
         max={parameter.max}
         min={parameter.min}
         onValueChange={change}
+        onValueCommitted={commit}
         scale={numberScale}
         size="sm"
         step={parameter.step}
@@ -117,16 +129,22 @@ function ToggleControl({
   device,
   disabled,
   onValueChange,
+  onValueCommitted,
   parameter,
   value,
 }: ControlProps<ToggleParameter>) {
   const on = value[parameter.id] === true;
   const change = useCallback(
-    (pressed: boolean) =>
-      onValueChange(
-        device.set(value as never, parameter.id, pressed) as AnyState
-      ),
-    [device, onValueChange, parameter.id, value]
+    (pressed: boolean) => {
+      const next = device.set(
+        value as never,
+        parameter.id,
+        pressed
+      ) as AnyState;
+      onValueChange(next);
+      onValueCommitted?.(next, parameter.id);
+    },
+    [device, onValueChange, onValueCommitted, parameter.id, value]
   );
   return (
     <Toggle
@@ -153,26 +171,26 @@ function ChoiceControl({
   disabled,
   group,
   onValueChange,
+  onValueCommitted,
   parameter,
   value,
 }: ControlProps<ChoiceParameter>) {
   const current = value[parameter.id];
+  const pick = useCallback(
+    (option: string) => {
+      const next = device.set(value as never, parameter.id, option) as AnyState;
+      onValueChange(next);
+      onValueCommitted?.(next, parameter.id);
+    },
+    [device, onValueChange, onValueCommitted, parameter.id, value]
+  );
   const pickFromList = useCallback(
     (option: string | null) => {
       if (option) {
-        onValueChange(
-          device.set(value as never, parameter.id, option) as AnyState
-        );
+        pick(option);
       }
     },
-    [device, onValueChange, parameter.id, value]
-  );
-  const pick = useCallback(
-    (option: string) =>
-      onValueChange(
-        device.set(value as never, parameter.id, option) as AnyState
-      ),
-    [device, onValueChange, parameter.id, value]
+    [pick]
   );
   let control: ReactNode;
   if (parameter.options.every((option) => isWaveform(option.value))) {
@@ -341,22 +359,33 @@ interface DeviceHeaderProps<Parameters extends readonly ParameterDescriptor[]> {
   children?: ReactNode;
   device: Device<Parameters>;
   onValueChange: (state: DeviceState<Parameters>) => void;
+  /** Called once a change is done (a drag let go, a key, a press), with the state and the parameter's id: where a host ends an automation gesture. */
+  onValueCommitted?: (
+    state: DeviceState<Parameters>,
+    id: Parameters[number]["id"]
+  ) => void;
   value: DeviceState<Parameters>;
 }
 
 function Activator({
   device,
   onValueChange,
+  onValueCommitted,
   parameter,
   value,
 }: ControlProps<ToggleParameter>) {
   const on = value[parameter.id] === true;
   const change = useCallback(
-    (pressed: boolean) =>
-      onValueChange(
-        device.set(value as never, parameter.id, pressed) as AnyState
-      ),
-    [device, onValueChange, parameter.id, value]
+    (pressed: boolean) => {
+      const next = device.set(
+        value as never,
+        parameter.id,
+        pressed
+      ) as AnyState;
+      onValueChange(next);
+      onValueCommitted?.(next, parameter.id);
+    },
+    [device, onValueChange, onValueCommitted, parameter.id, value]
   );
   return (
     // A cell as tall as the buttons at the end, so the square sits the same distance from the top, the bottom and the start of the bar.
@@ -384,6 +413,7 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
   children,
   device,
   onValueChange,
+  onValueCommitted,
   value,
 }: DeviceHeaderProps<Parameters>) {
   const parameter = device.parameters.find(
@@ -398,6 +428,9 @@ function DeviceHeader<const Parameters extends readonly ParameterDescriptor[]>({
         <Activator
           device={device as unknown as AnyDevice}
           onValueChange={onValueChange as unknown as (state: AnyState) => void}
+          onValueCommitted={
+            onValueCommitted as unknown as ControlProps<ToggleParameter>["onValueCommitted"]
+          }
           parameter={parameter}
           value={value as unknown as AnyState}
         />
@@ -420,6 +453,11 @@ interface DeviceToggleProps<Parameters extends readonly ParameterDescriptor[]> {
   /** The id of a toggle parameter. */
   id: Parameters[number]["id"];
   onValueChange: (state: DeviceState<Parameters>) => void;
+  /** Called once a change is done (a drag let go, a key, a press), with the state and the parameter's id: where a host ends an automation gesture. */
+  onValueCommitted?: (
+    state: DeviceState<Parameters>,
+    id: Parameters[number]["id"]
+  ) => void;
   value: DeviceState<Parameters>;
 }
 
@@ -431,6 +469,7 @@ function DeviceToggle<const Parameters extends readonly ParameterDescriptor[]>({
   device,
   id,
   onValueChange,
+  onValueCommitted,
   value,
 }: DeviceToggleProps<Parameters>) {
   const parameter = device.parameters.find((candidate) => candidate.id === id);
@@ -441,6 +480,9 @@ function DeviceToggle<const Parameters extends readonly ParameterDescriptor[]>({
     <ToggleControl
       device={device as unknown as AnyDevice}
       onValueChange={onValueChange as unknown as (state: AnyState) => void}
+      onValueCommitted={
+        onValueCommitted as unknown as ControlProps<ToggleParameter>["onValueCommitted"]
+      }
       parameter={parameter}
       value={value as unknown as AnyState}
     />
@@ -468,6 +510,11 @@ interface DevicePanelProps<Parameters extends readonly ParameterDescriptor[]> {
   labelPrefix?: string;
   /** Called with the whole new state: store it, and drive the engine from it. */
   onValueChange: (state: DeviceState<Parameters>) => void;
+  /** Called once a change is done (a drag let go, a key, a press), with the state and the parameter's id: where a host ends an automation gesture. */
+  onValueCommitted?: (
+    state: DeviceState<Parameters>,
+    id: Parameters[number]["id"]
+  ) => void;
   /** The state of the device. The panel keeps none: it draws this. */
   value: DeviceState<Parameters>;
 }
@@ -488,11 +535,14 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
   groups,
   labelPrefix,
   onValueChange,
+  onValueCommitted,
   value,
 }: DevicePanelProps<Parameters>) {
   const props = {
     device: device as unknown as AnyDevice,
     onValueChange: onValueChange as unknown as (state: AnyState) => void,
+    onValueCommitted:
+      onValueCommitted as unknown as ControlProps<ParameterDescriptor>["onValueCommitted"],
     value: value as unknown as AnyState,
   };
   const control = (parameter: ParameterDescriptor, group?: string) => {

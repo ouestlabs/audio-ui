@@ -17,9 +17,7 @@ test("a primitive written in the registry is shipped and aliased, and only those
   );
   expect([...SHIPPED_PRIMITIVES].sort()).toEqual(written.sort());
   for (const name of written) {
-    expect(aliased.get(name)).toBe(
-      `./src/registry/primitives/${name}/core.ts`
-    );
+    expect(aliased.get(name)).toBe(`./src/registry/primitives/${name}/core.ts`);
   }
   expect([...aliased.keys()].sort()).toEqual(written.sort());
 });

@@ -6,9 +6,9 @@ import {
 import { createFrequencyShifterEngine } from "@/registry/bases/shared/devices/frequency-shifter/engine";
 import { FrequencyShifterPanel } from "@/registry/bases/shared/devices/frequency-shifter/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
-import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 
 const MASTER_VOLUME = 0.7;
 

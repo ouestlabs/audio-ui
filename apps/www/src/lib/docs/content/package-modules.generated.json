@@ -367,6 +367,16 @@
     ],
     "exports": [
       {
+        "kind": "type",
+        "name": "ContractParameter",
+        "summary": "A parameter as the audio.js processor contract 1.0 declares it in a processor's `params`."
+      },
+      {
+        "kind": "function",
+        "name": "contractParams",
+        "summary": "A device's parameters as the `params` of an audio.js processor, by parameter id, in the order the device declares them: what a plugin host or an `AudioWorklet` adapter reads, with no range written a second time."
+      },
+      {
         "kind": "interface",
         "name": "ChoiceOption",
         "summary": "One entry of a choice: the `value` that goes in the state and the `label` a panel shows."

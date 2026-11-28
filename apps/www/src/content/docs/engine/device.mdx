@@ -64,6 +64,19 @@ set.run(state, { amount: 60 });
 
 The schema is the subset that OpenAI, Anthropic, MCP and the AI SDK all accept, and the ranges it gives are the ones the device enforces.
 
+## Processor parameters
+
+`contractParams(device)` gives the parameters as the `params` of an [audio.js processor](https://github.com/audiojs/plugin/blob/main/CONTRACT.md), by parameter id: a number with its range, a `"toggle"` as a `bool`, a `"choice"` as an `enum`. A processor declared with them takes its ranges from the device:
+
+```ts
+import { contractParams } from "@/lib/engine/device";
+
+contractParams(driveDevice).tone;
+// { type: "number", min: 200, max: 20000, default: 4000, curve: "log", unit: "Hz" }
+```
+
+The contract has no labels, groups or formats. A custom scale, a unit it does not name (`%`) and a step that does not divide its range are left out.
+
 ## Engines
 
 What a device's engine is, and the pieces an engine is made of, each the one place its behavior lives.
