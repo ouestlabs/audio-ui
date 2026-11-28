@@ -42,6 +42,8 @@ interface DuckerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DuckerState) => void;
+  /** Called once a change is done, with the state and the parameter's id: where a host ends an automation gesture. */
+  onValueCommitted?: (state: DuckerState, id: keyof DuckerState) => void;
   /** Its live sound: a dot rides the curve at the level of the key it ducks for. */
   signal?: DeviceSignal;
   value: DuckerState;
@@ -57,6 +59,7 @@ function DuckerPanel({
   children,
   className,
   onValueChange,
+  onValueCommitted,
   signal,
   value,
 }: DuckerPanelProps) {
@@ -71,12 +74,21 @@ function DuckerPanel({
       onValueChange(duckerDevice.apply(value, { thresholdDb: x }).state),
     [onValueChange, value]
   );
+  const commit = useCallback(
+    ({ x }: { x: number }) =>
+      onValueCommitted?.(
+        duckerDevice.apply(value, { thresholdDb: x }).state,
+        "thresholdDb"
+      ),
+    [onValueCommitted, value]
+  );
   return (
     <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={duckerDevice}
         onValueChange={onValueChange}
+        onValueCommitted={onValueCommitted}
         value={value}
       >
         {children}
@@ -116,6 +128,7 @@ function DuckerPanel({
               aria-label="Threshold"
               getAriaValueText={describeValue}
               onValueChange={change}
+              onValueCommitted={commit}
               value={{ x: value.thresholdDb, y: curve(value.thresholdDb) }}
             />
           ) : null}
@@ -126,6 +139,7 @@ function DuckerPanel({
           disabled={value.enabled ? undefined : OFF}
           exclude={SWITCHES}
           onValueChange={onValueChange}
+          onValueCommitted={onValueCommitted}
           value={value}
         />
       </div>
