@@ -68,6 +68,7 @@ export const LIB_GROUPS = {
   devices: [
     "device-library",
     "device-signal",
+    "master-bus",
     "rack",
     "instrument-rack",
     "voice-pool",

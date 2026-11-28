@@ -61,6 +61,11 @@ const OLD_FOLDER = /components\/audio\/[a-z]/g;
 const ICON_EXPRESSION =
   /\b(?:lucide|tabler|hugeicons|phosphor|remixicon)=\{(?!\s*["'`])/;
 
+// A relative import in an installed file: `./parts`, `../core`.
+const RELATIVE_IMPORT = /(?:from|import)\s*\(?\s*["'](\.\.?\/[^"']+)["']/g;
+// `@/components/audio-ui/<name>/<name>`, which the shadcn CLI shortens to `@/components/audio-ui/<name>`.
+const REPEATED_IMPORT = /["']@\/components\/audio-ui\/([a-z-]+)\/\1["']/g;
+
 interface BuiltItem {
   dependencies?: string[];
   description?: string;
@@ -415,4 +420,54 @@ test("no item pins the version of a package it asks for", () => {
         .map((dependency) => `${item.name}: ${dependency}`)
     )
   ).toEqual([]);
+});
+
+/** A path with its `.` and `..` segments resolved. */
+function normalize(path: string) {
+  const segments: string[] = [];
+  for (const segment of path.split("/")) {
+    if (segment === "..") {
+      segments.pop();
+    } else if (segment !== "." && segment !== "") {
+      segments.push(segment);
+    }
+  }
+  return segments.join("/");
+}
+
+/** The folder of the project's aliases a path lands in: `components/audio-ui`, `components/examples`, `hooks`, `lib`. */
+function aliasFolder(path: string) {
+  const segments = path.split("/");
+  const components = segments.indexOf("components");
+  return components === -1
+    ? (segments[0] ?? "")
+    : segments.slice(0, components + 2).join("/");
+}
+
+test("no installed file imports by a relative path that leaves its alias folder", () => {
+  const leaving = items.flatMap((item) =>
+    (item.files ?? []).flatMap((file) => {
+      const target = normalize(file.target ?? "");
+      const folder = target.slice(0, target.lastIndexOf("/"));
+      return [...(file.content ?? "").matchAll(RELATIVE_IMPORT)]
+        .map((match) => match[1] ?? "")
+        .filter(
+          (path) =>
+            aliasFolder(normalize(`${folder}/${path}`)) !== aliasFolder(target)
+        )
+        .map((path) => `${item.name}: ${target} imports ${path}`);
+    })
+  );
+  expect(leaving).toEqual([]);
+});
+
+test("no installed file imports a path the shadcn CLI shortens to another file", () => {
+  const shortened = items.flatMap((item) =>
+    (item.files ?? []).flatMap((file) =>
+      [...(file.content ?? "").matchAll(REPEATED_IMPORT)].map(
+        (match) => `${item.name}: ${match[0]}`
+      )
+    )
+  );
+  expect(shortened).toEqual([]);
 });

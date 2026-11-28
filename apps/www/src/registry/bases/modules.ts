@@ -82,6 +82,7 @@ export const ENGINE_MODULES: Record<string, LibModule> = {
     description:
       "A device as a description: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with.",
     files: [
+      "contract.ts",
       "define.ts",
       "engine.ts",
       "index.ts",

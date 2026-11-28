@@ -450,6 +450,7 @@
     "lib/engine/analysis/tint.ts"
   ],
   "engine-device": [
+    "lib/engine/device/contract.ts",
     "lib/engine/device/define.ts",
     "lib/engine/device/engine.ts",
     "lib/engine/device/index.ts",
@@ -560,7 +561,7 @@
   ],
   "envelope-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/core.ts",
     "components/audio-ui/envelope/geometry.ts",
     "components/audio-ui/envelope/react.tsx"
   ],
@@ -572,7 +573,7 @@
   ],
   "envelope-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/envelope/envelope.ts",
+    "~/src/lib/components/audio-ui/envelope/core.ts",
     "~/src/lib/components/audio-ui/envelope/geometry.ts",
     "~/src/lib/components/audio-ui/envelope/svelte/Fill.svelte",
     "~/src/lib/components/audio-ui/envelope/svelte/Line.svelte",
@@ -585,7 +586,7 @@
   ],
   "envelope-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/core.ts",
     "components/audio-ui/envelope/geometry.ts",
     "components/audio-ui/envelope/vue.ts"
   ],
@@ -594,7 +595,7 @@
   ],
   "envelope-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/envelope/envelope.ts",
+    "components/audio-ui/envelope/core.ts",
     "components/audio-ui/envelope/geometry.ts",
     "components/audio-ui/envelope/web.ts"
   ],
@@ -645,7 +646,7 @@
   ],
   "fader-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/core.ts",
     "components/audio-ui/fader/react.tsx"
   ],
   "fader-svelte-demo": [
@@ -653,7 +654,7 @@
   ],
   "fader-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/fader/fader.ts",
+    "~/src/lib/components/audio-ui/fader/core.ts",
     "~/src/lib/components/audio-ui/fader/svelte/Thumb.svelte",
     "~/src/lib/components/audio-ui/fader/svelte/Value.svelte",
     "~/src/lib/components/audio-ui/fader/svelte/index.ts",
@@ -667,7 +668,7 @@
   ],
   "fader-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/core.ts",
     "components/audio-ui/fader/vue.ts"
   ],
   "fader-web-demo": [
@@ -675,7 +676,7 @@
   ],
   "fader-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/fader/fader.ts",
+    "components/audio-ui/fader/core.ts",
     "components/audio-ui/fader/web.ts"
   ],
   "fader": [
@@ -782,7 +783,7 @@
   ],
   "knob-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/core.ts",
     "components/audio-ui/knob/react.tsx"
   ],
   "knob-svelte-demo": [
@@ -790,7 +791,7 @@
   ],
   "knob-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/knob/knob.ts",
+    "~/src/lib/components/audio-ui/knob/core.ts",
     "~/src/lib/components/audio-ui/knob/svelte/Arc.svelte",
     "~/src/lib/components/audio-ui/knob/svelte/Indicator.svelte",
     "~/src/lib/components/audio-ui/knob/svelte/Provider.svelte",
@@ -806,7 +807,7 @@
   ],
   "knob-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/core.ts",
     "components/audio-ui/knob/vue.ts"
   ],
   "knob-web-demo": [
@@ -814,7 +815,7 @@
   ],
   "knob-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/knob/knob.ts",
+    "components/audio-ui/knob/core.ts",
     "components/audio-ui/knob/web.ts"
   ],
   "knob": [
@@ -853,6 +854,9 @@
   "manifest-worklet": [
     "lib/manifest-worklet.ts"
   ],
+  "master-bus": [
+    "lib/master-bus.ts"
+  ],
   "menubar": [
     "components/ui/menubar.tsx"
   ],
@@ -868,7 +872,7 @@
   ],
   "meter-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/core.ts",
     "components/audio-ui/meter/levels.ts",
     "components/audio-ui/meter/react.tsx"
   ],
@@ -880,7 +884,7 @@
   ],
   "meter-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/meter/meter.ts",
+    "~/src/lib/components/audio-ui/meter/core.ts",
     "~/src/lib/components/audio-ui/meter/levels.ts",
     "~/src/lib/components/audio-ui/meter/svelte/Value.svelte",
     "~/src/lib/components/audio-ui/meter/svelte/index.ts",
@@ -891,7 +895,7 @@
   ],
   "meter-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/core.ts",
     "components/audio-ui/meter/levels.ts",
     "components/audio-ui/meter/vue.ts"
   ],
@@ -900,7 +904,7 @@
   ],
   "meter-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/meter/meter.ts",
+    "components/audio-ui/meter/core.ts",
     "components/audio-ui/meter/levels.ts",
     "components/audio-ui/meter/web.ts"
   ],
@@ -1002,7 +1006,7 @@
   ],
   "pad-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/core.ts",
     "components/audio-ui/pad/react.tsx"
   ],
   "pad-svelte-demo": [
@@ -1010,7 +1014,7 @@
   ],
   "pad-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/pad/pad.ts",
+    "~/src/lib/components/audio-ui/pad/core.ts",
     "~/src/lib/components/audio-ui/pad/svelte/index.ts",
     "~/src/lib/components/audio-ui/pad/svelte/parts.ts"
   ],
@@ -1019,7 +1023,7 @@
   ],
   "pad-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/core.ts",
     "components/audio-ui/pad/vue.ts"
   ],
   "pad-web-demo": [
@@ -1027,7 +1031,7 @@
   ],
   "pad-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/pad/pad.ts",
+    "components/audio-ui/pad/core.ts",
     "components/audio-ui/pad/web.ts"
   ],
   "pad": [
@@ -1062,7 +1066,7 @@
   ],
   "piano-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/piano/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/piano/react.tsx"
   ],
@@ -1079,7 +1083,7 @@
   ],
   "piano-roll-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/piano-roll/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/piano-roll/controller.ts",
@@ -1092,7 +1096,7 @@
   ],
   "piano-roll-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/piano-roll/piano-roll.ts",
+    "~/src/lib/components/audio-ui/piano-roll/core.ts",
     "~/src/lib/components/audio-ui/pitch.ts",
     "~/src/lib/components/audio-ui/grid.ts",
     "~/src/lib/components/audio-ui/piano-roll/controller.ts",
@@ -1115,7 +1119,7 @@
   ],
   "piano-roll-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/piano-roll/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/piano-roll/controller.ts",
@@ -1128,7 +1132,7 @@
   ],
   "piano-roll-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano-roll/piano-roll.ts",
+    "components/audio-ui/piano-roll/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/piano-roll/controller.ts",
@@ -1148,7 +1152,7 @@
   ],
   "piano-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/piano/piano.ts",
+    "~/src/lib/components/audio-ui/piano/core.ts",
     "~/src/lib/components/audio-ui/pitch.ts",
     "~/src/lib/components/audio-ui/piano/svelte/Label.svelte",
     "~/src/lib/components/audio-ui/piano/svelte/index.ts",
@@ -1159,7 +1163,7 @@
   ],
   "piano-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/piano/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/piano/vue.ts"
   ],
@@ -1168,7 +1172,7 @@
   ],
   "piano-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/piano/piano.ts",
+    "components/audio-ui/piano/core.ts",
     "components/audio-ui/pitch.ts",
     "components/audio-ui/piano/web.ts"
   ],
@@ -1186,7 +1190,7 @@
   ],
   "plot-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/core.ts",
     "components/audio-ui/plot/react.tsx"
   ],
   "plot-svelte-demo": [
@@ -1194,7 +1198,7 @@
   ],
   "plot-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/plot/plot.ts",
+    "~/src/lib/components/audio-ui/plot/core.ts",
     "~/src/lib/components/audio-ui/plot/svelte/Band.svelte",
     "~/src/lib/components/audio-ui/plot/svelte/Curve.svelte",
     "~/src/lib/components/audio-ui/plot/svelte/Grid.svelte",
@@ -1211,7 +1215,7 @@
   ],
   "plot-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/core.ts",
     "components/audio-ui/plot/vue.ts"
   ],
   "plot-web-demo": [
@@ -1219,7 +1223,7 @@
   ],
   "plot-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/plot/plot.ts",
+    "components/audio-ui/plot/core.ts",
     "components/audio-ui/plot/web.ts"
   ],
   "plot": [
@@ -1364,7 +1368,7 @@
   ],
   "sequencer-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/core.ts",
     "components/audio-ui/sequencer/react.tsx"
   ],
   "sequencer-svelte-demo": [
@@ -1372,7 +1376,7 @@
   ],
   "sequencer-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/sequencer/sequencer.ts",
+    "~/src/lib/components/audio-ui/sequencer/core.ts",
     "~/src/lib/components/audio-ui/sequencer/svelte/Cell.svelte",
     "~/src/lib/components/audio-ui/sequencer/svelte/Velocity.svelte",
     "~/src/lib/components/audio-ui/sequencer/svelte/index.ts",
@@ -1383,7 +1387,7 @@
   ],
   "sequencer-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/core.ts",
     "components/audio-ui/sequencer/vue.ts"
   ],
   "sequencer-web-demo": [
@@ -1391,7 +1395,7 @@
   ],
   "sequencer-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/sequencer/sequencer.ts",
+    "components/audio-ui/sequencer/core.ts",
     "components/audio-ui/sequencer/web.ts"
   ],
   "sequencer": [
@@ -1505,7 +1509,7 @@
   ],
   "timeline-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/timeline/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/timeline/clip-controller.ts",
@@ -1529,7 +1533,7 @@
   ],
   "timeline-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/timeline/timeline.ts",
+    "~/src/lib/components/audio-ui/timeline/core.ts",
     "~/src/lib/components/audio-ui/frame.ts",
     "~/src/lib/components/audio-ui/grid.ts",
     "~/src/lib/components/audio-ui/timeline/clip-controller.ts",
@@ -1565,7 +1569,7 @@
   ],
   "timeline-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/timeline/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/timeline/clip-controller.ts",
@@ -1589,7 +1593,7 @@
   ],
   "timeline-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/timeline/timeline.ts",
+    "components/audio-ui/timeline/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/timeline/clip-controller.ts",
@@ -1828,7 +1832,7 @@
   ],
   "waveform-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/waveform/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/waveform/bar-layout.ts",
@@ -1852,7 +1856,7 @@
   ],
   "waveform-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/waveform/waveform.ts",
+    "~/src/lib/components/audio-ui/waveform/core.ts",
     "~/src/lib/components/audio-ui/frame.ts",
     "~/src/lib/components/audio-ui/grid.ts",
     "~/src/lib/components/audio-ui/waveform/bar-layout.ts",
@@ -1874,7 +1878,7 @@
   ],
   "waveform-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/waveform/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/waveform/bar-layout.ts",
@@ -1892,7 +1896,7 @@
   ],
   "waveform-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/waveform/waveform.ts",
+    "components/audio-ui/waveform/core.ts",
     "components/audio-ui/frame.ts",
     "components/audio-ui/grid.ts",
     "components/audio-ui/waveform/bar-layout.ts",
@@ -1934,7 +1938,7 @@
   ],
   "xypad-react": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/core.ts",
     "components/audio-ui/xypad/react.tsx"
   ],
   "xypad-svelte-demo": [
@@ -1942,7 +1946,7 @@
   ],
   "xypad-svelte": [
     "~/src/lib/components/audio-ui/primitive.ts",
-    "~/src/lib/components/audio-ui/xypad/xypad.ts",
+    "~/src/lib/components/audio-ui/xypad/core.ts",
     "~/src/lib/components/audio-ui/xypad/svelte/Thumb.svelte",
     "~/src/lib/components/audio-ui/xypad/svelte/Value.svelte",
     "~/src/lib/components/audio-ui/xypad/svelte/index.ts",
@@ -1953,7 +1957,7 @@
   ],
   "xypad-vue": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/core.ts",
     "components/audio-ui/xypad/vue.ts"
   ],
   "xypad-web-demo": [
@@ -1961,7 +1965,7 @@
   ],
   "xypad-web": [
     "components/audio-ui/primitive.ts",
-    "components/audio-ui/xypad/xypad.ts",
+    "components/audio-ui/xypad/core.ts",
     "components/audio-ui/xypad/web.ts"
   ],
   "xypad": [

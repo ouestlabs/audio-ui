@@ -158,9 +158,9 @@ interface ItemInstallProps {
 }
 
 /**
- * How an item installs: one command with the shadcn CLI in React; in the
- * other frameworks, which have no CLI, what to copy and paste: the packages,
- * then each file at its path, then the items it needs.
+ * How an item installs: one command, with the shadcn CLI in React and with
+ * ours in the other frameworks, then, outside React, what to copy by hand:
+ * the packages, each file at its path, and the items it needs.
  */
 function ItemInstall({ dependencies, files, name, needs }: ItemInstallProps) {
   const [framework] = useFramework();
@@ -170,6 +170,15 @@ function ItemInstall({ dependencies, files, name, needs }: ItemInstallProps) {
   const own = needs.filter((each) => !each.includes("/"));
   return (
     <>
+      <Command code={`npx @audio-ui/cli add ${name}`} />
+      <p>
+        The{" "}
+        <Link params={{ _splat: "cli" }} to="/docs/$">
+          CLI
+        </Link>{" "}
+        writes its files, the items it needs, and installs its packages. By
+        hand:
+      </p>
       {dependencies.length > 0 ? (
         <Command code={`npm install ${dependencies.join(" ")}`} />
       ) : null}

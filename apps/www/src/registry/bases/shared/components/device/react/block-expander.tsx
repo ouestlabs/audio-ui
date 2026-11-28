@@ -8,6 +8,7 @@ import { ExpanderPanel } from "@/registry/bases/shared/devices/expander/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 
 const MASTER_VOLUME = 0.7;
 
@@ -22,9 +23,11 @@ export default function BlockExpander() {
     expanderDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createExpanderEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, expanderDevice);

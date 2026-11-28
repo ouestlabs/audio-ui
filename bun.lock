@@ -68,8 +68,8 @@
         "@tanstack/react-hotkeys": "catalog:",
         "@tanstack/react-router": "catalog:",
         "@tanstack/react-start": "catalog:",
-        "@ui-sdk/core": "0.1.0-beta.14",
-        "@ui-sdk/react": "0.1.0-beta.14",
+        "@ui-sdk/core": "0.1.0-beta.17",
+        "@ui-sdk/react": "0.1.0-beta.17",
         "class-variance-authority": "catalog:",
         "cn": "catalog:",
         "fflate": "catalog:",
@@ -149,9 +149,9 @@
         "@tanstack/react-router": "catalog:",
         "@tanstack/react-router-devtools": "catalog:",
         "@tanstack/react-start": "catalog:",
-        "@ui-sdk/core": "0.1.0-beta.14",
-        "@ui-sdk/react": "0.1.0-beta.14",
-        "@ui-sdk/web": "0.1.0-beta.14",
+        "@ui-sdk/core": "0.1.0-beta.17",
+        "@ui-sdk/react": "0.1.0-beta.17",
+        "@ui-sdk/web": "0.1.0-beta.17",
         "class-variance-authority": "catalog:",
         "cmdk": "^1.1.1",
         "cn": "catalog:",
@@ -341,11 +341,11 @@
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "@types/react-dom": "catalog:",
-        "@ui-sdk/core": "0.1.0-beta.14",
-        "@ui-sdk/react": "0.1.0-beta.14",
-        "@ui-sdk/svelte": "0.1.0-beta.14",
-        "@ui-sdk/vue": "0.1.0-beta.14",
-        "@ui-sdk/web": "0.1.0-beta.14",
+        "@ui-sdk/core": "0.1.0-beta.17",
+        "@ui-sdk/react": "0.1.0-beta.17",
+        "@ui-sdk/svelte": "0.1.0-beta.17",
+        "@ui-sdk/vue": "0.1.0-beta.17",
+        "@ui-sdk/web": "0.1.0-beta.17",
         "@vitejs/plugin-react": "catalog:",
         "@vitejs/plugin-vue": "^6.0.11",
         "chokidar": "^5.0.0",
@@ -363,7 +363,7 @@
     },
     "packages/cli": {
       "name": "@audio-ui/cli",
-      "version": "0.0.0",
+      "version": "0.3.0",
       "bin": {
         "audio-ui": "dist/index.js",
       },
@@ -1854,15 +1854,15 @@
 
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
 
-    "@ui-sdk/core": ["@ui-sdk/core@0.1.0-beta.14", "", {}, "sha512-SHm5qLYBqxT5+d3svaBeP5uoBMIQbETKBqcZ/6b+WhhXlz6YoeNqjtMfpmq4yGA329DFwzu+y7+xGJjw4fnTPQ=="],
+    "@ui-sdk/core": ["@ui-sdk/core@0.1.0-beta.17", "", {}, "sha512-wBWNqT0Qf1sE6fqD1XuBnSGBFcY6+cek1z7rKl/r4j2bsv2or9i7z44PLy0J9hmflm3IJ5MLW0P4ur2H9BCIvg=="],
 
-    "@ui-sdk/react": ["@ui-sdk/react@0.1.0-beta.14", "", { "peerDependencies": { "@types/react": ">=19.2.10", "@ui-sdk/core": "^0.1.0-beta.14", "react": ">=19", "react-dom": ">=19" }, "optionalPeers": ["@types/react"] }, "sha512-qfriaLQEd+Iy7+PhAK6d2j3e1Hs6A4lh50+d+6rSAADoBwkQ/jf11SGzfXV5pCuYFGps3Ekz2W4RwtiR6yryjg=="],
+    "@ui-sdk/react": ["@ui-sdk/react@0.1.0-beta.17", "", { "peerDependencies": { "@types/react": ">=19.2.10", "@ui-sdk/core": "^0.1.0-beta.17", "react": ">=19", "react-dom": ">=19" }, "optionalPeers": ["@types/react"] }, "sha512-oAJu+/e8woA5gboO28nm3aiO2qZbjccGc8hukCijSz3biX71AYBw8mo14HkMAZUuPlbSnzVAuNYQMaW0z8vsrw=="],
 
-    "@ui-sdk/svelte": ["@ui-sdk/svelte@0.1.0-beta.14", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.14", "svelte": ">=5.33" } }, "sha512-0yX4vbN3V1vSWcExSuht9gnaGS7+6Kwos92vscAX6ZzyrIm34BKia+WNQAyK8hX3zIggFPBDInVAS2RoaMEmPA=="],
+    "@ui-sdk/svelte": ["@ui-sdk/svelte@0.1.0-beta.17", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.17", "svelte": ">=5.33" } }, "sha512-iqtDoSGFt3jUa/38Y2cNVm6Tbi3gtpl1FPs4+QXK5e6dkDzI8UvY68xtEADD/D8xsrZReizD9yQOsWbVZ/VLNw=="],
 
-    "@ui-sdk/vue": ["@ui-sdk/vue@0.1.0-beta.14", "", { "peerDependencies": { "@nuxt/kit": "^4.0.0 || ^5.0.0-0", "@nuxt/schema": "^4.0.0 || ^5.0.0-0", "@ui-sdk/core": "^0.1.0-beta.14", "nuxt": "^4.0.0 || ^5.0.0-0", "vue": ">=3.5" }, "optionalPeers": ["@nuxt/kit", "@nuxt/schema", "nuxt"] }, "sha512-J3cqsQ6NzYeVeJ7/cmRnAbajdo7ml+djOk7vogCzgDnkYfr+ltpMaG+WXwULMrgVtVTfuNr7/veFDwhACJZuPA=="],
+    "@ui-sdk/vue": ["@ui-sdk/vue@0.1.0-beta.17", "", { "peerDependencies": { "@nuxt/kit": "^4.0.0 || ^5.0.0-0", "@nuxt/schema": "^4.0.0 || ^5.0.0-0", "@ui-sdk/core": "^0.1.0-beta.17", "nuxt": "^4.0.0 || ^5.0.0-0", "vue": ">=3.5" }, "optionalPeers": ["@nuxt/kit", "@nuxt/schema", "nuxt"] }, "sha512-4wx8xdVwXLp++/XEnf0MEMeshHb0UDdotTatfIObbQ2D+QQUG3OMLD0thjQWayMFY5phdYBM9t+YlIJdzYAq5Q=="],
 
-    "@ui-sdk/web": ["@ui-sdk/web@0.1.0-beta.14", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.14" } }, "sha512-FBwLmJEcN4nF7bSzfu1POeueeh9ggwpLITssULQdc9BjnrHUJPeuKb/NJwXF2F257Qtt5Lmf+XLa3ZLe1ar4Ug=="],
+    "@ui-sdk/web": ["@ui-sdk/web@0.1.0-beta.17", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.17" } }, "sha512-O9mcpOGp5Jf3QdYB8ffRF1c2fXikknwi7+5SzdgyBSL5M9xzrnpEVLctcihbKu8HcHUaZgKmMepP3Gfur/TIrg=="],
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.4.0", "", {}, "sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ=="],
 

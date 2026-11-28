@@ -57,7 +57,15 @@ The same works for every item of the [Docs](/docs), including the `block-*` bloc
 
 <ForFrameworks only="vue">
 
-The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+Copy the styled knob with the [CLI](/docs/cli): its primitive, its adapter and its Vue component, its sheet and the theme's tokens. It finds your framework in `package.json` and installs the packages:
+
+```bash
+npx @audio-ui/cli add knob
+```
+
+Or, without the styles, the headless primitive alone: `npx @audio-ui/cli add knob --headless`. The libraries and the engine's modules install the same way: `npx @audio-ui/cli add engine-time`.
+
+By hand, the headless knob is a few files you copy and paste:
 
 <Steps>
 
@@ -77,7 +85,15 @@ npm install @ui-sdk/core@0.1.0-beta.14 @ui-sdk/vue@0.1.0-beta.14 vue
 
 <ForFrameworks only="svelte">
 
-The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+Copy the styled knob with the [CLI](/docs/cli): its primitive, its adapter and its Svelte component, its sheet and the theme's tokens. It finds your framework in `package.json` and installs the packages:
+
+```bash
+npx @audio-ui/cli add knob
+```
+
+Or, without the styles, the headless primitive alone: `npx @audio-ui/cli add knob --headless`. The libraries and the engine's modules install the same way: `npx @audio-ui/cli add engine-time`.
+
+By hand, the headless knob is a few files you copy and paste:
 
 <Steps>
 
@@ -97,7 +113,15 @@ npm install @ui-sdk/core@0.1.0-beta.14 @ui-sdk/svelte@0.1.0-beta.14 svelte
 
 <ForFrameworks only="web">
 
-The shadcn CLI is for React: a primitive is a few files you copy and paste. For the knob:
+Copy the styled knob with the [CLI](/docs/cli): its primitive, its custom elements, its sheet and the theme's tokens. It finds your framework in `package.json` and installs the packages:
+
+```bash
+npx @audio-ui/cli add knob
+```
+
+Or, without the styles, the headless primitive alone: `npx @audio-ui/cli add knob --headless`. The libraries and the engine's modules install the same way: `npx @audio-ui/cli add engine-time`.
+
+By hand, the headless knob is a few files you copy and paste:
 
 <Steps>
 
@@ -173,7 +197,14 @@ import { Knob } from "@/components/audio-ui/knob";
 
 <ForFrameworks only="vue">
 
-Import its parts from where it landed:
+Import the styled knob from where it landed, and its sheets once, in your app's entry (`src/main.ts`):
+
+```ts
+import Knob from "@/components/audio-ui/knob/Knob.vue";
+import "./components/audio-ui/css/index.css";
+```
+
+The headless knob is its parts:
 
 ```ts
 import { Knob } from "@/components/audio-ui/knob/vue";
@@ -183,7 +214,14 @@ import { Knob } from "@/components/audio-ui/knob/vue";
 
 <ForFrameworks only="svelte">
 
-Import its parts from where it landed:
+Import the styled knob from where it landed, and its sheets once, in your app's entry (`src/main.ts`):
+
+```ts
+import Knob from "$lib/components/audio-ui/knob/Knob.svelte";
+import "./lib/components/audio-ui/css/index.css";
+```
+
+The headless knob is its parts:
 
 ```ts
 import { Knob } from "$lib/components/audio-ui/knob/svelte";
@@ -195,10 +233,11 @@ With the latest SvelteKit, write `#lib/components/audio-ui/knob/svelte`.
 
 <ForFrameworks only="web">
 
-Import it once, in your app's browser entry: the import registers the `audio-ui-knob` tags, and the page can then use them.
+Import it once, in your app's browser entry, with the sheets the CLI wrote: the import registers the `audio-ui-knob` tags, and the page can then use them.
 
 ```ts
 import "./components/audio-ui/knob/web.ts";
+import "./components/audio-ui/css/index.css";
 ```
 
 </ForFrameworks>
@@ -212,7 +251,7 @@ The page of each component has its parts, its options and an example in your fra
 A plain HTML page can run a primitive with no CLI, no bundler and no `node_modules`: the site serves each web adapter as a script, with its packages inside. Load the one you need, and write its tags:
 
 ```html title="index.html"
-<script type="module" src="https://www.audio-ui.dev/web/0.1.11/knob.js"></script>
+<script type="module" src="https://www.audio-ui.dev/web/0.1.14/knob.js"></script>
 
 <audio-ui-knob value="40">
   <audio-ui-knob-control>
@@ -230,7 +269,7 @@ The folder of the address is a version of the scripts, and the files of a versio
 
 ## What a component brings
 
-A primitive imports no package of ours, only the kernel. A component that needs the audio logic (pitch, MIDI, musical time, analysis) installs the engine's modules it imports with itself, as files in `lib/engine/<module>/`, and the npm packages they use. Like every file of the registry, they are yours: an update is installing the item again (`npx shadcn@latest add @audio-ui/engine-time --overwrite`).
+A primitive imports no package of ours, only the kernel. A component that needs the audio logic (pitch, MIDI, musical time, analysis) installs the engine's modules it imports with itself, as files in `lib/engine/<module>/`, and the npm packages they use. Like every file of the registry, they are yours: an update is installing the item again with `--overwrite` (`npx shadcn@latest add @audio-ui/engine-time --overwrite` in React, `npx @audio-ui/cli add engine-time --overwrite` in the other frameworks).
 
 ## Styling
 
@@ -241,6 +280,8 @@ Components are styled with a design token system defined by CSS variables and im
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
+
+The styled component is drawn by its sheet: plain CSS on its parts, in the style you picked, with no Tailwind. See the [Styling guide](/docs/styling) for the styles and the skins.
 
 A primitive is headless: it brings behavior and accessibility, and no styles. Each part takes the classes and attributes of its element, and carries state attributes (`data-dragging`, `data-disabled`…) to style from, with your own CSS or with Tailwind CSS. The page of each component lists the attributes of its parts.
 

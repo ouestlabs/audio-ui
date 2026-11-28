@@ -1,0 +1,29 @@
+{
+  "lockfileVersion": 2,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "ducker-vst3-trial",
+      "dependencies": {
+        "@audio/dynamics-ducker": "0.2.1",
+        "@audio/plugin-vst": "0.0.2",
+        "jz": "1.0.3",
+      },
+    },
+  },
+  "packages": {
+    "@audio/dynamics-compressor": ["@audio/dynamics-compressor@0.2.1", "", { "dependencies": { "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-8g7pplFtHtTj4o+/mo4HRf9+yoKZdRrLSQzGwQRKObcMft+4nLxDB0B8fA5ROQ4BoO98n10DF5fep3ofyOQbmQ=="],
+
+    "@audio/dynamics-ducker": ["@audio/dynamics-ducker@0.2.1", "", { "dependencies": { "@audio/dynamics-compressor": "^0.2.0", "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-6m69LXsRqwvNwnEmynLXEgnN0lvqa2v3YUDZpNPrcP4FUUGO/BMcoW6v9zynH1PjtoLo1KLjRBu3yWJlVk+d5A=="],
+
+    "@audio/dynamics-envelope": ["@audio/dynamics-envelope@0.1.4", "", {}, "sha512-1nA2UG7BPnWGA5DM94npwZHiNqTAhOu786XeFqbnwX3bFyAgDRJ9VxENDoGPyPjSkvuDvJ4f//yehr8EmWrJaw=="],
+
+    "@audio/plugin-vst": ["@audio/plugin-vst@0.0.2", "", { "peerDependencies": { "jz": "^1.0.3" }, "optionalPeers": ["jz"] }, "sha512-FwhbID2t6rJgUXCCVAsdhbdzr7O4XJ9tokJCahMps12YPghldw+NC4mWTO1+T8T/hn2yu5dSvQSz85YOlZb6VQ=="],
+
+    "jz": ["jz@1.0.3", "", { "dependencies": { "subscript": "10.8.1", "watr": "5.13.2" }, "bin": { "jz": "cli.js" } }, "sha512-TCfANdKAxB8buf+XRWDjTksGMFTVEFRUSuni2kvh62JQT77SVMK6pHueHUeYWjZh4iKCM+xTXWKZphvHZk8g1A=="],
+
+    "subscript": ["subscript@10.8.1", "", {}, "sha512-aVBJ+SWY8J8ImNk9c1iM4AnK0NSkenyxYp+Msi+NudXCqIcn7Ka83D6agkkYpzq5WDUMk90y5yv1qpneaKP+hA=="],
+
+    "watr": ["watr@5.13.2", "", { "bin": { "watr": "bin/watr.js" } }, "sha512-QQchx/nmvJB33Yp1M5ksPndesGp4pC598hw4NI/SQOUS8+nb23eNIeXG9rCqV69E1+awBfxhae6lGZXjweNTWQ=="],
+  }
+}

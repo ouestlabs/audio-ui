@@ -1,3 +1,4 @@
+export { type ContractParameter, contractParams } from "./contract";
 export {
   type ChoiceOption,
   type ChoiceParameter,

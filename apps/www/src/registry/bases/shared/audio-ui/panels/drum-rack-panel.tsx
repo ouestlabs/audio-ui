@@ -46,7 +46,7 @@ import {
   type RackMapping,
 } from "@/registry/lib/arrangement/arrangement";
 import { cn } from "@/registry/lib/utils";
-import type { PadOnDetails } from "@/registry/primitives/pad/pad";
+import type { PadOnDetails } from "@/registry/primitives/pad/core";
 import { pitchName } from "@/registry/primitives/pitch";
 
 /** How many pads a bank shows, four by four. */

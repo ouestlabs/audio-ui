@@ -11,7 +11,7 @@ import {
   drumSynthDevice,
 } from "@/registry/bases/shared/devices/drum-synth/device";
 import { cn } from "@/registry/lib/utils";
-import type { PadOnDetails } from "@/registry/primitives/pad/pad";
+import type { PadOnDetails } from "@/registry/primitives/pad/core";
 
 interface DrumSynthPanelProps {
   /** The notes held now, such as on a MIDI keyboard or from a sequencer: while any is, the pad lights up. */

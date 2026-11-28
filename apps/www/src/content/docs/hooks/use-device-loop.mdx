@@ -1,13 +1,13 @@
 ---
 title: useDeviceLoop
-description: "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal)."
+description: "A sound of the app's looped through an effect's engine and out to a destination: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal)."
 ---
 
 <Entry name="use-device-loop" />
 
 ## Usage
 
-A short loop of drums and plucked notes played through an effect's engine and out to a destination: what a device does, heard. It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, so the play button belongs to the host, and it is silent outside one.
+A sound looped through an effect's engine and out to a destination: what a device does, heard. The sound is the app's: an `AudioBuffer` it decoded, with its tempo. It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, so the play button belongs to the host, and it is silent outside one.
 
 ```tsx
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
@@ -18,13 +18,22 @@ import { useDeviceSignal } from "@/hooks/use-device-signal";
 import { useMasterBus } from "@/hooks/use-master-bus";
 
 const output = useMasterBus(0.7);
-const { engine } = useDeviceLoop({ create: createCompressorEngine, destination: output, state });
+// `buffer` is a loop the app decoded, such as with `decodeAudioData`.
+const sound = buffer ? { buffer, tempo: { beatsPerBar: 4, beatUnit: 4, bpm: 90 } } : null;
+const { engine } = useDeviceLoop({ create: createCompressorEngine, destination: output, sound, state });
 const signal = useDeviceSignal(engine, compressorDevice); // what the panel draws of its sound
 
 <CompressorPanel onValueChange={setState} signal={signal} value={state} />;
 ```
 
-The engine is made when the loop starts and disposed when it stops ([`useDeviceEngines`](/docs/hooks/use-device-engines)), following `state` and the tempo of the sound it plays, for a time parameter synced to it. `key` feeds the engine's `sidechain` with the kick that goes with the sound, as a ducker needs. `source` picks the sound unless the session has another chosen (see [`useDemoSource`](/docs/hooks/use-demo-source)).
+The engine is made when the loop starts and disposed when it stops ([`useDeviceEngines`](/docs/hooks/use-device-engines)), following `state` and the tempo of the sound (120 BPM in 4/4 until one is given), for a time parameter synced to it. `sound.key` feeds the engine's `sidechain` on the same beat, as a ducker needs: it is listened to, never heard. Nothing plays while `sound` is null. The blocks of this site pass the demo sounds through [`useDemoSound`](/docs/hooks/use-demo-source).
+
+<TypeTable title="Options">
+<TypeRow name={"create"} type={"EngineFactory<State, Engine>"}>Makes the engine for the state it starts with: an effect's `create<Name>Engine`.</TypeRow>
+<TypeRow name={"destination"} type={"AudioNode | null"}>Where the processed sound goes, such as the node of [`useMasterBus`](/docs/hooks/use-master-bus).</TypeRow>
+<TypeRow name={"sound"} type={"{ buffer: AudioBuffer; key?: AudioBuffer | null; tempo: Tempo } | null"}>The sound to loop, its sidechain key, and their tempo.</TypeRow>
+<TypeRow name={"state"} type={"State"}>The state of the device, followed by the engine.</TypeRow>
+</TypeTable>
 
 <TypeTable title="Returns">
 <TypeRow name={"engine"} type={"Engine | null"}>The engine while the loop plays: give it to [`useDeviceSignal`](/docs/hooks/use-device-signal) for the panel's live sound.</TypeRow>

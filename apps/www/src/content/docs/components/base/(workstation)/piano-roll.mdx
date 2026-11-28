@@ -272,7 +272,7 @@ Both are served at `https://www.audio-ui.dev/css/`.
 A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
 
 ```tsx
-import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/core";
 
 const [notes, setNotes] = useState<Note[]>([]);
 ```
@@ -416,7 +416,7 @@ A Root holds the notes and their selection. The roll is a column of parts you pl
 <TabsContent value="react">
 
 ```tsx
-import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/core";
 import { Piano } from "@/components/audio-ui/piano/react";
 import { PianoRoll } from "@/components/audio-ui/piano-roll/react";
 
@@ -468,7 +468,7 @@ export function Roll({ notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[
 
 ```vue
 <script setup lang="ts">
-import type { Note } from "@/components/audio-ui/piano-roll/piano-roll";
+import type { Note } from "@/components/audio-ui/piano-roll/core";
 import { PianoRoll } from "@/components/audio-ui/piano-roll/vue";
 
 defineProps<{ notes: Note[] }>();
@@ -507,7 +507,7 @@ const emit = defineEmits<{ notes: [notes: Note[]] }>();
 
 ```svelte
 <script lang="ts">
-  import type { Note } from "$lib/components/audio-ui/piano-roll/piano-roll";
+  import type { Note } from "$lib/components/audio-ui/piano-roll/core";
   import { PianoRoll } from "$lib/components/audio-ui/piano-roll/svelte";
 
   let { notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[]) => void } = $props();

@@ -3,12 +3,11 @@ import type {
   EffectEngine,
   SidechainBinding,
 } from "@/engine/device";
-import { createFeed, type Feed } from "@/engine/device";
 import { loadWorklet } from "@/engine/worklet";
 import {
   DUCKER_WORKLET,
   type DuckerState,
-  duckerSettings,
+  duckerDevice,
 } from "@/registry/bases/shared/devices/ducker/device";
 
 const RAMP_SECONDS = 0.01;
@@ -26,19 +25,24 @@ export interface DuckerEngine
   readonly sidechain: AudioNode;
 }
 
+/** The state as the values of the worklet's parameters, by id, a toggle as 0 or 1. */
+const parametersOf = (state: DuckerState) =>
+  Object.fromEntries(
+    duckerDevice.parameters.map(({ id }) => [id, Number(state[id])])
+  );
+
 /**
  * A ducker on the Web Audio API for a `DuckerState`:
  *
  * ```
- * input → dry ─────────────────────────────────┐
- *       → ducker (an AudioWorklet) → wet ──────┴→ output
+ * input → ducker (an AudioWorklet) → output
  * sidechain ↗ (its second input)
  * ```
  *
- * The browser has no ducker node: the ducker is the audio.js one in an
- * `AudioWorklet` loaded from a blob, the sound on its first input and the key
- * on its second, fed only while it plays. Off, or until it is ready, the
- * sound goes round it, unchanged.
+ * The browser has no ducker node: the ducker is the device's processor, over
+ * the audio.js one, in an `AudioWorklet` loaded from a blob, the sound on its
+ * first input and the key on its second. Off, the processor lets the sound
+ * through unchanged, and so does the engine until the worklet is ready.
  */
 export function createDuckerEngine(
   ctx: BaseAudioContext,
@@ -48,28 +52,18 @@ export function createDuckerEngine(
   const output = ctx.createGain();
   const sidechain = ctx.createGain();
   const dry = ctx.createGain();
-  const wet = ctx.createGain();
   input.connect(dry).connect(output);
-  wet.connect(output);
-  dry.gain.value = 1;
-  wet.gain.value = 0;
 
-  let settings = duckerSettings(initial);
+  let state = initial;
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let feed: Feed | null = null;
 
-  /** The ducker in place of the dry sound while it plays and is loaded, fed only then. */
-  const route = () => {
-    const playing = model === null ? 0 : settings.wet;
-    dry.gain.setTargetAtTime(1 - playing, ctx.currentTime, RAMP_SECONDS);
-    wet.gain.setTargetAtTime(playing, ctx.currentTime, RAMP_SECONDS);
-    // As values: the ones it reads as it plays change at once, the others make it again, which fades it in.
-    for (const [name, value] of Object.entries(settings.modelParams)) {
+  /** As values: the processor reads them as it plays. */
+  const send = () => {
+    for (const [name, value] of Object.entries(parametersOf(state))) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    feed?.set(playing > 0);
   };
 
   const ready = loadWorklet(ctx, DUCKER_WORKLET).then((ok) => {
@@ -79,43 +73,41 @@ export function createDuckerEngine(
     model = new AudioWorkletNode(ctx, "audioui-ducker", {
       numberOfInputs: 2,
       outputChannelCount: [2],
-      parameterData: settings.modelParams,
+      parameterData: parametersOf(state),
       processorOptions: { model: "ducker" },
     });
-    feed = createFeed([
-      [input, model, 0, 0],
-      [sidechain, model, 0, 1],
-    ]);
+    input.connect(model, 0, 0);
+    sidechain.connect(model, 0, 1);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
-    model.connect(wet);
-    route();
+    model.connect(output);
+    // The sound that went round it gives way to what comes out of it.
+    dry.gain.setTargetAtTime(0, ctx.currentTime, RAMP_SECONDS);
     return true;
   });
+
+  const gainReduction = () => (state.enabled ? reduction : 0);
 
   return {
     dispose: () => {
       disposed = true;
-      feed?.dispose();
       model?.disconnect();
-      for (const node of [input, sidechain, dry, wet, output]) {
+      for (const node of [input, sidechain, dry, output]) {
         node.disconnect();
       }
     },
     input,
     output,
     get reduction() {
-      return settings.wet > 0 ? reduction : 0;
+      return gainReduction();
     },
-    readings: (): DeviceReadings => ({
-      gainReductionDb: settings.wet > 0 ? reduction : 0,
-    }),
+    readings: (): DeviceReadings => ({ gainReductionDb: gainReduction() }),
     ready,
     sidechain,
-    update: (state) => {
-      settings = duckerSettings(state);
-      route();
+    update: (next) => {
+      state = next;
+      send();
     },
   };
 }

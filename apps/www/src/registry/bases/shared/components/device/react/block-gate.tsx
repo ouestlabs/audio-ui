@@ -8,6 +8,7 @@ import { GatePanel } from "@/registry/bases/shared/devices/gate/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 
 const MASTER_VOLUME = 0.7;
 /** A loop whose tails fall under the threshold, so the gate closes between the hits. */
@@ -30,9 +31,11 @@ export default function BlockGate() {
     () => gateDevice.apply(gateDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
+  const sound = useDemoSound("groove");
   const { engine } = useDeviceLoop({
     create: createGateEngine,
     destination: master,
+    sound,
     state,
   });
   const signal = useDeviceSignal(engine, gateDevice);

@@ -1,6 +1,6 @@
 /**
  * A primitive as the registry ships it: one file written by hand,
- * `registry/primitives/<name>/<name>.ts`, over `registry/primitives/primitive.ts`,
+ * `registry/primitives/<name>/core.ts`, over `registry/primitives/primitive.ts`,
  * installed with each adapter in the same layout, `components/audio-ui/`
  * (`src/lib/components/audio-ui/` in Svelte). Its relative imports resolve as
  * written, with no alias and no package of ours.
@@ -75,21 +75,17 @@ const MORE_FILES: Record<string, string[]> = {
 /** The files of a primitive, by path from `registry/primitives/`. */
 export const primitiveFiles = (name: string) => [
   "primitive.ts",
-  `${name}/${name}.ts`,
+  `${name}/core.ts`,
   ...(MORE_FILES[name] ?? []),
 ];
 
 /**
  * An adapter's file, with the packages of ours it imports written as the path
- * to its primitive: beside it (`audio-ui/knob/react.tsx` imports `./knob`), or
+ * to its primitive: beside it (`audio-ui/knob/react.tsx` imports `./core`), or
  * one folder up from Svelte's parts (`audio-ui/knob/svelte/`).
  */
-export function rewriteAdapter(
-  primitive: string,
-  framework: string,
-  content: string
-) {
-  const path = `${framework === "svelte" ? ".." : "."}/${primitive}`;
+export function rewriteAdapter(framework: string, content: string) {
+  const path = `${framework === "svelte" ? ".." : "."}/core`;
   return content.replace(OUR_PACKAGES, `"${path}"`);
 }
 
@@ -98,15 +94,15 @@ const PRIMITIVE_IMPORT = /(["'])@\/primitives\/([a-z-]+)\1/g;
 /**
  * Any other file of the registry (a demo, a block) that imports a primitive
  * written in the registry, as `@/primitives/<name>`, imports it where
- * the primitive's adapter installs it: `$lib/components/audio-ui/<name>/<name>`
- * in Svelte, `@/components/audio-ui/<name>/<name>` elsewhere.
+ * the primitive's adapter installs it: `$lib/components/audio-ui/<name>/core`
+ * in Svelte, `@/components/audio-ui/<name>/core` elsewhere.
  */
 export function rewritePrimitiveImports(content: string, svelte: boolean) {
   return content.replace(
     PRIMITIVE_IMPORT,
     (match, quote: string, name: string) =>
       SHIPPED_PRIMITIVES.has(name)
-        ? `${quote}${svelte ? "$lib" : "@"}/components/audio-ui/${name}/${name}${quote}`
+        ? `${quote}${svelte ? "$lib" : "@"}/components/audio-ui/${name}/core${quote}`
         : match
   );
 }

@@ -173,7 +173,7 @@
     pointer-events: none;
   }
 }
-[data-slot=sequencer-cell][data-beat] {
+[data-slot=sequencer-cell][data-beat]:not([aria-pressed="true"]) {
   background-color: var(--muted);
 }
 [data-slot=sequencer-velocity] {

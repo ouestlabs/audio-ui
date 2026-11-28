@@ -20,7 +20,7 @@ The framework is found in your `package.json`, and each one gets the files writt
 | Svelte | `src/lib/components/audio-ui/knob/Knob.svelte`, over `knob/svelte/` | `css/knob.css` |
 | Web | `components/audio-ui/knob/web.ts`, the custom elements | `css/knob.css` |
 
-Every framework also gets the primitive, `knob/knob.ts`, and `primitive.ts`, which the primitives share. The files land under `src/` when the project has one.
+Every framework also gets the primitive, `knob/core.ts`, and `primitive.ts`, which the primitives share. The files land under `src/` when the project has one.
 
 Outside React, the sheets go in `components/audio-ui/css/` with `index.css`, which imports them all. Import it once, at the root of your app:
 
@@ -31,6 +31,17 @@ import "./components/audio-ui/css/index.css"
 Each `add` adds the sheets it writes to the index. A project with no shadcn theme also gets `theme.css`, the theme's tokens (`--foreground`, `--primary`…).
 
 In React, a component that needs `cn` gets `lib/utils.ts`, which re-exports it from the [`cn`](https://github.com/shadcn-ui/cn) package, unless the project has one.
+
+## Libraries and the engine
+
+What makes the sound installs the same way, in every framework: the libraries and the modules of the [engine](/docs/engine) and of WebGL are plain TypeScript.
+
+```bash
+npx @audio-ui/cli add engine-time
+npx @audio-ui/cli add web-audio
+```
+
+Each one lands in `lib/`, with the modules it imports and the npm packages they use.
 
 ## Imports
 

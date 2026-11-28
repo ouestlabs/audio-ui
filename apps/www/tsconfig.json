@@ -22,40 +22,20 @@
       "@/components/audio-ui/rocker-switch": [
         "./src/registry/bases/ui-sdk/audio-ui/elements/rocker-switch.tsx"
       ],
-      "@/primitives/envelope": [
-        "./src/registry/primitives/envelope/envelope.ts"
-      ],
-      "@/primitives/fader": [
-        "./src/registry/primitives/fader/fader.ts"
-      ],
-      "@/primitives/knob": [
-        "./src/registry/primitives/knob/knob.ts"
-      ],
-      "@/primitives/meter": [
-        "./src/registry/primitives/meter/meter.ts"
-      ],
-      "@/primitives/pad": ["./src/registry/primitives/pad/pad.ts"],
-      "@/primitives/piano": [
-        "./src/registry/primitives/piano/piano.ts"
-      ],
+      "@/primitives/envelope": ["./src/registry/primitives/envelope/core.ts"],
+      "@/primitives/fader": ["./src/registry/primitives/fader/core.ts"],
+      "@/primitives/knob": ["./src/registry/primitives/knob/core.ts"],
+      "@/primitives/meter": ["./src/registry/primitives/meter/core.ts"],
+      "@/primitives/pad": ["./src/registry/primitives/pad/core.ts"],
+      "@/primitives/piano": ["./src/registry/primitives/piano/core.ts"],
       "@/primitives/piano-roll": [
-        "./src/registry/primitives/piano-roll/piano-roll.ts"
+        "./src/registry/primitives/piano-roll/core.ts"
       ],
-      "@/primitives/plot": [
-        "./src/registry/primitives/plot/plot.ts"
-      ],
-      "@/primitives/sequencer": [
-        "./src/registry/primitives/sequencer/sequencer.ts"
-      ],
-      "@/primitives/timeline": [
-        "./src/registry/primitives/timeline/timeline.ts"
-      ],
-      "@/primitives/waveform": [
-        "./src/registry/primitives/waveform/waveform.ts"
-      ],
-      "@/primitives/xypad": [
-        "./src/registry/primitives/xypad/xypad.ts"
-      ],
+      "@/primitives/plot": ["./src/registry/primitives/plot/core.ts"],
+      "@/primitives/sequencer": ["./src/registry/primitives/sequencer/core.ts"],
+      "@/primitives/timeline": ["./src/registry/primitives/timeline/core.ts"],
+      "@/primitives/waveform": ["./src/registry/primitives/waveform/core.ts"],
+      "@/primitives/xypad": ["./src/registry/primitives/xypad/core.ts"],
       "@/engine/*": ["./src/registry/lib/engine/*/index.ts"],
       "@/webgl/*": ["./src/registry/lib/webgl/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],

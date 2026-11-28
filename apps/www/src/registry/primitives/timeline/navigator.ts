@@ -1,5 +1,11 @@
 import { css, type SlotDefinition } from "@ui-sdk/core";
 import { flag, VISUALLY_HIDDEN } from "../primitive";
+import type {
+  DescribePosition,
+  TimelineApi,
+  TimelinePublicState,
+  TimelineState,
+} from "./core";
 import {
   createNavigatorController,
   type NavigatorController,
@@ -7,12 +13,6 @@ import {
   thumbOf,
   visibleRange,
 } from "./navigator-controller";
-import type {
-  DescribePosition,
-  TimelineApi,
-  TimelinePublicState,
-  TimelineState,
-} from "./timeline";
 
 /**
  * The navigator: a bar with the stretch the viewport shows inside it, which a

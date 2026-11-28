@@ -193,8 +193,8 @@ export const hooks: RegistryItem[] = [
   hookItem("use-master-bus", {
     categories: ["audio", "synth", "sequencer"],
     description:
-      "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
-    registryDependencies: ["@audio-ui/web-audio"],
+      "A master output bus with a safety limiter on the page's context (master-bus), its volume following a value: every source connects into one gain node that a single fader governs.",
+    registryDependencies: ["@audio-ui/master-bus", "@audio-ui/web-audio"],
   }),
   hookItem("use-device-engines", {
     categories: ["hooks", "audio", "device"],
@@ -260,10 +260,13 @@ export const hooks: RegistryItem[] = [
   hookItem("use-demo-source", {
     categories: ["hooks", "audio"],
     description:
-      "The sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does. It tells the session its default, so a bar can offer the choice only where there is one. Outside a session it is always the default.",
+      "The demo sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does, and useDemoSound, which renders it for use-device-loop once the session plays. Outside a session it is always the default.",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-audio-session",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/web-audio",
     ],
   }),
   hookItem("use-audio-session", {
@@ -329,10 +332,8 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio", "device"],
     dependencies: [],
     description:
-      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
+      "A sound of the app's looped through an effect's engine and out to a destination: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     registryDependencies: [
-      "@audio-ui/demo-sound",
-      "@audio-ui/use-demo-source",
       "@audio-ui/use-device-engines",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
