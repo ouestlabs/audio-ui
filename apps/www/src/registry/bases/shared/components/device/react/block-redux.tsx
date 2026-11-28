@@ -6,9 +6,9 @@ import {
 import { createReduxEngine } from "@/registry/bases/shared/devices/redux/engine";
 import { ReduxPanel } from "@/registry/bases/shared/devices/redux/panel";
 import { useDeviceLoop } from "@/registry/bases/shared/hooks/devices/use-device-loop";
-import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 import { useDeviceSignal } from "@/registry/bases/shared/hooks/devices/use-device-signal";
 import { useMasterBus } from "@/registry/bases/shared/hooks/devices/use-master-bus";
+import { useDemoSound } from "@/registry/bases/shared/hooks/use-demo-source";
 
 const MASTER_VOLUME = 0.7;
 
