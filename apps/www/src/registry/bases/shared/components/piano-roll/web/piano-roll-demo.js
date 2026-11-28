@@ -22,7 +22,7 @@ export default function pianoRollWebDemo(element) {
       audio-ui-piano-roll-note-start, audio-ui-piano-roll-note-end { width: 0.375rem; cursor: ew-resize; }
       audio-ui-piano-roll-marquee { border: 1px solid var(--primary); background: color-mix(in oklab, var(--primary) 10%, transparent); z-index: 10; }
     </style>
-    <audio-ui-piano-roll value='${JSON.stringify(NOTES)}' duration="16" max-pitch="72" min-pitch="48" mode="select" snap-step="0.25">
+    <audio-ui-piano-roll default-value='${JSON.stringify(NOTES)}' duration="16" max-pitch="72" min-pitch="48" mode="select" snap-step="0.25">
       <audio-ui-piano-roll-grid style="position: relative; height: 16rem">
         <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
         <audio-ui-piano-roll-notes handles></audio-ui-piano-roll-notes>
