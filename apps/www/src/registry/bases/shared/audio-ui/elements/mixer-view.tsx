@@ -2,6 +2,7 @@ import { createReorder, type ReorderDraft } from "@ui-sdk/core";
 import {
   type KeyboardEvent,
   type MouseEvent,
+  memo,
   type PointerEvent,
   useCallback,
   useEffect,
@@ -265,14 +266,10 @@ function SendKnob({
   );
 }
 
-/** How a track's channel is moved: by its name, dragged or picked up with the keyboard. */
+/** How a track's channel is moved: by its name, dragged or picked up with the keyboard. The same object for a channel from one render to the next. */
 interface StripGrip {
-  /** Whether a pointer is dragging the channel, by itself or with its group. */
-  dragging: boolean;
   /** Joins the channel to the row, and returns what takes it out. */
   item: (element: HTMLElement | null) => (() => void) | undefined;
-  /** Whether the channel is picked up. */
-  moving: boolean;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
   onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
 }
@@ -363,20 +360,17 @@ function useChannelReorder(
     [cleanups]
   );
   const state = useSyncExternalStore(store.subscribe, store.get, store.get);
-  const items = useRef(new Map<string, StripGrip["item"]>());
-  const grip = (id: string): StripGrip => {
-    let item = items.current.get(id);
-    if (!item) {
-      item = (element) =>
-        element ? reorder.bind(element, { key: id, props: {} }) : undefined;
-      items.current.set(id, item);
+  const grips = useRef(new Map<string, StripGrip>());
+  const grip = (id: string) => {
+    const held = grips.current.get(id);
+    if (held) {
+      return held;
     }
-    return {
-      dragging: reorder.dragging(state, id),
-      item,
-      moving: reorder.moving(state, id),
+    const made: StripGrip = {
+      item: (element) =>
+        element ? reorder.bind(element, { key: id, props: {} }) : undefined,
       onKeyDown: (event) => {
-        if (!state.moving) {
+        if (!store.get().moving) {
           live.current.picked = id;
         }
         reorder.keydown(event.nativeEvent, id);
@@ -386,28 +380,43 @@ function useChannelReorder(
         reorder.pointerdown(event.nativeEvent, id);
       },
     };
+    grips.current.set(id, made);
+    return made;
   };
-  return { grip, order: state.moving?.order ?? ids };
+  return {
+    /** Whether a pointer is dragging a channel, by itself or with its group. */
+    dragging: (id: string) => reorder.dragging(state, id),
+    grip,
+    /** Whether a channel is picked up. */
+    moving: (id: string) => reorder.moving(state, id),
+    order: state.moving?.order ?? ids,
+  };
 }
 
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
   /** Whether the track is armed to record (REC-001). */
   armed?: boolean;
-  /** What the fader and the pan follow their envelopes by (AUT-006). */
-  following: AutomationFollowing;
+  /** Whether a pointer is dragging the channel. */
+  dragging?: boolean;
+  /** With `overridden` and `position`, what the fader and the pan follow their envelopes by (AUT-006). */
+  duration: AutomationFollowing["duration"];
   /** A track's channel moves by its name; a return and the main track stay where they are. */
   grip?: StripGrip;
   /** The group the track plays into, when it is in one (MIX-020). */
   into?: string;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
+  /** Whether the channel is picked up to be moved. */
+  moving?: boolean;
   /** Gives the channel an Arm switch, as its track's header has: `exclusive` is false when Cmd or Ctrl adds it to the armed ones. */
   onArm?: (id: string, exclusive: boolean) => void;
   onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
   onSelect: (id: string) => void;
   onSend: (id: string, to: string, level: number) => void;
   onSettle: () => void;
+  overridden: AutomationFollowing["overridden"];
+  position: AutomationFollowing["position"];
   returns: readonly ArrangementTrack[];
   selected: boolean;
   /** A return's own sends are off (MIX-008): it shows none. */
@@ -485,10 +494,10 @@ function StripSwitches({
 }
 
 /** How a channel looks while it moves: dimmed under a pointer, ringed under the keyboard, and the copy that follows the pointer, cut down to its name. */
-function reorderStyle(grip: StripGrip | undefined) {
+function reorderStyle(dragging: boolean, moving: boolean) {
   return cn(
-    grip?.dragging && "opacity-30",
-    grip?.moving && !grip.dragging && "ring-2 ring-ring ring-inset",
+    dragging && "opacity-30",
+    moving && !dragging && "ring-2 ring-ring ring-inset",
     "data-drag-preview:h-8! data-drag-preview:grid-rows-1 data-drag-preview:overflow-hidden! data-drag-preview:rounded-md data-drag-preview:border data-drag-preview:bg-card data-drag-preview:shadow-md data-drag-preview:[&>:not(:first-child)]:hidden"
   );
 }
@@ -522,26 +531,34 @@ function StripName({
   );
 }
 
-/** A channel of the mixer: its sends, its pan, its fader and meter, its switches; the main track's loudness in their place. */
-function Strip({
+/**
+ * A channel of the mixer: its sends, its pan, its fader and meter, its
+ * switches; the main track's loudness in their place. Drawn again only when
+ * what it shows changes: a channel moved past it leaves it as it is.
+ */
+const Strip = memo(function Channel({
   analysers,
   armed = false,
-  following,
+  dragging = false,
+  duration,
   grip,
   into,
   main,
+  moving = false,
   onArm,
   onMix,
   onSelect,
   onSend,
   onSettle,
+  overridden,
+  position,
   returns,
   selected,
   sends,
   tap = null,
   track,
 }: StripProps) {
-  const mix = useAutomatedMix(track, following);
+  const mix = useAutomatedMix(track, { duration, overridden, position });
   const swatch = trackSwatch(mix.color);
   const setGain = useCallback(
     (volume: number) => onMix(track.id, { gain: gainOf(volume) }),
@@ -580,7 +597,7 @@ function Strip({
         main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
         selected && "bg-muted",
-        reorderStyle(grip)
+        reorderStyle(dragging, moving)
       )}
       data-mixer-track={grip ? track.id : undefined}
       onPointerDown={select}
@@ -696,7 +713,7 @@ function Strip({
       )}
     </section>
   );
-}
+});
 
 /**
  * The mixer: a channel for each track and return, then the main track. Each
@@ -746,20 +763,20 @@ export function MixerView({
     <Strip
       analysers={engine.meter(track.id)}
       armed={armed?.has(track.id)}
-      following={{
-        duration: doc.duration,
-        overridden: overridden[track.id],
-        position: engine.position,
-      }}
+      dragging={channels.dragging(track.id)}
+      duration={doc.duration}
       grip={moves}
       into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
+      moving={channels.moving(track.id)}
       onArm={moves && track.kind !== "group" ? onArm : undefined}
       onMix={onMix}
       onSelect={onSelectTrack}
       onSend={onSend}
       onSettle={onSettle}
+      overridden={overridden[track.id]}
+      position={engine.position}
       returns={doc.returns}
       selected={selectedTrack === track.id}
       sends={sends}
