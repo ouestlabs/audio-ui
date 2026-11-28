@@ -210,7 +210,7 @@ export const devices: RegistryItem[] = [
     device: {
       dependencies: [],
       description:
-        "The ducker as a device: a threshold, a ratio, a knee, a range, an attack and a release, the gain it puts on the sound for a level of the key, one processor over the ducker of @audio/dynamics-ducker that takes the device's parameters, and the worklet's source, with no panel and no audio in it.",
+        "The ducker as a device: a threshold, a ratio, a knee, a range, an attack and a release, the numbers it gives the ducker of audio.js for a state, the gain it puts on the sound for a level of the key, one processor over the ducker of @audio/dynamics-ducker that takes the device's parameters, and the worklet's source, with no panel and no audio in it.",
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {

@@ -83,6 +83,21 @@ export const duckerDevice = defineDevice({
 
 export type DuckerState = DeviceState<typeof duckerDevice.parameters>;
 
+/** The numbers a state gives the processor of `@audio/dynamics-ducker`, in the manifest's units: the range as a cut. Off, the sound goes round it. */
+export function duckerSettings(state: DuckerState) {
+  return {
+    modelParams: {
+      attack: state.attackMs,
+      knee: state.kneeDb,
+      range: -state.rangeDb,
+      ratio: state.ratio,
+      release: state.releaseMs,
+      threshold: state.thresholdDb,
+    },
+    wet: state.enabled ? 1 : 0,
+  };
+}
+
 /** The gain a state puts on the sound, in dB, for a level of the key in dB, once it has settled: the package's own compression curve, held within the range. */
 export function duckerCurve(state: DuckerState) {
   if (!state.enabled) {

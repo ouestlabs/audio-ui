@@ -6,6 +6,7 @@ import {
   type DuckerState,
   duckerCurve,
   duckerDevice,
+  duckerSettings,
 } from "@/registry/bases/shared/devices/ducker/device";
 import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
 import { contractParams } from "@/registry/lib/engine/device";
@@ -189,5 +190,6 @@ describe("duckerDevice", () => {
     expect(curve(-10)).toBe(compressorGain(-10, -30, 4, 6));
     expect(curve(20)).toBe(-24);
     expect(duckerCurve({ ...defaults, enabled: false })(0)).toBe(0);
+    expect(duckerSettings(defaults).modelParams.range).toBe(-24);
   });
 });
