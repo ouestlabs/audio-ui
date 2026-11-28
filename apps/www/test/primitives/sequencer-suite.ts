@@ -221,6 +221,33 @@ export function sequencerSuite(framework: string, mount: MountSequencer) {
       s.unmount();
     });
 
+    test("Page Down and Page Up cross the rows, and Control with Home or End goes to a corner", async () => {
+      const s = await render(mount);
+      s.cell(0, 1).focus();
+      await s.act(() => key(s.cell(0, 1), "PageDown"));
+      expect(document.activeElement).toBe(s.cell(1, 1));
+      await s.act(() => key(s.cell(1, 1), "PageUp"));
+      expect(document.activeElement).toBe(s.cell(0, 1));
+      await s.act(() => key(s.cell(0, 1), "End", { ctrlKey: true }));
+      expect(document.activeElement).toBe(s.cell(1, 3));
+      await s.act(() => key(s.cell(1, 3), "Home", { ctrlKey: true }));
+      expect(document.activeElement).toBe(s.cell(0, 0));
+      expect(s.cell(0, 0).getAttribute("tabindex")).toBe("0");
+      s.unmount();
+    });
+
+    test("right to left, the left and right arrows walk the way the steps read", async () => {
+      const s = await render(mount);
+      s.root.setAttribute("dir", "rtl");
+      s.root.style.direction = "rtl";
+      s.cell(0, 1).focus();
+      await s.act(() => key(s.cell(0, 1), "ArrowLeft"));
+      expect(document.activeElement).toBe(s.cell(0, 2));
+      await s.act(() => key(s.cell(0, 2), "ArrowRight"));
+      expect(document.activeElement).toBe(s.cell(0, 1));
+      s.unmount();
+    });
+
     test("a controlled pattern is the one drawn", async () => {
       const s = await render(mount, { value: [[false, true, false, false]] });
       expect(s.rows()).toHaveLength(1);

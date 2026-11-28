@@ -126,6 +126,26 @@ const jsonAttribute = (value: string | null) =>
   value ? JSON.parse(value) : undefined;
 
 /**
+ * Names a part with the `data-slot` the kernel would write, before it joins
+ * the timeline. `data-slot` is a prop of every part (`nameSlots`), so the
+ * element observes it, and the kernel writing it first re-renders every part
+ * from inside the last. A name given to the part is kept.
+ */
+function nameSlot(part: HTMLElement) {
+  if (!part.hasAttribute("data-slot")) {
+    part.setAttribute("data-slot", part.localName.slice("audio-ui-".length));
+  }
+}
+
+/** `render` for a part that also draws something of its own, once named. */
+const named =
+  <Result>(render: (part: HTMLElement) => Result) =>
+  (part: HTMLElement) => {
+    nameSlot(part);
+    return render(part);
+  };
+
+/**
  * The whole web adapter of the timeline: a tag for each part. The ruler and a
  * track's resize handle make the input they hold themselves.
  */
@@ -133,17 +153,17 @@ export const parts = createParts(timeline, {
   clip: {
     display: "block",
     kinds: { defaultValue: jsonAttribute, value: jsonAttribute },
-    render: renderClip,
+    render: named(renderClip),
     tag: "audio-ui-timeline-clip",
   },
   clipFadeIn: {
     display: "block",
-    render: renderFade,
+    render: named(renderFade),
     tag: "audio-ui-timeline-clip-fade-in",
   },
   clipFadeInHandle: {
     display: "block",
-    render: renderEdge("audio-ui-timeline-clip-fade-in-input"),
+    render: named(renderEdge("audio-ui-timeline-clip-fade-in-input")),
     tag: "audio-ui-timeline-clip-fade-in-handle",
   },
   clipFadeInInput: {
@@ -154,12 +174,12 @@ export const parts = createParts(timeline, {
   },
   clipFadeOut: {
     display: "block",
-    render: renderFade,
+    render: named(renderFade),
     tag: "audio-ui-timeline-clip-fade-out",
   },
   clipFadeOutHandle: {
     display: "block",
-    render: renderEdge("audio-ui-timeline-clip-fade-out-input"),
+    render: named(renderEdge("audio-ui-timeline-clip-fade-out-input")),
     tag: "audio-ui-timeline-clip-fade-out-handle",
   },
   clipFadeOutInput: {
@@ -168,7 +188,11 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-clip-fade-out-input",
     target: (el) => el.querySelector("input"),
   },
-  clipHeader: { display: "block", tag: "audio-ui-timeline-clip-header" },
+  clipHeader: {
+    display: "block",
+    render: nameSlot,
+    tag: "audio-ui-timeline-clip-header",
+  },
   clipInput: {
     display: "contents",
     properties: ["getAriaValueText"],
@@ -177,7 +201,7 @@ export const parts = createParts(timeline, {
   },
   clipTrimEnd: {
     display: "block",
-    render: renderEdge("audio-ui-timeline-clip-trim-end-input"),
+    render: named(renderEdge("audio-ui-timeline-clip-trim-end-input")),
     tag: "audio-ui-timeline-clip-trim-end",
   },
   clipTrimEndInput: {
@@ -188,7 +212,7 @@ export const parts = createParts(timeline, {
   },
   clipTrimStart: {
     display: "block",
-    render: renderEdge("audio-ui-timeline-clip-trim-start-input"),
+    render: named(renderEdge("audio-ui-timeline-clip-trim-start-input")),
     tag: "audio-ui-timeline-clip-trim-start",
   },
   clipTrimStartInput: {
@@ -197,16 +221,20 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-clip-trim-start-input",
     target: (el) => el.querySelector("input"),
   },
-  lane: { display: "block", tag: "audio-ui-timeline-lane" },
+  lane: { display: "block", render: nameSlot, tag: "audio-ui-timeline-lane" },
   mark: {
     display: "block",
-    render: nameMark,
+    render: named(nameMark),
     tag: "audio-ui-timeline-mark",
   },
-  navigator: { display: "block", tag: "audio-ui-timeline-navigator" },
+  navigator: {
+    display: "block",
+    render: nameSlot,
+    tag: "audio-ui-timeline-navigator",
+  },
   navigatorEnd: {
     display: "block",
-    render: renderNavigator("audio-ui-timeline-navigator-end-input"),
+    render: named(renderNavigator("audio-ui-timeline-navigator-end-input")),
     tag: "audio-ui-timeline-navigator-end",
   },
   navigatorEndInput: {
@@ -217,7 +245,7 @@ export const parts = createParts(timeline, {
   },
   navigatorStart: {
     display: "block",
-    render: renderNavigator("audio-ui-timeline-navigator-start-input"),
+    render: named(renderNavigator("audio-ui-timeline-navigator-start-input")),
     tag: "audio-ui-timeline-navigator-start",
   },
   navigatorStartInput: {
@@ -228,7 +256,7 @@ export const parts = createParts(timeline, {
   },
   navigatorWindow: {
     display: "block",
-    render: renderNavigator("audio-ui-timeline-navigator-window-input"),
+    render: named(renderNavigator("audio-ui-timeline-navigator-window-input")),
     tag: "audio-ui-timeline-navigator-window",
   },
   navigatorWindowInput: {
@@ -237,16 +265,20 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-navigator-window-input",
     target: (el) => el.querySelector("input"),
   },
-  playhead: { display: "block", tag: "audio-ui-timeline-playhead" },
+  playhead: {
+    display: "block",
+    render: nameSlot,
+    tag: "audio-ui-timeline-playhead",
+  },
   range: {
     display: "block",
     kinds: { defaultValue: jsonAttribute, value: jsonAttribute },
-    render: renderRange,
+    render: named(renderRange),
     tag: "audio-ui-timeline-range",
   },
   rangeEnd: {
     display: "block",
-    render: renderRangeEdge("audio-ui-timeline-range-end-input"),
+    render: named(renderRangeEdge("audio-ui-timeline-range-end-input")),
     tag: "audio-ui-timeline-range-end",
   },
   rangeEndInput: {
@@ -263,7 +295,7 @@ export const parts = createParts(timeline, {
   },
   rangeStart: {
     display: "block",
-    render: renderRangeEdge("audio-ui-timeline-range-start-input"),
+    render: named(renderRangeEdge("audio-ui-timeline-range-start-input")),
     tag: "audio-ui-timeline-range-start",
   },
   rangeStartInput: {
@@ -302,8 +334,9 @@ export const parts = createParts(timeline, {
   },
   ruler: {
     display: "block",
-    render: (ruler: HTMLElement) =>
-      addInput(ruler, "audio-ui-timeline-ruler-input"),
+    render: named((ruler: HTMLElement) =>
+      addInput(ruler, "audio-ui-timeline-ruler-input")
+    ),
     tag: "audio-ui-timeline-ruler",
   },
   rulerInput: {
@@ -312,16 +345,21 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-ruler-input",
     target: (el) => el.querySelector("input"),
   },
-  track: { display: "block", tag: "audio-ui-timeline-track" },
-  trackHeader: { display: "block", tag: "audio-ui-timeline-track-header" },
+  track: { display: "block", render: nameSlot, tag: "audio-ui-timeline-track" },
+  trackHeader: {
+    display: "block",
+    render: nameSlot,
+    tag: "audio-ui-timeline-track-header",
+  },
   trackResizeHandle: {
     display: "block",
-    render: (handle: HTMLElement) =>
+    render: named((handle: HTMLElement) =>
       addInput(
         handle,
         "audio-ui-timeline-track-resize-input",
         handle.getAttribute("track")
-      ),
+      )
+    ),
     tag: "audio-ui-timeline-track-resize-handle",
   },
   trackResizeInput: {
@@ -329,5 +367,9 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-track-resize-input",
     target: (el) => el.querySelector("input"),
   },
-  viewport: { display: "block", tag: "audio-ui-timeline-viewport" },
+  viewport: {
+    display: "block",
+    render: nameSlot,
+    tag: "audio-ui-timeline-viewport",
+  },
 });

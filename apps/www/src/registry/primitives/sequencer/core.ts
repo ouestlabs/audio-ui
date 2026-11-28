@@ -1,7 +1,10 @@
 import {
   createChange,
+  createGridFocus,
   css,
   dispatch,
+  type GridCell,
+  type GridFocus,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
@@ -95,33 +98,6 @@ const velocityAtY = (box: DOMRect, clientY: number) =>
   box.height <= 0
     ? DEFAULT_VELOCITY
     : clamp((box.bottom - clientY) / box.height, 0, 1);
-
-/** Where an arrow, Home or End key takes the focus from `from`, kept inside the grid. */
-function moveFocus(
-  from: CellAddress,
-  key: string,
-  rows: number,
-  steps: number,
-  ctrlKey: boolean
-): CellAddress | null {
-  const last = { row: Math.max(0, rows - 1), step: Math.max(0, steps - 1) };
-  switch (key) {
-    case "ArrowLeft":
-      return { ...from, step: Math.max(0, from.step - 1) };
-    case "ArrowRight":
-      return { ...from, step: Math.min(last.step, from.step + 1) };
-    case "ArrowUp":
-      return { ...from, row: Math.max(0, from.row - 1) };
-    case "ArrowDown":
-      return { ...from, row: Math.min(last.row, from.row + 1) };
-    case "Home":
-      return ctrlKey ? { row: 0, step: 0 } : { ...from, step: 0 };
-    case "End":
-      return ctrlKey ? last : { ...from, step: last.step };
-    default:
-      return null;
-  }
-}
 
 /** The cell whose element holds the point. */
 function cellAtPoint(
@@ -261,9 +237,11 @@ export interface VelocityState {
 export interface SequencerApi {
   /** The cells' elements by `row:step`, which a paint reads to find the one under the pointer. */
   cells: Map<string, HTMLElement>;
+  /** The keyboard's way through the cells. A cell joins it as it binds. */
+  grid: GridFocus;
   /** Which key a `"key"` prop is keyed by. */
   internal: { keyOf: (cell: unknown) => string };
-  /** Where an arrow, Home or End key takes the focus from `from`: the new tab stop, or null when the key is not the grid's. */
+  /** Moves the focus and the tab stop from `from` for an arrow, Home, End or Page key: the cell it went to, or null when the key is not the grid's. */
   moveFocusFrom: (
     from: CellAddress,
     event: KeyboardEvent
@@ -415,6 +393,29 @@ export const sequencer: SequencerPrimitive = definePrimitive({
     const cells = new Map<string, HTMLElement>();
     const velocities = new Map<string, HTMLElement>();
     const gestures = createGestures<Gesture>(context);
+    // The grid reads its active cell by row and column: the tab stop, by row and step.
+    const grid = createGridFocus<{ active: GridCell }>(
+      {
+        options: context.options,
+        parts: context.parts,
+        store: {
+          get: () => {
+            const { row, step } = (context.store.get() as SequencerState)
+              .tabStop;
+            return { active: { col: step, row } };
+          },
+          set: ({ active }: { active: GridCell }) =>
+            context.store.set({
+              tabStop: { row: active.row, step: active.col },
+            } as never),
+        },
+      } as never,
+      {
+        cols: () => currentValue()[0]?.length ?? 0,
+        key: "active",
+        rows: () => currentValue().length,
+      }
+    );
 
     /** The pattern and velocities as the gesture under way left them. */
     const currentValue = () => state().draftValue ?? state().value;
@@ -575,19 +576,13 @@ export const sequencer: SequencerPrimitive = definePrimitive({
     return {
       cells,
       internal: { keyOf: (cell: unknown) => String(cell) },
+      grid,
       moveFocusFrom: (from: CellAddress, event: KeyboardEvent) => {
-        const value = currentValue();
-        const next = moveFocus(
-          from,
-          event.key,
-          value.length,
-          value[0]?.length ?? 0,
-          event.ctrlKey || event.metaKey
-        );
-        if (next) {
-          set({ tabStop: next });
+        set({ tabStop: from });
+        if (!grid.keydown(event)) {
+          return null;
         }
-        return next;
+        return state().tabStop;
       },
       playing: { step: null as number | null },
       pressCell: (
@@ -691,8 +686,15 @@ export const sequencer: SequencerPrimitive = definePrimitive({
         const cell = addressOf(part.props);
         const key = cellKey(cell);
         part.api.cells.set(key, el);
+        const leave = part.api.grid.bind(el, {
+          col: cell.step,
+          row: cell.row,
+        });
         el.toggleAttribute("data-current", part.api.playing.step === cell.step);
-        return () => part.api.cells.delete(key);
+        return () => {
+          leave();
+          part.api.cells.delete(key);
+        };
       },
       on: {
         focus: (_event, { api, props }) => api.setTabStop(addressOf(props)),
@@ -706,11 +708,7 @@ export const sequencer: SequencerPrimitive = definePrimitive({
             api.toggleCell(cell, event);
             return;
           }
-          const next = api.moveFocusFrom(cell, event);
-          if (next) {
-            event.preventDefault();
-            api.cells.get(cellKey(next))?.focus({ preventScroll: true });
-          }
+          api.moveFocusFrom(cell, event);
         },
         pointerdown: (event, { api, el, props, store }) => {
           const root = rootOf(el);
