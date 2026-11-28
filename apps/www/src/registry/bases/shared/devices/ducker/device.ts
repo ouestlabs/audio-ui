@@ -117,7 +117,7 @@ const SWITCH_SECONDS = 0.01;
  * It runs the processor of `@audio/dynamics-ducker` on the sound and the key,
  * gives it the range as a cut, and goes round it while it is off, in a line.
  */
-const DUCKER_PROCESSOR = `
+export const DUCKER_PROCESSOR = `
 const duckerProcessor = (ctx) => {
   const values = {};
   for (const name in ducker.params) {
