@@ -1,13 +1,16 @@
+import { createReorder, type ReorderDraft } from "@ui-sdk/core";
 import {
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { flushSync } from "react-dom";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { dbToGain, gainToDb, peakDb } from "@/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@/engine/format";
@@ -38,7 +41,6 @@ import {
   trackBlock,
   trackOf,
 } from "@/registry/lib/arrangement/arrangement-state";
-import { startSortableDrag } from "@/registry/lib/sortable-drag";
 import { cn } from "@/registry/lib/utils";
 import type { MeterFrame } from "@/registry/primitives/meter/levels";
 import type { Source } from "@/registry/primitives/primitive";
@@ -263,10 +265,129 @@ function SendKnob({
   );
 }
 
-/** How a track's channel is moved: its name, dragged, or with Left and Right on it. */
+/** How a track's channel is moved: by its name, dragged or picked up with the keyboard. */
 interface StripGrip {
+  /** Whether a pointer is dragging the channel, by itself or with its group. */
+  dragging: boolean;
+  /** Joins the channel to the row, and returns what takes it out. */
+  item: (element: HTMLElement | null) => (() => void) | undefined;
+  /** Whether the channel is picked up. */
+  moving: boolean;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
   onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+}
+
+interface ReorderState {
+  moving: ReorderDraft | null;
+  order: string[];
+}
+
+/** A store of one object, the two things `createReorder` asks of its owner. */
+function reorderStore() {
+  let state: ReorderState = { moving: null, order: [] };
+  const listeners = new Set<() => void>();
+  return {
+    get: () => state,
+    set: (patch: Partial<ReorderState>) => {
+      state = { ...state, ...patch };
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+}
+
+/**
+ * The tracks' channels reordered by their names, with a pointer or the
+ * keyboard, a group with its tracks: the order shown while one moves, and what
+ * each channel's grip takes. Dropping sends the same command as a track moved
+ * in the arrangement.
+ */
+function useChannelReorder(
+  tracks: readonly ArrangementTrack[],
+  dispatch: Arrangement["dispatch"]
+) {
+  const live = useRef({ dispatch, picked: "", tracks });
+  live.current.dispatch = dispatch;
+  live.current.tracks = tracks;
+  const [{ cleanups, reorder, store }] = useState(() => {
+    const held = reorderStore();
+    const ends: (() => void)[] = [];
+    const created = createReorder<ReorderState>(
+      {
+        onDestroy: (end: () => void) => ends.push(end),
+        store: held,
+      } as never,
+      {
+        draft: "moving",
+        group: (id) => trackBlock(live.current.tracks, id),
+        key: "order",
+        label: (id) =>
+          live.current.tracks.find((track) => track.id === id)?.name,
+        orientation: () => "horizontal",
+        preview: true,
+        set: (order) => {
+          const { picked } = live.current;
+          // The command counts the index once the tracks moved have left their place: where the first of them is.
+          flushSync(() =>
+            live.current.dispatch({
+              id: picked,
+              index: order.indexOf(picked),
+              type: "move-track",
+            })
+          );
+          return true;
+        },
+        slot: "channel",
+      }
+    );
+    return { cleanups: ends, reorder: created, store: held };
+  });
+  const ids = tracks.map((track) => track.id);
+  const joined = ids.join(" ");
+  useLayoutEffect(() => {
+    store.set({ order: joined ? joined.split(" ") : [] });
+  }, [joined, store]);
+  useEffect(
+    () => () => {
+      for (const end of cleanups) {
+        end();
+      }
+    },
+    [cleanups]
+  );
+  const state = useSyncExternalStore(store.subscribe, store.get, store.get);
+  const items = useRef(new Map<string, StripGrip["item"]>());
+  const grip = (id: string): StripGrip => {
+    let item = items.current.get(id);
+    if (!item) {
+      item = (element) =>
+        element ? reorder.bind(element, { key: id, props: {} }) : undefined;
+      items.current.set(id, item);
+    }
+    return {
+      dragging: reorder.dragging(state, id),
+      item,
+      moving: reorder.moving(state, id),
+      onKeyDown: (event) => {
+        if (!state.moving) {
+          live.current.picked = id;
+        }
+        reorder.keydown(event.nativeEvent, id);
+      },
+      onPointerDown: (event) => {
+        live.current.picked = id;
+        reorder.pointerdown(event.nativeEvent, id);
+      },
+    };
+  };
+  return { grip, order: state.moving?.order ?? ids };
 }
 
 interface StripProps {
@@ -363,6 +484,44 @@ function StripSwitches({
   );
 }
 
+/** How a channel looks while it moves: dimmed under a pointer, ringed under the keyboard, and the copy that follows the pointer, cut down to its name. */
+function reorderStyle(grip: StripGrip | undefined) {
+  return cn(
+    grip?.dragging && "opacity-30",
+    grip?.moving && !grip.dragging && "ring-2 ring-ring ring-inset",
+    "data-drag-preview:h-8! data-drag-preview:grid-rows-1 data-drag-preview:overflow-hidden! data-drag-preview:rounded-md data-drag-preview:border data-drag-preview:bg-card data-drag-preview:shadow-md data-drag-preview:[&>:not(:first-child)]:hidden"
+  );
+}
+
+/** A channel's name: the grip that moves it, for a channel that moves. */
+function StripName({
+  grip,
+  track,
+}: {
+  grip: StripGrip | undefined;
+  track: ArrangementTrack;
+}) {
+  if (!grip) {
+    return (
+      <span className="min-h-4 w-full truncate text-center font-medium text-xs">
+        {track.name}
+      </span>
+    );
+  }
+  return (
+    <BareButton
+      aria-label={`Move ${track.name}`}
+      className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+      data-mixer-grip={track.id}
+      onKeyDown={grip.onKeyDown}
+      onPointerDown={grip.onPointerDown}
+      type="button"
+    >
+      {track.name}
+    </BareButton>
+  );
+}
+
 /** A channel of the mixer: its sends, its pan, its fader and meter, its switches; the main track's loudness in their place. */
 function Strip({
   analysers,
@@ -420,10 +579,12 @@ function Strip({
         // The main track is wider: its meter has a scale.
         main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
-        selected && "bg-muted"
+        selected && "bg-muted",
+        reorderStyle(grip)
       )}
       data-mixer-track={grip ? track.id : undefined}
       onPointerDown={select}
+      ref={grip?.item}
     >
       <div className="row-start-1 flex w-full min-w-0 flex-col items-center gap-1.5">
         {/* The track's color, as its clips have it. */}
@@ -435,21 +596,7 @@ function Strip({
           )}
           style={swatch.style}
         />
-        {grip ? (
-          <BareButton
-            aria-label={`Move ${track.name}`}
-            className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
-            data-mixer-grip={track.id}
-            type="button"
-            {...grip}
-          >
-            {track.name}
-          </BareButton>
-        ) : (
-          <span className="min-h-4 w-full truncate text-center font-medium text-xs">
-            {track.name}
-          </span>
-        )}
+        <StripName grip={grip} track={track} />
         {into ? (
           <span className="w-full truncate text-center text-muted-foreground text-xs">
             To {into}
@@ -589,76 +736,7 @@ export function MixerView({
     () => dispatch({ type: "settle-clip-edit" }),
     [dispatch]
   );
-  const channelsRef = useRef<HTMLDivElement>(null);
-  const ghostRef = useRef<HTMLDivElement>(null);
-  const [lifted, setLifted] = useState<{
-    left: number;
-    name: string;
-    top: number;
-  } | null>(null);
-  const live = useRef({ dispatch, tracks: arrangement.unfoldedTracks });
-  live.current = { dispatch, tracks: arrangement.unfoldedTracks };
-  // The tracks' channels reorder as their rows do in the arrangement: the same gesture, the same command.
-  const grip = useCallback(
-    (id: string, name: string): StripGrip => ({
-      onKeyDown: (event) => {
-        const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-        const from = live.current.tracks.findIndex((track) => track.id === id);
-        if (direction && from !== -1) {
-          event.preventDefault();
-          live.current.dispatch({
-            id,
-            index: from + direction,
-            type: "move-track",
-          });
-        }
-      },
-      onPointerDown: (event) => {
-        const channels = channelsRef.current;
-        if (event.button !== 0 || !channels) {
-          return;
-        }
-        const items = Array.from(
-          channels.querySelectorAll<HTMLElement>("[data-mixer-track]")
-        );
-        const from = items.findIndex((item) => item.dataset.mixerTrack === id);
-        if (from === -1) {
-          return;
-        }
-        event.preventDefault();
-        const block = new Set(trackBlock(live.current.tracks, id));
-        const box = event.currentTarget.getBoundingClientRect();
-        startSortableDrag({
-          axis: "x",
-          count: Math.max(
-            1,
-            items.filter((item) => block.has(item.dataset.mixerTrack ?? ""))
-              .length
-          ),
-          free: true,
-          from,
-          ghost: () => ghostRef.current,
-          items,
-          onEnd: (landed) =>
-            flushSync(() => {
-              setLifted(null);
-              if (landed !== null) {
-                live.current.dispatch({
-                  id,
-                  index: landed,
-                  type: "move-track",
-                });
-              }
-            }),
-          onLift: () => setLifted({ left: box.left, name, top: box.top }),
-          scroller: channels,
-          x: event.clientX,
-          y: event.clientY,
-        });
-      },
-    }),
-    []
-  );
+  const channels = useChannelReorder(arrangement.unfoldedTracks, dispatch);
   const strip = (
     track: ArrangementTrack,
     main = false,
@@ -703,29 +781,17 @@ export function MixerView({
       <div
         className="row-span-7 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
         data-slot="mixer-channels"
-        ref={channelsRef}
       >
-        {/* A folded group hides its tracks here too. */}
-        {arrangement.unfoldedTracks.map((track) =>
-          strip(track, false, true, grip(track.id, track.name))
-        )}
+        {/* A folded group hides its tracks here too. While one moves, they stand in the order it would leave. */}
+        {channels.order.map((id) => {
+          const track = arrangement.unfoldedTracks.find(
+            (candidate) => candidate.id === id
+          );
+          return track ? strip(track, false, true, channels.grip(id)) : null;
+        })}
         {doc.returns.map((track) => strip(track))}
       </div>
       {strip(doc.main, true)}
-      {lifted
-        ? createPortal(
-            <div
-              aria-hidden="true"
-              className="pointer-events-none fixed z-50 flex h-7 max-w-40 items-center rounded-md border bg-card px-2.5 font-medium text-xs shadow-md"
-              data-slot="mixer-ghost"
-              ref={ghostRef}
-              style={{ left: lifted.left, top: lifted.top }}
-            >
-              <span className="truncate">{lifted.name}</span>
-            </div>,
-            document.body
-          )
-        : null}
     </div>
   );
 }
