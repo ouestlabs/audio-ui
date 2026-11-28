@@ -8,6 +8,7 @@ import {
   duckerSettings,
 } from "@/registry/bases/shared/devices/ducker/device";
 import { MANIFEST_HOST } from "@/registry/lib/devices/manifest-worklet";
+import { contractParams } from "@/registry/lib/engine/device";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -28,6 +29,43 @@ const key = (start: number) =>
       Math.exp(-(at % 12_000) / 1500) * Math.sin((2 * Math.PI * 60 * at) / RATE)
     );
   });
+
+describe("duckerDevice as a processor's params", () => {
+  test("gives each parameter of the processor the range it declares", () => {
+    const derived = contractParams(duckerDevice);
+    // The range is a cut: the knob says how far down, the processor a gain.
+    const modelParams = {
+      attack: "attackMs",
+      knee: "kneeDb",
+      range: "rangeDb",
+      ratio: "ratio",
+      release: "releaseMs",
+      threshold: "thresholdDb",
+    } as const;
+    expect(Object.keys(ducker.params).sort()).toEqual(
+      Object.keys(modelParams).sort()
+    );
+    for (const [name, id] of Object.entries(modelParams)) {
+      const own = derived[id];
+      const theirs = ducker.params[name as keyof typeof modelParams];
+      if (own?.type !== "number") {
+        throw new Error(`${id} is not a number`);
+      }
+      const negated = name === "range";
+      expect({
+        default: negated ? -own.default : own.default,
+        max: negated ? 0 - own.min : own.max,
+        min: negated ? -own.max : own.min,
+        unit: own.unit,
+      }).toEqual({
+        default: theirs.default,
+        max: theirs.max,
+        min: theirs.min,
+        unit: "unit" in theirs ? theirs.unit : undefined,
+      });
+    }
+  });
+});
 
 describe("duckerDevice", () => {
   test("is a stable, named effect that takes a sidechain", () => {

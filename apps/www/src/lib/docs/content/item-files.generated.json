@@ -450,6 +450,7 @@
     "lib/engine/analysis/tint.ts"
   ],
   "engine-device": [
+    "lib/engine/device/contract.ts",
     "lib/engine/device/define.ts",
     "lib/engine/device/engine.ts",
     "lib/engine/device/index.ts",
