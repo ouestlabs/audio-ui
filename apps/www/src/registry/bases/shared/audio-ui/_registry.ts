@@ -1193,7 +1193,7 @@ export const audioUi: RegistryItem[] = [
   },
   {
     categories: ["mixer"],
-    dependencies: [],
+    dependencies: ["@ui-sdk/core"],
     description:
       "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track reads its loudness in LUFS and stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
     files: [
@@ -1210,7 +1210,6 @@ export const audioUi: RegistryItem[] = [
       "@audio-ui/knob",
       "@audio-ui/led",
       "@audio-ui/meter",
-      "@audio-ui/sortable-drag",
       "@audio-ui/timeline",
       "@audio-ui/track-automation",
       "@audio-ui/use-arrangement",
