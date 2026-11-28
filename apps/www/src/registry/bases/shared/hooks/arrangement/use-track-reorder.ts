@@ -93,6 +93,7 @@ export function useTrackReorder({
     startSortableDrag({
       axis: "y",
       count: Math.max(count, 1),
+      event: event.nativeEvent,
       from,
       ghost: () => ghostRef.current,
       items,
@@ -116,8 +117,6 @@ export function useTrackReorder({
         setDraggingId(id);
       },
       scroller: verticalScroller(row),
-      x: event.clientX,
-      y: event.clientY,
     });
   }, []);
 
