@@ -102,16 +102,16 @@ npx shadcn@latest add @audio-ui/primitives-css
 
 <TabsContent value="cli">
 
-The [CLI](/docs/cli) finds your framework in `package.json` and writes the primitive, its adapter and `primitive.ts` into `components/audio-ui/` (under `src/lib/` in SvelteKit). It installs the kernel's packages:
+The [CLI](/docs/cli) finds your framework in `package.json` and writes the primitive, its adapter, `primitive.ts` and the sheet of your style, with an index to import once. It installs the kernel's packages:
 
 ```bash
 npx @audio-ui/cli add piano-roll
 ```
 
-The optional styles are one more name:
+Or the parts alone, to style yourself:
 
 ```bash
-npx @audio-ui/cli add primitives-css
+npx @audio-ui/cli add piano-roll --headless
 ```
 
 </TabsContent>
@@ -229,6 +229,29 @@ Import it once.
 Optional: size variants and theme styles over the primitive.
 
 <ItemFiles name="piano-roll" />
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+### 5. The styles
+
+Optional: the piano roll as the registry draws it in React, with no classes and no Tailwind. Its look is one sheet of plain CSS on the adapter's own parts, a sheet for each style (`nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `rhea`, `sera`): compose the parts as the example above does, and the sheet draws them. The layout is yours: give the grid its height, and lay the keys and the velocity lane out beside it. The keys and the grid take `data-size` (`sm`, `default` or `lg`), and a key's label `data-octave` on a C, which names its octave. The piano roll follows your theme: the skins dress controls and displays, not editors.
+
+The [CLI](/docs/cli) writes the adapter, the sheet and an index to import once:
+
+```bash
+npx @audio-ui/cli add piano-roll
+```
+
+By hand:
+
+```html
+<link rel="stylesheet" href="/css/theme.css" />
+<link rel="stylesheet" href="/css/nova/piano-roll.css" />
+```
+
+Both are served at `https://www.audio-ui.dev/css/`.
 
 </ForFrameworks>
 

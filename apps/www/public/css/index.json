@@ -9,7 +9,8 @@
     "piano",
     "plot",
     "waveform",
-    "sequencer"
+    "sequencer",
+    "piano-roll"
   ],
   "skins": [
     "hardware",

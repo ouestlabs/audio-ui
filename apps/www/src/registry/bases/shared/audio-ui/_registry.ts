@@ -327,6 +327,10 @@ export const audioUi: RegistryItem[] = [
         path: "audio-ui/elements/piano-roll.tsx",
         type: "registry:ui",
       },
+      {
+        path: "audio-ui/elements/piano-roll-parts.ts",
+        type: "registry:ui",
+      },
     ],
     name: "piano-roll",
     registryDependencies: [
