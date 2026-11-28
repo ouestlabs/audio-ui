@@ -302,6 +302,7 @@ function DeviceChain({
           }
           return next !== null;
         },
+        event: event.nativeEvent,
         from,
         free: true,
         ghost: () => ghostRef.current,
@@ -327,8 +328,6 @@ function DeviceChain({
           setDragging(id);
         },
         scroller: scrolling,
-        x: event.clientX,
-        y: event.clientY,
       });
     },
     [scroller]

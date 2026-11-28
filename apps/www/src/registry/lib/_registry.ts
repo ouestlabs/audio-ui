@@ -359,8 +359,9 @@ const items: RegistryItem[] = [
   },
   libItem("sortable-drag", {
     categories: ["lib", "audio"],
+    dependencies: ["@ui-sdk/core"],
     description:
-      "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves.",
+      "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges and Escape puts it back, with ui-sdk following the pointer. No render while it moves.",
   }),
 ];
 

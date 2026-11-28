@@ -1,9 +1,11 @@
+import { bindDrag, createAutoScroll } from "@ui-sdk/core";
+
 /**
  * The gesture of reordering a row of items by dragging one: past a few px the
  * items lift, the others slide aside and the items show dimmed where they
  * would land, and on release what follows the pointer settles there before the
  * new order is applied. All of it goes straight in the DOM: a drag costs no
- * render.
+ * render. ui-sdk follows the pointer and scrolls near the edges.
  */
 
 /** How far a press travels before it is a drag, in px: under that it stays a press. */
@@ -13,32 +15,6 @@ const EASING = "cubic-bezier(0.2, 0, 0, 1)";
 /** How the items show where they would land. */
 const DIMMED = "0.3";
 
-/** How far to scroll so a pointer held near an edge of the view keeps it going; 0 away from the edges. */
-function edgeScrollStep(at: number, start: number, end: number): number {
-  if (at < start + 48) {
-    return -Math.min(24, Math.ceil((start + 48 - at) / 3));
-  }
-  if (at > end - 48) {
-    return Math.min(24, Math.ceil((at - end + 48) / 3));
-  }
-  return 0;
-}
-
-/** Scrolls what scrolls, or the page, along the row by `step`. */
-function scrollAlong(
-  scroller: HTMLElement | null,
-  across: boolean,
-  step: number
-) {
-  if (!scroller) {
-    window.scrollBy(across ? step : 0, across ? 0 : step);
-  } else if (across) {
-    scroller.scrollLeft += step;
-  } else {
-    scroller.scrollTop += step;
-  }
-}
-
 export interface SortableDragOptions {
   /** The way the row runs. */
   axis: "x" | "y";
@@ -46,6 +22,8 @@ export interface SortableDragOptions {
   count?: number;
   /** Whether the pointer is over another place that takes the item: the row then closes up behind it. */
   elsewhere?: (x: number, y: number) => boolean;
+  /** The press, a `pointerdown` of the primary button: in React, `event.nativeEvent`. */
+  event: PointerEvent;
   /** Whether what follows the pointer goes anywhere it goes and fades as it lands, a label smaller than the item, rather than along the row. */
   free?: boolean;
   /** The index of the item pressed. */
@@ -58,11 +36,8 @@ export interface SortableDragOptions {
   onEnd: (index: number | null, released: boolean) => void;
   /** The press became a drag. */
   onLift: () => void;
-  /** What scrolls near its edges; with none, the page. */
+  /** What scrolls near its edges; with none, what is under the pointer, then the page. */
   scroller: HTMLElement | null;
-  /** Where the press was. */
-  x: number;
-  y: number;
 }
 
 /** Follows a press on an item until it is released: call it from `pointerdown`. */
@@ -70,6 +45,7 @@ export function startSortableDrag({
   axis,
   count = 1,
   elsewhere,
+  event: down,
   free = false,
   from,
   ghost,
@@ -77,9 +53,9 @@ export function startSortableDrag({
   onEnd,
   onLift,
   scroller,
-  x: startX,
-  y: startY,
 }: SortableDragOptions) {
+  const startX = down.clientX;
+  const startY = down.clientY;
   const across = axis === "x";
   const boxes = items.map((item) => item.getBoundingClientRect());
   const startOf = (box: DOMRect) => (across ? box.left : box.top);
@@ -117,7 +93,6 @@ export function startSortableDrag({
   let away = false;
   let x = startX;
   let y = startY;
-  let frame = 0;
 
   /** How far the items travel to reach the gap. */
   const landing = () => {
@@ -150,19 +125,10 @@ export function startSortableDrag({
     const raw = found === -1 ? items.length : found;
     return raw >= from && raw <= from + count ? from : raw;
   };
-  const pageBox = () =>
-    new DOMRect(0, 0, window.innerWidth, window.innerHeight);
-
-  // Once a frame while dragged, whether or not the pointer moved: near an edge of the view it scrolls, and the items
-  // are where they were at the press, moved by how far it has scrolled since.
-  const tick = () => {
+  // On each move, and on each scroll under a pointer that stays: the items are where they were at the press, moved by
+  // how far the row has scrolled since.
+  const update = () => {
     const at = across ? x : y;
-    const view = scroller?.getBoundingClientRect() ?? pageBox();
-    scrollAlong(
-      scroller,
-      across,
-      edgeScrollStep(at, startOf(view), endOf(view))
-    );
     const copy = ghost();
     if (copy) {
       copy.style.transform = free
@@ -175,7 +141,26 @@ export function startSortableDrag({
       gap = wanted;
       slide();
     }
-    frame = requestAnimationFrame(tick);
+  };
+
+  const autoScroll = createAutoScroll({
+    edge: 48,
+    ignore: ghost,
+    speed: 24,
+  });
+  /** Scrolls toward the pointer: along a scroller of its own, one held past an end still does, and only along the row. */
+  const scrollToward = () => {
+    if (!scroller) {
+      autoScroll.update(x, y);
+      return;
+    }
+    const { bottom, left, right, top } = scroller.getBoundingClientRect();
+    const within = (value: number, start: number, end: number) =>
+      Math.min(Math.max(value, start + 1), end - 1);
+    autoScroll.update(
+      across ? within(x, left, right) : (left + right) / 2,
+      across ? (top + bottom) / 2 : within(y, top, bottom)
+    );
   };
 
   /** What follows the pointer, to where the items land: a label goes to their corner and fades into them. */
@@ -194,30 +179,23 @@ export function startSortableDrag({
     ];
   };
 
-  const follow = (event: PointerEvent) => {
-    x = event.clientX;
-    y = event.clientY;
-    if (!lifted && Math.hypot(x - startX, y - startY) >= LIFT_PX) {
-      lifted = true;
-      onLift();
-      document.documentElement.style.cursor = "grabbing";
-      for (const item of items) {
-        item.style.transition = transition;
-      }
-      for (const item of moving) {
-        item.style.opacity = DIMMED;
-        item.style.pointerEvents = "none";
-      }
-      frame = requestAnimationFrame(tick);
+  const lift = () => {
+    lifted = true;
+    onLift();
+    document.documentElement.style.cursor = "grabbing";
+    for (const item of items) {
+      item.style.transition = transition;
     }
+    for (const item of moving) {
+      item.style.opacity = DIMMED;
+      item.style.pointerEvents = "none";
+    }
+    window.addEventListener("scroll", update, true);
   };
 
   const finish = (released: boolean) => {
-    window.removeEventListener("pointermove", follow);
-    window.removeEventListener("pointerup", release);
-    window.removeEventListener("pointercancel", cancel);
-    window.removeEventListener("keydown", escape, { capture: true });
-    cancelAnimationFrame(frame);
+    autoScroll.stop();
+    window.removeEventListener("scroll", update, true);
     if (!lifted) {
       return;
     }
@@ -256,17 +234,20 @@ export function startSortableDrag({
       })
       .finished.then(clean, clean);
   };
-  const release = () => finish(true);
-  const cancel = () => finish(false);
-  const escape = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      cancel();
-    }
-  };
 
-  window.addEventListener("pointermove", follow);
-  window.addEventListener("pointerup", release);
-  window.addEventListener("pointercancel", cancel);
-  window.addEventListener("keydown", escape, { capture: true });
+  const pressed = items[from];
+  if (!pressed) {
+    return;
+  }
+  bindDrag(pressed, down, {
+    cancelOnEscape: true,
+    onEnd: (_event, canceled) => finish(!canceled),
+    onMove: (sample) => {
+      ({ x, y } = sample);
+      update();
+      scrollToward();
+    },
+    onStart: lift,
+    threshold: LIFT_PX,
+  });
 }

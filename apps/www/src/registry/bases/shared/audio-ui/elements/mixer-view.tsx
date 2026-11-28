@@ -636,6 +636,7 @@ export function MixerView({
               .length
           ),
           free: true,
+          event: event.nativeEvent,
           from,
           ghost: () => ghostRef.current,
           items,
@@ -652,8 +653,6 @@ export function MixerView({
             }),
           onLift: () => setLifted({ left: box.left, name, top: box.top }),
           scroller: channels,
-          x: event.clientX,
-          y: event.clientY,
         });
       },
     }),
