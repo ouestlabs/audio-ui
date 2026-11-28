@@ -1,0 +1,14 @@
+{
+  "name": "ducker-vst3-trial",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build.ts",
+    "check": "bun test/check.ts"
+  },
+  "dependencies": {
+    "@audio/dynamics-ducker": "0.2.1",
+    "@audio/plugin-vst": "0.0.2",
+    "jz": "1.0.3"
+  }
+}
