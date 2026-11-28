@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
-import { fireEvent, render, within } from "@testing-library/react";
+import { act, fireEvent, render, within } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
+import { useCallback, useState } from "react";
 import { defineDevice } from "@/engine/device";
 
 // The list a long choice goes in is the site's own select, which asks the router where it is.
@@ -8,7 +9,7 @@ mock.module("@tanstack/react-router", () => ({
   useLocation: ({ select }: { select: (l: { pathname: string }) => string }) =>
     select({ pathname: "/" }),
 }));
-const { DevicePanel } = await import(
+const { DeviceHeader, DevicePanel } = await import(
   "@/registry/bases/shared/audio-ui/panels/device-panel"
 );
 
@@ -270,5 +271,100 @@ describe("DevicePanel with a long choice", () => {
         trigger.getAttribute("aria-disabled") === "true" ||
         trigger.hasAttribute("data-disabled")
     ).toBe(true);
+  });
+});
+
+/** A host that stores each change, as one that records automation does, and notes what it hears in order. */
+function Host({ heard }: { heard: unknown[][] }) {
+  const [state, setState] = useState(tremolo.defaults);
+  const change = useCallback(
+    (next: typeof state) => {
+      heard.push(["change", next]);
+      setState(next);
+    },
+    [heard]
+  );
+  const commit = useCallback(
+    (next: typeof state, id: string) => heard.push(["commit", next, id]),
+    [heard]
+  );
+  return (
+    <>
+      <DeviceHeader
+        activator="on"
+        device={tremolo}
+        onValueChange={change}
+        onValueCommitted={commit}
+        value={state}
+      />
+      <DevicePanel
+        device={tremolo}
+        exclude={["on"]}
+        onValueChange={change}
+        onValueCommitted={commit}
+        value={state}
+      />
+    </>
+  );
+}
+
+function hosted() {
+  const heard: unknown[][] = [];
+  const view = render(<Host heard={heard} />);
+  return { heard, view: within(view.container) };
+}
+
+describe("the end of a change", () => {
+  test("a key on a knob changes the value, then commits it with the parameter's id", () => {
+    const { heard, view } = hosted();
+    fireEvent.keyDown(view.getByRole("slider", { name: "Depth" }), {
+      key: "ArrowDown",
+    });
+    const state = { depth: 49, on: true, rate: 5 };
+    expect(heard).toEqual([
+      ["change", state],
+      ["commit", state, "depth"],
+    ]);
+  });
+
+  test("a drag on a knob commits once, when it is let go", async () => {
+    const { heard, view } = hosted();
+    const control = view
+      .getByRole("slider", { name: "Depth" })
+      .closest('[data-slot="knob"]')
+      ?.querySelector('[data-slot="knob-control"]') as HTMLElement;
+    const move = async (type: string, clientY: number) => {
+      fireEvent(
+        control,
+        new PointerEvent(type, {
+          bubbles: true,
+          button: 0,
+          buttons: type === "pointerup" ? 0 : 1,
+          clientX: 50,
+          clientY,
+          pointerId: 1,
+        })
+      );
+      // A drag reports its moves on the next frame.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 30)));
+    };
+    await move("pointerdown", 90);
+    await move("pointermove", 80);
+    await move("pointermove", 70);
+    expect(heard.length).toBeGreaterThan(0);
+    expect(heard.every(([kind]) => kind === "change")).toBe(true);
+    await move("pointerup", 70);
+    const commits = heard.filter(([kind]) => kind === "commit");
+    expect(commits).toEqual([["commit", heard.at(-2)?.[1], "depth"]]);
+  });
+
+  test("a press on the header's switch is a whole change", () => {
+    const { heard, view } = hosted();
+    fireEvent.click(view.getByRole("button", { name: "Active" }));
+    const state = { depth: 50, on: false, rate: 5 };
+    expect(heard).toEqual([
+      ["change", state],
+      ["commit", state, "on"],
+    ]);
   });
 });
